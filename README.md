@@ -14,3 +14,29 @@ Copyright (c) 2018 Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp Licensed u
 
 
 [yarn]: https://yarnpkg.com/lang/en/
+
+## Help
+
+To start work with it you need to install npm, nodejs, yarn first.
+You can do it by the next command(It is not completed now, it will install only yarn):
+```
+sudo ./installDependencies.sh
+```
+
+If you already have it, you need to build rest server:
+```
+sudo ./yarn_setup.sh
+```
+
+
+Then if you want to run spammer:
+```
+cd spammer
+npm run build && npm run start
+```
+You can configure it:
+spammer/src/utils/spammerOptions.js - here you can change parameters of connection and spam.
+spammer/src/model/transactionFactory.js - here you can change token, which you need to use in transactions.
+spammer/src/index.js - here you can change private keys of account which already have tokens.
+
+Todo: add description how to run rest

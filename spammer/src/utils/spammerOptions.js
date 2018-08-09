@@ -29,16 +29,16 @@ const optionDefinitions = [
 		name: 'predefinedRecipients', alias: 'd', type: Number, defaultValue: 0
 	},
 	{
-		name: 'address', alias: 'a', type: String, defaultValue: '127.0.0.1'
+		name: 'address', alias: 'a', type: String, defaultValue: '178.62.200.117'
 	},
 	{
 		name: 'port', alias: 'p', type: Number, defaultValue: 3000
 	},
 	{
-		name: 'rate', alias: 'r', type: Number, defaultValue: 1
+		name: 'rate', alias: 'r', type: Number, defaultValue: 1000
 	},
 	{
-		name: 'total', alias: 't', type: Number, defaultValue: 10
+		name: 'total', alias: 't', type: Number, defaultValue: 10000
 	},
 	{
 		name: 'mode', alias: 'm', type: String, defaultValue: 'transfer'

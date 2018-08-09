@@ -18,7 +18,7 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const restify = require('restify');
+const restify = require('restify-clients');
 const catapult = require('catapult-sdk');
 const crypto = require('crypto');
 const winston = require('winston');
@@ -41,11 +41,22 @@ const { uint64 } = catapult.utils;
 		connectTimeout: 1000
 	});
 
+	// If you use bootstrap, you can find private keys here:
+	// catapult-service-bootstrap/build/generated-addresses/addresses.yaml
+	// You need to find section "nemesis_addresses"(It is pre-created accounts with tokens)
+	// and you can pick up private keys for testing
+	// Example:
+	// nemesis_addresses:
+	// - private: E683A987DC5B588916F5667D717B59D01D6662DE588F8EEC2285289FCB1508AB
+	//   public: 031B78DACDEB6427D69A4C0FDC2C4571ABBFFF7EA6B83532CF854BCDB465277E
+	//   address: SCTBPQ6O7DYHWTCMU6VHPTS4B736EIQ6AU5N7BJY
+	// ....
+
 	const Private_Keys = [
-		'8473645728B15F007385CE2889D198D26369D2806DCDED4A9B219FD0DE23A505',
-		'BBC3E5BE46A953070B0B9636E386C2006DA9EA8840596B601D4A1B92A9F93330',
-		'46C83EE87DAB6588DD82D1059140D3E5A7FAFF78C3A0C4CE4802486D71C69E40',
-		'FA19F42DDD6E757B3A2E39E75A7487F8FEC19C0E872153EC0EFD9AC2E5A84E58'
+		'E683A987DC5B588916F5667D717B59D01D6662DE588F8EEC2285289FCB1508AB',
+		'5A790BF770EAC5F22761B2A3178C00DA11D2085DD7F2104D9B555FE9786A2384',
+		'9C7A11929FF6265215B2C9F750E7D365C003CBE61FBA8DC0CBD2D24BEEA8BF5A',
+		'BE1FB2850497A48130FF20D3D7A76F39A46F522AA3ADC1E6F7FE7258A84D90E2'
 	];
 
 	const txCounters = { initiated: 0, successful: 0 };
