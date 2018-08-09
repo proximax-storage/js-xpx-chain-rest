@@ -35,8 +35,9 @@ cd spammer
 npm run build && npm run start
 ```
 You can configure it:
-spammer/src/utils/spammerOptions.js - here you can change parameters of connection and spam.
-spammer/src/model/transactionFactory.js - here you can change token, which you need to use in transactions.
-spammer/src/index.js - here you can change private keys of account which already have tokens.
 
-Todo: add description how to run rest
+ * spammer/src/utils/spammerOptions.js - here you can change parameters of connection and spam.
+ * spammer/src/model/transactionFactory.js - here you can change token, which you need  to use in transactions.
+ * spammer/src/index.js - here you can change private keys of account which already have tokens.
+
+Todo: add description how to run and build rest
