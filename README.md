@@ -18,16 +18,15 @@ Copyright (c) 2018 Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp Licensed u
 ## Help
 
 To start work with it you need to install npm, nodejs, yarn first.
-You can do it by the next command(It is not completed now, it will install only yarn):
+You can do it by the next command:
 ```
-sudo ./installDependencies.sh
+sudo ./scripts/installDependencies.sh
 ```
 
-If you already have it, you need to build rest server:
+If you already have it, you need to build each module:
 ```
 sudo ./yarn_setup.sh
 ```
-
 
 Then if you want to run spammer:
 ```
@@ -40,4 +39,22 @@ You can configure it:
  * spammer/src/model/transactionFactory.js - here you can change token, which you need  to use in transactions.
  * spammer/src/index.js - here you can change private keys of account which already have tokens.
 
-Todo: add description how to run and build rest
+If you want to run a rest server, you need to install mongodb first, or change mongodb address in rest.json:
+```
+sudo ./scripts/mongo/installMongoDb.sh
+```
+Then you can run rest server:
+```
+cd rest
+npm run build && npm run start ./resources/rest.json ./resources/rest.json
+```
+
+You can change information about mongodb connection and catapult server connection in **rest/resources/rest.json**.
+
+## Build docker image
+
+If docker, yarn, nodejs and npm are installed, you can easy create an image:
+
+```
+sudo ./scripts/RestDockerImage/buildRestImage.sh
+```
