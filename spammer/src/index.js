@@ -41,28 +41,15 @@ const { uint64 } = catapult.utils;
 		connectTimeout: 1000
 	});
 
-	// If you use bootstrap, you can find private keys here:
-	// catapult-service-bootstrap/build/generated-addresses/addresses.yaml
-	// You need to find section "nemesis_addresses"(It is pre-created accounts with tokens)
-	// and you can pick up private keys for testing
-	// Example:
-	// nemesis_addresses:
-	// - private: E683A987DC5B588916F5667D717B59D01D6662DE588F8EEC2285289FCB1508AB
-	//   public: 031B78DACDEB6427D69A4C0FDC2C4571ABBFFF7EA6B83532CF854BCDB465277E
-	//   address: SCTBPQ6O7DYHWTCMU6VHPTS4B736EIQ6AU5N7BJY
-	// ....
-
-	const Private_Keys = [
-		'E683A987DC5B588916F5667D717B59D01D6662DE588F8EEC2285289FCB1508AB',
-		'5A790BF770EAC5F22761B2A3178C00DA11D2085DD7F2104D9B555FE9786A2384',
-		'9C7A11929FF6265215B2C9F750E7D365C003CBE61FBA8DC0CBD2D24BEEA8BF5A',
-		'BE1FB2850497A48130FF20D3D7A76F39A46F522AA3ADC1E6F7FE7258A84D90E2'
-	];
+	const Private_Keys = options.privateKeys;
 
 	const txCounters = { initiated: 0, successful: 0 };
 	const timer = (() => {
-		const startTime = new Date().getTime();
-		return { elapsed: () => new Date().getTime() - startTime };
+		let startTime = new Date().getTime();
+		return {
+			elapsed: () => new Date().getTime() - startTime,
+			restart: () => { startTime = new Date().getTime(); }
+		};
 	})();
 
 	const logStats = spammerStats => {
@@ -109,29 +96,6 @@ const { uint64 } = catapult.utils;
 		transactionExtensions.sign(modelCodec, keyPair, transfer);
 		return transfer;
 	};
-
-	const sendTransaction = createAndPrepareTransaction => new Promise(resolve => {
-		// don't initiate more transactions than wanted. If a send fails txCounters.initiated will be decremented
-		// and thus another transaction will be sent.
-		if (txCounters.initiated >= options.total)
-			return;
-
-		++txCounters.initiated;
-		const transaction = createAndPrepareTransaction(txCounters.initiated);
-
-		const txData = createPayload(transaction);
-		client.put('/transaction', txData, err => {
-			if (err) {
-				winston.error(`an error occurred while sending the transaction with id ${txCounters.initiated}`, err);
-				--txCounters.initiated;
-			} else {
-				++txCounters.successful;
-				logStats(txCounters);
-			}
-
-			resolve(txCounters.successful);
-		});
-	});
 
 	const randomKeyPair = () => {
 		const keySize = 32;
@@ -189,23 +153,62 @@ const { uint64 } = catapult.utils;
 		process.exit();
 	}
 
-	(() => {
-		const transactionFactories = {
-			transfer: prepareTransferTransaction,
-			aggregate: prepareAggregateTransaction
-		};
+	const transactionFactories = {
+		transfer: prepareTransferTransaction,
+		aggregate: prepareAggregateTransaction
+	};
+	const createTransaction = transactionFactories[options.mode in transactionFactories ? options.mode : 'transfer'];
 
-		const mode = options.mode in transactionFactories ? options.mode : 'transfer';
-		const timerId = setInterval(
-			() => sendTransaction(transactionFactories[mode]).then(numSuccessfulTransactions => {
-				if (numSuccessfulTransactions < options.total)
-					return;
+	const sendTransaction = cache => new Promise(resolve => {
+		// don't initiate more transactions than wanted. If a send fails txCounters.initiated will be decremented
+		// and thus another transaction will be sent.
+		if (txCounters.initiated >= options.total)
+			return;
 
-				clearInterval(timerId);
-				winston.info('finished');
-				process.exit();
-			}),
-			1000 / options.rate
-		);
-	})();
+		let txData = cache;
+
+		if (!cache) {
+			const transaction = createTransaction(txCounters.initiated);
+			txData = createPayload(transaction);
+		}
+
+		++txCounters.initiated;
+		client.put('/transaction', txData, err => {
+			if (err) {
+				winston.error(`an error occurred while sending the transaction with id ${txCounters.initiated}`, err);
+				--txCounters.initiated;
+			} else {
+				++txCounters.successful;
+				logStats(txCounters);
+			}
+
+			resolve(txCounters.successful);
+		});
+	});
+
+	{
+		let chache = null;
+
+		if (options.sameTransaction) {
+			const transaction = createTransaction(0);
+			chache = createPayload(transaction);
+		}
+
+		const interval = options.rate <= 0 ? 0 : 1000 / options.rate;
+		// We send one transaction to create a socket connection with server, then we will fire so many request as we can
+		sendTransaction(chache).then(() => {
+			timer.restart();
+			const timerId = setInterval(
+				() => sendTransaction(chache).then(numSuccessfulTransactions => {
+					if (numSuccessfulTransactions < options.total)
+						return;
+
+					clearInterval(timerId);
+					winston.info('finished');
+					process.exit();
+				}),
+				interval
+			);
+		});
+	}
 })();

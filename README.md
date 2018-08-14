@@ -28,18 +28,7 @@ If you already have it, you need to build each module:
 sudo ./yarn_setup.sh
 ```
 
-Then if you want to run spammer:
-```
-cd spammer
-npm run build && npm run start
-```
-You can configure it:
-
- * spammer/src/utils/spammerOptions.js - here you can change parameters of connection and spam.
- * spammer/src/model/transactionFactory.js - here you can change token, which you need  to use in transactions.
- * spammer/src/index.js - here you can change private keys of account which already have tokens.
-
-If you want to run a rest server, you need to install mongodb first, or change mongodb address in rest.json:
+To run a rest server, you need to install mongodb first, or change mongodb address in rest.json:
 ```
 sudo ./scripts/mongo/installMongoDb.sh
 ```
@@ -58,3 +47,7 @@ If docker, yarn, nodejs and npm are installed, you can easy create an image:
 ```
 sudo ./scripts/RestDockerImage/buildRestImage.sh
 ```
+
+## Spammer
+
+Also you can find a transaction sender in **spammer** folder. Hot to work with it you can read in Readme file in **spammer** folder.
