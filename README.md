@@ -50,4 +50,4 @@ sudo ./scripts/RestDockerImage/buildRestImage.sh
 
 ## Spammer
 
-Also you can find a transaction sender in **spammer** folder. Hot to work with it you can read in Readme file in **spammer** folder.
+Also you can find a transaction sender in **spammer** folder. How to work with it you can read in Readme file in **spammer** folder.
