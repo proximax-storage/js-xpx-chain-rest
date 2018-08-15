@@ -427,7 +427,7 @@ describe('route utils', () => {
 			const parseHexParam = (params, key) => routeUtils.parseArgument(params, key, catapult.utils.convert.hexToUint8);
 			routeUtils.addPutPacketRoute(
 				server,
-				services.connections,
+				services,
 				{ routeName: '/foo/bar', packetType: 987 },
 				params => Buffer.concat([parseHexParam(params, 'alpha'), parseHexParam(params, 'beta')])
 			);

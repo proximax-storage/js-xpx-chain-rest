@@ -493,6 +493,9 @@ const routeTestUtils = {
 									return Promise.resolve();
 								}
 							})
+						},
+						performanceLogger: {
+							statistic: {}
 						}
 					};
 

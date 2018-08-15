@@ -8,6 +8,7 @@
     "build": "ncp src/ _build",
     "rebuild": "npm run clean && npm run build",
     "start": "node _build/index.js",
+    "restart": "npm run build && npm run start",
     "start:debug": "node src/index.js",
     "test": "mocha --full-trace --recursive",
     "test:coverage": "nyc yarn test && nyc report --reporter=text-lcov",

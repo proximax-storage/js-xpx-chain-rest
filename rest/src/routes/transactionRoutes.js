@@ -45,7 +45,7 @@ module.exports = {
 
 		routeUtils.addPutPacketRoute(
 			server,
-			services.connections,
+			services,
 			{ routeName: '/transaction', packetType: PacketType.pushTransactions },
 			params => routeUtils.parseArgument(params, 'payload', convert.hexToUint8)
 		);

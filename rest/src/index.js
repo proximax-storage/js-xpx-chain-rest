@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 /*
  * Copyright (c) 2016-present,
  * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
@@ -31,6 +32,9 @@ const allRoutes = require('./routes/allRoutes');
 const bootstrapper = require('./server/bootstrapper');
 const formatters = require('./server/formatters');
 const messageFormattingRules = require('./server/messageFormattingRules');
+const PerformanceLogger = require('./plugins/performanceLogger');
+
+const perfLogger = new PerformanceLogger(winston);
 
 const configureLogging = config => {
 	winston.remove(winston.transports.Console);
@@ -108,7 +112,8 @@ const registerRoutes = (server, db, services) => {
 				step: services.config.db.pageSizeStep
 			}
 		},
-		connections: services.connectionService
+		connections: services.connectionService,
+		performanceLogger: services.perfLogger
 	};
 
 	// 2. configure extension routes
@@ -120,6 +125,17 @@ const registerRoutes = (server, db, services) => {
 
 	// 4. configure basic routes
 	allRoutes.register(server, db, servicesView);
+};
+
+const registerPerformanceLogger = logger => {
+    const timerId = setInterval(
+        () => {
+			logger.snapData();
+            clearInterval(timerId);
+			registerPerformanceLogger(logger);
+        },
+        logger.interval
+    );
 };
 
 (() => {
@@ -151,7 +167,8 @@ const registerRoutes = (server, db, services) => {
 			serviceManager.pushService(server, 'close');
 
 			const connectionService = createConnectionService(config, createConnection, catapult.auth.createAuthPromise, winston.verbose);
-			registerRoutes(server, db, { codec: serverAndCodec.codec, config, connectionService });
+            registerPerformanceLogger(perfLogger);
+			registerRoutes(server, db, { codec: serverAndCodec.codec, config, connectionService, perfLogger });
 
 			winston.info(`listening on port ${config.port}`);
 			server.listen(config.port);

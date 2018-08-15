@@ -248,7 +248,7 @@ const routeUtils = {
 	 * @param {object} routeInfo Information about the route.
 	 * @param {Function} parser The parser to use to parse the route parameters into a packet payload.
 	 */
-	addPutPacketRoute: (server, connections, routeInfo, parser) => {
+	addPutPacketRoute: (server, services, routeInfo, parser) => {
 		const createPacketFromBuffer = (data, packetType) => {
 			const length = packetHeader.size + data.length;
 			const header = packetHeader.createBuffer(packetType, length);
@@ -256,11 +256,15 @@ const routeUtils = {
 			return Buffer.concat(buffers, length);
 		};
 
+		const statisctic = services.performanceLogger.statistic;
+
 		server.put(routeInfo.routeName, (req, res, next) => {
+			++statisctic.transactionsIn;
 			const packetBuffer = createPacketFromBuffer(parser(req.params), routeInfo.packetType);
-			return connections.lease()
+			return services.connections.lease()
 				.then(connection => connection.send(packetBuffer))
 				.then(() => {
+					++statisctic.transactionsOut;
 					res.send(202, { message: `packet ${routeInfo.packetType} was pushed to the network via ${routeInfo.routeName}` });
 					next();
 				});
