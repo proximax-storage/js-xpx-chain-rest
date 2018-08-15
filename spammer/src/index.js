@@ -26,20 +26,50 @@ const spammerUtils = require('./model/spammerUtils');
 const transactionFactory = require('./model/transactionFactory');
 const random = require('./utils/random');
 const spammerOptions = require('./utils/spammerOptions');
+const fs = require('fs');
+const { createConnection } = require('net');
+// TODO: Need to re-work it in future
+const { createConnectionService } = require('../../rest/src/connection/connectionService');
 
+const packetHeader = catapult.packet.header;
+const { PacketType } = catapult.packet;
 const { address } = catapult.model;
 const { serialize, transactionExtensions } = catapult.modelBinary;
 const modelCodec = catapult.plugins.catapultModelSystem.configure(['transfer', 'aggregate'], {}).codec;
 const { uint64 } = catapult.utils;
 
-(() => {
+const configureLogging = config => {
+	winston.remove(winston.transports.Console);
+	if ('production' !== process.env.NODE_ENV)
+		winston.add(winston.transports.Console, config.console);
+
+	winston.add(winston.transports.File, config.file);
+};
+
+const loadConfig = (options) => {
+	winston.info(`loading config from ${options.configFile}`);
+	return JSON.parse(fs.readFileSync(options.configFile, 'utf8'));
+};
+
+{
 	const Mijin_Test_Network = catapult.model.networkInfo.networks.mijinTest.id;
 	const options = spammerOptions.options();
+	let client;
 
-	const client = restify.createJsonClient({
-		url: `http://${options.address}:${options.port}`,
-		connectTimeout: 1000
-	});
+	if (options.type === 'rest') {
+		client = restify.createJsonClient({
+			url: `http://${options.address}:${options.port}`,
+			connectTimeout: 1000
+		});
+	} else if (options.type === 'node') {
+		const config = loadConfig(options);
+		configureLogging(config.logging);
+		winston.verbose('finished loading rest server config', config);
+
+		const connectionService = createConnectionService(config, createConnection, catapult.auth.createAuthPromise, winston.verbose);
+
+		client = connectionService.lease();
+	}
 
 	const Private_Keys = options.privateKeys;
 
@@ -85,7 +115,19 @@ const { uint64 } = catapult.utils;
 		return () => keyPairs[crypto.randomBytes(1)[0] % privateKeys.length];
 	})(Private_Keys);
 
-	const createPayload = transfer => ({ payload: serialize.toHex(modelCodec, transfer) });
+	const createPayload = transfer => {
+		if (options.type === 'rest')
+			return { payload: serialize.toHex(modelCodec, transfer) };
+		else if (options.type === 'node') {
+			const data = Buffer.from(serialize.toHex(modelCodec, transfer), 'hex');
+			const length = packetHeader.size + data.length;
+			const header = packetHeader.createBuffer(PacketType.pushTransactions, length);
+			const buffers = [header, data];
+			return Buffer.concat(buffers, length);
+		}
+
+		return null;
+	};
 
 	const prepareTransferTransaction = txId => {
 		const keyPair = pickKeyPair();
@@ -159,56 +201,63 @@ const { uint64 } = catapult.utils;
 	};
 	const createTransaction = transactionFactories[options.mode in transactionFactories ? options.mode : 'transfer'];
 
-	const sendTransaction = cache => new Promise(resolve => {
-		// don't initiate more transactions than wanted. If a send fails txCounters.initiated will be decremented
-		// and thus another transaction will be sent.
-		if (txCounters.initiated >= options.total)
-			return;
-
-		let txData = cache;
-
-		if (!cache) {
-			const transaction = createTransaction(txCounters.initiated);
-			txData = createPayload(transaction);
-		}
-
-		++txCounters.initiated;
-		client.put('/transaction', txData, err => {
-			if (err) {
-				winston.error(`an error occurred while sending the transaction with id ${txCounters.initiated}`, err);
-				--txCounters.initiated;
-			} else {
-				++txCounters.successful;
-				logStats(txCounters);
-			}
-
-			resolve(txCounters.successful);
-		});
-	});
-
 	{
-		let chache = null;
+		let cache = null;
 
 		if (options.sameTransaction) {
 			const transaction = createTransaction(0);
-			chache = createPayload(transaction);
+			cache = createPayload(transaction);
 		}
 
 		const interval = options.rate <= 0 ? 0 : 1000 / options.rate;
-		// We send one transaction to create a socket connection with server, then we will fire so many request as we can
-		sendTransaction(chache).then(() => {
-			timer.restart();
-			const timerId = setInterval(
-				() => sendTransaction(chache).then(numSuccessfulTransactions => {
-					if (numSuccessfulTransactions < options.total)
-						return;
+		let initTransaction = true;
 
-					clearInterval(timerId);
-					winston.info('finished');
-					process.exit();
-				}),
-				interval
-			);
-		});
+		const sendTransaction = () => {
+			// don't initiate more transactions than wanted. If a send fails txCounters.initiated will be decremented
+			// and thus another transaction will be sent.
+			if (txCounters.initiated >= options.total)
+				return;
+
+			let txData = cache;
+
+			if (!cache) {
+				const transaction = createTransaction(txCounters.initiated);
+				txData = createPayload(transaction);
+			}
+
+			++txCounters.initiated;
+			const callback = err => {
+				if (err) {
+					winston.error(`an error occurred while sending the transaction with id ${txCounters.initiated}`, err);
+					--txCounters.initiated;
+				} else {
+					++txCounters.successful;
+					logStats(txCounters);
+				}
+
+				if (initTransaction) {
+					initTransaction = false;
+					sendTransaction();
+				}
+			};
+
+			if (options.type == 'rest') {
+				client.put('/transaction', txData, callback);
+				if (!initTransaction) {
+					setTimeout(sendTransaction, interval);
+				}
+			} else if (options.type == 'node') {
+				client.then(connection => connection.send(txData)).then(() => {
+					callback();
+					if (interval === 0) {
+						sendTransaction();
+					} else {
+						setTimeout(sendTransaction, interval);
+					}
+				});
+			}
+		};
+
+		sendTransaction();
 	}
-})();
+}

@@ -35,6 +35,12 @@ const optionDefinitions = [
 		name: 'address', alias: 'a', type: String, defaultValue: '127.0.0.1'
 	},
 	{
+		name: 'configFile', alias: 'c', type: String, defaultValue: '../resources/rest.json'
+	},
+	{
+		name: 'type', type: String, defaultValue: 'rest'
+	},
+	{
 		name: 'port', alias: 'p', type: Number, defaultValue: 3000
 	},
 	{
@@ -93,6 +99,15 @@ const sections = [
 				name: 'address',
 				alias: 'a',
 				description: 'The host ip address.'
+			},
+			{
+				name: 'type',
+				description: 'Type of connection(rest or node).'
+			},
+			{
+				name: 'configFile',
+				alias: 'c',
+				description: 'If you use apiNode type, you can pass config file with information about connection.'
 			},
 			{
 				name: 'port',
