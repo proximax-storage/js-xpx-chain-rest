@@ -26,10 +26,19 @@ const optionDefinitions = [
 		name: 'help', alias: 'h', type: Boolean, defaultValue: false
 	},
 	{
+		name: 'sameTransaction', alias: 's', type: Boolean, defaultValue: false
+	},
+	{
 		name: 'predefinedRecipients', alias: 'd', type: Number, defaultValue: 0
 	},
 	{
 		name: 'address', alias: 'a', type: String, defaultValue: '127.0.0.1'
+	},
+	{
+		name: 'configFile', alias: 'c', type: String, defaultValue: '../resources/rest.json'
+	},
+	{
+		name: 'type', type: String, defaultValue: 'rest'
 	},
 	{
 		name: 'port', alias: 'p', type: Number, defaultValue: 3000
@@ -42,6 +51,24 @@ const optionDefinitions = [
 	},
 	{
 		name: 'mode', alias: 'm', type: String, defaultValue: 'transfer'
+	},
+	{
+		// If you use bootstrap, you can find private keys here:
+		// catapult-service-bootstrap/build/generated-addresses/addresses.yaml
+		// You need to find section "nemesis_addresses"(It is pre-created accounts with tokens)
+		// and you can pick up private keys for testing
+		// Example:
+		// nemesis_addresses:
+		// - private: E683A987DC5B588916F5667D717B59D01D6662DE588F8EEC2285289FCB1508AB
+		//   public: 031B78DACDEB6427D69A4C0FDC2C4571ABBFFF7EA6B83532CF854BCDB465277E
+		//   address: SCTBPQ6O7DYHWTCMU6VHPTS4B736EIQ6AU5N7BJY
+		// ....
+		name: 'privateKeys', alias: 'k', type: String, multiple: true, defaultValue: [
+			'CDF107C89782952AF6FBA50386B33DBBC8331DF666E3835BC23A61211AA0F9DD',
+			'7806576341D110934A5E05AFA062A91C42B6E3FE5EA176AAACE1693775A28BC4',
+			'D9E07D2411280D3CEB0D6F122165281999B3893DD71CA8CFCFF9EF7197221703',
+			'D95CC77DC4B99A03DEA111803EBC925A9B29B86C5CD5CC0B26288CCA803914F2'
+		]
 	}
 ];
 
@@ -53,6 +80,11 @@ const sections = [
 	{
 		header: 'Options',
 		optionList: [
+			{
+				name: 'sameTransaction',
+				alias: 's',
+				description: 'Spammer will use the same transaction each time'
+			},
 			{
 				name: 'mode',
 				alias: 'm',
@@ -69,6 +101,15 @@ const sections = [
 				description: 'The host ip address.'
 			},
 			{
+				name: 'type',
+				description: 'Type of connection(rest or node).'
+			},
+			{
+				name: 'configFile',
+				alias: 'c',
+				description: 'If you use apiNode type, you can pass config file with information about connection.'
+			},
+			{
 				name: 'port',
 				alias: 'p',
 				description: 'The port on which to connect.'
@@ -82,6 +123,11 @@ const sections = [
 				name: 'total',
 				alias: 't',
 				description: 'The total number of transactions.'
+			},
+			{
+				name: 'privateKeys',
+				alias: 'k',
+				description: 'The private keys of accounts with tokens to generate transactions.'
 			}
 		]
 	}

@@ -41,7 +41,8 @@ module.exports = {
 			payload: Buffer.from(uint64.toHex(uint64.fromUint(options.transferId)), 'hex')
 		},
 		mosaics: [
-			{ id: [0xD95FCF29, 0xD525AD41],	amount: uint64.fromUint(random.uint32(1000000)) }
+			// Main token mosaic id = Xpx_id =  D423931BD268D1F4
+			{ id: [0xD268D1F4, 0xD423931B],	amount: uint64.fromUint(random.uint32(1000000)) }
 		]
 	}),
 

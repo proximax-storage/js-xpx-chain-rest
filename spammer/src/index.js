@@ -18,7 +18,7 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const restify = require('restify');
+const restify = require('restify-clients');
 const catapult = require('catapult-sdk');
 const crypto = require('crypto');
 const winston = require('winston');
@@ -26,32 +26,60 @@ const spammerUtils = require('./model/spammerUtils');
 const transactionFactory = require('./model/transactionFactory');
 const random = require('./utils/random');
 const spammerOptions = require('./utils/spammerOptions');
+const fs = require('fs');
+const { createConnection } = require('net');
+// TODO: Need to re-work it in future
+const { createConnectionService } = require('../../rest/src/connection/connectionService');
 
+const packetHeader = catapult.packet.header;
+const { PacketType } = catapult.packet;
 const { address } = catapult.model;
 const { serialize, transactionExtensions } = catapult.modelBinary;
 const modelCodec = catapult.plugins.catapultModelSystem.configure(['transfer', 'aggregate'], {}).codec;
 const { uint64 } = catapult.utils;
 
-(() => {
+const configureLogging = config => {
+	winston.remove(winston.transports.Console);
+	if ('production' !== process.env.NODE_ENV)
+		winston.add(winston.transports.Console, config.console);
+
+	winston.add(winston.transports.File, config.file);
+};
+
+const loadConfig = (options) => {
+	winston.info(`loading config from ${options.configFile}`);
+	return JSON.parse(fs.readFileSync(options.configFile, 'utf8'));
+};
+
+{
 	const Mijin_Test_Network = catapult.model.networkInfo.networks.mijinTest.id;
 	const options = spammerOptions.options();
+	let client;
 
-	const client = restify.createJsonClient({
-		url: `http://${options.address}:${options.port}`,
-		connectTimeout: 1000
-	});
+	if (options.type === 'rest') {
+		client = restify.createJsonClient({
+			url: `http://${options.address}:${options.port}`,
+			connectTimeout: 1000
+		});
+	} else if (options.type === 'node') {
+		const config = loadConfig(options);
+		configureLogging(config.logging);
+		winston.verbose('finished loading rest server config', config);
 
-	const Private_Keys = [
-		'8473645728B15F007385CE2889D198D26369D2806DCDED4A9B219FD0DE23A505',
-		'BBC3E5BE46A953070B0B9636E386C2006DA9EA8840596B601D4A1B92A9F93330',
-		'46C83EE87DAB6588DD82D1059140D3E5A7FAFF78C3A0C4CE4802486D71C69E40',
-		'FA19F42DDD6E757B3A2E39E75A7487F8FEC19C0E872153EC0EFD9AC2E5A84E58'
-	];
+		const connectionService = createConnectionService(config, createConnection, catapult.auth.createAuthPromise, winston.verbose);
+
+		client = connectionService.lease();
+	}
+
+	const Private_Keys = options.privateKeys;
 
 	const txCounters = { initiated: 0, successful: 0 };
 	const timer = (() => {
-		const startTime = new Date().getTime();
-		return { elapsed: () => new Date().getTime() - startTime };
+		let startTime = new Date().getTime();
+		return {
+			elapsed: () => new Date().getTime() - startTime,
+			restart: () => { startTime = new Date().getTime(); }
+		};
 	})();
 
 	const logStats = spammerStats => {
@@ -87,7 +115,19 @@ const { uint64 } = catapult.utils;
 		return () => keyPairs[crypto.randomBytes(1)[0] % privateKeys.length];
 	})(Private_Keys);
 
-	const createPayload = transfer => ({ payload: serialize.toHex(modelCodec, transfer) });
+	const createPayload = transfer => {
+		if (options.type === 'rest')
+			return { payload: serialize.toHex(modelCodec, transfer) };
+		else if (options.type === 'node') {
+			const data = Buffer.from(serialize.toHex(modelCodec, transfer), 'hex');
+			const length = packetHeader.size + data.length;
+			const header = packetHeader.createBuffer(PacketType.pushTransactions, length);
+			const buffers = [header, data];
+			return Buffer.concat(buffers, length);
+		}
+
+		return null;
+	};
 
 	const prepareTransferTransaction = txId => {
 		const keyPair = pickKeyPair();
@@ -98,29 +138,6 @@ const { uint64 } = catapult.utils;
 		transactionExtensions.sign(modelCodec, keyPair, transfer);
 		return transfer;
 	};
-
-	const sendTransaction = createAndPrepareTransaction => new Promise(resolve => {
-		// don't initiate more transactions than wanted. If a send fails txCounters.initiated will be decremented
-		// and thus another transaction will be sent.
-		if (txCounters.initiated >= options.total)
-			return;
-
-		++txCounters.initiated;
-		const transaction = createAndPrepareTransaction(txCounters.initiated);
-
-		const txData = createPayload(transaction);
-		client.put('/transaction', txData, err => {
-			if (err) {
-				winston.error(`an error occurred while sending the transaction with id ${txCounters.initiated}`, err);
-				--txCounters.initiated;
-			} else {
-				++txCounters.successful;
-				logStats(txCounters);
-			}
-
-			resolve(txCounters.successful);
-		});
-	});
 
 	const randomKeyPair = () => {
 		const keySize = 32;
@@ -178,23 +195,69 @@ const { uint64 } = catapult.utils;
 		process.exit();
 	}
 
-	(() => {
-		const transactionFactories = {
-			transfer: prepareTransferTransaction,
-			aggregate: prepareAggregateTransaction
+	const transactionFactories = {
+		transfer: prepareTransferTransaction,
+		aggregate: prepareAggregateTransaction
+	};
+	const createTransaction = transactionFactories[options.mode in transactionFactories ? options.mode : 'transfer'];
+
+	{
+		let cache = null;
+
+		if (options.sameTransaction) {
+			const transaction = createTransaction(0);
+			cache = createPayload(transaction);
+		}
+
+		const interval = options.rate <= 0 ? 0 : 1000 / options.rate;
+		let initTransaction = true;
+
+		const sendTransaction = () => {
+			// don't initiate more transactions than wanted. If a send fails txCounters.initiated will be decremented
+			// and thus another transaction will be sent.
+			if (txCounters.initiated >= options.total)
+				return;
+
+			let txData = cache;
+
+			if (!cache) {
+				const transaction = createTransaction(txCounters.initiated);
+				txData = createPayload(transaction);
+			}
+
+			++txCounters.initiated;
+			const callback = err => {
+				if (err) {
+					winston.error(`an error occurred while sending the transaction with id ${txCounters.initiated}`, err);
+					--txCounters.initiated;
+				} else {
+					++txCounters.successful;
+					logStats(txCounters);
+				}
+
+				if (initTransaction) {
+					initTransaction = false;
+					sendTransaction();
+				}
+			};
+
+			if (options.type == 'rest') {
+				client.put('/transaction', txData, callback);
+				if (!initTransaction) {
+					setTimeout(sendTransaction, interval);
+				}
+			} else if (options.type == 'node') {
+				client.then(connection => connection.send(txData)).then(() => {
+					callback();
+					if (interval === 0) {
+						sendTransaction();
+					} else {
+						setTimeout(sendTransaction, interval);
+					}
+				});
+			}
 		};
 
-		const mode = options.mode in transactionFactories ? options.mode : 'transfer';
-		const timerId = setInterval(
-			() => sendTransaction(transactionFactories[mode]).then(numSuccessfulTransactions => {
-				if (numSuccessfulTransactions < options.total)
-					return;
-
-				clearInterval(timerId);
-				winston.info('finished');
-				process.exit();
-			}),
-			1000 / options.rate
-		);
-	})();
-})();
+		sendTransaction();
+	}
+}
