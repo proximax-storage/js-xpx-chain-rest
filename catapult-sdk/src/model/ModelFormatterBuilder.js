@@ -39,6 +39,9 @@ class ModelFormatterBuilder {
 			'transactionWithMetadata',
 
 			'chainInfo',
+			'merkleProofInfo',
+			'nodeInfo',
+			'nodeTime',
 			'storageInfo',
 			'transactionStatus'
 		]);

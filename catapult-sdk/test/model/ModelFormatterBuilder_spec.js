@@ -48,6 +48,9 @@ describe('model formatter builder', () => {
 				'transactionWithMetadata',
 
 				'chainInfo',
+				'merkleProofInfo',
+				'nodeInfo',
+				'nodeTime',
 				'storageInfo',
 				'transactionStatus'
 			]);
@@ -104,7 +107,8 @@ describe('model formatter builder', () => {
 					hash: 0,
 					generationHash: 0,
 					totalFee: 0,
-					numTransactions: 0
+					numTransactions: 0,
+					subCacheMerkleRoots: [0]
 				},
 				block: {
 					signature: 0,
@@ -116,7 +120,8 @@ describe('model formatter builder', () => {
 					timestamp: 0,
 					difficulty: 0,
 					previousBlockHash: 0,
-					blockTransactionsHash: 0
+					blockTransactionsHash: 0,
+					stateHash: 0
 				}
 			});
 
@@ -126,7 +131,8 @@ describe('model formatter builder', () => {
 					hash: 'binary',
 					generationHash: 'binary',
 					totalFee: 'uint64',
-					numTransactions: 'none'
+					numTransactions: 'none',
+					subCacheMerkleRoots: ['binary']
 				},
 				block: {
 					signature: 'binary',
@@ -138,7 +144,8 @@ describe('model formatter builder', () => {
 					timestamp: 'uint64',
 					difficulty: 'uint64',
 					previousBlockHash: 'binary',
-					blockTransactionsHash: 'binary'
+					blockTransactionsHash: 'binary',
+					stateHash: 'binary'
 				}
 			});
 		});
