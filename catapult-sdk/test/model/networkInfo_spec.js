@@ -32,7 +32,9 @@ describe('network info', () => {
 				'mijin',
 				'mijinTest',
 				'public',
-				'publicTest'
+				'publicTest',
+				'private',
+				'privateTest'
 			]);
 		});
 
@@ -48,13 +50,23 @@ describe('network info', () => {
 
 		it('defines public network', () => {
 			// Assert:
-			expect(networkInfo.networks.public).to.deep.equal({ id: 0x68, bytePrefix: '68', charPrefix: 'N' });
+			expect(networkInfo.networks.public).to.deep.equal({ id: 0xB8, bytePrefix: 'B8', charPrefix: 'X' });
 		});
 
 		it('defines public test network', () => {
 			// Assert:
-			expect(networkInfo.networks.publicTest).to.deep.equal({ id: 0x98, bytePrefix: '98', charPrefix: 'T' });
+			expect(networkInfo.networks.publicTest).to.deep.equal({ id: 0xA8, bytePrefix: 'A8', charPrefix: 'V' });
 		});
+
+        it('defines public test network', () => {
+            // Assert:
+            expect(networkInfo.networks.private).to.deep.equal({ id: 0xC8, bytePrefix: 'C8', charPrefix: 'Z' });
+        });
+
+        it('defines public test network', () => {
+            // Assert:
+            expect(networkInfo.networks.privateTest).to.deep.equal({ id: 0xB0, bytePrefix: 'B0', charPrefix: 'W' });
+        });
 	});
 
 	describe('find by id', () => {
