@@ -16,7 +16,8 @@ RUN cd /catapult-rest/catapult-sdk && \
     yarn install && \
     yarn rebuild && \
     cd /catapult-rest/rest && \
-    yarn install --production --modules-folder /catapult-rest/node_modules
+    yarn install --production  --modules-folder /catapult-rest/node_modules && \
+    npm run build
 
 #------------------------
 # Actual target image which only contains the required binaries
