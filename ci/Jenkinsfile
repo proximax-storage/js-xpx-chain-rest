@@ -71,7 +71,7 @@ pipeline {
         success {
             slackSend channel: '#devops',
                 color: 'good',
-                message: "Branch *${env.GIT_BRANCH}* Tag *${env.GIT_BRANCH}* build of *${currentBuild.fullDisplayName}* completed successfully :100:\nPushed Docker image ${DOCKER_REGISTRY}/${IMAGE}:${env.GIT_BRANCH}"
+                message: "Release with Tag *${env.GIT_BRANCH}* build of *${currentBuild.fullDisplayName}* completed successfully :100:\nPushed Docker image ${DOCKER_REGISTRY}/${IMAGE}:${env.GIT_BRANCH}"
         }
       }
     }
