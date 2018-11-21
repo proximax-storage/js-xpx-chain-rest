@@ -64,7 +64,7 @@ pipeline {
             def newImage = docker.build("${IMAGE}")
             docker.withRegistry("https://${DOCKER_REGISTRY}", "${CREDENTIAL_ID}"){
                 newImage.push("release-jenkins-build-${env.BUILD_NUMBER}") // also push using Jenkins build number
-                newImage.push("${env.GIT_TAG_NAME}")
+                newImage.push("${env.GIT_BRANCH}") // if a tag commit, then env.GIT_BRANCH returns the tag name instead of a branch
             }
         }
       }
