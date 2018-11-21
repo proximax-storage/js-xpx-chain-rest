@@ -1,31 +1,116 @@
-node {
+pipeline {
 
-    // download the
-    docker.withRegistry('https://249767383774.dkr.ecr.ap-southeast-1.amazonaws.com', 'ecr:ap-southeast-1:jenkins-ecr') {
-        docker.image('proximax-catapult-rest-build-image').pull()
+  agent {
+    node {
+      label 'catapult-rest-build-node'
     }
+  }
 
-    docker.image('249767383774.dkr.ecr.ap-southeast-1.amazonaws.com/proximax-catapult-rest-build-image').inside {
-        stage('Build') {
-            echo 'Building proximax-catapult-rest'
+  // using the Timestamper plugin we can add timestamps to the console log
+  options {
+    timestamps()
+  }
 
-            // Display Alpine OS details
-            sh 'cat /etc/*release'
+  environment {
+    IMAGE = "249767383774.dkr.ecr.ap-southeast-1.amazonaws.com/proximax-catapult-rest"
+    VERSION = "test1-${env.BUILD_NUMBER}"
+  }
+
+ stages {
+    stage('Build') {
+      steps {
+        sh """
+              # Disable exit on non 0
+              set +e
+              echo "running yarn_setup.sh"
+              cd catapult-sdk
+              yarn install
+              yarn run rebuild
+
+              cd ../rest
+              yarn install --production
+              npm run build
+              cd ..
+          """
+      }
+      post {
+        success {
+          echo 'Build Success'
         }
+      }
+    }
 
-        stage('Test') {
-            echo 'Running unit tests'
+    stage('Unit Test') {
+      steps {
+       sh """
+              cd catapult-sdk
+              npm run test
+              cd ..
+          """
+       sh """
+             cd rest
+             npm run test
+             cd ..
+          """
+      }
+    }
 
-            // TODO: Run the tests while inside the proximax-catapult-rest-build-image Docker container
+    stage('Build and Publish Release Image') {
+      when {
+        tag "release-*"   // only run these steps on tag release-*
+      }
+      steps {
+        echo 'Build and Publish Image'
+        docker.withRegistry('https://249767383774.dkr.ecr.ap-southeast-1.amazonaws.com', 'ecr:ap-southeast-1:jenkins-ecr') {
+            docker build -t ${IMAGE}:${VERSION} .
+            docker push ${IMAGE}:${VERSION}
         }
+      }
+      post {
+        success {
+            slackSend channel: '#devops',
+                    color: 'good',
+                    message: "Branch master build of ${currentBuild.fullDisplayName} completed successfully. New pushed Docker image ${IMAGE}:${VERSION}"
+        }
+        failure {
+            slackSend channel: '#devops',
+                    color: 'bad',
+                    message: "Branch master build of ${currentBuild.fullDisplayName} FAILED."
+        }
+      }
     }
 
-    stage('Build Docker Image') {
-        echo 'Building proximax-catapult-rest Docker image'
+    stage('Build and Publish Develop Image') {
+      when {
+        branch 'jenkins'  // only run these steps on the develop branch
+      }
+      steps {
+        echo 'Build and Publish Image'
+        docker.withRegistry('https://249767383774.dkr.ecr.ap-southeast-1.amazonaws.com', 'ecr:ap-southeast-1:jenkins-ecr') {
+            docker build -t ${IMAGE}:${VERSION} .
+            docker push ${IMAGE}:${VERSION}
+        }
+      }
+      post {
+        success {
+            slackSend channel: '#devops',
+                    color: 'good',
+                    message: "Branch develop build of ${currentBuild.fullDisplayName} completed successfully. New pushed Docker image ${IMAGE}:${VERSION}"
+        }
+        failure {
+            slackSend channel: '#devops',
+                    color: 'bad',
+                    message: "Branch develop build of ${currentBuild.fullDisplayName} FAILED."
+        }
+      }
     }
+  }
 
-    stage('Push Image to Docker Registry') {
-        // 249767383774.dkr.ecr.ap-southeast-1.amazonaws.com/proximax-catapult-rest
-        echo 'Pushing proximax-catapult-rest Docker image to AWS ECR Docker registry'
+  post {
+    failure {
+        slackSend channel: '#devops',
+                color: 'bad',
+                message: "Build of ${currentBuild.fullDisplayName} FAILED."
     }
+  }
 }
