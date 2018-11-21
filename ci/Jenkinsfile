@@ -64,7 +64,7 @@ pipeline {
         script {
             def newImage = docker.build("${IMAGE}")
             docker.withRegistry("${DOCKER_REGISTRY}", '${CREDENTIAL_ID}'){
-                newImage.push("${env.BUILD_NUMBER}") // also push using Jenkins build number
+                newImage.push("jenkins-build-${env.BUILD_NUMBER}") // also push using Jenkins build number
                 newImage.push("${env.GIT_TAG_NAME}")
             }
         }
@@ -88,7 +88,7 @@ pipeline {
         script {
             def newImage = docker.build("${IMAGE}")
             docker.withRegistry("${DOCKER_REGISTRY}", '${CREDENTIAL_ID}'){
-                newImage.push("${env.BUILD_NUMBER}") // also push using Jenkins build number
+                newImage.push("jenkins-build-${env.BUILD_NUMBER}") // also push using Jenkins build number
                 newImage.push("develop") // update Docker image develop
             }
         }
