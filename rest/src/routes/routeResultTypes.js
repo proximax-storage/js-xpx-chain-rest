@@ -25,8 +25,11 @@ module.exports = {
 	transfer: 'transactionWithMetadata',
 
 	// other
-	transactionStatus: 'transactionStatus',
 	chainInfo: 'chainInfo',
+	merkleProofInfo: 'merkleProofInfo',
+	transactionStatus: 'transactionStatus',
+	nodeInfo: 'nodeInfo',
+	nodeTime: 'nodeTime',
 
 	// diagnostic
 	storageInfo: 'storageInfo'

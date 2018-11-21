@@ -72,6 +72,8 @@ describe('model schema builder', () => {
 				'blockHeader',
 				'blockHeaderMetadata',
 				'blockHeaderWithMetadata',
+				'merkleProofInfo',
+				'merkleProofInfoPathNode',
 
 				'transaction',
 				'transactionMetadata',
@@ -85,6 +87,9 @@ describe('model schema builder', () => {
 				'accountWithMetadata',
 
 				'chainInfo',
+				'nodeInfo',
+				'communicationTimestamps',
+				'nodeTime',
 				'storageInfo'
 			]);
 		});
@@ -142,7 +147,9 @@ describe('model schema builder', () => {
 				'transactionWithMetadata.transaction',
 
 				'accountWithMetadata.meta',
-				'accountWithMetadata.account'
+				'accountWithMetadata.account',
+
+				'nodeTime.communicationTimestamps'
 			]);
 		});
 
@@ -152,6 +159,8 @@ describe('model schema builder', () => {
 
 			// Assert:
 			expect(matchingProperties).to.deep.equal([
+				'blockHeaderMetadata.subCacheMerkleRoots',
+				'merkleProofInfo.merklePath',
 				'account.mosaics'
 			]);
 		});
@@ -171,10 +180,13 @@ describe('model schema builder', () => {
 
 				'blockHeader.previousBlockHash',
 				'blockHeader.blockTransactionsHash',
+				'blockHeader.stateHash',
 				'blockHeader.signature',
 				'blockHeader.signer',
 				'blockHeaderMetadata.hash',
 				'blockHeaderMetadata.generationHash',
+				'blockHeaderMetadata.subCacheMerkleRoots.schemaName',
+				'merkleProofInfoPathNode.hash',
 
 				'transaction.signature',
 				'transaction.signer',
@@ -185,7 +197,9 @@ describe('model schema builder', () => {
 				'transactionStatus.hash',
 
 				'account.address',
-				'account.publicKey'
+				'account.publicKey',
+
+				'nodeInfo.publicKey'
 			]);
 		});
 
@@ -216,7 +230,10 @@ describe('model schema builder', () => {
 
 				'chainInfo.height',
 				'chainInfo.scoreLow',
-				'chainInfo.scoreHigh'
+				'chainInfo.scoreHigh',
+
+				'communicationTimestamps.receiveTimestamp',
+				'communicationTimestamps.sendTimestamp'
 			]);
 		});
 
@@ -236,7 +253,10 @@ describe('model schema builder', () => {
 			const matchingProperties = extractSchemaPropertiesWithType('string');
 
 			// Assert:
-			expect(matchingProperties.length).to.equal(0);
+			expect(matchingProperties).to.deep.equal([
+				'nodeInfo.friendlyName',
+				'nodeInfo.host'
+			]);
 		});
 
 		it('exposes correct status code properties', () => {

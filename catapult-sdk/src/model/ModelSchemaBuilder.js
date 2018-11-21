@@ -47,16 +47,24 @@ class ModelSchemaBuilder {
 				timestamp: ModelType.uint64,
 				difficulty: ModelType.uint64,
 				previousBlockHash: ModelType.binary,
-				blockTransactionsHash: ModelType.binary
+				blockTransactionsHash: ModelType.binary,
+				stateHash: ModelType.binary
 			},
 			blockHeaderMetadata: {
 				hash: ModelType.binary,
 				generationHash: ModelType.binary,
-				totalFee: ModelType.uint64
+				totalFee: ModelType.uint64,
+				subCacheMerkleRoots: { type: ModelType.array, schemaName: ModelType.binary }
 			},
 			blockHeaderWithMetadata: {
 				meta: { type: ModelType.object, schemaName: 'blockHeaderMetadata' },
 				block: { type: ModelType.object, schemaName: 'blockHeader' }
+			},
+			merkleProofInfo: {
+				merklePath: { type: ModelType.array, schemaName: 'merkleProofInfoPathNode' }
+			},
+			merkleProofInfoPathNode: {
+				hash: ModelType.binary
 			},
 
 			// endregion
@@ -127,6 +135,20 @@ class ModelSchemaBuilder {
 				height: ModelType.uint64,
 				scoreLow: ModelType.uint64,
 				scoreHigh: ModelType.uint64
+			},
+
+			nodeInfo: {
+				friendlyName: ModelType.string,
+				host: ModelType.string,
+				publicKey: ModelType.binary
+			},
+
+			communicationTimestamps: {
+				receiveTimestamp: ModelType.uint64,
+				sendTimestamp: ModelType.uint64
+			},
+			nodeTime: {
+				communicationTimestamps: { type: ModelType.object, schemaName: 'communicationTimestamps' }
 			},
 
 			storageInfo: {

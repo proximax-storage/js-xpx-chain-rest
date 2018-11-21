@@ -190,6 +190,11 @@ class CatapultDb {
 	}
 
 	blockAtHeight(height) {
+		return this.queryDocument('blocks', { 'block.height': createLong(height) }, { 'meta.merkleTree': 0 })
+			.then(this.sanitizer.deleteId);
+	}
+
+	blockWithMerkleTreeAtHeight(height) {
 		return this.queryDocument('blocks', { 'block.height': createLong(height) })
 			.then(this.sanitizer.deleteId);
 	}
@@ -203,6 +208,7 @@ class CatapultDb {
 			const options = buildBlocksFromOptions(createLong(height), createLong(numBlocks), chainInfo.height);
 
 			return blockCollection.find({ 'block.height': { $gte: options.startHeight, $lt: options.endHeight } })
+				.project({ 'meta.merkleTree': 0 })
 				.sort({ 'block.height': -1 })
 				.toArray()
 				.then(this.sanitizer.deleteIds)
@@ -364,16 +370,16 @@ class CatapultDb {
 		return this.queryDocuments('accounts', { 'account.address': { $in: buffers } })
 			.then(entities => entities.map(accountWithMetadata => {
 				const { account } = accountWithMetadata;
-				if (0 < account.importances.length) {
-					const importanceSnapshot = account.importances.pop();
-					account.importance = importanceSnapshot.value;
-					account.importanceHeight = importanceSnapshot.height;
-				} else {
-					account.importance = createLong(0);
-					account.importanceHeight = createLong(0);
-				}
-
-				delete account.importances;
+				// if (0 < account.importances.length) {
+				// 	const importanceSnapshot = account.importances.pop();
+				// 	account.importance = importanceSnapshot.value;
+				// 	account.importanceHeight = importanceSnapshot.height;
+				// } else {
+				// 	account.importance = createLong(0);
+				// 	account.importanceHeight = createLong(0);
+				// }
+				//
+				// delete account.importances;
 				return accountWithMetadata;
 			}));
 	}

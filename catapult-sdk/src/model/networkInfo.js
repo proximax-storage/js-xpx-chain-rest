@@ -46,8 +46,10 @@ const networks = (() => {
 	return {
 		mijin: createNetworkInfo(0x60),
 		mijinTest: createNetworkInfo(0x90),
-		public: createNetworkInfo(0x68),
-		publicTest: createNetworkInfo(0x98)
+		public: createNetworkInfo(0xB8),
+		publicTest: createNetworkInfo(0xA8),
+		private: createNetworkInfo(0xC8),
+		privateTest: createNetworkInfo(0xB0)
 	};
 })();
 
