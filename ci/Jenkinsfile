@@ -15,7 +15,6 @@ pipeline {
     DOCKER_REGISTRY = "https://249767383774.dkr.ecr.ap-southeast-1.amazonaws.com"
     CREDENTIAL_ID = "ecr:ap-southeast-1:jenkins-ecr"
     IMAGE = "proximax-catapult-rest"
-    VERSION = "test1-${env.BUILD_NUMBER}"
   }
 
  stages {
@@ -56,15 +55,15 @@ pipeline {
 
     stage('Build and Publish Release Image') {
       when {
-        tag "release-*"   // only run these steps on tag release-*
+        tag "release-*"   // only run these stage in tag release-*
       }
       steps {
         echo 'Build and Publish Image'
 
         script {
             def newImage = docker.build("${IMAGE}")
-            docker.withRegistry("${DOCKER_REGISTRY}", '${CREDENTIAL_ID}'){
-                newImage.push("jenkins-build-${env.BUILD_NUMBER}") // also push using Jenkins build number
+            docker.withRegistry("${DOCKER_REGISTRY}", "${CREDENTIAL_ID}"){
+                newImage.push("release-jenkins-build-${env.BUILD_NUMBER}") // also push using Jenkins build number
                 newImage.push("${env.GIT_TAG_NAME}")
             }
         }
@@ -73,22 +72,22 @@ pipeline {
         success {
             slackSend channel: '#devops',
                 color: 'good',
-                message: "Branch ${env.GIT_BRANCH} Tag ${env.GIT_TAG_NAME} build of ${currentBuild.fullDisplayName} completed successfully. New pushed Docker image ${IMAGE}:${VERSION}"
+                message: "Branch *${env.GIT_BRANCH}* Tag *${env.GIT_TAG_NAME}* build of *${currentBuild.fullDisplayName}* completed successfully :100:\nPushed Docker images *${IMAGE}:release-jenkins-build-${env.BUILD_NUMBER}* and *${IMAGE}:${env.GIT_TAG_NAME}*"
         }
       }
     }
 
     stage('Build and Publish Develop Image') {
       when {
-        branch 'jenkins'  // only run these steps on the develop branch
+        branch 'develop'  // only run this stage in the develop branch
       }
       steps {
         echo 'Build and Publish Image'
 
         script {
             def newImage = docker.build("${IMAGE}")
-            docker.withRegistry("${DOCKER_REGISTRY}", '${CREDENTIAL_ID}'){
-                newImage.push("jenkins-build-${env.BUILD_NUMBER}") // also push using Jenkins build number
+            docker.withRegistry("${DOCKER_REGISTRY}", "${CREDENTIAL_ID}"){
+                newImage.push("develop-jenkins-build-${env.BUILD_NUMBER}") // also push using Jenkins build number
                 newImage.push("develop") // update Docker image develop
             }
         }
@@ -96,8 +95,8 @@ pipeline {
       post {
         success {
             slackSend channel: '#devops',
-                    color: 'good',
-                    message: "Branch ${env.GIT_BRANCH}  build of ${currentBuild.fullDisplayName} completed successfully. New pushed Docker image ${IMAGE}:${VERSION}"
+                color: 'good',
+                message: "Branch *${env.GIT_BRANCH}* build of *${currentBuild.fullDisplayName}* completed successfully :100:\nPushed Docker images *${IMAGE}:develop-jenkins-build-${env.BUILD_NUMBER}* and *${IMAGE}:develop*"
         }
       }
     }
@@ -106,8 +105,8 @@ pipeline {
   post {
     failure {
         slackSend channel: '#devops',
-                color: 'bad',
-                message: "Build ${env.GIT_BRANCH} of ${currentBuild.fullDisplayName} FAILED."
+            color: 'bad',
+            message: "Branch *${env.GIT_BRANCH}* of *${currentBuild.fullDisplayName}* FAILED :scream:"
     }
   }
 }
