@@ -12,7 +12,7 @@ pipeline {
   }
 
   environment {
-    DOCKER_REGISTRY = "https://249767383774.dkr.ecr.ap-southeast-1.amazonaws.com"
+    DOCKER_REGISTRY = "249767383774.dkr.ecr.ap-southeast-1.amazonaws.com"
     CREDENTIAL_ID = "ecr:ap-southeast-1:jenkins-ecr"
     IMAGE = "proximax-catapult-rest"
   }
@@ -62,7 +62,7 @@ pipeline {
 
         script {
             def newImage = docker.build("${IMAGE}")
-            docker.withRegistry("${DOCKER_REGISTRY}", "${CREDENTIAL_ID}"){
+            docker.withRegistry("https://${DOCKER_REGISTRY}", "${CREDENTIAL_ID}"){
                 newImage.push("release-jenkins-build-${env.BUILD_NUMBER}") // also push using Jenkins build number
                 newImage.push("${env.GIT_TAG_NAME}")
             }
@@ -86,7 +86,7 @@ pipeline {
 
         script {
             def newImage = docker.build("${IMAGE}")
-            docker.withRegistry("${DOCKER_REGISTRY}", "${CREDENTIAL_ID}"){
+            docker.withRegistry("https://${DOCKER_REGISTRY}", "${CREDENTIAL_ID}"){
                 newImage.push("develop-jenkins-build-${env.BUILD_NUMBER}") // also push using Jenkins build number
                 newImage.push("develop") // update Docker image develop
             }
