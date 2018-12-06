@@ -1127,9 +1127,9 @@ describe('catapult db', () => {
 			// so update the expected object to match
 			const accountWithMetadata = Object.assign({}, dbAccountDocument);
 			const { account } = accountWithMetadata;
-			account.importance = Long.fromNumber(numImportances);
-			account.importanceHeight = Long.fromNumber(numImportances * numImportances);
-			delete account.importances;
+			// account.importance = Long.fromNumber(numImportances);
+			// account.importanceHeight = Long.fromNumber(numImportances * numImportances);
+			// delete account.importances;
 			return accountWithMetadata;
 		};
 

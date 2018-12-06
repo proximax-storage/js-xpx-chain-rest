@@ -370,16 +370,16 @@ class CatapultDb {
 		return this.queryDocuments('accounts', { 'account.address': { $in: buffers } })
 			.then(entities => entities.map(accountWithMetadata => {
 				const { account } = accountWithMetadata;
-				if (0 < account.importances.length) {
-					const importanceSnapshot = account.importances.pop();
-					account.importance = importanceSnapshot.value;
-					account.importanceHeight = importanceSnapshot.height;
-				} else {
-					account.importance = createLong(0);
-					account.importanceHeight = createLong(0);
-				}
-
-				delete account.importances;
+				// if (0 < account.importances.length) {
+				// 	const importanceSnapshot = account.importances.pop();
+				// 	account.importance = importanceSnapshot.value;
+				// 	account.importanceHeight = importanceSnapshot.height;
+				// } else {
+				// 	account.importance = createLong(0);
+				// 	account.importanceHeight = createLong(0);
+				// }
+				//
+				// delete account.importances;
 				return accountWithMetadata;
 			}));
 	}

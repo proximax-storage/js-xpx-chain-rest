@@ -39,7 +39,7 @@
     "command-line-usage": "^4.1.0",
     "coveralls": "^3.0.1",
     "nyc": "^11.8.0",
-    "restify": "^6.3.4",
+    "restify-clients": "^2.5.0",
     "winston": "^2.4.0"
   }
 }

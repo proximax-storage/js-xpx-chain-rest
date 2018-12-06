@@ -18,84 +18,96 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const {expect} = require('chai');
 const networkInfo = require('../../src/model/networkInfo');
-const { expect } = require('chai');
 
 describe('network info', () => {
-	describe('networks', () => {
-		it('defines all known networks', () => {
-			// Act:
-			const knownNetworks = Object.keys(networkInfo.networks);
+    describe('networks', () => {
+        it('defines all known networks', () => {
+            // Act:
+            const knownNetworks = Object.keys(networkInfo.networks);
 
-			// Assert:
-			expect(knownNetworks).to.deep.equal([
-				'mijin',
-				'mijinTest',
-				'public',
-				'publicTest'
-			]);
-		});
+            // Assert:
+            expect(knownNetworks).to.deep.equal([
+                'mijin',
+                'mijinTest',
+                'public',
+                'publicTest',
+                'private',
+                'privateTest'
+            ]);
+        });
 
-		it('defines mijin network', () => {
-			// Assert:
-			expect(networkInfo.networks.mijin).to.deep.equal({ id: 0x60, bytePrefix: '60', charPrefix: 'M' });
-		});
+        it('defines mijin network', () => {
+            // Assert:
+            expect(networkInfo.networks.mijin).to.deep.equal({id: 0x60, bytePrefix: '60', charPrefix: 'M'});
+        });
 
-		it('defines mijin test network', () => {
-			// Assert:
-			expect(networkInfo.networks.mijinTest).to.deep.equal({ id: 0x90, bytePrefix: '90', charPrefix: 'S' });
-		});
+        it('defines mijin test network', () => {
+            // Assert:
+            expect(networkInfo.networks.mijinTest).to.deep.equal({id: 0x90, bytePrefix: '90', charPrefix: 'S'});
+        });
 
-		it('defines public network', () => {
-			// Assert:
-			expect(networkInfo.networks.public).to.deep.equal({ id: 0x68, bytePrefix: '68', charPrefix: 'N' });
-		});
+        it('defines public network', () => {
+            // Assert:
+            expect(networkInfo.networks.public).to.deep.equal({id: 0xB8, bytePrefix: 'B8', charPrefix: 'X'});
+        });
 
-		it('defines public test network', () => {
-			// Assert:
-			expect(networkInfo.networks.publicTest).to.deep.equal({ id: 0x98, bytePrefix: '98', charPrefix: 'T' });
-		});
-	});
+        it('defines public test network', () => {
+            // Assert:
+            expect(networkInfo.networks.publicTest).to.deep.equal({id: 0xA8, bytePrefix: 'A8', charPrefix: 'V'});
+        });
 
-	describe('find by id', () => {
-		it('can find all known networks', () => {
-			// Arrange:
-			Object.keys(networkInfo.networks).forEach(networkName => {
-				// Act:
-				const network = networkInfo.findById(networkInfo.networks[networkName].id);
+        it('defines private network', () => {
+            // Assert:
+            expect(networkInfo.networks.private).to.deep.equal({id: 0xC8, bytePrefix: 'C8', charPrefix: 'Z'});
+        });
 
-				// Assert:
-				expect(network).to.equal(networkInfo.networks[networkName]);
-			});
-		});
+        it('defines private test network', () => {
+            // Assert:
+            expect(networkInfo.networks.privateTest).to.deep.equal({id: 0xB0, bytePrefix: 'B0', charPrefix: 'W'});
+        });
+    });
 
-		it('returns undefined for unknown network', () => {
-			// Act:
-			const network = networkInfo.findById(0x25);
+    describe('find by id', () => {
+        it('can find all known networks', () => {
+            // Arrange:
+            Object.keys(networkInfo.networks).forEach(networkName => {
+                // Act:
+                const network = networkInfo.findById(networkInfo.networks[networkName].id);
 
-			// Assert:
-			expect(network).to.equal(undefined);
-		});
-	});
+                // Assert:
+                expect(network).to.equal(networkInfo.networks[networkName]);
+            });
+        });
 
-	describe('find by char prefix', () => {
-		it('can find all known networks', () => {
-			// Arrange:
-			Object.keys(networkInfo.networks).forEach(networkName => {
-				// Act:
-				const network = networkInfo.findByCharPrefix(networkInfo.networks[networkName].charPrefix);
+        it('returns undefined for unknown network', () => {
+            // Act:
+            const network = networkInfo.findById(0x25);
 
-				// Assert:
-				expect(network).to.equal(networkInfo.networks[networkName]);
-			});
-		});
+            // Assert:
+            expect(network).to.equal(undefined);
+        });
+    });
 
-		it('returns undefined for unknown network', () => {
-			// Act:
-			const network = networkInfo.findByCharPrefix('J');
+    describe('find by char prefix', () => {
+        it('can find all known networks', () => {
+            // Arrange:
+            Object.keys(networkInfo.networks).forEach(networkName => {
+                // Act:
+                const network = networkInfo.findByCharPrefix(networkInfo.networks[networkName].charPrefix);
 
-			// Assert:
-			expect(network).to.equal(undefined);
-		});
-	});
+                // Assert:
+                expect(network).to.equal(networkInfo.networks[networkName]);
+            });
+        });
+
+        it('returns undefined for unknown network', () => {
+            // Act:
+            const network = networkInfo.findByCharPrefix('J');
+
+            // Assert:
+            expect(network).to.equal(undefined);
+        });
+    });
 });
