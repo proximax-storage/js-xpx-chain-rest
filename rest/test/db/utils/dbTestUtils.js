@@ -39,6 +39,23 @@ const createDbCollection = (db, collectionName) =>
 
 const createObjectId = id => new ObjectId(`${'00'.repeat(12)}${id.toString(16)}`.slice(-24));
 
+const createReputations = (publicKeys, maxNumber) => {
+	const reputations = [];
+	for (let i = 0; i < publicKeys.length && i < maxNumber; ++i) {
+		reputations.push({
+			meta: {},
+			reputation: {
+				account: publicKeys[i],
+				accountAddress: new Binary(Buffer.from(address.publicKeyToAddress(publicKeys[i], testDbOptions.networkId))),
+				positiveInteractions: Long.fromNumber(i + 10),
+				negativeInteractions: Long.fromNumber(i + 1)
+			}
+		});
+	}
+
+	return reputations;
+};
+
 const createMosaics = count => {
 	const mosaics = [];
 	for (let i = 0; i < count; ++i)
@@ -194,7 +211,8 @@ const createChainInfo = (height, scorelow, scoreHigh) => ({
 });
 
 const collectionUtils = {
-	names: ['blocks', 'transactions', 'unconfirmedTransactions', 'partialTransactions', 'transactionStatuses', 'accounts', 'chainInfo'],
+	names: ['blocks', 'transactions', 'unconfirmedTransactions', 'partialTransactions', 'transactionStatuses',
+		'accounts', 'chainInfo', 'reputations'],
 	findInEntities: (dbEntities, collectionName) => {
 		if ('blocks' !== collectionName)
 			return dbEntities[collectionName];
@@ -256,6 +274,7 @@ const dbTestUtils = {
 	db: {
 		createDbCollection,
 		createObjectId,
+		createReputations,
 		createAccounts,
 		createDbBlock,
 		createDbTransaction,
