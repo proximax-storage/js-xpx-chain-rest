@@ -367,19 +367,29 @@ class CatapultDb {
 	accountsByIds(ids) {
 		// id will either have address property or publicKey property set; in the case of publicKey, convert it to address
 		const buffers = ids.map(id => Buffer.from((id.publicKey ? address.publicKeyToAddress(id.publicKey, this.networkId) : id.address)));
-		return this.queryDocuments('accounts', { 'account.address': { $in: buffers } })
+		return this.database.collection('accounts').aggregate([
+			{ $match: { 'account.address': { $in: buffers } } },
+			{
+				$lookup: {
+					from: 'reputations',
+					localField: 'account.address',
+					foreignField: 'reputation.accountAddress',
+					as: 'reputationArray'
+				}
+			}])
+			.toArray()
+			.then(this.sanitizer.deleteIds)
 			.then(entities => entities.map(accountWithMetadata => {
 				const { account } = accountWithMetadata;
-				// if (0 < account.importances.length) {
-				// 	const importanceSnapshot = account.importances.pop();
-				// 	account.importance = importanceSnapshot.value;
-				// 	account.importanceHeight = importanceSnapshot.height;
-				// } else {
-				// 	account.importance = createLong(0);
-				// 	account.importanceHeight = createLong(0);
-				// }
-				//
-				// delete account.importances;
+				if (0 < accountWithMetadata.reputationArray.length) {
+					const reputationWithMetadata = accountWithMetadata.reputationArray.pop();
+					account.reputation = {
+						positiveInteractions: reputationWithMetadata.reputation.positiveInteractions,
+						negativeInteractions: reputationWithMetadata.reputation.negativeInteractions
+					};
+				}
+
+				delete accountWithMetadata.reputationArray;
 				return accountWithMetadata;
 			}));
 	}
