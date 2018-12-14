@@ -41,7 +41,13 @@ const PacketType = {
 	pushPartialTransactions: 500,
 
 	/** Detached cosignatures have been pushed by an api-node. */
-	pushDetachedCosignatures: 501
+	pushDetachedCosignatures: 501,
+
+	/** Node information has been requested by a peer. */
+	nodeDiscoveryPullPing: 601,
+
+	/** Node time information has been requested by a peer. */
+	timeSyncNodeTime: 700
 };
 
 module.exports = PacketType;

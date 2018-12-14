@@ -18,8 +18,8 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { expect } = require('chai');
 const EntityType = require('../../src/model/EntityType');
+const { expect } = require('chai');
 
 describe('entity type enumeration', () => {
 	it('exposes expected types', () => {
@@ -27,15 +27,21 @@ describe('entity type enumeration', () => {
 		expect(EntityType).to.deep.equal({
 			transfer: 0x4154,
 			registerNamespace: 0x414E,
+			aliasAddress: 0x424E,
+			aliasMosaic: 0x434E,
 			mosaicDefinition: 0x414D,
 			mosaicSupplyChange: 0x424D,
 			mosaicLevyChange: 0x434D,
 			modifyMultisigAccount: 0x4155,
 			aggregateComplete: 0x4141,
 			aggregateBonded: 0x4241,
-			hashLock: 0x414C,
-			secretLock: 0x424C,
-			secretProof: 0x434C
+			hashLock: 0x4148,
+			secretLock: 0x4152,
+			secretProof: 0x434C,
+			accountPropertiesAddress: 0x4150,
+			accountPropertiesMosaic: 0x4250,
+			accountPropertiesEntityType: 0x4350,
+			accountLink: 0x414C
 		});
 	});
 

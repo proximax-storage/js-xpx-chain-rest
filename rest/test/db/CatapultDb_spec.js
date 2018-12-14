@@ -18,12 +18,12 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { expect } = require('chai');
 const catapult = require('catapult-sdk');
-const MongoDb = require('mongodb');
 const CatapultDb = require('../../src/db/CatapultDb');
+const MongoDb = require('mongodb');
 const test = require('./utils/dbTestUtils');
 const testDbOptions = require('./utils/testDbOptions');
+const { expect } = require('chai');
 
 const { address, EntityType } = catapult.model;
 
@@ -130,6 +130,13 @@ describe('catapult db', () => {
 			));
 	});
 
+	const stripPrivateBlockInformation = block => {
+		// block merkle tree is not exposed outside of the database class unless explicitly requested
+		const modifiedBlock = Object.assign({}, block);
+		delete modifiedBlock.meta.merkleTree;
+		return modifiedBlock;
+	};
+
 	describe('block at height', () => {
 		it('undefined is returned for block at unknown height', () =>
 			// Assert:
@@ -149,7 +156,7 @@ describe('catapult db', () => {
 			return runDbTest(
 				{ block: seedBlock },
 				db => db.blockAtHeight(height),
-				block => expect(block).to.deep.equal(seedBlock)
+				block => expect(block).to.deep.equal(stripPrivateBlockInformation(seedBlock))
 			);
 		};
 
@@ -166,6 +173,47 @@ describe('catapult db', () => {
 			return runDbTest(
 				{ block: seedBlock, transactions: blockTransactions },
 				db => db.blockAtHeight(Long.fromNumber(Default_Height)),
+				block => expect(block).to.deep.equal(stripPrivateBlockInformation(seedBlock))
+			);
+		});
+	});
+
+	describe('block at height with merkle tree', () => {
+		it('undefined is returned for block at unknown height', () =>
+			// Assert:
+			runDbTest(
+				{ block: test.db.createDbBlock(Default_Height) },
+				db => db.blockWithMerkleTreeAtHeight(Long.fromNumber(Default_Height + 1)),
+				block => expect(block).to.equal(undefined)
+			));
+
+		// use blockAtHeight tests as a proxy for testing support of different numeric types (Number, uint64, Long)
+
+		const assertCanRetrieveSimpleBlock = height => {
+			// Arrange:
+			const seedBlock = test.db.createDbBlock(Default_Height);
+
+			// Assert:
+			return runDbTest(
+				{ block: seedBlock },
+				db => db.blockWithMerkleTreeAtHeight(height),
+				block => expect(block).to.deep.equal(seedBlock)
+			);
+		};
+
+		it('can retrieve block with merkle tree at height (Number)', () => assertCanRetrieveSimpleBlock(Default_Height));
+		it('can retrieve block with merkle tree at height (uint64)', () => assertCanRetrieveSimpleBlock([Default_Height, 0]));
+		it('can retrieve block with merkle tree at height (Long)', () => assertCanRetrieveSimpleBlock(Long.fromNumber(Default_Height)));
+
+		it('can retrieve block with merkle tree at height', () => {
+			// Arrange:
+			const seedBlock = test.db.createDbBlock(Default_Height);
+			const blockTransactions = test.db.createDbTransactions(2, test.random.publicKey(), test.random.address());
+
+			// Assert:
+			return runDbTest(
+				{ block: seedBlock, transactions: blockTransactions },
+				db => db.blockWithMerkleTreeAtHeight(Long.fromNumber(Default_Height)),
 				block => expect(block).to.deep.equal(seedBlock)
 			);
 		});
@@ -203,7 +251,7 @@ describe('catapult db', () => {
 			const endElement = dbEntities.blocks.findIndex(entity => entity.block.height.toNumber() === startHeight) + 1;
 			const startElement = endElement - numBlocks;
 			expect(actualBlocks.length).to.equal(numBlocks);
-			expect(actualBlocks).to.deep.equal(dbEntities.blocks.slice(startElement, endElement));
+			expect(actualBlocks).to.deep.equal(dbEntities.blocks.slice(startElement, endElement).map(stripPrivateBlockInformation));
 		};
 
 		it('returns at most available blocks', () => {
@@ -1074,32 +1122,33 @@ describe('catapult db', () => {
 		const publicKeyUnknown = test.random.publicKey();
 		const decodedAddressUnknown = keyToAddress(publicKeyUnknown);
 
-		const transformDbAccount = (dbAccountDocument, numImportances) => {
-			// the db call should replace importances with the most recent importance and importance height,
-			// so update the expected object to match
+		const transformDbAccount = (dbAccountDocument, dbReputationDocument) => {
 			const accountWithMetadata = Object.assign({}, dbAccountDocument);
 			const { account } = accountWithMetadata;
-			account.importance = Long.fromNumber(numImportances);
-			account.importanceHeight = Long.fromNumber(numImportances * numImportances);
-			delete account.importances;
+			if (dbReputationDocument) {
+				const reputationWithMetadata = Object.assign({}, dbReputationDocument);
+				const { reputation } = reputationWithMetadata;
+				account.reputation = {
+					positiveInteractions: reputation.positiveInteractions,
+					negativeInteractions: reputation.negativeInteractions
+				};
+			}
 			return accountWithMetadata;
 		};
 
 		const runSingleKnownAccountTest = (description, accountId, options) => {
 			it(description, () => {
 				// Arrange:
-				// note: createAccounts uses options.numImportances to seed the importances for the accounts
-				//       with values i for the importance and i * i for the importance height (0 < i <= numImportances)
-				//       the last entry thus is (numImportances, numImportances * numImportances)
 				const seedAccounts = test.db.createAccounts(publicKey, options);
+				const seedReputations = test.db.createReputations([publicKey], 1);
 
 				// Assert:
 				return runDbTest(
-					{ accounts: seedAccounts },
+					{ accounts: seedAccounts, reputations: seedReputations },
 					db => db.accountsByIds([accountId]),
 					accounts => {
 						// Assert: compare against the transformed account instead of the db account
-						const account = transformDbAccount(seedAccounts[0], options.numImportances);
+						const account = transformDbAccount(seedAccounts[0], seedReputations[0]);
 						expect(accounts).to.deep.equal([account]);
 					}
 				);
@@ -1110,7 +1159,7 @@ describe('catapult db', () => {
 			it('returns empty array for unknown ids', () =>
 				// Assert:
 				runDbTest(
-					{ accounts: test.db.createAccounts(publicKey, options) },
+					{ accounts: test.db.createAccounts(publicKey, options), reputations: test.db.createReputations([publicKey], 1) },
 					db => db.accountsByIds([accountId]),
 					accounts => expect(accounts).to.deep.equal([])
 				));
@@ -1174,34 +1223,37 @@ describe('catapult db', () => {
 					numImportances: 1
 				});
 				const publicKeys = seedAccounts.map(seedAccount => seedAccount.account.publicKey.buffer);
+				const seedReputations = test.db.createReputations(publicKeys, publicKeys.length / 2);
 
 				// Assert:
-				return runTest(seedAccounts, publicKeys);
+				return runTest(seedAccounts, publicKeys, seedReputations);
 			};
 
 			it('returns multiple matching accounts', () =>
 				// Arrange:
-				runMultipleAccountsByIdsTests((seedAccounts, publicKeys) => runDbTest(
-					{ accounts: seedAccounts },
+				runMultipleAccountsByIdsTests((seedAccounts, publicKeys, seedReputations) => runDbTest(
+					{ accounts: seedAccounts, reputations: seedReputations },
 					db => db.accountsByIds([
 						{ publicKey: publicKeys[1] },
 						{ address: keyToAddress(publicKeys[3]) },
 						{ publicKey: publicKeys[4] }
 					]),
-					accounts => expect(accounts).to.deep.equal([1, 3, 4].map(index => transformDbAccount(seedAccounts[index], 1)))
+					accounts => expect(accounts).to.deep.equal([1, 3, 4].map(index =>
+						transformDbAccount(seedAccounts[index], seedReputations[index])))
 				)));
 
 			it('returns only known matching accounts', () =>
 				// Arrange:
-				runMultipleAccountsByIdsTests((seedAccounts, publicKeys) => runDbTest(
-					{ accounts: seedAccounts },
+				runMultipleAccountsByIdsTests((seedAccounts, publicKeys, seedReputations) => runDbTest(
+					{ accounts: seedAccounts, reputations: seedReputations },
 					db => db.accountsByIds([
 						{ publicKey: publicKeys[1] },
 						{ publicKey: test.random.publicKey() },
 						{ address: test.random.address() },
 						{ address: keyToAddress(publicKeys[3]) }
 					]),
-					accounts => expect(accounts).to.deep.equal([1, 3].map(index => transformDbAccount(seedAccounts[index], 1)))
+					accounts => expect(accounts).to.deep.equal([1, 3].map(index =>
+						transformDbAccount(seedAccounts[index], seedReputations[index])))
 				)));
 		});
 	});

@@ -19,8 +19,8 @@
  */
 
 const catapult = require('catapult-sdk');
-const MongoDb = require('mongodb');
 const CatapultDb = require('../../../src/db/CatapultDb');
+const MongoDb = require('mongodb');
 const test = require('../../testUtils');
 const testDbOptions = require('./testDbOptions');
 
@@ -38,6 +38,23 @@ const createDbCollection = (db, collectionName) =>
 		.catch(() => Promise.resolve());
 
 const createObjectId = id => new ObjectId(`${'00'.repeat(12)}${id.toString(16)}`.slice(-24));
+
+const createReputations = (publicKeys, maxNumber) => {
+	const reputations = [];
+	for (let i = 0; i < publicKeys.length && i < maxNumber; ++i) {
+		reputations.push({
+			meta: {},
+			reputation: {
+				account: publicKeys[i],
+				accountAddress: new Binary(Buffer.from(address.publicKeyToAddress(publicKeys[i], testDbOptions.networkId))),
+				positiveInteractions: Long.fromNumber(i + 10),
+				negativeInteractions: Long.fromNumber(i + 1)
+			}
+		});
+	}
+
+	return reputations;
+};
 
 const createMosaics = count => {
 	const mosaics = [];
@@ -106,7 +123,8 @@ const createDbBlock = height => {
 		hash: new Binary(test.random.hash()),
 		generationHash: new Binary(test.random.hash()),
 		totalFee: Long.fromNumber(12345),
-		numTransactions: 5
+		numTransactions: 5,
+		merkleTree: [new Binary(test.random.hash()), new Binary(test.random.hash())]
 	};
 
 	// block header data
@@ -193,7 +211,8 @@ const createChainInfo = (height, scorelow, scoreHigh) => ({
 });
 
 const collectionUtils = {
-	names: ['blocks', 'transactions', 'unconfirmedTransactions', 'partialTransactions', 'transactionStatuses', 'accounts', 'chainInfo'],
+	names: ['blocks', 'transactions', 'unconfirmedTransactions', 'partialTransactions', 'transactionStatuses',
+		'accounts', 'chainInfo', 'reputations'],
 	findInEntities: (dbEntities, collectionName) => {
 		if ('blocks' !== collectionName)
 			return dbEntities[collectionName];
@@ -255,6 +274,7 @@ const dbTestUtils = {
 	db: {
 		createDbCollection,
 		createObjectId,
+		createReputations,
 		createAccounts,
 		createDbBlock,
 		createDbTransaction,

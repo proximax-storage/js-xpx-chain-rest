@@ -42,12 +42,16 @@ const networks = (() => {
 	 * @property {NetworkInfo} mijinTest Mijin test network information.
 	 * @property {NetworkInfo} public Public network information.
 	 * @property {NetworkInfo} publicTest Public test network information.
+     * @property {NetworkInfo} private network information.
+     * @property {NetworkInfo} privateTest test network information.
 	 */
 	return {
 		mijin: createNetworkInfo(0x60),
 		mijinTest: createNetworkInfo(0x90),
-		public: createNetworkInfo(0x68),
-		publicTest: createNetworkInfo(0x98)
+		public: createNetworkInfo(0xB8),
+		publicTest: createNetworkInfo(0xA8),
+		private: createNetworkInfo(0xC8),
+		privateTest: createNetworkInfo(0xB0)
 	};
 })();
 

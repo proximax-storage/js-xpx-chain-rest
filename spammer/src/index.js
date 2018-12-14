@@ -21,11 +21,11 @@
 const restify = require('restify-clients');
 const catapult = require('catapult-sdk');
 const crypto = require('crypto');
-const winston = require('winston');
-const spammerUtils = require('./model/spammerUtils');
-const transactionFactory = require('./model/transactionFactory');
 const random = require('./utils/random');
 const spammerOptions = require('./utils/spammerOptions');
+const spammerUtils = require('./model/spammerUtils');
+const transactionFactory = require('./model/transactionFactory');
+const winston = require('winston');
 const fs = require('fs');
 const { createConnection } = require('net');
 // TODO: Need to re-work it in future
