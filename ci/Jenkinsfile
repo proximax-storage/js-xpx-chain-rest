@@ -20,16 +20,17 @@ pipeline {
  stages {
     stage('Build') {
       steps {
-        sh """
-              # Disable exit on non 0
-              set +e
-              echo "running yarn_setup.sh"
-              ./yarn_setup.sh
+        echo 'Starting Docker Container'
+        withDockerContainer(image: 'node:8-alpine', args: '-u root') {
+          echo 'Installing dependencies'
+          sh 'apk add python python-dev py-pip alpine-sdk'
 
-              cd rest
-              npm run build
-              cd ..
-          """
+          echo 'Running yarn_setup.sh'
+          sh './yarn_setup.sh'
+
+          echo 'Building'
+          sh '(cd rest; npm run build)'
+        }
       }
       post {
         success {
@@ -40,16 +41,14 @@ pipeline {
 
     stage('Unit Test') {
       steps {
-       sh """
-              cd catapult-sdk
-              npm run test
-              cd ..
-          """
-       sh """
-             cd rest
-             npm run test
-             cd ..
-          """
+       echo 'Starting Docker Container'
+        withDockerContainer(image: 'node:8-alpine', args: '-u root --network="host"') {
+          echo 'Testing catapult-sdk'
+          sh '(cd catapult-sdk; npm run test)'
+
+          echo 'Testing rest'
+          sh '(cd rest; npm run test)'
+        }
       }
     }
 
