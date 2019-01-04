@@ -23,10 +23,11 @@ const empty = require('./empty');
 const lock = require('./lock');
 const MessageChannelBuilder = require('../connection/MessageChannelBuilder');
 const multisig = require('./multisig');
+const contract = require('./contract');
 const namespace = require('./namespace');
 
 const plugins = {
-	aggregate, lock, multisig, namespace, transfer: empty
+	aggregate, lock, multisig, contract, namespace, transfer: empty
 };
 
 module.exports = {

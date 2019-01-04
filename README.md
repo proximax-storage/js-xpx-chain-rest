@@ -30,7 +30,10 @@ sudo ./yarn_setup.sh
 
 To run a rest server, you need to install mongodb first, or change mongodb address in rest.json:
 ```
-sudo ./scripts/mongo/installMongoDb.sh
+cd ./scripts/mongo/
+sudo ./installMongoDb.sh
+cd mongoPrepare/
+./mongors.sh
 ```
 Then you can run rest server:
 ```
