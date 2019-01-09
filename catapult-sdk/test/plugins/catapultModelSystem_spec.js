@@ -49,6 +49,7 @@ describe('catapult model system', () => {
 				'aggregate',
 				'lock',
 				'multisig',
+				'contract',
 				'namespace',
 				'transfer'
 			]);

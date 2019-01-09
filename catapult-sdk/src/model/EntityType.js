@@ -48,6 +48,9 @@ const EntityType = {
 	/** Modify multisig account transaction. */
 	modifyMultisigAccount: 0x4155,
 
+	/** Modify contract transaction. */
+	modifyContract: 0x4157,
+
 	/** Aggregate complete transaction. */
 	aggregateComplete: 0x4141,
 

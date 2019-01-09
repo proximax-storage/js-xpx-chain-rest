@@ -114,7 +114,12 @@ class ModelSchemaBuilder {
 				publicKeyHeight: ModelType.uint64,
 				importance: ModelType.uint64,
 				importanceHeight: ModelType.uint64,
-				mosaics: { type: ModelType.array, schemaName: 'mosaic' }
+				mosaics: { type: ModelType.array, schemaName: 'mosaic' },
+				reputation: { type: ModelType.object, schemaName: 'reputation' }
+			},
+			reputation: {
+				positiveInteractions: ModelType.uint64,
+				negativeInteractions: ModelType.uint64
 			},
 			mosaic: {
 				id: ModelType.uint64,

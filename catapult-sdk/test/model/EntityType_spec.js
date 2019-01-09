@@ -33,6 +33,7 @@ describe('entity type enumeration', () => {
 			mosaicSupplyChange: 0x424D,
 			mosaicLevyChange: 0x434D,
 			modifyMultisigAccount: 0x4155,
+			modifyContract: 0x4157,
 			aggregateComplete: 0x4141,
 			aggregateBonded: 0x4241,
 			hashLock: 0x4148,
