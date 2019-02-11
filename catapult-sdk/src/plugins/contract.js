@@ -1,21 +1,8 @@
-/*
- * Copyright (c) 2018-present,
- *
- * This file is part of Catapult.
- *
- * Catapult is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Catapult is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
- */
+/**
+ *** Copyright 2018 ProximaX Limited. All rights reserved.
+ *** Use of this source code is governed by the Apache 2.0
+ *** license that can be found in the LICENSE file.
+ **/
 
 /** @module plugins/contract */
 const EntityType = require('../model/EntityType');
@@ -32,7 +19,6 @@ const contractPlugin = {
 	registerSchema: builder => {
 		builder.addTransactionSupport(EntityType.modifyContract, {
 			duration: 	{ type: ModelType.uint64, schemaName: 'modifyContract.duration' },
-			multisig: 	{ type: ModelType.binary, schemaName: 'modifyContract.multisig' },
 			hash: 		{ type: ModelType.binary, schemaName: 'modifyContract.hash' },
 			customers: 	{ type: ModelType.array, schemaName: 'modifyContract.modification' },
 			executors:	{ type: ModelType.array, schemaName: 'modifyContract.modification' },
@@ -46,12 +32,19 @@ const contractPlugin = {
 		builder.addSchema('contractEntry', {
 			contract: { type: ModelType.object, schemaName: 'contractEntry.multisig' }
 		});
+
+		builder.addSchema('HashSnapshot', {
+			hash: ModelType.binary,
+			height: ModelType.uint64
+		});
+
 		builder.addSchema('contractEntry.multisig', {
 			start: ModelType.uint64,
 			duration: ModelType.uint64,
 			multisig: ModelType.binary,
 			multisigAddress: ModelType.binary,
 			hash: ModelType.binary,
+			hashes: { type: ModelType.array, schemaName: 'HashSnapshot' },
 			customers: { type: ModelType.array, schemaName: ModelType.binary },
 			executors: { type: ModelType.array, schemaName: ModelType.binary },
 			verifiers: { type: ModelType.array, schemaName: ModelType.binary }
@@ -63,7 +56,6 @@ const contractPlugin = {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.duration = parser.uint64();
-				transaction.multisig = parser.buffer(constants.sizes.signer);
 				transaction.hash = parser.buffer(constants.sizes.hash256);
 
 				const customersCount = parser.uint8();
@@ -90,7 +82,6 @@ const contractPlugin = {
 
 			serialize: (transaction, serializer) => {
 				serializer.writeUint64(transaction.DurationDelta);
-				serializer.writeBuffer(transaction.Multisig);
 				serializer.writeBuffer(transaction.Hash);
 
 				const CustomerModificationCount = transaction.CustomerModifications.length;
