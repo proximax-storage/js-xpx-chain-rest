@@ -19,7 +19,6 @@ const contractPlugin = {
 	registerSchema: builder => {
 		builder.addTransactionSupport(EntityType.modifyContract, {
 			duration: 	{ type: ModelType.uint64, schemaName: 'modifyContract.duration' },
-			multisig: 	{ type: ModelType.binary, schemaName: 'modifyContract.multisig' },
 			hash: 		{ type: ModelType.binary, schemaName: 'modifyContract.hash' },
 			customers: 	{ type: ModelType.array, schemaName: 'modifyContract.modification' },
 			executors:	{ type: ModelType.array, schemaName: 'modifyContract.modification' },
@@ -57,7 +56,6 @@ const contractPlugin = {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.duration = parser.uint64();
-				transaction.multisig = parser.buffer(constants.sizes.signer);
 				transaction.hash = parser.buffer(constants.sizes.hash256);
 
 				const customersCount = parser.uint8();
@@ -84,7 +82,6 @@ const contractPlugin = {
 
 			serialize: (transaction, serializer) => {
 				serializer.writeUint64(transaction.DurationDelta);
-				serializer.writeBuffer(transaction.Multisig);
 				serializer.writeBuffer(transaction.Hash);
 
 				const CustomerModificationCount = transaction.CustomerModifications.length;
