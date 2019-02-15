@@ -1,23 +1,13 @@
-/*
- * Copyright (c) 2018-present
- *
- * This file is part of Catapult.
- *
- * Catapult is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Catapult is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
- */
+/**
+ *** Copyright 2018 ProximaX Limited. All rights reserved.
+ *** Use of this source code is governed by the Apache 2.0
+ *** license that can be found in the LICENSE file.
+ **/
 
 const AccountType = require('../AccountType');
+const errors = require('../../server/errors');
+
+const allowedRoles = ['multisig', 'executors', 'verifiers', 'customers'];
 
 class ContractDb {
 	/**
@@ -33,17 +23,27 @@ class ContractDb {
 	/**
 	 * Retrieves the contract entries for given accounts.
 	 * @param {array<object>} accountIds The account ids.
+	 * @param {array<string>} roles Filters the role of account in the contracts.
+	 * If filter is null or empty, returns all contracts which contains public key of account.
 	 * @returns {Promise.<array>} The contract entries for all accounts.
 	 */
-	contractsByAccounts(accountIds) {
+	contractsByAccounts(accountIds, roles) {
 		const buffers = accountIds.map(accountId => Buffer.from(accountId));
+
+		if (!roles || !roles.length)
+			roles = allowedRoles;
+
+		const query = [];
+		for (let i = 0; i < roles.length; ++i) {
+			if (-1 === allowedRoles.indexOf(roles[i]))
+				throw errors.createInvalidArgumentError(`Role '${roles[i]}' is not supported`);
+
+			const field = `contract.${roles[i]}`;
+			query.push({ [field]: { $in: buffers } });
+		}
+
 		return this.catapultDb.queryDocuments('contracts', {
-			$or:[
-				{ ['contract.multisig']: { $in: buffers } },
-				{ ['contract.executors']: { $in: buffers } },
-				{ ['contract.verifiers']: { $in: buffers } },
-				{ ['contract.customers']: { $in: buffers } }
-			]
+			$or: query
 		});
 	}
 
