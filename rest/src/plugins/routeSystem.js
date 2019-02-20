@@ -22,12 +22,13 @@ const aggregate = require('./aggregate');
 const empty = require('./empty');
 const lock = require('./lock');
 const MessageChannelBuilder = require('../connection/MessageChannelBuilder');
+const mosaic = require('./mosaic');
 const multisig = require('./multisig');
 const contract = require('./contract');
 const namespace = require('./namespace');
 
 const plugins = {
-	aggregate, lock, multisig, contract, namespace, transfer: empty
+	aggregate, contract, lock, mosaic, multisig, namespace, transfer: empty
 };
 
 module.exports = {
