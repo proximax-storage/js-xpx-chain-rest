@@ -18,18 +18,20 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const BinarySerializer = require('../../src/serializer/BinarySerializer');
+const { expect } = require('chai');
+const test = require('../binaryTestUtils');
 const EntityType = require('../../src/model/EntityType');
 const ModelSchemaBuilder = require('../../src/model/ModelSchemaBuilder');
 const ModelType = require('../../src/model/ModelType');
 const namespace = require('../../src/plugins/namespace');
-const test = require('../binaryTestUtils');
-const { expect } = require('chai');
+const BinarySerializer = require('../../src/serializer/BinarySerializer');
 
 const constants = {
 	sizes: {
+		aliasAddress: 34,
 		namespaceName: 6,
 		registerNamespace: 18,
+		aliasMosaic: 17,
 		mosaicDefinition: 15,
 		mosaicProperty: 9,
 		mosaicSupplyChange: 17
