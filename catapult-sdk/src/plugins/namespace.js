@@ -52,8 +52,6 @@ const namespacePlugin = {
 
 		builder.addTransactionSupport(EntityType.mosaicDefinition, {
 			mosaicId: ModelType.uint64,
-			parentId: ModelType.uint64,
-			name: ModelType.string,
 			properties: { type: ModelType.array, schemaName: 'mosaicDefinition.mosaicProperty' }
 		});
 
@@ -155,17 +153,16 @@ const namespacePlugin = {
 		codecBuilder.addTransactionSupport(EntityType.mosaicDefinition, {
 			deserialize: parser => {
 				const transaction = {};
-				transaction.parentId = parser.uint64();
+
+				transaction.nonce = parser.uint32();
+
 				transaction.mosaicId = parser.uint64();
 
-				const mosaicNameSize = parser.uint8();
 				const propertiesCount = parser.uint8();
 
 				transaction.properties = [];
 				for (let i = 0; i < numRequiredProperties; ++i)
 					transaction.properties.push({ key: i, value: uint64.fromUint(parser.uint8()) });
-
-				transaction.name = parseString(parser, mosaicNameSize);
 
 				if (0 < propertiesCount) {
 					for (let i = 0; i < propertiesCount; ++i) {
@@ -179,10 +176,8 @@ const namespacePlugin = {
 			},
 
 			serialize: (transaction, serializer) => {
-				serializer.writeUint64(transaction.parentId);
+				serializer.writeUint32(transaction.nonce);
 				serializer.writeUint64(transaction.mosaicId);
-
-				serializer.writeUint8(transaction.name.length);
 
 				const propertiesCount = transaction.properties.length - numRequiredProperties;
 				if (0 > propertiesCount)
@@ -203,7 +198,6 @@ const namespacePlugin = {
 					serializer.writeUint8(value);
 				}
 
-				writeString(serializer, transaction.name);
 				for (let i = 0; i < propertiesCount; ++i) {
 					const property = transaction.properties[numRequiredProperties + i];
 					serializer.writeUint8(property.key);
