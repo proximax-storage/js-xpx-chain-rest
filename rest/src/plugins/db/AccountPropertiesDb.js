@@ -18,21 +18,25 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const catapult = require('catapult-sdk');
-const routeUtils = require('../../routes/routeUtils');
-
-const { uint64 } = catapult.utils;
-
-module.exports = {
-	register: (server, db) => {
-		const mosaicSender = routeUtils.createSender('mosaicDescriptor');
-
-		routeUtils.addGetPostDocumentRoutes(
-			server,
-			mosaicSender,
-			{ base: '/mosaic', singular: 'mosaicId', plural: 'mosaicIds' },
-			params => db.mosaicsByIds(params),
-			uint64.fromHex
-		);
+class AccountPropertiesDb {
+	/**
+	 * Creates AccountPropertiesDb around CatapultDb.
+	 * @param {module:db/CatapultDb} db Catapult db instance.
+	 */
+	constructor(db) {
+		this.catapultDb = db;
 	}
-};
+
+	/**
+	 * Retrieves account properties of the given addresses.
+	 * @param {array<object>} addresses The given addresses.
+	 * @returns {Promise.<array>} Owned account properties.
+	 */
+	accountPropertiesByAddresses(addresses) {
+		const buffers = addresses.map(address => Buffer.from(address));
+		const conditions = { 'accountProperties.address': { $in: buffers } };
+		return this.catapultDb.queryDocuments('accountProperties', conditions);
+	}
+}
+
+module.exports = AccountPropertiesDb;

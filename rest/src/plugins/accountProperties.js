@@ -18,21 +18,22 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const catapult = require('catapult-sdk');
-const routeUtils = require('../../routes/routeUtils');
+/** @module plugins/accountProperties */
+const AccountPropertiesDb = require('./db/AccountPropertiesDb');
+const accountPropertiesRoutes = require('./routes/accountPropertiesRoutes');
 
-const { uint64 } = catapult.utils;
-
+/**
+ * Creates an accountProperties plugin.
+ * @type {module:plugins/CatapultRestPlugin}
+ */
 module.exports = {
-	register: (server, db) => {
-		const mosaicSender = routeUtils.createSender('mosaicDescriptor');
+	createDb: db => new AccountPropertiesDb(db),
 
-		routeUtils.addGetPostDocumentRoutes(
-			server,
-			mosaicSender,
-			{ base: '/mosaic', singular: 'mosaicId', plural: 'mosaicIds' },
-			params => db.mosaicsByIds(params),
-			uint64.fromHex
-		);
+	registerTransactionStates: () => {},
+
+	registerMessageChannels: () => {},
+
+	registerRoutes: (...args) => {
+		accountPropertiesRoutes.register(...args);
 	}
 };

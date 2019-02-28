@@ -25,15 +25,6 @@ const sizes = require('../modelBinary/sizes');
 
 const constants = { sizes };
 
-const propertyTypeBlockOffset = 128;
-const PropertyType = Object.freeze({
-	addressAllow: 1,
-	addressBlock: 1 + propertyTypeBlockOffset,
-	mosaicAllow: 2,
-	mosaicBlock: 2 + propertyTypeBlockOffset,
-	entityTypeAllow: 4,
-	entityTypeBlock: 4 + propertyTypeBlockOffset
-});
 
 const accountPropertiesCreateBaseCodec = valueCodec => ({
 	deserialize: parser => {
@@ -66,14 +57,12 @@ const accountPropertiesCreateBaseCodec = valueCodec => ({
 const accountPropertiesPlugin = {
 	registerSchema: builder => {
 		const modificationTypeSchema = {
-			propertyType: ModelType.uint64,
 			modifications: { type: ModelType.array, schemaName: 'accountProperties.modificationType' }
 		};
 		builder.addTransactionSupport(EntityType.accountPropertiesAddress, modificationTypeSchema);
 		builder.addTransactionSupport(EntityType.accountPropertiesMosaic, modificationTypeSchema);
 		builder.addTransactionSupport(EntityType.accountPropertiesEntityType, modificationTypeSchema);
 		builder.addSchema('accountProperties.modificationType', {
-			modificationType: ModelType.uint64,
 			value: ModelType.binary
 		});
 
@@ -82,7 +71,6 @@ const accountPropertiesPlugin = {
 			properties: { type: ModelType.array, schemaName: 'accountProperties.accountProperty' }
 		});
 		builder.addSchema('accountProperties.accountProperty', {
-			propertyType: ModelType.uint64,
 			values: ModelType.binary
 		});
 	},
@@ -114,7 +102,4 @@ const accountPropertiesPlugin = {
 	}
 };
 
-module.exports = {
-	accountPropertiesPlugin,
-	PropertyType
-};
+module.exports = accountPropertiesPlugin;

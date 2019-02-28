@@ -18,29 +18,28 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const namespace = require('../../src/plugins/namespace');
-const NamespaceDb = require('../../src/plugins/db/NamespaceDb');
+const accountProperties = require('../../src/plugins/accountProperties');
+const AccountPropertiesDb = require('../../src/plugins/db/AccountPropertiesDb');
 const pluginTest = require('./utils/pluginTestUtils');
 const test = require('../routes/utils/routeTestUtils');
 
-describe('namespace plugin', () => {
-	pluginTest.assertThat.pluginCreatesDb(namespace, NamespaceDb);
-	pluginTest.assertThat.pluginDoesNotRegisterAdditionalTransactionStates(namespace);
-	pluginTest.assertThat.pluginDoesNotRegisterAdditionalMessageChannels(namespace);
+describe('account properties plugin', () => {
+	pluginTest.assertThat.pluginCreatesDb(accountProperties, AccountPropertiesDb);
+	pluginTest.assertThat.pluginDoesNotRegisterAdditionalTransactionStates(accountProperties);
+	pluginTest.assertThat.pluginDoesNotRegisterAdditionalMessageChannels(accountProperties);
 
 	describe('register routes', () => {
-		it('registers GET routes', () => {
+		it('registers account properties GET routes', () => {
 			// Arrange:
 			const routes = [];
 			const server = test.setup.createCapturingMockServer('get', routes);
 
 			// Act:
-			namespace.registerRoutes(server, {});
+			accountProperties.registerRoutes(server, {}, { network: { name: 'mijinTest' } });
 
 			// Assert:
 			test.assert.assertRoutes(routes, [
-				'/account/:accountId/namespaces',
-				'/namespace/:namespaceId'
+				'/account/properties/:accountId'
 			]);
 		});
 
@@ -50,12 +49,11 @@ describe('namespace plugin', () => {
 			const server = test.setup.createCapturingMockServer('post', routes);
 
 			// Act:
-			namespace.registerRoutes(server, {});
+			accountProperties.registerRoutes(server, {}, { network: { name: 'mijinTest' } });
 
 			// Assert:
 			test.assert.assertRoutes(routes, [
-				'/account/namespaces',
-				'/namespace/names'
+				'/account/properties'
 			]);
 		});
 	});

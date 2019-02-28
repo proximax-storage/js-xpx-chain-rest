@@ -124,11 +124,13 @@ class CatapultDb {
 
 	close() {
 		if (!this.database)
-			return;
+			return Promise.resolve();
 
-		this.client.close();
-		this.client = undefined;
-		this.database = undefined;
+		return new Promise(resolve => {
+			this.client.close(resolve);
+			this.client = undefined;
+			this.database = undefined;
+		});
 	}
 
 	// endregion
@@ -190,12 +192,20 @@ class CatapultDb {
 	}
 
 	blockAtHeight(height) {
-		return this.queryDocument('blocks', { 'block.height': createLong(height) }, { 'meta.merkleTree': 0 })
+		return this.queryDocument(
+			'blocks',
+			{ 'block.height': createLong(height) },
+			{ 'meta.transactionMerkleTree': 0, 'meta.statementMerkleTree': 0 }
+		).then(this.sanitizer.deleteId);
+	}
+
+	blockWithStatementMerkleTreeAtHeight(height) {
+		return this.queryDocument('blocks', { 'block.height': createLong(height) }, { 'meta.transactionMerkleTree': 0 })
 			.then(this.sanitizer.deleteId);
 	}
 
-	blockWithMerkleTreeAtHeight(height) {
-		return this.queryDocument('blocks', { 'block.height': createLong(height) })
+	blockWithTransactionMerkleTreeAtHeight(height) {
+		return this.queryDocument('blocks', { 'block.height': createLong(height) }, { 'meta.statementMerkleTree': 0 })
 			.then(this.sanitizer.deleteId);
 	}
 
@@ -208,7 +218,7 @@ class CatapultDb {
 			const options = buildBlocksFromOptions(createLong(height), createLong(numBlocks), chainInfo.height);
 
 			return blockCollection.find({ 'block.height': { $gte: options.startHeight, $lt: options.endHeight } })
-				.project({ 'meta.merkleTree': 0 })
+				.project({ 'meta.transactionMerkleTree': 0, 'meta.statementMerkleTree': 0 })
 				.sort({ 'block.height': -1 })
 				.toArray()
 				.then(this.sanitizer.deleteIds)
@@ -265,10 +275,7 @@ class CatapultDb {
 	transactionsByIdsImpl(collectionName, conditions) {
 		return this.queryDocumentsAndCopyIds(collectionName, conditions, { projection: { 'meta.addresses': 0 } })
 			.then(documents => Promise.all(documents.map(document => {
-				if (!document)
-					return document;
-
-				if (!isAggregateType(document))
+				if (!document || !isAggregateType(document))
 					return document;
 
 				return this.queryDependentDocuments(collectionName, [document.meta.id]).then(dependentDocuments => {
@@ -334,30 +341,30 @@ class CatapultDb {
 
 	// region transaction retrieval for account
 
-	accountTransactionsAll(publicKey, id, pageSize) {
+	accountTransactionsAll(publicKey, id, pageSize, ordering) {
 		const conditions = createAccountTransactionsAllConditions(publicKey, this.networkId);
-		return this.queryTransactions(conditions, id, pageSize);
+		return this.queryTransactions(conditions, id, pageSize, { sortOrder: ordering });
 	}
 
-	accountTransactionsIncoming(publicKey, id, pageSize) {
+	accountTransactionsIncoming(publicKey, id, pageSize, ordering) {
 		const decoded = address.publicKeyToAddress(publicKey, this.networkId);
 		const bufferAddress = Buffer.from(decoded);
-		return this.queryTransactions({ 'transaction.recipient': bufferAddress }, id, pageSize);
+		return this.queryTransactions({ 'transaction.recipient': bufferAddress }, id, pageSize, { sortOrder: ordering });
 	}
 
-	accountTransactionsOutgoing(publicKey, id, pageSize) {
+	accountTransactionsOutgoing(publicKey, id, pageSize, ordering) {
 		const bufferPublicKey = Buffer.from(publicKey);
-		return this.queryTransactions({ 'transaction.signer': bufferPublicKey }, id, pageSize);
+		return this.queryTransactions({ 'transaction.signer': bufferPublicKey }, id, pageSize, { sortOrder: ordering });
 	}
 
-	accountTransactionsUnconfirmed(publicKey, id, pageSize) {
+	accountTransactionsUnconfirmed(publicKey, id, pageSize, ordering) {
 		const conditions = createAccountTransactionsAllConditions(publicKey, this.networkId);
-		return this.queryTransactions(conditions, id, pageSize, { collectionName: 'unconfirmedTransactions' });
+		return this.queryTransactions(conditions, id, pageSize, { collectionName: 'unconfirmedTransactions', sortOrder: ordering });
 	}
 
-	accountTransactionsPartial(publicKey, id, pageSize) {
+	accountTransactionsPartial(publicKey, id, pageSize, ordering) {
 		const conditions = createAccountTransactionsAllConditions(publicKey, this.networkId);
-		return this.queryTransactions(conditions, id, pageSize, { collectionName: 'partialTransactions' });
+		return this.queryTransactions(conditions, id, pageSize, { collectionName: 'partialTransactions', sortOrder: ordering });
 	}
 
 	// endregion
