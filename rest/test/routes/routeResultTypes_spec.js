@@ -18,21 +18,23 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const catapult = require('catapult-sdk');
-const routeUtils = require('../../routes/routeUtils');
+const routeResultTypes = require('../../src/routes/routeResultTypes');
+const { expect } = require('chai');
 
-const { uint64 } = catapult.utils;
-
-module.exports = {
-	register: (server, db) => {
-		const mosaicSender = routeUtils.createSender('mosaicDescriptor');
-
-		routeUtils.addGetPostDocumentRoutes(
-			server,
-			mosaicSender,
-			{ base: '/mosaic', singular: 'mosaicId', plural: 'mosaicIds' },
-			params => db.mosaicsByIds(params),
-			uint64.fromHex
-		);
-	}
-};
+describe('routeResultTypes', () => {
+	it('has correct links to schema', () => {
+		expect(Object.keys(routeResultTypes).length).to.equal(10);
+		expect(routeResultTypes).to.deep.equal({
+			account: 'accountWithMetadata',
+			block: 'blockHeaderWithMetadata',
+			transaction: 'transactionWithMetadata',
+			chainInfo: 'chainInfo',
+			merkleProofInfo: 'merkleProofInfo',
+			receipts: 'receipts',
+			transactionStatus: 'transactionStatus',
+			nodeInfo: 'nodeInfo',
+			nodeTime: 'nodeTime',
+			storageInfo: 'storageInfo'
+		});
+	});
+});

@@ -111,7 +111,7 @@ describe('catapult db', () => {
 			// Arrange:
 			return runDbTest(
 				{
-					block: test.db.createDbBlock(),
+					block: test.db.createDbBlock(Default_Height),
 					transactions: test.db.createDbTransactions(Rounds, test.random.publicKey(), test.random.address())
 				},
 				db => db.storageInfo(),
@@ -130,12 +130,14 @@ describe('catapult db', () => {
 			));
 	});
 
-	const stripPrivateBlockInformation = block => {
-		// block merkle tree is not exposed outside of the database class unless explicitly requested
+	const stripBlockFields = (block, fields) => {
+		// block merkle trees are not exposed outside of the database class unless explicitly requested
 		const modifiedBlock = Object.assign({}, block);
-		delete modifiedBlock.meta.merkleTree;
+		fields.forEach(field => delete modifiedBlock.meta[field]);
 		return modifiedBlock;
 	};
+
+	const stripExtraneousBlockInformation = block => stripBlockFields(block, ['transactionMerkleTree', 'statementMerkleTree']);
 
 	describe('block at height', () => {
 		it('undefined is returned for block at unknown height', () =>
@@ -156,7 +158,7 @@ describe('catapult db', () => {
 			return runDbTest(
 				{ block: seedBlock },
 				db => db.blockAtHeight(height),
-				block => expect(block).to.deep.equal(stripPrivateBlockInformation(seedBlock))
+				block => expect(block).to.deep.equal(stripExtraneousBlockInformation(seedBlock))
 			);
 		};
 
@@ -173,17 +175,17 @@ describe('catapult db', () => {
 			return runDbTest(
 				{ block: seedBlock, transactions: blockTransactions },
 				db => db.blockAtHeight(Long.fromNumber(Default_Height)),
-				block => expect(block).to.deep.equal(stripPrivateBlockInformation(seedBlock))
+				block => expect(block).to.deep.equal(stripExtraneousBlockInformation(seedBlock))
 			);
 		});
 	});
 
-	describe('block at height with merkle tree', () => {
+	describe('block at height with statement merkle tree', () => {
 		it('undefined is returned for block at unknown height', () =>
 			// Assert:
 			runDbTest(
 				{ block: test.db.createDbBlock(Default_Height) },
-				db => db.blockWithMerkleTreeAtHeight(Long.fromNumber(Default_Height + 1)),
+				db => db.blockWithStatementMerkleTreeAtHeight(Long.fromNumber(Default_Height + 1)),
 				block => expect(block).to.equal(undefined)
 			));
 
@@ -196,16 +198,17 @@ describe('catapult db', () => {
 			// Assert:
 			return runDbTest(
 				{ block: seedBlock },
-				db => db.blockWithMerkleTreeAtHeight(height),
-				block => expect(block).to.deep.equal(seedBlock)
+				db => db.blockWithStatementMerkleTreeAtHeight(height),
+				block => expect(block).to.deep.equal(stripBlockFields(seedBlock, ['transactionMerkleTree']))
 			);
 		};
 
-		it('can retrieve block with merkle tree at height (Number)', () => assertCanRetrieveSimpleBlock(Default_Height));
-		it('can retrieve block with merkle tree at height (uint64)', () => assertCanRetrieveSimpleBlock([Default_Height, 0]));
-		it('can retrieve block with merkle tree at height (Long)', () => assertCanRetrieveSimpleBlock(Long.fromNumber(Default_Height)));
+		it('can retrieve block with statement merkle tree at height (Number)', () => assertCanRetrieveSimpleBlock(Default_Height));
+		it('can retrieve block with statement merkle tree at height (uint64)', () => assertCanRetrieveSimpleBlock([Default_Height, 0]));
+		it('can retrieve block with statement merkle tree at height (Long)', () =>
+			assertCanRetrieveSimpleBlock(Long.fromNumber(Default_Height)));
 
-		it('can retrieve block with merkle tree at height', () => {
+		it('can retrieve block with statement merkle tree at height', () => {
 			// Arrange:
 			const seedBlock = test.db.createDbBlock(Default_Height);
 			const blockTransactions = test.db.createDbTransactions(2, test.random.publicKey(), test.random.address());
@@ -213,8 +216,50 @@ describe('catapult db', () => {
 			// Assert:
 			return runDbTest(
 				{ block: seedBlock, transactions: blockTransactions },
-				db => db.blockWithMerkleTreeAtHeight(Long.fromNumber(Default_Height)),
-				block => expect(block).to.deep.equal(seedBlock)
+				db => db.blockWithStatementMerkleTreeAtHeight(Long.fromNumber(Default_Height)),
+				block => expect(block).to.deep.equal(stripBlockFields(seedBlock, ['transactionMerkleTree']))
+			);
+		});
+	});
+
+	describe('block at height with transaction merkle tree', () => {
+		it('undefined is returned for block at unknown height', () =>
+			// Assert:
+			runDbTest(
+				{ block: test.db.createDbBlock(Default_Height) },
+				db => db.blockWithTransactionMerkleTreeAtHeight(Long.fromNumber(Default_Height + 1)),
+				block => expect(block).to.equal(undefined)
+			));
+
+		// use blockAtHeight tests as a proxy for testing support of different numeric types (Number, uint64, Long)
+
+		const assertCanRetrieveSimpleBlock = height => {
+			// Arrange:
+			const seedBlock = test.db.createDbBlock(Default_Height);
+
+			// Assert:
+			return runDbTest(
+				{ block: seedBlock },
+				db => db.blockWithTransactionMerkleTreeAtHeight(height),
+				block => expect(block).to.deep.equal(stripBlockFields(seedBlock, ['statementMerkleTree']))
+			);
+		};
+
+		it('can retrieve block with transaction merkle tree at height (Number)', () => assertCanRetrieveSimpleBlock(Default_Height));
+		it('can retrieve block with transaction merkle tree at height (uint64)', () => assertCanRetrieveSimpleBlock([Default_Height, 0]));
+		it('can retrieve block with transaction merkle tree at height (Long)', () =>
+			assertCanRetrieveSimpleBlock(Long.fromNumber(Default_Height)));
+
+		it('can retrieve block with transaction merkle tree at height', () => {
+			// Arrange:
+			const seedBlock = test.db.createDbBlock(Default_Height);
+			const blockTransactions = test.db.createDbTransactions(2, test.random.publicKey(), test.random.address());
+
+			// Assert:
+			return runDbTest(
+				{ block: seedBlock, transactions: blockTransactions },
+				db => db.blockWithTransactionMerkleTreeAtHeight(Long.fromNumber(Default_Height)),
+				block => expect(block).to.deep.equal(stripBlockFields(seedBlock, ['statementMerkleTree']))
 			);
 		});
 	});
@@ -251,7 +296,8 @@ describe('catapult db', () => {
 			const endElement = dbEntities.blocks.findIndex(entity => entity.block.height.toNumber() === startHeight) + 1;
 			const startElement = endElement - numBlocks;
 			expect(actualBlocks.length).to.equal(numBlocks);
-			expect(actualBlocks).to.deep.equal(dbEntities.blocks.slice(startElement, endElement).map(stripPrivateBlockInformation));
+			expect(actualBlocks).to.deep.equal(dbEntities.blocks.slice(startElement, endElement).map(block =>
+				stripExtraneousBlockInformation(block)));
 		};
 
 		it('returns at most available blocks', () => {
@@ -701,7 +747,7 @@ describe('catapult db', () => {
 			partial: { dbFunctionName: 'accountTransactionsPartial', collectionName: 'partialTransactions' }
 		};
 
-		describe('can filter by', () => {
+		describe('can customize queries', () => {
 			// creates transactions for three accounts such that: A is sender, B is recipient, C is sender and recipient
 			// [0001] A -> B, [0002] A -> C, [0003] C -> B, [0004] C -> C
 			const createDirectionalTransactions = (key1, key2, key3) => {
@@ -728,51 +774,95 @@ describe('catapult db', () => {
 				return transactions;
 			};
 
-			const addTests = traits => {
-				const addDirectionalTest = (keySelector, expectedTransactionIndexes) => {
+			const addTests = (traits, ordering) => {
+				const addDirectionalTest = (keySelector, expectedTransactionIndexes, queryOrdering) => {
 					// Arrange:
 					const keys = [test.random.publicKey(), test.random.publicKey(), test.random.publicKey()];
 					const seedTransactions = createDirectionalTransactions(keys[0], keys[1], keys[2]);
 					return runDbTest(
 						{ [getCollectionName(traits)]: seedTransactions },
 						// Act: retrieve transactions for an account
-						db => db[traits.dbFunctionName](keySelector(keys)),
+						db => db[traits.dbFunctionName](keySelector(keys), undefined, undefined, queryOrdering),
 						transactions => {
-							// Assert: expected transactions are available
+							// Assert: expected transactions are ordered
 							assertEqualDocuments(expectedTransactionIndexes.map(index => seedTransactions[index]), transactions);
 						}
 					);
 				};
 
 				it('for account without transactions', () =>
-					addDirectionalTest(() => test.random.publicKey(), [])); // random
+					addDirectionalTest(() => test.random.publicKey(), [], ordering)); // random
 
 				it('for account with outgoing only transactions', () =>
-					addDirectionalTest(keys => keys[0], traits.directional.outgoing)); // A
+					addDirectionalTest(keys => keys[0], traits.directional.outgoing, ordering)); // A
 
 				it('for account with incoming only transactions', () =>
-					addDirectionalTest(keys => keys[1], traits.directional.incoming)); // B
+					addDirectionalTest(keys => keys[1], traits.directional.incoming, ordering)); // B
 
 				it('for account with incoming and outgoing transactions', () =>
-					addDirectionalTest(keys => keys[2], traits.directional.incomingAndOutgoing)); // C
+					addDirectionalTest(keys => keys[2], traits.directional.incomingAndOutgoing, ordering)); // C
 			};
 
-			describe('incoming', () => {
-				addTests(Object.assign({
-					directional: { outgoing: [], incoming: [2, 0], incomingAndOutgoing: [3, 1] }
-				}, dbTransactionTraits.incoming));
+			describe('filtering by', () => {
+				describe('incoming', () => {
+					addTests(Object.assign({
+						directional: { outgoing: [], incoming: [2, 0], incomingAndOutgoing: [3, 1] }
+					}, dbTransactionTraits.incoming));
+				});
+
+				describe('outgoing', () => {
+					addTests(Object.assign({
+						directional: { outgoing: [1, 0], incoming: [], incomingAndOutgoing: [3, 2] }
+					}, dbTransactionTraits.outgoing));
+				});
+
+				['all', 'unconfirmed', 'partial'].forEach(key => {
+					addTests(Object.assign({
+						directional: { outgoing: [1, 0], incoming: [2, 0], incomingAndOutgoing: [3, 2, 1] }
+					}, dbTransactionTraits[key]));
+				});
 			});
 
-			describe('outgoing', () => {
-				addTests(Object.assign({
-					directional: { outgoing: [1, 0], incoming: [], incomingAndOutgoing: [3, 2] }
-				}, dbTransactionTraits.outgoing));
-			});
+			describe('ordering by', () => {
+				describe('incoming (ascending)', () => {
+					addTests(Object.assign({
+						directional: { outgoing: [], incoming: [0, 2], incomingAndOutgoing: [1, 3] }
+					}, dbTransactionTraits.incoming), 1);
+				});
 
-			['all', 'unconfirmed', 'partial'].forEach(key => {
-				addTests(Object.assign({
-					directional: { outgoing: [1, 0], incoming: [2, 0], incomingAndOutgoing: [3, 2, 1] }
-				}, dbTransactionTraits[key]));
+				describe('outgoing (ascending)', () => {
+					addTests(Object.assign({
+						directional: { outgoing: [0, 1], incoming: [], incomingAndOutgoing: [2, 3] }
+					}, dbTransactionTraits.outgoing), 1);
+				});
+
+				describe('all, unconfirmed and partial (ascending)', () => {
+					['all', 'unconfirmed', 'partial'].forEach(key => {
+						addTests(Object.assign({
+							directional: { outgoing: [0, 1], incoming: [0, 2], incomingAndOutgoing: [1, 2, 3] }
+						}, dbTransactionTraits[key]), 1);
+					});
+				});
+
+				describe('incoming (descending)', () => {
+					addTests(Object.assign({
+						directional: { outgoing: [], incoming: [2, 0], incomingAndOutgoing: [3, 1] }
+					}, dbTransactionTraits.incoming), -1);
+				});
+
+				describe('outgoing (descending)', () => {
+					addTests(Object.assign({
+						directional: { outgoing: [1, 0], incoming: [], incomingAndOutgoing: [3, 2] }
+					}, dbTransactionTraits.outgoing), -1);
+				});
+
+				describe('all, unconfirmed and partial (descending)', () => {
+					['all', 'unconfirmed', 'partial'].forEach(key => {
+						addTests(Object.assign({
+							directional: { outgoing: [1, 0], incoming: [2, 0], incomingAndOutgoing: [3, 2, 1] }
+						}, dbTransactionTraits[key]), -1);
+					});
+				});
 			});
 		});
 

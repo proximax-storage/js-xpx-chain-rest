@@ -24,7 +24,7 @@ const errors = require('../server/errors');
 const routeResultTypes = require('./routeResultTypes');
 const routeUtils = require('./routeUtils');
 
-const { indexOfLeafWithHash, buildAuditPath } = catapult.crypto.merkle;
+const { buildAuditPath, indexOfLeafWithHash } = catapult.crypto.merkle;
 
 const parseHeight = params => routeUtils.parseArgument(params, 'height', 'uint');
 
@@ -51,7 +51,7 @@ module.exports = {
 			const height = parseHeight(req.params);
 			const hash = routeUtils.parseArgument(req.params, 'hash', 'hash256');
 
-			return dbFacade.runHeightDependentOperation(db, height, () => db.blockWithMerkleTreeAtHeight(height))
+			return dbFacade.runHeightDependentOperation(db, height, () => db.blockWithTransactionMerkleTreeAtHeight(height))
 				.then(result => {
 					if (!result.isRequestValid) {
 						res.send(errors.createNotFoundError(height));
@@ -65,12 +65,12 @@ module.exports = {
 					}
 
 					const merkleTree = {
-						numberOfTransactions: block.meta.numTransactions,
-						nodes: block.meta.merkleTree.map(merkleHash => merkleHash.buffer)
+						count: block.meta.numTransactions,
+						nodes: block.meta.transactionMerkleTree.map(merkleHash => merkleHash.buffer)
 					};
 
 					if (0 > indexOfLeafWithHash(hash, merkleTree)) {
-						res.send(errors.createNotFoundError(req.params.hash));
+						res.send(errors.createInvalidArgumentError(`hash '${req.params.hash}' not included in block height '${height}'`));
 						return next();
 					}
 
@@ -80,6 +80,7 @@ module.exports = {
 						payload: { merklePath },
 						type: routeResultTypes.merkleProofInfo
 					});
+
 					return next();
 				});
 		});
@@ -96,7 +97,7 @@ module.exports = {
 						return next();
 					}
 
-					return routeUtils.createSender(routeResultTypes.transfer).sendArray('height', res, next)(result.payload);
+					return routeUtils.createSender(routeResultTypes.transaction).sendArray('height', res, next)(result.payload);
 				});
 		});
 

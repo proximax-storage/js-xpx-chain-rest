@@ -22,11 +22,12 @@ module.exports = {
 	// with meta data
 	account: 'accountWithMetadata',
 	block: 'blockHeaderWithMetadata',
-	transfer: 'transactionWithMetadata',
+	transaction: 'transactionWithMetadata',
 
 	// other
 	chainInfo: 'chainInfo',
 	merkleProofInfo: 'merkleProofInfo',
+	receipts: 'receipts',
 	transactionStatus: 'transactionStatus',
 	nodeInfo: 'nodeInfo',
 	nodeTime: 'nodeTime',

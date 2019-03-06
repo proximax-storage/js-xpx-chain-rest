@@ -47,10 +47,12 @@ describe('catapult model system', () => {
 				'accountLink',
 				'accountProperties',
 				'aggregate',
-				'lock',
-				'multisig',
 				'contract',
+				'lock',
+				'mosaic',
+				'multisig',
 				'namespace',
+				'receipts',
 				'transfer'
 			]);
 		});

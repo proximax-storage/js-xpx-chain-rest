@@ -18,44 +18,29 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const namespace = require('../../src/plugins/namespace');
-const NamespaceDb = require('../../src/plugins/db/NamespaceDb');
 const pluginTest = require('./utils/pluginTestUtils');
+const receipts = require('../../src/plugins/receipts');
+const ReceiptsDb = require('../../src/plugins/db/ReceiptsDb');
 const test = require('../routes/utils/routeTestUtils');
 
-describe('namespace plugin', () => {
-	pluginTest.assertThat.pluginCreatesDb(namespace, NamespaceDb);
-	pluginTest.assertThat.pluginDoesNotRegisterAdditionalTransactionStates(namespace);
-	pluginTest.assertThat.pluginDoesNotRegisterAdditionalMessageChannels(namespace);
+describe('receipts plugin', () => {
+	pluginTest.assertThat.pluginCreatesDb(receipts, ReceiptsDb);
+	pluginTest.assertThat.pluginDoesNotRegisterAdditionalTransactionStates(receipts);
+	pluginTest.assertThat.pluginDoesNotRegisterAdditionalMessageChannels(receipts);
 
 	describe('register routes', () => {
-		it('registers GET routes', () => {
+		it('registers receipts GET routes', () => {
 			// Arrange:
 			const routes = [];
 			const server = test.setup.createCapturingMockServer('get', routes);
 
 			// Act:
-			namespace.registerRoutes(server, {});
+			receipts.registerRoutes(server, {});
 
 			// Assert:
 			test.assert.assertRoutes(routes, [
-				'/account/:accountId/namespaces',
-				'/namespace/:namespaceId'
-			]);
-		});
-
-		it('registers POST routes', () => {
-			// Arrange:
-			const routes = [];
-			const server = test.setup.createCapturingMockServer('post', routes);
-
-			// Act:
-			namespace.registerRoutes(server, {});
-
-			// Assert:
-			test.assert.assertRoutes(routes, [
-				'/account/namespaces',
-				'/namespace/names'
+				'/block/:height/receipts',
+				'/block/:height/receipt/:hash/merkle'
 			]);
 		});
 	});
