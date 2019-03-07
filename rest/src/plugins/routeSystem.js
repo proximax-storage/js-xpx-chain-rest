@@ -27,9 +27,10 @@ const mosaic = require('./mosaic');
 const multisig = require('./multisig');
 const contract = require('./contract');
 const namespace = require('./namespace');
+const receipts = require('./receipts');
 
 const plugins = {
-	accountProperties, aggregate, contract, lock, mosaic, multisig, namespace, transfer: empty
+	accountProperties, aggregate, contract, lock, mosaic, multisig, namespace, receipts, transfer: empty
 };
 
 module.exports = {
