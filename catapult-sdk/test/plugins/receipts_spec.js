@@ -37,7 +37,7 @@ describe('receipts plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 9);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 10);
 			expect(modelSchema).to.contain.all.keys([
 				'receipts',
 				'receipts.addressResolutionStatement',
