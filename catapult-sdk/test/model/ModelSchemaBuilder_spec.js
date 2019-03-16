@@ -185,6 +185,7 @@ describe('model schema builder', () => {
 				'blockHeader.previousBlockHash',
 				'blockHeader.blockTransactionsHash',
 				'blockHeader.stateHash',
+				'blockHeader.beneficiary',
 				'blockHeader.signature',
 				'blockHeader.signer',
 				'blockHeaderMetadata.address',
@@ -221,7 +222,7 @@ describe('model schema builder', () => {
 				'blockHeaderMetadata.totalFee',
 
 				'transaction.deadline',
-				'transaction.fee',
+				'transaction.maxFee',
 				'transactionMetadata.height',
 
 				'transactionStatus.deadline',
@@ -298,7 +299,7 @@ describe('model schema builder', () => {
 
 			// - transaction extensions should inherit transaction types
 			expect(modelSchema.foo.signature).to.equal(ModelType.binary);
-			expect(modelSchema.foo.fee).to.equal(ModelType.uint64);
+			expect(modelSchema.foo.maxFee).to.equal(ModelType.uint64);
 		});
 
 		it('can add other extension', () => {
@@ -315,7 +316,7 @@ describe('model schema builder', () => {
 
 			// - non-transaction extensions should not inherit transaction types
 			expect(modelSchema.foo.signature).to.equal(undefined);
-			expect(modelSchema.foo.fee).to.equal(undefined);
+			expect(modelSchema.foo.maxFee).to.equal(undefined);
 		});
 
 		it('can add transaction extension for known entity type', () => {
@@ -330,7 +331,7 @@ describe('model schema builder', () => {
 
 			// - transaction extensions should inherit transaction types
 			expect(modelSchema.transfer.signature).to.equal(ModelType.binary);
-			expect(modelSchema.transfer.fee).to.equal(ModelType.uint64);
+			expect(modelSchema.transfer.maxFee).to.equal(ModelType.uint64);
 		});
 
 		it('cannot add transaction extension for unknown entity type', () => {

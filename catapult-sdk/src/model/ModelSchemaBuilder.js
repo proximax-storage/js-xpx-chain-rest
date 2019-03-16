@@ -52,7 +52,8 @@ class ModelSchemaBuilder {
 				difficulty: ModelType.uint64,
 				previousBlockHash: ModelType.binary,
 				blockTransactionsHash: ModelType.binary,
-				stateHash: ModelType.binary
+				stateHash: ModelType.binary,
+				beneficiary: ModelType.binary
 			},
 			blockHeaderMetadata: {
 				address: ModelType.binary,
@@ -78,7 +79,7 @@ class ModelSchemaBuilder {
 
 			transaction: {
 				deadline: ModelType.uint64,
-				fee: ModelType.uint64
+				maxFee: ModelType.uint64
 			},
 			transactionMetadata: {
 				address: ModelType.binary,
