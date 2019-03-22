@@ -37,7 +37,7 @@ describe('receipts plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 9);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 10);
 			expect(modelSchema).to.contain.all.keys([
 				'receipts',
 				'receipts.addressResolutionStatement',
@@ -111,6 +111,7 @@ describe('receipts plugin', () => {
 			expect(modelSchema['receipts.artifactExpiry']).to.contain.all.keys(['artifactId']);
 		});
 	});
+
 
 	describe('conditional schema', () => {
 		describe('uses the correct conditional schema depending on receipt type', () => {

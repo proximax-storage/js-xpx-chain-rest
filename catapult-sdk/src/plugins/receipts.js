@@ -83,7 +83,11 @@ const receiptsPlugin = {
 		builder.addSchema('receipts.artifactExpiry', {
 			artifactId: ModelType.uint64
 		});
-	}
+
+		builder.addSchema('receipts.unknown', {});
+	},
+
+	registerCodecs: codecBuilder => {}
 };
 
 module.exports = receiptsPlugin;
