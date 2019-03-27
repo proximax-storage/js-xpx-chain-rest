@@ -184,6 +184,7 @@ describe('model schema builder', () => {
 				'topicMetadata.address',
 				'blockHeader.previousBlockHash',
 				'blockHeader.blockTransactionsHash',
+				'blockHeader.blockReceiptsHash',
 				'blockHeader.stateHash',
 				'blockHeader.beneficiary',
 				'blockHeader.signature',
