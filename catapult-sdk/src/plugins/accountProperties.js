@@ -25,6 +25,12 @@ const sizes = require('../modelBinary/sizes');
 
 const constants = { sizes };
 
+const propertyTypeBlockOffset = 128;
+const PropertyTypeFlags = Object.freeze({
+	address: 1,
+	mosaic: 2,
+	entityType: 4
+});
 
 const accountPropertiesCreateBaseCodec = valueCodec => ({
 	deserialize: parser => {
@@ -50,12 +56,26 @@ const accountPropertiesCreateBaseCodec = valueCodec => ({
 	}
 });
 
-const propertyTypeBlockOffset = 128;
-const PropertyTypeFlags = Object.freeze({
-	address: 1,
-	mosaic: 2,
-	entityType: 4
-});
+const propertyTypeDescriptors = [
+	{
+		entityType: EntityType.accountPropertiesAddress,
+		schemaPrefix: 'address',
+		valueType: ModelType.binary,
+		flag: PropertyTypeFlags.address
+	},
+	{
+		entityType: EntityType.accountPropertiesMosaic,
+		schemaPrefix: 'mosaic',
+		valueType: ModelType.uint64,
+		flag: PropertyTypeFlags.mosaic
+	},
+	{
+		entityType: EntityType.accountPropertiesEntityType,
+		schemaPrefix: 'entityType',
+		valueType: ModelType.uint16,
+		flag: PropertyTypeFlags.entityType
+	}
+];
 
 /**
  * Creates an accountProperties plugin.
@@ -72,61 +92,40 @@ const accountPropertiesPlugin = {
 	}),
 
 	registerSchema: builder => {
-		// transaction schema for account property transactions
 		const modificationTypeSchema = modificationsSchemaName => ({
 			modifications: { type: ModelType.array, schemaName: modificationsSchemaName }
 		});
-		builder.addTransactionSupport(
-			EntityType.accountPropertiesAddress,
-			modificationTypeSchema('accountProperties.addressModificationType')
-		);
-		builder.addTransactionSupport(
-			EntityType.accountPropertiesMosaic,
-			modificationTypeSchema('accountProperties.mosaicModificationType')
-		);
-		builder.addTransactionSupport(
-			EntityType.accountPropertiesEntityType,
-			modificationTypeSchema('accountProperties.entityTypeModificationType')
-		);
-		builder.addSchema('accountProperties.addressModificationType', {
-			value: ModelType.binary
-		});
-		builder.addSchema('accountProperties.mosaicModificationType', {
-			value: ModelType.uint64
-		});
-		builder.addSchema('accountProperties.entityTypeModificationType', {
-			value: ModelType.uint16
+		propertyTypeDescriptors.forEach(propertyTypeDescriptor => {
+			// transaction schemas
+			builder.addTransactionSupport(
+				propertyTypeDescriptor.entityType,
+				modificationTypeSchema(`accountProperties.${propertyTypeDescriptor.schemaPrefix}ModificationType`)
+			);
+			builder.addSchema(`accountProperties.${propertyTypeDescriptor.schemaPrefix}ModificationType`, {
+				value: propertyTypeDescriptor.valueType
+			});
+
+			// aggregated account property schemas
+			builder.addSchema(`accountProperties.${propertyTypeDescriptor.schemaPrefix}AccountProperty`, {
+				values: { type: ModelType.array, schemaName: propertyTypeDescriptor.valueType }
+			});
 		});
 
-		// aggregated account property assets
+		// aggregated account property schemas
 		builder.addSchema('accountProperties', {
-			accountProperties: { type: ModelType.object, schemaName: 'accountProperties.accountProperties'}
+			accountProperties: { type: ModelType.object, schemaName: 'accountProperties.accountProperties' }
 		});
 		builder.addSchema('accountProperties.accountProperties', {
 			address: ModelType.binary,
 			properties: {
 				type: ModelType.array,
 				schemaName: entity => {
-					const propertyType = entity.propertyType & 0x7F;
-					if (propertyType === PropertyTypeFlags.address)
-						return 'accountProperties.addressAccountProperty';
-
-					else if (propertyType === PropertyTypeFlags.mosaic)
-						return 'accountProperties.mosaicAccountProperty';
-
-					else if (propertyType === PropertyTypeFlags.entityType)
-						return 'accountProperties.entityTypeAccountProperty';
+					propertyTypeDescriptors.forEach(propertyTypeDescriptor => {
+						if (entity.propertyType & 0x7F === propertyTypeDescriptor.flag)
+							return `accountProperties.${propertyTypeDescriptor.schemaPrefix}AccountProperty`;
+					});
 				}
 			}
-		});
-		builder.addSchema('accountProperties.addressAccountProperty', {
-			values: { type: ModelType.array, schemaName: ModelType.binary }
-		});
-		builder.addSchema('accountProperties.mosaicAccountProperty', {
-			values: { type: ModelType.array, schemaName: ModelType.uint64 }
-		});
-		builder.addSchema('accountProperties.entityTypeAccountProperty', {
-			values: { type: ModelType.array, schemaName: ModelType.uint16 }
 		});
 	},
 
