@@ -74,42 +74,37 @@ describe('db formatting rules', () => {
 
 	it('can format uint64 type from Binary', () => {
 		// Arrange:
-		const value = [0x00ABCDEF, 0x000FDFFF];
 		const buffer = Buffer.alloc(8, 0);
-		buffer.writeUInt32LE(value[0], 0);
-		buffer.writeUInt32LE(value[1], 4);
+		buffer.writeUInt32LE(0x00ABCDEF, 0);
+		buffer.writeUInt32LE(0x000FDFFF, 4);
 		const object = new Binary(buffer);
 
 		// Act:
 		const result = formattingRules[ModelType.uint64](object);
 
 		// Assert:
-		expect(result).to.deep.equal(value);
+		expect(result).to.deep.equal([0x00ABCDEF, 0x000FDFFF]);
 	});
 
 	it('can format uint16 type', () => {
-		// Arrange:
-		const object = 17434;
-
 		// Act:
-		const result = formattingRules[ModelType.uint16](object);
+		const result = formattingRules[ModelType.uint16](17434);
 
 		// Assert:
-		expect(result).to.equal(object);
+		expect(result).to.equal(17434);
 	});
 
 	it('can format uint16 type from Binary', () => {
 		// Arrange:
-		const value = 17434;
 		const buffer = Buffer.alloc(2, 0);
-		buffer.writeUInt16LE(value);
+		buffer.writeUInt16LE(17434);
 		const object = new Binary(buffer);
 
 		// Act:
 		const result = formattingRules[ModelType.uint16](object);
 
 		// Assert:
-		expect(result).to.deep.equal(value);
+		expect(result).to.deep.equal(17434);
 	});
 
 	it('can format object id type', () => {
