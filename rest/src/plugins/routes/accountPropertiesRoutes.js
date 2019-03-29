@@ -33,7 +33,7 @@ module.exports = {
 
 		const accountPropertiesSender = routeUtils.createSender('accountProperties');
 
-		server.get('/account/properties/:accountId', (req, res, next) => {
+		server.get('/account/:accountId/properties', (req, res, next) => {
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
 			return db.accountPropertiesByAddresses([accountIdToAddress(type, accountId)])
 				.then(accountPropertiesSender.sendOne(req.params.accountId, res, next));
