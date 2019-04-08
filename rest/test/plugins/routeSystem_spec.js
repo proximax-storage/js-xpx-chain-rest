@@ -43,6 +43,7 @@ describe('route system', () => {
 			'aggregate',
 			'contract',
 			'lock',
+			'metadata',
 			'mosaic',
 			'multisig',
 			'namespace',

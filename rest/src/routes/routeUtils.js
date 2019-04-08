@@ -32,7 +32,8 @@ const constants = {
 		hexPublicKey: 64,
 		addressEncoded: 40,
 		hash256: 32,
-		hash512: 64
+		hash512: 64,
+		hexUint64: 16
 	}
 };
 
@@ -83,6 +84,16 @@ const namedParserMap = {
 			return convert.hexToUint8(str);
 
 		throw Error(`invalid length of hash512 '${str.length}'`);
+	},
+	metadataId: str => {
+		if (constants.sizes.hexPublicKey === str.length)
+			return ['publicKey', convert.hexToUint8(str)];
+		else if (constants.sizes.addressEncoded === str.length)
+			return ['address', address.stringToAddress(str)];
+		else if (constants.sizes.hexUint64 === str.length)
+			return ['metadataId', convert.hexToUint8(str).reverse()];
+
+		throw Error(`invalid length of account id '${str.length}'`);
 	}
 };
 
