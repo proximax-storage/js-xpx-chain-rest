@@ -40,8 +40,8 @@ module.exports = {
 			if (type === AccountType.publicKey)
 				metadataId = address.publicKeyToAddress(metadataId, networkInfo.networks[services.config.network.name].id);
 
-			return db.metadatasByIds(type, [metadataId])
-				.then(routeUtils.createSender('metadataEntry').sendOne(req.params.accountId, res, next));
+			return db.metadatasByIds([metadataId])
+				.then(routeUtils.createSender('metadataEntry').sendOne(req.params.metadataId, res, next));
 		});
 
 		server.post('/metadata', (req, res, next) => {
