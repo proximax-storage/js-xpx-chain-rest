@@ -120,10 +120,10 @@ const accountPropertiesPlugin = {
 			properties: {
 				type: ModelType.array,
 				schemaName: entity => {
-					propertyTypeDescriptors.forEach(propertyTypeDescriptor => {
-						if (entity.propertyType & 0x7F === propertyTypeDescriptor.flag)
-							return `accountProperties.${propertyTypeDescriptor.schemaPrefix}AccountProperty`;
-					});
+					for (let i = 0; i < propertyTypeDescriptors.length; i++) {
+						if ((entity.propertyType & 0x7F) === propertyTypeDescriptors[i].flag)
+							return `accountProperties.${propertyTypeDescriptors[i].schemaPrefix}AccountProperty`;
+					}
 				}
 			}
 		});

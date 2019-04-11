@@ -84,8 +84,8 @@ describe('account properties plugin', () => {
 			expect(modelSchema.accountPropertiesEntityType).to.contain.all.keys(['modifications']);
 
 			// - accountProperties
-			expect(Object.keys(modelSchema['accountProperties']).length).to.equal(1);
-			expect(modelSchema['accountProperties']).to.contain.all.keys(['accountProperties']);
+			expect(Object.keys(modelSchema.accountProperties).length).to.equal(1);
+			expect(modelSchema.accountProperties).to.contain.all.keys(['accountProperties']);
 
 			// - accountProperties modification types
 			modificationTypeSchemas.forEach(schema => {
@@ -101,6 +101,30 @@ describe('account properties plugin', () => {
 			accountPropertySchemas.forEach(schema => {
 				expect(Object.keys(modelSchema[schema]).length).to.equal(1);
 				expect(modelSchema[schema]).to.contain.all.keys(['values']);
+			});
+		});
+
+		describe('aggregation schemas', () => {
+			it('use the correct conditional schema depending on property type', () => {
+				// Arrange:
+				const builder = new ModelSchemaBuilder();
+				accountPropertiesPlugin.registerSchema(builder);
+				const modelSchema = builder.build();
+				const accountPropertiesSchema = modelSchema['accountProperties.accountProperties'].properties.schemaName;
+
+				// Assert:
+				expect(accountPropertiesSchema({ propertyType: PropertyType.addressAllow }))
+					.to.equal('accountProperties.addressAccountProperty');
+				expect(accountPropertiesSchema({ propertyType: PropertyType.addressBlock }))
+					.to.equal('accountProperties.addressAccountProperty');
+				expect(accountPropertiesSchema({ propertyType: PropertyType.mosaicAllow }))
+					.to.equal('accountProperties.mosaicAccountProperty');
+				expect(accountPropertiesSchema({ propertyType: PropertyType.mosaicBlock }))
+					.to.equal('accountProperties.mosaicAccountProperty');
+				expect(accountPropertiesSchema({ propertyType: PropertyType.entityTypeAllow }))
+					.to.equal('accountProperties.entityTypeAccountProperty');
+				expect(accountPropertiesSchema({ propertyType: PropertyType.entityTypeBlock }))
+					.to.equal('accountProperties.entityTypeAccountProperty');
 			});
 		});
 	});
