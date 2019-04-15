@@ -38,8 +38,9 @@ const createBlockDescriptor = () => ({
 	},
 
 	handler: (codec, emit) => (topic, binaryBlock, hash, generationHash) => {
+		const address = topic.slice(1);
 		const block = codec.deserialize(parserFromData(binaryBlock), { skipBlockTransactions: true });
-		emit({ type: 'blockHeaderWithMetadata', payload: { block, meta: { hash, generationHash } } });
+		emit({ type: 'blockHeaderWithMetadata', payload: { block, meta: { hash, generationHash, channelName: 'block', address } } });
 	}
 });
 
@@ -52,15 +53,17 @@ const createPolicyBasedAddressFilter = (markerByte, emptyAddressHandler) => topi
 
 const handlers = {
 	transaction: channelName => (codec, emit) => (topic, binaryTransaction, hash, merkleComponentHash, height) => {
+		const address = topic.slice(1);
 		const transaction = codec.deserialize(parserFromData(binaryTransaction));
 		const meta = {
-			hash, merkleComponentHash, height: uint64.fromBytes(height), channelName
+			hash, merkleComponentHash, height: uint64.fromBytes(height), channelName, address
 		};
 		emit({ type: 'transactionWithMetadata', payload: { transaction, meta } });
 	},
 
 	transactionHash: channelName => (codec, emit) => (topic, hash) => {
-		emit({ type: 'transactionWithMetadata', payload: { meta: { hash, channelName } } });
+		const address = topic.slice(1);
+		emit({ type: 'transactionWithMetadata', payload: { meta: { hash, channelName, address } } });
 	}
 };
 
@@ -89,13 +92,16 @@ class MessageChannelBuilder {
 		this.descriptors.status = {
 			filter: this.createAddressFilter('s'),
 			handler: (codec, emit) => (topic, buffer) => {
+				const address = topic.slice(1);
 				const parser = new BinaryParser();
 				parser.push(buffer);
 
 				const hash = parser.buffer(catapult.constants.sizes.hash256);
 				const status = parser.uint32();
 				const deadline = parser.uint64();
-				emit({ type: 'transactionStatus', payload: { hash, status, deadline } });
+
+				const meta = { channelName: 'status', address };
+				emit({ type: 'transactionStatus', payload: { hash, status, deadline, meta } });
 			}
 		};
 	}

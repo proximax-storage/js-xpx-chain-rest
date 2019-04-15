@@ -96,10 +96,10 @@ describe('message channel builder', () => {
 
 		// Act:
 		const height = Buffer.of(66, 0, 0, 0, 0, 0, 0, 0);
-		handler(codec, eventData => emitted.push(eventData))(22, transactionBuffer, 44, 55, height, 77, 88, 99);
+		handler(codec, eventData => emitted.push(eventData))([0, 22], transactionBuffer, 44, 55, height, 77, 88, 99);
 
 		// Assert:
-		// - 22 is a "topic" so it's not forwarded
+		// - [0, 22] is a "topic" so it's forwarded without first element
 		// - trailing params (77, 88, 99) should be ignored
 		expect(codec.collected.length).to.equal(1);
 		expect(codec.collected[0].parser.buffers.current()).to.equal(transactionBuffer);
@@ -114,7 +114,8 @@ describe('message channel builder', () => {
 					hash: 44,
 					merkleComponentHash: 55,
 					height: [66, 0],
-					channelName
+					channelName,
+					address: [22]
 				}
 			}
 		});
@@ -127,15 +128,15 @@ describe('message channel builder', () => {
 		const handler = createHandler(new MessageChannelBuilder());
 
 		// Act:
-		handler(codec, eventData => emitted.push(eventData))(22, 44, 77, 88, 99);
+		handler(codec, eventData => emitted.push(eventData))([0, 22], 44, 77, 88, 99);
 
 		// Assert:
-		// - 22 is a "topic" so it's not forwarded
+		// - [0, 22] is a "topic" so it's forwarded without first element
 		// - trailing params (77, 88, 99) should be ignored
 		expect(codec.collected.length).to.equal(0);
 
 		expect(emitted.length).to.equal(1);
-		expect(emitted[0]).to.deep.equal({ type: 'transactionWithMetadata', payload: { meta: { hash: 44, channelName } } });
+		expect(emitted[0]).to.deep.equal({ type: 'transactionWithMetadata', payload: { meta: { hash: 44, channelName, address: [22] } } });
 	};
 
 	describe('default channels', () => {
@@ -179,10 +180,10 @@ describe('message channel builder', () => {
 					const blockBuffer = Buffer.of(0xAB, 0xCD, 0xEF);
 
 					// Act:
-					handler(codec, eventData => emitted.push(eventData))(12, blockBuffer, 56, 78, 99, 88);
+					handler(codec, eventData => emitted.push(eventData))([0, 12], blockBuffer, 56, 78, 99, 88);
 
 					// Assert:
-					// - 12 is a "topic" so it's not forwarded
+					// - [0, 12] is a "topic" so it's forwarded without first element
 					// - trailing params (99, 88) should be ignored
 					expect(codec.collected.length).to.equal(1);
 					expect(codec.collected[0].parser.buffers.current()).to.equal(blockBuffer);
@@ -191,7 +192,7 @@ describe('message channel builder', () => {
 					expect(emitted.length).to.equal(1);
 					expect(emitted[0]).to.deep.equal({
 						type: 'blockHeaderWithMetadata',
-						payload: { block: 34, meta: { hash: 56, generationHash: 78 } }
+						payload: { block: 34, meta: { hash: 56, generationHash: 78, channelName: 'block', address: [12] } }
 					});
 				});
 			});
@@ -236,10 +237,10 @@ describe('message channel builder', () => {
 						Buffer.of(55, 0, 0, 0), // status
 						Buffer.of(66, 0, 0, 0, 0, 0, 0, 0) // deadline
 					]);
-					handler(codec, eventData => emitted.push(eventData))(22, buffer, 99);
+					handler(codec, eventData => emitted.push(eventData))([0, 22], buffer, 99);
 
 					// Assert:
-					// - 22 is a "topic" so it's not forwarded
+					// - [0, 22] is a "topic" so it's forwarded without first element
 					// - trailing param 99 should be ignored
 					expect(codec.collected.length).to.equal(0);
 
@@ -247,6 +248,10 @@ describe('message channel builder', () => {
 					expect(emitted[0]).to.deep.equal({
 						type: 'transactionStatus',
 						payload: {
+							meta: {
+								channelName: 'status',
+								address: [22]
+							},
 							hash: Buffer.alloc(test.constants.sizes.hash256, 41),
 							status: 55,
 							deadline: [66, 0]
