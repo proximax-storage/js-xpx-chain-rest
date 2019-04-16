@@ -35,19 +35,19 @@ module.exports = {
 			let [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', ParseMetadataId);
 
 			return db.metadatasByIds([accountId])
-				.then(routeUtils.createSender('metadataEntry').sendArray(req.params.accountId, res, next));
+				.then(routeUtils.createSender('metadataEntry').sendOne(req.params.accountId, res, next));
 		});
 
 		server.get('/mosaic/:mosaicId/metadata', (req, res, next) => {
 			let [type, mosaicId] = routeUtils.parseArgument(req.params, 'mosaicId', ParseMetadataId);
 			return db.metadatasByIds([mosaicId])
-				.then(routeUtils.createSender('metadataEntry').sendArray(req.params.mosaicId, res, next));
+				.then(routeUtils.createSender('metadataEntry').sendOne(req.params.mosaicId, res, next));
 		});
 
 		server.get('/namespace/:namespaceId/metadata', (req, res, next) => {
 			let [type, namespaceId] = routeUtils.parseArgument(req.params, 'namespaceId', ParseMetadataId);
 			return db.metadatasByIds([namespaceId])
-				.then(routeUtils.createSender('metadataEntry').sendArray(req.params.namespaceId, res, next));
+				.then(routeUtils.createSender('metadataEntry').sendOne(req.params.namespaceId, res, next));
 		});
 
 		server.get('/metadata/:metadataId', (req, res, next) => {
