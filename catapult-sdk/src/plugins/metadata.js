@@ -53,7 +53,7 @@ const contractPlugin = {
 		});
 
 		builder.addSchema('metadataEntry.metadataId', {
-			metadataId:		ModelType.binary,
+			metadataId: ModelType.metadataId,
 			metadataType:	ModelType.uint8,
 			fields:			{ type: ModelType.array, schemaName: 'Field' }
 		});
@@ -68,8 +68,12 @@ const contractPlugin = {
 			const valueSize = parser.uint16();
 
 			if (size !== 4 + 1 + 1 + 2 + keySize + valueSize) throw Error('metadata modification must is wrong size');
-			modification.key = parser.buffer(keySize);
-			modification.value = parser.buffer(valueSize);
+
+			if (keySize !== 0)
+				modification.key = parser.buffer(keySize);
+
+			if (valueSize !== 0)
+				modification.value = parser.buffer(valueSize);
 
 			return modification;
 		};

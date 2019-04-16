@@ -40,7 +40,10 @@ const ModelType = {
 	string: SchemaType.max + 4,
 
 	/** Schema property type indicating a status code. */
-	statusCode: SchemaType.max + 5
+	statusCode: SchemaType.max + 5,
+
+	/** Schema property type indicating a metadata id. */
+	metadataId: SchemaType.max + 6
 };
 
 Object.assign(ModelType, SchemaType);

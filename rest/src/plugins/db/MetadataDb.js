@@ -4,9 +4,6 @@
  *** license that can be found in the LICENSE file.
  **/
 
-const AccountType = require('../AccountType');
-const errors = require('../../server/errors');
-
 class MetadataDb {
 	/**
 	 * Creates MetadataDb around CatapultDb.
