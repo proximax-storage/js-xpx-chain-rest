@@ -22,43 +22,43 @@ module.exports = {
 		const ParseMetadataId = str => {
 			if (constants.sizes.hexPublicKey === str.length) {
 				const publicKey = convert.hexToUint8(str);
-				return ['address', address.publicKeyToAddress(publicKey, networkInfo.networks[services.config.network.name].id)];
+				return address.publicKeyToAddress(publicKey, networkInfo.networks[services.config.network.name].id);
 			} else if (constants.sizes.addressEncoded === str.length)
-				return ['address', address.stringToAddress(str)];
+				return address.stringToAddress(str);
 			else if (constants.sizes.hexUint64 === str.length)
-				return ['metadataId', convert.hexToUint8(str).reverse()];
+				return convert.hexToUint8(str).reverse();
 
 			throw Error(`invalid length of account id '${str.length}'`);
 		};
 
 		server.get('/account/:accountId/metadata', (req, res, next) => {
-			let [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', ParseMetadataId);
+			let accountId = routeUtils.parseArgument(req.params, 'accountId', ParseMetadataId);
 
 			return db.metadatasByIds([accountId])
 				.then(routeUtils.createSender('metadataEntry').sendOne(req.params.accountId, res, next));
 		});
 
 		server.get('/mosaic/:mosaicId/metadata', (req, res, next) => {
-			let [type, mosaicId] = routeUtils.parseArgument(req.params, 'mosaicId', ParseMetadataId);
+			let mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', ParseMetadataId);
 			return db.metadatasByIds([mosaicId])
 				.then(routeUtils.createSender('metadataEntry').sendOne(req.params.mosaicId, res, next));
 		});
 
 		server.get('/namespace/:namespaceId/metadata', (req, res, next) => {
-			let [type, namespaceId] = routeUtils.parseArgument(req.params, 'namespaceId', ParseMetadataId);
+			let namespaceId = routeUtils.parseArgument(req.params, 'namespaceId', ParseMetadataId);
 			return db.metadatasByIds([namespaceId])
 				.then(routeUtils.createSender('metadataEntry').sendOne(req.params.namespaceId, res, next));
 		});
 
 		server.get('/metadata/:metadataId', (req, res, next) => {
-			let [type, metadataId] = routeUtils.parseArgument(req.params, 'metadataId', ParseMetadataId);
+			let metadataId = routeUtils.parseArgument(req.params, 'metadataId', ParseMetadataId);
 
 			return db.metadatasByIds([metadataId])
 				.then(routeUtils.createSender('metadataEntry').sendOne(req.params.metadataId, res, next));
 		});
 
 		server.post('/metadata', (req, res, next) => {
-			if (Array.isArray(req.params.metadataIds))
+			if (!Array.isArray(req.params.metadataIds))
 				throw errors.createInvalidArgumentError('metadataIds must be array');
 
 			const metadataIds = routeUtils.parseArgumentAsArray(req.params, 'metadataIds', ParseMetadataId);
