@@ -32,7 +32,8 @@ const constants = {
 		hexPublicKey: 64,
 		addressEncoded: 40,
 		hash256: 32,
-		hash512: 64
+		hash512: 64,
+		hexUint64: 16
 	}
 };
 

@@ -52,6 +52,7 @@ const deserializeTransactions = (parser, size, txCodecs) => {
 	const transactions = [];
 	let remainingBytes = size;
 	while (0 < remainingBytes) {
+		const initialBytes = parser.numUnprocessedBytes();
 		const transactionSize = parser.uint32();
 		if (transactionSize < constants.sizes.transactionHeader)
 			throw Error('transaction must contain complete transaction header');
@@ -67,7 +68,8 @@ const deserializeTransactions = (parser, size, txCodecs) => {
 			codecs.push(createThrowawayConsumingCodec(transactionSize - constants.sizes.transactionHeader));
 
 		codecs.forEach(codec => {
-			Object.assign(entity, codec.deserialize(parser, transactionSize, txCodecs));
+			const preprocessedBytes = initialBytes - parser.numUnprocessedBytes();
+			Object.assign(entity, codec.deserialize(parser, transactionSize, txCodecs, preprocessedBytes));
 		});
 
 		transactions.push(entity);
@@ -112,13 +114,15 @@ class ModelCodecBuilder {
 
 			deserialize: (parser, options) => {
 				// get codecs for the current entity (and ignore the verifiableEntity codec)
+				const initialBytes = parser.numUnprocessedBytes();
 				const size = parser.uint32();
 				const entity = verifiableEntityCodec.deserialize(parser);
 				const codecs = findCodecs(entity.type, txCodecs);
 				codecs.shift();
 
 				codecs.forEach(codec => {
-					Object.assign(entity, codec.deserialize(parser, size, txCodecs));
+					const preprocessedBytes = initialBytes - parser.numUnprocessedBytes();
+					Object.assign(entity, codec.deserialize(parser, size, txCodecs, preprocessedBytes));
 				});
 
 				// if it's a block with transactions, also deserialize them

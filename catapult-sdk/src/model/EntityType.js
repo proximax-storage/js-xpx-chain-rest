@@ -36,6 +36,15 @@ const EntityType = {
 	/** Alias mosaic transaction. */
 	aliasMosaic: 0x434E,
 
+	/** Metadata address modification transaction. */
+	metadataAddress: 0x413D,
+
+	/** Metadata mosaic modification transaction. */
+	metadataMosaic: 0x423D,
+
+	/** Metadata namespace modification transaction. */
+	metadataNamespace: 0x433D,
+
 	/** Mosaic definition transaction. */
 	mosaicDefinition: 0x414D,
 
