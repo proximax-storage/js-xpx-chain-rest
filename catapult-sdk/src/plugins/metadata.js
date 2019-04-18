@@ -62,12 +62,12 @@ const contractPlugin = {
 	registerCodecs: codecBuilder => {
 		const readModifications = function (parser) {
 			const modification = {};
-			const size = parser.uint32();
+			modification.size = parser.uint32();
 			modification.modificationType = parser.uint8();
 			const keySize = parser.uint8();
 			const valueSize = parser.uint16();
 
-			if (size !== 4 + 1 + 1 + 2 + keySize + valueSize) throw Error('metadata modification must is wrong size');
+			if (modification.size !== 4 + 1 + 1 + 2 + keySize + valueSize) throw Error('metadata modification must is wrong size');
 
 			if (keySize !== 0)
 				modification.key = parser.buffer(keySize);
@@ -78,14 +78,20 @@ const contractPlugin = {
 			return modification;
 		};
 
-		const deserialize = function (parser, metadataIdParser) {
+		const deserialize = function (parser, bodySize, metadataIdParser) {
 			const transaction = {};
+			const initialBytes = parser.numUnprocessedBytes();
 			transaction.metadataType = parser.uint8();
 			transaction.metadataId = metadataIdParser(parser);
+			let modificationsSize = bodySize - (initialBytes - parser.numUnprocessedBytes());
 
 			transaction.modifications = [];
-			while (0 < parser.numUnprocessedBytes())
-				transaction.modifications.push(readModifications(parser));
+			while (0 < modificationsSize) {
+				const modification = readModifications(parser);
+				modificationsSize -= modification.size;
+				delete modification.size;
+				transaction.modifications.push(modification);
+			}
 
 			return transaction;
 		};
@@ -110,9 +116,9 @@ const contractPlugin = {
 		};
 
 		codecBuilder.addTransactionSupport(EntityType.metadataAddress, {
-			deserialize: parser => {
+			deserialize: (parser, size, txCodecs, preprocessedBytes) => {
 				const addressParser = p => p.buffer(constants.sizes.addressDecoded);
-				return deserialize(parser, addressParser);
+				return deserialize(parser, size - preprocessedBytes, addressParser);
 			},
 
 			serialize: (transaction, serializer) => {
@@ -122,9 +128,9 @@ const contractPlugin = {
 		});
 
 		codecBuilder.addTransactionSupport(EntityType.metadataMosaic, {
-			deserialize: parser => {
+			deserialize: (parser, size, txCodecs, preprocessedBytes) => {
 				const addressParser = p => p.uint64();
-				return deserialize(parser, addressParser);
+				return deserialize(parser, size - preprocessedBytes, addressParser);
 			},
 
 			serialize: (transaction, serializer) => {
@@ -134,9 +140,9 @@ const contractPlugin = {
 		});
 
 		codecBuilder.addTransactionSupport(EntityType.metadataNamespace, {
-			deserialize: parser => {
+			deserialize: (parser, size, txCodecs, preprocessedBytes) => {
 				const addressParser = p => p.uint64();
-				return deserialize(parser, addressParser);
+				return deserialize(parser, size - preprocessedBytes, addressParser);
 			},
 
 			serialize: (transaction, serializer) => {

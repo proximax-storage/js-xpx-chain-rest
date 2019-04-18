@@ -58,11 +58,14 @@ const createSubTransactionCodec = txCodecs => {
 		},
 
 		deserialize: parser => {
+			const bytesBeforeHeader = parser.numUnprocessedBytes();
 			const size = parser.uint32();
 			const entity = embeddedEntityCodec.deserialize(parser);
+			const bytesAfterHeader = parser.numUnprocessedBytes();
 
+			const preprocessedBytes = size - (bytesBeforeHeader - bytesAfterHeader);
 			const txCodec = getTxCodec(entity.type);
-			Object.assign(entity, txCodec.deserialize(parser));
+			Object.assign(entity, txCodec.deserialize(parser, size, [txCodec], preprocessedBytes));
 			return { size, entity };
 		},
 
