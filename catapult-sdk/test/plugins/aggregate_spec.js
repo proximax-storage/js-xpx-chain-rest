@@ -49,7 +49,7 @@ describe('aggregate plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 3);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 4);
 			expect(modelSchema).to.contain.all.keys(['aggregateComplete', 'aggregateBonded', 'aggregate.cosignature']);
 
 			// - aggregate

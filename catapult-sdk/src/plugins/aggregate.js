@@ -104,6 +104,13 @@ const aggregatePlugin = {
 			signature: ModelType.binary,
 			parentHash: ModelType.binary
 		});
+
+		builder.addSchema('aggregate.cosignatureWithMetadata', {
+			signer: ModelType.binary,
+			signature: ModelType.binary,
+			parentHash: ModelType.binary,
+			meta: { type: ModelType.object, schemaName: 'topicMetadata' }
+		});
 	},
 
 	registerCodecs: codecBuilder => {
