@@ -16,6 +16,9 @@ tags:
 - name: Blockchain routes
   description: |
     [Block](https://nemtech.github.io/concepts/block.html) related endpoints.
+- name: Contract routes
+  description: |
+    [Contract TODO](https://nemtech.github.io/concepts/mosaic.html) related endpoints.
 - name: Metadata routes
   description: |
     [Metadata TODO](https://nemtech.github.io/concepts/mosaic.html) related endpoints.
@@ -650,6 +653,116 @@ paths:
           description: success
           schema:
             $ref: '#/definitions/BlockchainStorageInfoDTO'
+  '/account/{publicKey}/contracts':
+    get:
+      tags:
+      - Contract routes
+      summary: Get contract of account
+      description: Gets the contract for a given publicKey.
+      operationId: getAccountContract
+      produces:
+      - application/json
+      parameters:
+      - name: publicKey
+        in: path
+        description: The account identifier.
+        type: string
+        format: hex
+        required: true
+      responses:
+        '200':
+          description: success
+          schema:
+            $ref: '#/definitions/ContractInfoDTO'
+        '404':
+          description: resource not found
+        '409':
+          description: invalid argument
+  '/contract/{accountId}':
+    get:
+      tags:
+      - Contract routes
+      summary: Get contract of account
+      description: Gets the contract for a given accountId.
+      operationId: getContract
+      produces:
+      - application/json
+      parameters:
+      - name: accountId
+        in: path
+        description: The account identifier.
+        type: string
+        format: hex
+        required: true
+      responses:
+        '200':
+          description: success
+          schema:
+            $ref: '#/definitions/ContractInfoDTO'
+        '404':
+          description: resource not found
+        '409':
+          description: invalid argument
+  '/account/contracts':
+    post:
+      tags:
+      - Contract routes
+      summary: Get contracts for an array of publicKeys
+      description: Gets an array of contracts.
+      operationId: getAccountContracts
+      produces:
+      - application/json
+      parameters:
+      - name: publicKeys
+        in: body
+        description: An array of public keys.
+        required: true
+        schema:
+          $ref: '#/definitions/publicKeys'
+      responses:
+        '200':
+          description: success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ContractInfoDTO'
+        '400':
+          description: invalid content
+        '409':
+          description: invalid argument
+  '/contract':
+    post:
+      tags:
+      - Contract routes
+      summary: Get contracts for an array of publicKeys or addresses
+      description: Gets an array of contracts.
+      operationId: getContracts
+      produces:
+      - application/json
+      parameters:
+      - name: publicKeys
+        in: body
+        description: An array of public keys.
+        required: true
+        schema:
+          $ref: '#/definitions/publicKeys'
+      - name: addresses
+        in: body
+        description: An array of addresses.
+        required: true
+        schema:
+          $ref: '#/definitions/addresses'
+      responses:
+        '200':
+          description: success
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ContractInfoDTO'
+        '400':
+          description: invalid content
+        '409':
+          description: invalid argument
   '/account/{accountId}/metadata':
     get:
       tags:
@@ -1290,6 +1403,53 @@ definitions:
         example:
         - C14+w2br1wkUdGm/SNSlBwCvcksjWBkBXg==
         - Ul6vmYP5TAEIOMMcDoHz6sn7bCdpjBaE+Q==
+  ContractInfoDTO:
+    type: object
+    required:
+    - contract
+    properties:
+      contract:
+        $ref: '#/definitions/ContractDTO'
+  ContractDTO:
+    type: object
+    required:
+    - multisig
+    - multisigAddress
+    - start
+    - duration
+    - hash
+    - customers
+    - executors
+    - verifiers
+    properties:
+      multisig:
+        type: string
+        example: "EB8923957301F796C884977234D20B0388A3AD6F865F1ACC7D3A94AFF597D59D"
+      multisigAddress:
+        type: string
+        example: "905BD08D85AF3224A62C2EDAB004CFF4432271E662B333BA34"
+      start:
+        $ref: '#/definitions/UInt64DTO'
+      duration:
+        $ref: '#/definitions/UInt64DTO'
+      hash:
+        type: string
+        example: "D8E06B597BEE34263E9C970A50B5341783EFF67EF00637644C114447BE1905DA"
+      customers:
+        type: array
+        items:
+          type: string
+          example: "A93FEB7F051F4258C73FE0BD009F50F1E71DBA8A88B6E248ECDF560D9A9AB7C3"
+      executors:
+        type: array
+        items:
+          type: string
+          example: "8599BA6DB5B81BB69F96B88DD80A3B9EB7BBF8849CBD979100E89D69C30356E0"
+      verifiers:
+        type: array
+        items:
+          type: string
+          example: "3DCB6E5EFF4D63A38902EF948E895B01D6EA497EBF84B1460C14CA5BEDCAD9F3"
   MultisigAccountGraphInfoDTO:
     type: object
     required:
@@ -1453,7 +1613,7 @@ definitions:
       metadataType:
         type: integer
         example: 1
-      fields:        
+      fields:
         type: array
         items:
           $ref: '#/definitions/FieldDTO'
@@ -1478,14 +1638,14 @@ definitions:
         $ref: '#/definitions/AddressMetadataDTO'
   AddressMetadataDTO:
     allOf:
-      - $ref: '#/definitions/MetadataDTO'
-      - type: object
-        required:
-        - metadataId
-        properties:
-          metadataId:
-            type: string
-            example: "90936FF3536858CBEA8EE0EAAB99FE9EC4EF5EF1F66366569A"
+    - $ref: '#/definitions/MetadataDTO'
+    - type: object
+      required:
+      - metadataId
+      properties:
+        metadataId:
+          type: string
+          example: "90936FF3536858CBEA8EE0EAAB99FE9EC4EF5EF1F66366569A"
   MosaicMetadataInfoDTO:
     type: object
     required:
@@ -1495,16 +1655,16 @@ definitions:
         $ref: '#/definitions/MosaicMetadataDTO'
   MosaicMetadataDTO:
     allOf:
-      - $ref: '#/definitions/MetadataDTO'
-      - type: object
-        required:
-        - metadataId
-        properties:
-          metadataType:
-            type: integer
-            example: 2
-          metadataId:
-            $ref: '#/definitions/UInt64DTO'
+    - $ref: '#/definitions/MetadataDTO'
+    - type: object
+      required:
+      - metadataId
+      properties:
+        metadataType:
+          type: integer
+          example: 2
+        metadataId:
+          $ref: '#/definitions/UInt64DTO'
   NamespaceMetadataInfoDTO:
     type: object
     required:
@@ -1514,16 +1674,16 @@ definitions:
         $ref: '#/definitions/NamespaceMetadataDTO'
   NamespaceMetadataDTO:
     allOf:
-      - $ref: '#/definitions/MetadataDTO'
-      - type: object
-        required:
-        - metadataId
-        properties:
-          metadataType:
-            type: integer
-            example: 3
-          metadataId:
-            $ref: '#/definitions/UInt64DTO'
+    - $ref: '#/definitions/MetadataDTO'
+    - type: object
+      required:
+      - metadataId
+      properties:
+        metadataType:
+          type: integer
+          example: 3
+        metadataId:
+          $ref: '#/definitions/UInt64DTO'
   MosaicDTO:
     type: object
     required:
@@ -1800,6 +1960,16 @@ definitions:
         example:
         - SDRDGFTDLLCB67D4HPGIMIHPNSRYRJRT7DOBGWZY
         - SBCPGZ3S2SCC3YHBBTYDCUZV4ZZEPHM2KGCP4QXX
+  publicKeys:
+    type: object
+    properties:
+      publicKeys:
+        type: array
+        items:
+          type: string
+        example:
+        - "8599BA6DB5B81BB69F96B88DD80A3B9EB7BBF8849CBD979100E89D69C30356E0"
+        - "3DCB6E5EFF4D63A38902EF948E895B01D6EA497EBF84B1460C14CA5BEDCAD9F3"
   transactionIds:
     type: object
     properties:
