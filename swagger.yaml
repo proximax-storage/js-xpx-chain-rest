@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  version: 1.0.12
+  version: 1.0.13
   title: Catapult REST API Reference
   license:
     name: Apache 2.0
@@ -740,12 +740,6 @@ paths:
       produces:
       - application/json
       parameters:
-      - name: publicKeys
-        in: body
-        description: An array of public keys.
-        required: true
-        schema:
-          $ref: '#/definitions/publicKeys'
       - name: addresses
         in: body
         description: An array of addresses.
@@ -2027,5 +2021,5 @@ definitions:
     - lower
     - higher
 externalDocs:
-  description: NEM Developer Center
-  url: 'https://nemtech.github.io/'
+  description: ProximaX Developer Center
+  url: 'https://proximax.io/'
