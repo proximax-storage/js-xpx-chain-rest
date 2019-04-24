@@ -84,9 +84,9 @@ const contractPlugin = {
 				serializer.writeUint64(transaction.DurationDelta);
 				serializer.writeBuffer(transaction.Hash);
 
-				const CustomerModificationCount = transaction.CustomerModifications.length;
-				const ExecutorModificationCount = transaction.ExecutorModifications.length;
-				const VerifierModificationCount = transaction.VerifierModifications.length;
+				const CustomerModificationCount = transaction.customers.length;
+				const ExecutorModificationCount = transaction.executors.length;
+				const VerifierModificationCount = transaction.verifiers.length;
 				serializer.writeUint8(CustomerModificationCount);
 				serializer.writeUint8(ExecutorModificationCount);
 				serializer.writeUint8(VerifierModificationCount);
@@ -98,9 +98,9 @@ const contractPlugin = {
 					});
 				};
 
-				writeModifications(transaction.CustomerModifications);
-				writeModifications(transaction.ExecutorModifications);
-				writeModifications(transaction.VerifierModifications);
+				writeModifications(transaction.customers);
+				writeModifications(transaction.executors);
+				writeModifications(transaction.verifiers);
 			}
 		});
 	}
