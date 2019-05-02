@@ -19,9 +19,10 @@
  */
 
 const catapult = require('catapult-sdk');
+const { longToUint64 } = require('./dbUtils');
 
 const { ModelType, status } = catapult.model;
-const { convert, uint64 } = catapult.utils;
+const { convert } = catapult.utils;
 const size = {
 	uint64: 8
 };
@@ -35,7 +36,7 @@ module.exports = {
 		const buffer = value.buffer instanceof ArrayBuffer ? value : value.buffer;
 
 		if (buffer.length === size.uint64)
-			return uint64.fromBytes(buffer);
+			return longToUint64(buffer);
 		return convert.uint8ToHex(buffer);
 	},
 	[ModelType.objectId]: value => value.toHexString().toUpperCase(),
