@@ -22,11 +22,19 @@ const catapult = require('catapult-sdk');
 
 const { ModelType, status } = catapult.model;
 const { convert } = catapult.utils;
+const size = {
+	uint64dto: 2
+};
 
 module.exports = {
 	[ModelType.none]: value => value,
 	[ModelType.binary]: value => convert.uint8ToHex(value),
 	[ModelType.uint64]: value => value,
+	[ModelType.metadataId]: value => {
+		if (size.uint64dto === value.length)
+			return value;
+		return convert.uint8ToHex(value);
+	},
 	[ModelType.string]: value => value.toString(),
 	[ModelType.statusCode]: status.toString
 };
