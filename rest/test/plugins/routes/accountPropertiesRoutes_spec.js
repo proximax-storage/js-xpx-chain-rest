@@ -54,7 +54,7 @@ describe('account properties routes', () => {
 				}
 			},
 			dbApiName: 'accountPropertiesByAddresses',
-			type: 'accountProperties.accountProperties',
+			type: 'accountProperties',
 			config
 		});
 	});
@@ -83,7 +83,7 @@ describe('account properties routes', () => {
 				}
 			},
 			dbApiName: 'accountPropertiesByAddresses',
-			type: 'accountProperties.accountProperties',
+			type: 'accountProperties',
 			config
 		});
 	});

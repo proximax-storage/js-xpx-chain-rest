@@ -24,20 +24,13 @@ const test = require('../binaryTestUtils');
 const { expect } = require('chai');
 
 const accountPropertiesPlugin = require('../../src/plugins/accountProperties');
-
-const propertyTypeBlockOffset = 128;
-const PropertyType = Object.freeze({
-	addressAllow: 1,
-	addressBlock: 1 + propertyTypeBlockOffset,
-	mosaicAllow: 2,
-	mosaicBlock: 2 + propertyTypeBlockOffset,
-	entityTypeAllow: 4,
-	entityTypeBlock: 4 + propertyTypeBlockOffset
-});
+const { PropertyType } = require('../../src/plugins/accountProperties');
 
 describe('account properties plugin', () => {
 	describe('property types enumeration', () => {
 		it('contains valid values', () => {
+			const propertyTypeBlockOffset = 128;
+
 			// Assert:
 			expect(PropertyType.addressAllow).to.equal(1);
 			expect(PropertyType.addressBlock).to.equal(1 + propertyTypeBlockOffset);
@@ -59,14 +52,19 @@ describe('account properties plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 6);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 11);
 			expect(modelSchema).to.contain.all.keys([
 				'accountPropertiesAddress',
 				'accountPropertiesMosaic',
 				'accountPropertiesEntityType',
-				'accountProperties.modificationType',
+				'accountProperties.addressModificationType',
+				'accountProperties.mosaicModificationType',
+				'accountProperties.entityTypeModificationType',
+				'accountProperties',
 				'accountProperties.accountProperties',
-				'accountProperties.accountProperty'
+				'accountProperties.addressAccountProperty',
+				'accountProperties.mosaicAccountProperty',
+				'accountProperties.entityTypeAccountProperty'
 			]);
 
 			// - accountPropertiesAddress
@@ -81,17 +79,37 @@ describe('account properties plugin', () => {
 			expect(Object.keys(modelSchema.accountPropertiesEntityType).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
 			expect(modelSchema.accountPropertiesEntityType).to.contain.all.keys(['modifications']);
 
-			// - accountProperties.modificationType
-			expect(Object.keys(modelSchema['accountProperties.modificationType']).length).to.equal(1);
-			expect(modelSchema['accountProperties.modificationType']).to.contain.all.keys(['value']);
+			// - accountProperties
+			expect(Object.keys(modelSchema['accountProperties']).length).to.equal(1);
+			expect(modelSchema['accountProperties']).to.contain.all.keys(['accountProperties']);
+
+			// - accountProperties.addressModificationType
+			expect(Object.keys(modelSchema['accountProperties.addressModificationType']).length).to.equal(1);
+			expect(modelSchema['accountProperties.addressModificationType']).to.contain.all.keys(['value']);
+
+			// - accountProperties.mosaicModificationType
+			expect(Object.keys(modelSchema['accountProperties.mosaicModificationType']).length).to.equal(1);
+			expect(modelSchema['accountProperties.mosaicModificationType']).to.contain.all.keys(['value']);
+
+			// - accountProperties.entityTypeModificationType
+			expect(Object.keys(modelSchema['accountProperties.entityTypeModificationType']).length).to.equal(1);
+			expect(modelSchema['accountProperties.entityTypeModificationType']).to.contain.all.keys(['value']);
 
 			// - accountProperties.accountProperties
 			expect(Object.keys(modelSchema['accountProperties.accountProperties']).length).to.equal(2);
 			expect(modelSchema['accountProperties.accountProperties']).to.contain.all.keys(['address', 'properties']);
 
-			// - accountProperties.accountProperty
-			expect(Object.keys(modelSchema['accountProperties.accountProperty']).length).to.equal(1);
-			expect(modelSchema['accountProperties.accountProperty']).to.contain.all.keys(['values']);
+			// - accountProperties.addressAccountProperty
+			expect(Object.keys(modelSchema['accountProperties.addressAccountProperty']).length).to.equal(1);
+			expect(modelSchema['accountProperties.addressAccountProperty']).to.contain.all.keys(['values']);
+
+			// - accountProperties.mosaicAccountProperty
+			expect(Object.keys(modelSchema['accountProperties.mosaicAccountProperty']).length).to.equal(1);
+			expect(modelSchema['accountProperties.mosaicAccountProperty']).to.contain.all.keys(['values']);
+
+			// - accountProperties.entityTypeAccountProperty
+			expect(Object.keys(modelSchema['accountProperties.entityTypeAccountProperty']).length).to.equal(1);
+			expect(modelSchema['accountProperties.entityTypeAccountProperty']).to.contain.all.keys(['values']);
 		});
 	});
 

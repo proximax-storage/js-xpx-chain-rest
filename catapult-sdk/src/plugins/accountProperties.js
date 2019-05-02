@@ -50,28 +50,83 @@ const accountPropertiesCreateBaseCodec = valueCodec => ({
 	}
 });
 
+const propertyTypeBlockOffset = 128;
+const PropertyTypeFlags = Object.freeze({
+	address: 1,
+	mosaic: 2,
+	entityType: 4
+});
+
 /**
  * Creates an accountProperties plugin.
  * @type {module:plugins/CatapultPlugin}
  */
 const accountPropertiesPlugin = {
+	PropertyType: Object.freeze({
+		addressAllow: PropertyTypeFlags.address,
+		addressBlock: PropertyTypeFlags.address + propertyTypeBlockOffset,
+		mosaicAllow: PropertyTypeFlags.mosaic,
+		mosaicBlock: PropertyTypeFlags.mosaic + propertyTypeBlockOffset,
+		entityTypeAllow: PropertyTypeFlags.entityType,
+		entityTypeBlock: PropertyTypeFlags.entityType + propertyTypeBlockOffset
+	}),
+
 	registerSchema: builder => {
-		const modificationTypeSchema = {
-			modifications: { type: ModelType.array, schemaName: 'accountProperties.modificationType' }
-		};
-		builder.addTransactionSupport(EntityType.accountPropertiesAddress, modificationTypeSchema);
-		builder.addTransactionSupport(EntityType.accountPropertiesMosaic, modificationTypeSchema);
-		builder.addTransactionSupport(EntityType.accountPropertiesEntityType, modificationTypeSchema);
-		builder.addSchema('accountProperties.modificationType', {
+		// transaction schema for account property transactions
+		const modificationTypeSchema = modificationsSchemaName => ({
+			modifications: { type: ModelType.array, schemaName: modificationsSchemaName }
+		});
+		builder.addTransactionSupport(
+			EntityType.accountPropertiesAddress,
+			modificationTypeSchema('accountProperties.addressModificationType')
+		);
+		builder.addTransactionSupport(
+			EntityType.accountPropertiesMosaic,
+			modificationTypeSchema('accountProperties.mosaicModificationType')
+		);
+		builder.addTransactionSupport(
+			EntityType.accountPropertiesEntityType,
+			modificationTypeSchema('accountProperties.entityTypeModificationType')
+		);
+		builder.addSchema('accountProperties.addressModificationType', {
 			value: ModelType.binary
 		});
+		builder.addSchema('accountProperties.mosaicModificationType', {
+			value: ModelType.uint64
+		});
+		builder.addSchema('accountProperties.entityTypeModificationType', {
+			value: ModelType.uint16
+		});
 
+		// aggregated account property assets
+		builder.addSchema('accountProperties', {
+			accountProperties: { type: ModelType.object, schemaName: 'accountProperties.accountProperties'}
+		});
 		builder.addSchema('accountProperties.accountProperties', {
 			address: ModelType.binary,
-			properties: { type: ModelType.array, schemaName: 'accountProperties.accountProperty' }
+			properties: {
+				type: ModelType.array,
+				schemaName: entity => {
+					const propertyType = entity.propertyType & 0x7F;
+					if (propertyType === PropertyTypeFlags.address)
+						return 'accountProperties.addressAccountProperty';
+
+					else if (propertyType === PropertyTypeFlags.mosaic)
+						return 'accountProperties.mosaicAccountProperty';
+
+					else if (propertyType === PropertyTypeFlags.entityType)
+						return 'accountProperties.entityTypeAccountProperty';
+				}
+			}
 		});
-		builder.addSchema('accountProperties.accountProperty', {
-			values: ModelType.binary
+		builder.addSchema('accountProperties.addressAccountProperty', {
+			values: { type: ModelType.array, schemaName: ModelType.binary }
+		});
+		builder.addSchema('accountProperties.mosaicAccountProperty', {
+			values: { type: ModelType.array, schemaName: ModelType.uint64 }
+		});
+		builder.addSchema('accountProperties.entityTypeAccountProperty', {
+			values: { type: ModelType.array, schemaName: ModelType.uint16 }
 		});
 	},
 

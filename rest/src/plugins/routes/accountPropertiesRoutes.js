@@ -31,7 +31,7 @@ module.exports = {
 			? address.publicKeyToAddress(accountId, networkInfo.networks[services.config.network.name].id)
 			: accountId);
 
-		const accountPropertiesSender = routeUtils.createSender('accountProperties.accountProperties');
+		const accountPropertiesSender = routeUtils.createSender('accountProperties');
 
 		server.get('/account/properties/:accountId', (req, res, next) => {
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
