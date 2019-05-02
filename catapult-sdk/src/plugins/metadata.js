@@ -19,18 +19,18 @@ const contractPlugin = {
 	registerSchema: builder => {
 
 		builder.addTransactionSupport(EntityType.metadataAddress, {
-			metadataType: { type: ModelType.uint8, schemaName: 'modifyMetadata.metadataType' },
-			metadataId: { type: ModelType.binary, schemaName: 'modifyMetadata.metadataId' },
+			metadataType: ModelType.uint8,
+			metadataId: ModelType.metadataId,
 			modifications: { type: ModelType.array, schemaName: 'modifyMetadata.modification' }
 		});
 		builder.addTransactionSupport(EntityType.metadataMosaic, {
-			metadataType: { type: ModelType.uint8, schemaName: 'modifyMetadata.metadataType' },
-			metadataId: { type: ModelType.uint64, schemaName: 'modifyMetadata.metadataId' },
+			metadataType: ModelType.uint8,
+			metadataId: ModelType.metadataId,
 			modifications: { type: ModelType.array, schemaName: 'modifyMetadata.modification' }
 		});
 		builder.addTransactionSupport(EntityType.metadataNamespace, {
-			metadataType: { type: ModelType.uint8, schemaName: 'modifyMetadata.metadataType' },
-			metadataId: { type: ModelType.uint64, schemaName: 'modifyMetadata.metadataId' },
+			metadataType: ModelType.uint8,
+			metadataId: ModelType.metadataId,
 			modifications: { type: ModelType.array, schemaName: 'modifyMetadata.modification' }
 		});
 
