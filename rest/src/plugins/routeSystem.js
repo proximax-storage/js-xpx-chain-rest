@@ -24,6 +24,7 @@ const aggregate = require('./aggregate');
 const empty = require('./empty');
 const lock = require('./lock');
 const MessageChannelBuilder = require('../connection/MessageChannelBuilder');
+const metadata = require('./metadata');
 const mosaic = require('./mosaic');
 const multisig = require('./multisig');
 const contract = require('./contract');
@@ -31,7 +32,7 @@ const namespace = require('./namespace');
 const receipts = require('./receipts');
 
 const plugins = {
-	accountLink, accountProperties, aggregate, contract, lock, mosaic, multisig, namespace, receipts, transfer: empty
+	accountLink, accountProperties, aggregate, contract, lock, metadata, mosaic, multisig, namespace, receipts, transfer: empty
 };
 
 module.exports = {

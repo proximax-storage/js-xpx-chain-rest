@@ -146,7 +146,9 @@ describe('zmq service', () => {
 			]),
 
 			entityHash: Buffer.from(test.random.hash()),
-			generationHash: Buffer.from(test.random.hash())
+			generationHash: Buffer.from(test.random.hash()),
+			channelName: 'block',
+			address: Buffer.of(0x6A, 0xCA, 0x80, 0xE4, 0xD8, 0xF2, 0x9F)
 		});
 
 		it('forwards messages to subscribed handlers', () => {
@@ -185,7 +187,11 @@ describe('zmq service', () => {
 							type: 'blockHeaderWithMetadata',
 							payload: {
 								block: blockBuffers.block,
-								meta: { hash: blockBuffers.entityHash, generationHash: blockBuffers.generationHash }
+								meta: {
+									hash: blockBuffers.entityHash,
+									generationHash: blockBuffers.generationHash,
+									channelName: blockBuffers.channelName,
+									address: blockBuffers.address }
 							}
 						});
 						resolve();
@@ -197,7 +203,9 @@ describe('zmq service', () => {
 						zsocket.send(marker, zmq.ZMQ_SNDMORE);
 						zsocket.send(blockBuffers.block, zmq.ZMQ_SNDMORE);
 						zsocket.send(blockBuffers.entityHash, zmq.ZMQ_SNDMORE);
-						zsocket.send(blockBuffers.generationHash);
+						zsocket.send(blockBuffers.generationHash, zmq.ZMQ_SNDMORE);
+						zsocket.send(blockBuffers.channelName, zmq.ZMQ_SNDMORE);
+						zsocket.send(blockBuffers.address);
 					}, 100);
 				});
 			});

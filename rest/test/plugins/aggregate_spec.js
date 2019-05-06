@@ -92,18 +92,22 @@ describe('aggregate plugin', () => {
 				Buffer.alloc(test.constants.sizes.signature, 44),
 				Buffer.alloc(test.constants.sizes.hash256, 55)
 			]);
-			handler({}, eventData => emitted.push(eventData))(22, buffer, 99);
+			handler({}, eventData => emitted.push(eventData))([0, 22], buffer, 99);
 
 			// Assert:
-			// - 22 is a "topic" so it's not forwarded
+			// - [0, 22] is a "topic" so it's forwarded without first element
 			// - trailing param 99 should be ignored
 			expect(emitted.length).to.equal(1);
 			expect(emitted[0]).to.deep.equal({
-				type: 'aggregate.cosignature',
+				type: 'aggregate.cosignatureWithMetadata',
 				payload: {
 					signer: Buffer.alloc(test.constants.sizes.signer, 33),
 					signature: Buffer.alloc(test.constants.sizes.signature, 44),
-					parentHash: Buffer.alloc(test.constants.sizes.hash256, 55)
+					parentHash: Buffer.alloc(test.constants.sizes.hash256, 55),
+					meta: {
+						address: [22],
+						channelName: 'cosignature'
+					}
 				}
 			});
 		});

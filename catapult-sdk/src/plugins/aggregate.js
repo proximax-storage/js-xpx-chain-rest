@@ -58,11 +58,14 @@ const createSubTransactionCodec = txCodecs => {
 		},
 
 		deserialize: parser => {
+			const bytesBeforeHeader = parser.numUnprocessedBytes();
 			const size = parser.uint32();
 			const entity = embeddedEntityCodec.deserialize(parser);
+			const bytesAfterHeader = parser.numUnprocessedBytes();
 
+			const preprocessedBytes = bytesBeforeHeader - bytesAfterHeader;
 			const txCodec = getTxCodec(entity.type);
-			Object.assign(entity, txCodec.deserialize(parser));
+			Object.assign(entity, txCodec.deserialize(parser, size, [txCodec], preprocessedBytes));
 			return { size, entity };
 		},
 
@@ -100,6 +103,13 @@ const aggregatePlugin = {
 			signer: ModelType.binary,
 			signature: ModelType.binary,
 			parentHash: ModelType.binary
+		});
+
+		builder.addSchema('aggregate.cosignatureWithMetadata', {
+			signer: ModelType.binary,
+			signature: ModelType.binary,
+			parentHash: ModelType.binary,
+			meta: { type: ModelType.object, schemaName: 'topicMetadata' }
 		});
 	},
 

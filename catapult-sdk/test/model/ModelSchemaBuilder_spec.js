@@ -68,6 +68,7 @@ describe('model schema builder', () => {
 			// Assert:
 			expect(schemaRootProperties).to.deep.equal([
 				'verifiableEntity',
+				'topicMetadata',
 
 				'blockHeader',
 				'blockHeaderMetadata',
@@ -146,6 +147,7 @@ describe('model schema builder', () => {
 
 				'transactionWithMetadata.meta',
 				'transactionWithMetadata.transaction',
+				'transactionStatus.meta',
 				'account.reputation',
 				'accountWithMetadata.meta',
 				'accountWithMetadata.account',
@@ -179,11 +181,13 @@ describe('model schema builder', () => {
 				'verifiableEntity.signature',
 				'verifiableEntity.signer',
 
+				'topicMetadata.address',
 				'blockHeader.previousBlockHash',
 				'blockHeader.blockTransactionsHash',
 				'blockHeader.stateHash',
 				'blockHeader.signature',
 				'blockHeader.signer',
+				'blockHeaderMetadata.address',
 				'blockHeaderMetadata.hash',
 				'blockHeaderMetadata.generationHash',
 				'blockHeaderMetadata.subCacheMerkleRoots.schemaName',
@@ -191,6 +195,7 @@ describe('model schema builder', () => {
 
 				'transaction.signature',
 				'transaction.signer',
+				'transactionMetadata.address',
 				'transactionMetadata.aggregateHash',
 				'transactionMetadata.hash',
 				'transactionMetadata.merkleComponentHash',

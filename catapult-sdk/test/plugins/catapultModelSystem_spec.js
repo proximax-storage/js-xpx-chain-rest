@@ -49,6 +49,7 @@ describe('catapult model system', () => {
 				'aggregate',
 				'contract',
 				'lock',
+				'metadata',
 				'mosaic',
 				'multisig',
 				'namespace',

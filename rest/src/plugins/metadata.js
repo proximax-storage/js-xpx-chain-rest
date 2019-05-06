@@ -4,23 +4,24 @@
  *** license that can be found in the LICENSE file.
  **/
 
-/** @module plugins/contract */
-const ContractDb = require('./db/ContractDb');
-const contractRoutes = require('./routes/contractRoutes');
+
+/** @module plugins/metadata */
+const MetadataDb = require('./db/MetadataDb');
+const metadataRoutes = require('./routes/metadataRoutes');
 
 /**
- * Creates a contract plugin.
+ * Creates a metadata plugin.
  * @type {module:plugins/CatapultRestPlugin}
  */
 
 module.exports = {
-	createDb: db => new ContractDb(db),
+	createDb: db => new MetadataDb(db),
 
 	registerTransactionStates: () => {},
 
 	registerMessageChannels: () => {},
 
 	registerRoutes: (...args) => {
-		contractRoutes.register(...args);
+		metadataRoutes.register(...args);
 	}
 };

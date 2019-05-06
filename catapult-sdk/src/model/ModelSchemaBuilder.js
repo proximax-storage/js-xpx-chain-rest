@@ -38,6 +38,10 @@ class ModelSchemaBuilder {
 				signer: ModelType.binary
 			},
 
+			topicMetadata: {
+				address: ModelType.binary,
+			},
+
 			// endregion
 
 			// region block
@@ -51,6 +55,7 @@ class ModelSchemaBuilder {
 				stateHash: ModelType.binary
 			},
 			blockHeaderMetadata: {
+				address: ModelType.binary,
 				hash: ModelType.binary,
 				generationHash: ModelType.binary,
 				totalFee: ModelType.uint64,
@@ -76,6 +81,7 @@ class ModelSchemaBuilder {
 				fee: ModelType.uint64
 			},
 			transactionMetadata: {
+				address: ModelType.binary,
 				aggregateHash: ModelType.binary,
 				aggregateId: ModelType.objectId,
 				id: ModelType.objectId,
@@ -100,7 +106,8 @@ class ModelSchemaBuilder {
 				hash: ModelType.binary,
 				status: ModelType.statusCode,
 				deadline: ModelType.uint64,
-				height: ModelType.uint64
+				height: ModelType.uint64,
+				meta: { type: ModelType.object, schemaName: 'topicMetadata' }
 			},
 
 			// endregion
