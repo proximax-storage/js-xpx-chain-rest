@@ -316,7 +316,7 @@ paths:
         '409':
           description: invalid argument
 
-  '/account/properties/{accountId}':
+  '/account/{accountId}/properties':
     get:
       tags:
       - Account routes
