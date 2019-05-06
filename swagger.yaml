@@ -1330,9 +1330,9 @@ definitions:
     - addressHeight
     - publicKey
     - publicKeyHeight
+    - accountType
+    - linkedAccountKey
     - mosaics
-    - importance
-    - importanceHeight
     properties:
       address:
         type: string
@@ -1342,14 +1342,14 @@ definitions:
         type: string
       publicKeyHeight:
         $ref: '#/definitions/UInt64DTO'
+      accountType:
+        type: integer
+      linkedAccountKey:
+        type: string
       mosaics:
         type: array
         items:
           $ref: '#/definitions/MosaicDTO'
-      importance:
-        $ref: '#/definitions/UInt64DTO'
-      importanceHeight:
-        $ref: '#/definitions/UInt64DTO'
   AccountPropertiesInfoDTO:
     type: object
     required:

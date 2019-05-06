@@ -29,7 +29,7 @@ const ReceiptType = {
 	5: 'receipts.inflation'
 };
 
-const getBasicReceiptType = type => ReceiptType[(type & 0xF000) >> 12];
+const getBasicReceiptType = type => ReceiptType[(type & 0xF000) >> 12] || 'receipts.unknown';
 
 /**
  * Creates a receipts plugin.

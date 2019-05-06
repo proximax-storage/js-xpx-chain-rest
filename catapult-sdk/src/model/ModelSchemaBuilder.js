@@ -54,7 +54,7 @@ class ModelSchemaBuilder {
 				blockTransactionsHash: ModelType.binary,
 				blockReceiptsHash: ModelType.binary,
 				stateHash: ModelType.binary,
-				beneficiary: ModelType.binary
+				beneficiaryPublicKey: ModelType.binary
 			},
 			blockHeaderMetadata: {
 				address: ModelType.binary,
@@ -121,8 +121,7 @@ class ModelSchemaBuilder {
 				addressHeight: ModelType.uint64,
 				publicKey: ModelType.binary,
 				publicKeyHeight: ModelType.uint64,
-				importance: ModelType.uint64,
-				importanceHeight: ModelType.uint64,
+				linkedAccountKey: ModelType.binary,
 				mosaics: { type: ModelType.array, schemaName: 'mosaic' },
 				reputation: { type: ModelType.object, schemaName: 'reputation' }
 			},

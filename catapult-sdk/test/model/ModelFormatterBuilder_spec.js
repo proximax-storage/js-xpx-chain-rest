@@ -124,7 +124,7 @@ describe('model formatter builder', () => {
 					blockTransactionsHash: 0,
 					blockReceiptsHash: 0,
 					stateHash: 0,
-					beneficiary: 0
+					beneficiaryPublicKey: 0
 				}
 			});
 
@@ -150,7 +150,7 @@ describe('model formatter builder', () => {
 					blockTransactionsHash: 'binary',
 					blockReceiptsHash: 'binary',
 					stateHash: 'binary',
-					beneficiary: 'binary'
+					beneficiaryPublicKey: 'binary'
 				}
 			});
 		});
@@ -168,8 +168,8 @@ describe('model formatter builder', () => {
 					addressHeight: 0,
 					publicKey: 0,
 					publicKeyHeight: 0,
-					importance: 0,
-					importanceHeight: 0,
+					accountType: 0,
+					linkedAccountKey: 0,
 					mosaics: [
 						{ id: 0, amount: 0 },
 						{ id: 0, amount: 0 }
@@ -190,8 +190,8 @@ describe('model formatter builder', () => {
 					addressHeight: 'uint64',
 					publicKey: 'binary',
 					publicKeyHeight: 'uint64',
-					importance: 'uint64',
-					importanceHeight: 'uint64',
+					accountType: 'none',
+					linkedAccountKey: 'binary',
 					mosaics: [
 						{ id: 'uint64', amount: 'uint64' },
 						{ id: 'uint64', amount: 'uint64' }

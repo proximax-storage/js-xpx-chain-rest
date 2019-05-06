@@ -70,11 +70,6 @@ describe('message formatting rules', () => {
 		expect(result).to.deep.equal([1, 2]);
 	});
 
-	it('cannot format object id type', () => {
-		// Assert: objectId should never be written into messages, so it should be dropped
-		expect(Object.keys(formattingRules)).to.not.contain.key(ModelType.objectId);
-	});
-
 	it('can format string type', () => {
 		// Arrange:
 		const object = test.factory.createBinary(Buffer.from('6361746170756C74', 'hex'));

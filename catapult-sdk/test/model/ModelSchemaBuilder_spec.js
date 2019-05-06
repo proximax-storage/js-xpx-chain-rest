@@ -187,7 +187,7 @@ describe('model schema builder', () => {
 				'blockHeader.blockTransactionsHash',
 				'blockHeader.blockReceiptsHash',
 				'blockHeader.stateHash',
-				'blockHeader.beneficiary',
+				'blockHeader.beneficiaryPublicKey',
 				'blockHeader.signature',
 				'blockHeader.signer',
 				'blockHeaderMetadata.address',
@@ -207,6 +207,7 @@ describe('model schema builder', () => {
 
 				'account.address',
 				'account.publicKey',
+				'account.linkedAccountKey',
 
 				'nodeInfo.publicKey'
 			]);
@@ -232,8 +233,6 @@ describe('model schema builder', () => {
 
 				'account.addressHeight',
 				'account.publicKeyHeight',
-				'account.importance',
-				'account.importanceHeight',
 				'reputation.positiveInteractions',
 				'reputation.negativeInteractions',
 				'mosaic.id',
