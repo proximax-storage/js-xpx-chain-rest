@@ -18,24 +18,28 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const routeResultTypes = require('../../src/routes/routeResultTypes');
+const namespace = require('../../src/model/namespace');
 const { expect } = require('chai');
 
-describe('routeResultTypes', () => {
-	it('has correct links to schema', () => {
-		expect(Object.keys(routeResultTypes).length).to.equal(11);
-		expect(routeResultTypes).to.deep.equal({
-			account: 'accountWithMetadata',
-			block: 'blockHeaderWithMetadata',
-			transaction: 'transactionWithMetadata',
-			chainInfo: 'chainInfo',
-			merkleProofInfo: 'merkleProofInfo',
-			receipts: 'receipts',
-			transactionStatus: 'transactionStatus',
-			nodeInfo: 'nodeInfo',
-			nodeTime: 'nodeTime',
-			serverInfo: 'serverInfo',
-			storageInfo: 'storageInfo'
+describe('namespace', () => {
+	describe('alias type', () => {
+		it('exposes alias type types', () => {
+			// Assert:
+			expect(namespace.aliasType).to.deep.equal({
+				mosaic: 1,
+				address: 2
+			});
+		});
+
+		it('exposed values are unique', () => {
+			// Act:
+			const reverseMapping = Object.keys(namespace.aliasType).reduce((state, name) => {
+				state[namespace.aliasType[name]] = name;
+				return state;
+			}, {});
+
+			// Assert:
+			expect(Object.keys(namespace.aliasType).length).to.equal(Object.keys(reverseMapping).length);
 		});
 	});
 });

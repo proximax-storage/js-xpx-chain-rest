@@ -25,10 +25,11 @@ const ReceiptType = {
 	1: 'receipts.balanceTransfer',
 	2: 'receipts.balanceChange',
 	3: 'receipts.balanceChange',
-	4: 'receipts.artifactExpiry'
+	4: 'receipts.artifactExpiry',
+	5: 'receipts.inflation'
 };
 
-const getBasicReceiptType = type => ReceiptType[(type & 0xF000) >> 12];
+const getBasicReceiptType = type => ReceiptType[(type & 0xF000) >> 12] || 'receipts.unknown';
 
 /**
  * Creates a receipts plugin.
@@ -45,13 +46,13 @@ const receiptsPlugin = {
 		builder.addSchema('receipts.addressResolutionStatement', {
 			height: ModelType.uint64,
 			unresolved: ModelType.binary,
-			entries: { type: ModelType.array, schemaName: 'receipts.entry.address' }
+			resolutionEntries: { type: ModelType.array, schemaName: 'receipts.entry.address' }
 		});
 
 		builder.addSchema('receipts.mosaicResolutionStatement', {
 			height: ModelType.uint64,
 			unresolved: ModelType.uint64,
-			entries: { type: ModelType.array, schemaName: 'receipts.entry.mosaic' }
+			resolutionEntries: { type: ModelType.array, schemaName: 'receipts.entry.mosaic' }
 		});
 
 		builder.addSchema('receipts.transactionStatement', {
@@ -84,9 +85,15 @@ const receiptsPlugin = {
 			artifactId: ModelType.uint64
 		});
 
+		builder.addSchema('receipts.inflation', {
+			mosaicId: ModelType.uint64,
+			amount: ModelType.uint64
+		});
+
 		builder.addSchema('receipts.unknown', {});
 	},
 
+	/* eslint-disable-next-line no-unused-vars */
 	registerCodecs: codecBuilder => {}
 };
 

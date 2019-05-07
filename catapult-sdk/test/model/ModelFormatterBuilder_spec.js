@@ -51,6 +51,7 @@ describe('model formatter builder', () => {
 				'merkleProofInfo',
 				'nodeInfo',
 				'nodeTime',
+				'serverInfo',
 				'storageInfo',
 				'transactionStatus'
 			]);
@@ -73,7 +74,7 @@ describe('model formatter builder', () => {
 					version: 0,
 					type: 0,
 
-					fee: 0,
+					maxFee: 0,
 					deadline: 0
 				}
 			});
@@ -91,7 +92,7 @@ describe('model formatter builder', () => {
 					version: 'none',
 					type: 'none',
 
-					fee: 'uint64',
+					maxFee: 'uint64',
 					deadline: 'uint64'
 				}
 			});
@@ -121,7 +122,9 @@ describe('model formatter builder', () => {
 					difficulty: 0,
 					previousBlockHash: 0,
 					blockTransactionsHash: 0,
-					stateHash: 0
+					blockReceiptsHash: 0,
+					stateHash: 0,
+					beneficiaryPublicKey: 0
 				}
 			});
 
@@ -145,7 +148,9 @@ describe('model formatter builder', () => {
 					difficulty: 'uint64',
 					previousBlockHash: 'binary',
 					blockTransactionsHash: 'binary',
-					stateHash: 'binary'
+					blockReceiptsHash: 'binary',
+					stateHash: 'binary',
+					beneficiaryPublicKey: 'binary'
 				}
 			});
 		});
@@ -163,8 +168,8 @@ describe('model formatter builder', () => {
 					addressHeight: 0,
 					publicKey: 0,
 					publicKeyHeight: 0,
-					importance: 0,
-					importanceHeight: 0,
+					accountType: 0,
+					linkedAccountKey: 0,
 					mosaics: [
 						{ id: 0, amount: 0 },
 						{ id: 0, amount: 0 }
@@ -185,8 +190,8 @@ describe('model formatter builder', () => {
 					addressHeight: 'uint64',
 					publicKey: 'binary',
 					publicKeyHeight: 'uint64',
-					importance: 'uint64',
-					importanceHeight: 'uint64',
+					accountType: 'none',
+					linkedAccountKey: 'binary',
 					mosaics: [
 						{ id: 'uint64', amount: 'uint64' },
 						{ id: 'uint64', amount: 'uint64' }

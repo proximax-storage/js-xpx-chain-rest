@@ -18,15 +18,7 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const MongoDb = require('mongodb');
-
-const createLong = value => {
-	if (Number.isInteger(value))
-		return MongoDb.Long.fromNumber(value);
-
-	// if value is an array, assume it is a uint64
-	return Array.isArray(value) ? new MongoDb.Long(value[0], value[1]) : value;
-};
+const { convertToLong } = require('../../db/dbUtils');
 
 class ReceiptsDb {
 	/**
@@ -38,30 +30,13 @@ class ReceiptsDb {
 	}
 
 	/**
-	* Retrieves all address resolution statements in a given block.
+	* Retrieves all the statements in a given collection and block.
 	* @param {module:catapult.utils/uint64~uint64} height The given block height.
-	* @returns {Promise.<array>} Address resolution statements in a block.
+	* @param {string} statementsCollection The statements collection.
+	* @returns {Promise.<array>} Statements from a collection in a block.
 	*/
-	addressResolutionStatementsAtHeight(height) {
-		return this.catapultDb.queryDocuments('addressResolutionStatements', { height: createLong(height) });
-	}
-
-	/**
-	* Retrieves all mosaic resolution statements in a given block.
-	* @param {module:catapult.utils/uint64~uint64} height The given block height.
-	* @returns {Promise.<array>} Mosaic resolution statements in a block.
-	*/
-	mosaicResolutionStatementsAtHeight(height) {
-		return this.catapultDb.queryDocuments('mosaicResolutionStatements', { height: createLong(height) });
-	}
-
-	/**
-	* Retrieves all transaction statements in a given block.
-	* @param {module:catapult.utils/uint64~uint64} height The given block height.
-	* @returns {Promise.<array>} Transaction statements in a block.
-	*/
-	transactionStatementsAtHeight(height) {
-		return this.catapultDb.queryDocuments('transactionStatements', { height: createLong(height) });
+	statementsAtHeight(height, statementsCollection) {
+		return this.catapultDb.queryDocuments(statementsCollection, { height: convertToLong(height) });
 	}
 }
 

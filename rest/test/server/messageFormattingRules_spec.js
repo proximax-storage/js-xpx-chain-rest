@@ -48,6 +48,17 @@ describe('message formatting rules', () => {
 		expect(result).to.equal('FEDCBA9876543210');
 	});
 
+	it('can format uint16 type', () => {
+		// Arrange:
+		const object = 56;
+
+		// Act:
+		const result = formattingRules[ModelType.uint16](object);
+
+		// Assert:
+		expect(result).to.deep.equal(56);
+	});
+
 	it('can format uint64 type', () => {
 		// Arrange:
 		const object = [1, 2];
@@ -57,11 +68,6 @@ describe('message formatting rules', () => {
 
 		// Assert:
 		expect(result).to.deep.equal([1, 2]);
-	});
-
-	it('cannot format object id type', () => {
-		// Assert: objectId should never be written into messages, so it should be dropped
-		expect(Object.keys(formattingRules)).to.not.contain.key(ModelType.objectId);
 	});
 
 	it('can format string type', () => {

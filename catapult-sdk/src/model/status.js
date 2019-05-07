@@ -33,6 +33,8 @@ const toStringInternal = code => {
 	case 0x80430012: return 'Failure_Core_Nemesis_Account_Signed_After_Nemesis_Block';
 	case 0x80430014: return 'Failure_Core_Wrong_Network';
 	case 0x80430015: return 'Failure_Core_Invalid_Address';
+	case 0x80430016: return 'Failure_Core_Invalid_Version';
+	case 0x80430017: return 'Failure_Core_Invalid_Transaction_Fee';
 	case 0x80430069: return 'Failure_Core_Block_Harvester_Ineligible';
 	case 0x81480007: return 'Failure_Hash_Exists';
 	case 0x80530008: return 'Failure_Signature_Not_Verifiable';
