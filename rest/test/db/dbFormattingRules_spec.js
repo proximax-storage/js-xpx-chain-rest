@@ -107,6 +107,31 @@ describe('db formatting rules', () => {
 		expect(result).to.deep.equal(17434);
 	});
 
+	it('can format metadataId binary type', () => {
+		// Arrange:
+		const object = test.factory.createBinary(Buffer.from('FEDCBA987654321000', 'hex'));
+
+		// Act:
+		const result = formattingRules[ModelType.metadataId](object);
+
+		// Assert:
+		expect(result).to.equal('FEDCBA987654321000');
+	});
+
+	it('can format metadataId uint64 type from Binary', () => {
+		// Arrange:
+		const buffer = Buffer.alloc(8, 0);
+		buffer.writeUInt32LE(0x00ABCDEF, 0);
+		buffer.writeUInt32LE(0x000FDFFF, 4);
+		const object = new Binary(buffer);
+
+		// Act:
+		const result = formattingRules[ModelType.metadataId](object);
+
+		// Assert:
+		expect(result).to.deep.equal([0x00ABCDEF, 0x000FDFFF]);
+	});
+
 	it('can format object id type', () => {
 		// Arrange:
 		const object = test.factory.createObjectIdFromHexString('3AEDCBA9876F94725732547F');

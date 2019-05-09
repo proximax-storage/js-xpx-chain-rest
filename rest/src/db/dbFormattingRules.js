@@ -38,7 +38,7 @@ module.exports = {
 		const buffer = value.buffer instanceof ArrayBuffer ? value : value.buffer;
 
 		if (buffer.length === size.uint64)
-			return longToUint64(buffer);
+			return uint64.fromBytes(buffer);
 		return convert.uint8ToHex(buffer);
 	},
 	[ModelType.objectId]: value => value.toHexString().toUpperCase(),
