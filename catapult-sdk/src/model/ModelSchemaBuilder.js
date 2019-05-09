@@ -52,7 +52,9 @@ class ModelSchemaBuilder {
 				difficulty: ModelType.uint64,
 				previousBlockHash: ModelType.binary,
 				blockTransactionsHash: ModelType.binary,
-				stateHash: ModelType.binary
+				blockReceiptsHash: ModelType.binary,
+				stateHash: ModelType.binary,
+				beneficiaryPublicKey: ModelType.binary
 			},
 			blockHeaderMetadata: {
 				address: ModelType.binary,
@@ -78,7 +80,7 @@ class ModelSchemaBuilder {
 
 			transaction: {
 				deadline: ModelType.uint64,
-				fee: ModelType.uint64
+				maxFee: ModelType.uint64
 			},
 			transactionMetadata: {
 				address: ModelType.binary,
@@ -119,8 +121,7 @@ class ModelSchemaBuilder {
 				addressHeight: ModelType.uint64,
 				publicKey: ModelType.binary,
 				publicKeyHeight: ModelType.uint64,
-				importance: ModelType.uint64,
-				importanceHeight: ModelType.uint64,
+				linkedAccountKey: ModelType.binary,
 				mosaics: { type: ModelType.array, schemaName: 'mosaic' },
 				reputation: { type: ModelType.object, schemaName: 'reputation' }
 			},
@@ -161,6 +162,9 @@ class ModelSchemaBuilder {
 			},
 			nodeTime: {
 				communicationTimestamps: { type: ModelType.object, schemaName: 'communicationTimestamps' }
+			},
+
+			serverInfo: {
 			},
 
 			storageInfo: {

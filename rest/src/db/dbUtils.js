@@ -18,30 +18,37 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @module modelBinary/transactionCodec */
+const errors = require('../server/errors');
+const MongoDb = require('mongodb');
 
-const transactionCodec = {
+const { Long } = MongoDb;
+
+const dbUtils = {
 	/**
-	 * Parses a transaction.
-	 * @param {object} parser The parser.
-	 * @returns {object} The parsed transaction.
+	 * Converts number to long.
+	 * @param {object} value The value to convert.
+	 * @returns {MongoDb.Long} The converted value.
 	 */
-	deserialize: parser => {
-		const transaction = {};
-		transaction.maxFee = parser.uint64();
-		transaction.deadline = parser.uint64();
-		return transaction;
+	convertToLong: value => {
+		if (Number.isInteger(value))
+			return Long.fromNumber(value);
+
+		// if value is an array, assume it is a uint64
+		if (Array.isArray(value))
+			return new Long(value[0], value[1]);
+
+		if (value instanceof Long)
+			return value;
+
+		throw errors.createInvalidArgumentError(`${value} has an invalid format: not integer or uint64`);
 	},
 
 	/**
-	 * Serializes a transaction.
-	 * @param {object} transaction The transaction.
-	 * @param {object} serializer The serializer.
+	 * Converts long to uint64.
+	 * @param {Long} value The value to convert.
+	 * @returns {uint64} The converted value.
 	 */
-	serialize: (transaction, serializer) => {
-		serializer.writeUint64(transaction.maxFee);
-		serializer.writeUint64(transaction.deadline);
-	}
+	longToUint64: value => [value.getLowBitsUnsigned(), value.getHighBits() >>> 0]
 };
 
-module.exports = transactionCodec;
+module.exports = dbUtils;

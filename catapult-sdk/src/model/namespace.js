@@ -18,24 +18,20 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const routeResultTypes = require('../../src/routes/routeResultTypes');
-const { expect } = require('chai');
+/**
+ * Catapult model namespace.
+ * @enum {numeric}
+ * @exports model/namespace
+ */
+const namespace = {
+	/** Namespace alias type. */
+	aliasType: {
+		/** Mosaic alias. */
+		mosaic: 1,
 
-describe('routeResultTypes', () => {
-	it('has correct links to schema', () => {
-		expect(Object.keys(routeResultTypes).length).to.equal(11);
-		expect(routeResultTypes).to.deep.equal({
-			account: 'accountWithMetadata',
-			block: 'blockHeaderWithMetadata',
-			transaction: 'transactionWithMetadata',
-			chainInfo: 'chainInfo',
-			merkleProofInfo: 'merkleProofInfo',
-			receipts: 'receipts',
-			transactionStatus: 'transactionStatus',
-			nodeInfo: 'nodeInfo',
-			nodeTime: 'nodeTime',
-			serverInfo: 'serverInfo',
-			storageInfo: 'storageInfo'
-		});
-	});
-});
+		/** Address alias. */
+		address: 2
+	}
+};
+
+module.exports = namespace;
