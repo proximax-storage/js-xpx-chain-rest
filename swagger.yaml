@@ -1353,21 +1353,10 @@ definitions:
   AccountPropertiesInfoDTO:
     type: object
     required:
-    - meta
     - accountProperties
     properties:
-      meta:
-        $ref: '#/definitions/AccountPropertiesMetaDTO'
       accountProperties:
         $ref: '#/definitions/AccountPropertiesDTO'
-  AccountPropertiesMetaDTO:
-    type: object
-    required:
-    - id
-    properties:
-      id:
-        type: string
-        example: 00000000000000000000032f
   AccountPropertiesDTO:
     type: object
     required:
@@ -1736,12 +1725,9 @@ definitions:
   MosaicNameDTO:
     type: object
     required:
-    - parentId
     - mosaicId
     - name
     properties:
-      parentId:
-        $ref: '#/definitions/UInt64DTO'
       mosaicId:
         $ref: '#/definitions/UInt64DTO'
       name:
