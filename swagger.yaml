@@ -1617,10 +1617,10 @@ definitions:
     - value
     properties:
       key:
-        type: integer
+        type: string
         example: "jora"
       value:
-        type: integer
+        type: string
         example: "I Love you"
   AddressMetadataInfoDTO:
     type: object
