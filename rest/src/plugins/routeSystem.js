@@ -18,8 +18,7 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const accountLink = require('./accountLink.js');
-const accountProperties = require('./accountProperties.js');
+const accountProperties = require('./accountProperties');
 const aggregate = require('./aggregate');
 const empty = require('./empty');
 const lock = require('./lock');
@@ -32,7 +31,7 @@ const namespace = require('./namespace');
 const receipts = require('./receipts');
 
 const plugins = {
-	accountLink, accountProperties, aggregate, contract, lock, metadata, mosaic, multisig, namespace, receipts, transfer: empty
+	accountLink: empty, accountProperties, aggregate, contract, lock, metadata, mosaic, multisig, namespace, receipts, transfer: empty
 };
 
 module.exports = {
