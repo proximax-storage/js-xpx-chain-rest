@@ -26,16 +26,16 @@ describe('model type enumeration', () => {
 		// Assert:
 		expect(ModelType).to.deep.equal({
 			none: 0,
-			object: 1,
-			array: 2,
-			dictionary: 3,
+			array: 1,
+			dictionary: 2,
+			object: 3,
 			binary: 4,
-			uint64: 5,
+			metadataId: 5,
 			objectId: 6,
-			string: 7,
-			statusCode: 8,
+			statusCode: 7,
+			string: 8,
 			uint16: 9,
-			metadataId: 10,
+			uint64: 10,
 			max: 10
 		});
 	});
