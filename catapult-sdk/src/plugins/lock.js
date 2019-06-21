@@ -69,6 +69,7 @@ const lockPlugin = {
 			lock: { type: ModelType.object, schemaName: 'secretLockInfo.lock' }
 		});
 		builder.addSchema('secretLockInfo.lock', Object.assign({}, commonLockInfoSchema, {
+			compositeHash: ModelType.binary,
 			/* hashAlgorithm */
 			secret: ModelType.binary,
 			recipient: ModelType.binary

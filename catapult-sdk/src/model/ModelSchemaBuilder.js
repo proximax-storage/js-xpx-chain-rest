@@ -54,7 +54,7 @@ class ModelSchemaBuilder {
 				blockTransactionsHash: ModelType.binary,
 				blockReceiptsHash: ModelType.binary,
 				stateHash: ModelType.binary,
-				beneficiaryPublicKey: ModelType.binary
+				beneficiary: ModelType.binary
 			},
 			blockHeaderMetadata: {
 				address: ModelType.binary,

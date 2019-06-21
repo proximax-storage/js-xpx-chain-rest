@@ -68,8 +68,8 @@ describe('lock plugin', () => {
 			assertSchema(modelSchema.secretLockInfo, 1, 'lock');
 			assertSchema(
 				modelSchema['secretLockInfo.lock'],
-				7,
-				'account', 'accountAddress', 'mosaicId', 'amount', 'height', 'secret', 'recipient'
+				8,
+				'account', 'accountAddress', 'mosaicId', 'amount', 'compositeHash', 'height', 'secret', 'recipient'
 			);
 
 			// - transactions

@@ -1711,17 +1711,20 @@ definitions:
         $ref: '#/definitions/MosaicPropertiesDTO'
       levy:
         type: object
+  MosaicPropertyDTO:
+    type: object
+    required:
+    - id
+    - value
+    properties:
+      value:
+        $ref: '#/definitions/UInt64DTO'
+      id:
+        type: integer
   MosaicPropertiesDTO:
     type: array
     items:
-      $ref: '#/definitions/UInt64DTO'
-    example:
-    - - 0
-      - 0
-    - - 0
-      - 0
-    - - 0
-      - 0
+      $ref: '#/definitions/MosaicPropertyDTO'
   MosaicNameDTO:
     type: object
     required:
@@ -1773,7 +1776,7 @@ definitions:
     - blockTransactionsHash
     - blockReceiptsHash
     - stateHash
-    - beneficiaryPublicKey
+    - beneficiary
     properties:
       signature:
         type: string
@@ -1799,7 +1802,7 @@ definitions:
         type: string
       stateHash:
         type: string
-      beneficiaryPublicKey:
+      beneficiary:
         type: string
   HeightDTO:
     type: object
