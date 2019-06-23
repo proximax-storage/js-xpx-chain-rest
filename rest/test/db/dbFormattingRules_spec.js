@@ -21,8 +21,8 @@
 const catapult = require('catapult-sdk');
 const formattingRules = require('../../src/db/dbFormattingRules');
 const test = require('../testUtils');
-const { convertToLong } = require('../../src/db/dbUtils');
 const { Binary } = require('mongodb');
+const { convertToLong } = require('../../src/db/dbUtils');
 const { expect } = require('chai');
 
 const { ModelType } = catapult.model;
@@ -59,52 +59,6 @@ describe('db formatting rules', () => {
 
 		// Assert:
 		expect(result).to.equal('FEDCBA9876543210');
-	});
-
-	it('can format uint64 type from Long', () => {
-		// Arrange:
-		const object = convertToLong([1, 2]);
-
-		// Act:
-		const result = formattingRules[ModelType.uint64](object);
-
-		// Assert:
-		expect(result).to.deep.equal([1, 2]);
-	});
-
-	it('can format uint64 type from Binary', () => {
-		// Arrange:
-		const buffer = Buffer.alloc(8, 0);
-		buffer.writeUInt32LE(0x00ABCDEF, 0);
-		buffer.writeUInt32LE(0x000FDFFF, 4);
-		const object = new Binary(buffer);
-
-		// Act:
-		const result = formattingRules[ModelType.uint64](object);
-
-		// Assert:
-		expect(result).to.deep.equal([0x00ABCDEF, 0x000FDFFF]);
-	});
-
-	it('can format uint16 type', () => {
-		// Act:
-		const result = formattingRules[ModelType.uint16](17434);
-
-		// Assert:
-		expect(result).to.equal(17434);
-	});
-
-	it('can format uint16 type from Binary', () => {
-		// Arrange:
-		const buffer = Buffer.alloc(2, 0);
-		buffer.writeUInt16LE(17434);
-		const object = new Binary(buffer);
-
-		// Act:
-		const result = formattingRules[ModelType.uint16](object);
-
-		// Assert:
-		expect(result).to.deep.equal(17434);
 	});
 
 	it('can format metadataId binary type', () => {
@@ -152,5 +106,62 @@ describe('db formatting rules', () => {
 			// Assert:
 			expect(result, `${code} code`).to.equal('Failure_Signature_Not_Verifiable');
 		});
+	});
+
+	it('can format string type', () => {
+		// Arrange:
+		const object = test.factory.createBinary(Buffer.from('6361746170756C74', 'hex'));
+
+		// Act:
+		const result = formattingRules[ModelType.string](object);
+
+		// Assert:
+		expect(result).to.equal('catapult');
+	});
+
+	it('can format uint16 type', () => {
+		// Act:
+		const result = formattingRules[ModelType.uint16](17434);
+
+		// Assert:
+		expect(result).to.equal(17434);
+	});
+
+	it('can format uint16 type from Binary', () => {
+		// Arrange:
+		const buffer = Buffer.alloc(2, 0);
+		buffer.writeUInt16LE(17434);
+		const object = new Binary(buffer);
+
+		// Act:
+		const result = formattingRules[ModelType.uint16](object);
+
+		// Assert:
+		expect(result).to.deep.equal(17434);
+	});
+
+	it('can format uint64 type from Long', () => {
+		// Arrange:
+		const object = convertToLong([1, 2]);
+
+		// Act:
+		const result = formattingRules[ModelType.uint64](object);
+
+		// Assert:
+		expect(result).to.deep.equal([1, 2]);
+	});
+
+	it('can format uint64 type from Binary', () => {
+		// Arrange:
+		const buffer = Buffer.alloc(8, 0);
+		buffer.writeUInt32LE(0x00ABCDEF, 0);
+		buffer.writeUInt32LE(0x000FDFFF, 4);
+		const object = new Binary(buffer);
+
+		// Act:
+		const result = formattingRules[ModelType.uint64](object);
+
+		// Assert:
+		expect(result).to.deep.equal([0x00ABCDEF, 0x000FDFFF]);
 	});
 });

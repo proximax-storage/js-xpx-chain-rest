@@ -34,7 +34,6 @@ describe('entity type enumeration', () => {
 			metadataNamespace: 0x433D,
 			mosaicDefinition: 0x414D,
 			mosaicSupplyChange: 0x424D,
-			mosaicLevyChange: 0x434D,
 			modifyMultisigAccount: 0x4155,
 			modifyContract: 0x4157,
 			aggregateComplete: 0x4141,

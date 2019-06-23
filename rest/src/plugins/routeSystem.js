@@ -18,8 +18,7 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const accountLink = require('./accountLink.js');
-const accountProperties = require('./accountProperties.js');
+const accountProperties = require('./accountProperties');
 const aggregate = require('./aggregate');
 const empty = require('./empty');
 const lock = require('./lock');
@@ -32,23 +31,23 @@ const namespace = require('./namespace');
 const receipts = require('./receipts');
 
 const plugins = {
-	accountLink, accountProperties, aggregate, contract, lock, metadata, mosaic, multisig, namespace, receipts, transfer: empty
+	accountLink: empty, accountProperties, aggregate, contract, lock, metadata, mosaic, multisig, namespace, receipts, transfer: empty
 };
 
 module.exports = {
 	/**
 	 * Gets the names of all supported plugins.
-	 * @returns {array<string>} The names of all supported plugins.
+	 * @returns {array<string>} Names of all supported plugins.
 	 */
 	supportedPluginNames: () => Object.keys(plugins),
 
 	/**
 	 * Configures the server with the specified extensions.
-	 * @param {array} pluginNames The additional extensions to use.
-	 * @param {object} server The server.
-	 * @param {module:db/CatapultDb} db The catapult database.
+	 * @param {array} pluginNames Additional extensions to use.
+	 * @param {object} server Server.
+	 * @param {module:db/CatapultDb} db Catapult database.
 	 * @param {object} services Supporting services.
-	 * @returns {array<module:plugins/CatapultRestPlugin~TransactionStateDescriptor>} The additional transaction states to register.
+	 * @returns {array<module:plugins/CatapultRestPlugin~TransactionStateDescriptor>} Additional transaction states to register.
 	 */
 	configure: (pluginNames, server, db, services) => {
 		const transactionStates = [];
