@@ -78,7 +78,7 @@ const toStringInternal = code => {
 	case 0x80520003: return 'Failure_LockSecret_Hash_Not_Implemented';
 	case 0x80520004: return 'Failure_LockSecret_Proof_Size_Out_Of_Bounds';
 	case 0x80520005: return 'Failure_LockSecret_Secret_Mismatch';
-	case 0x80520006: return 'Failure_LockSecret_Unknown_Secret';
+	case 0x80520006: return 'Failure_LockSecret_Unknown_Composite_Key';
 	case 0x80520007: return 'Failure_LockSecret_Inactive_Secret';
 	case 0x80520008: return 'Failure_LockSecret_Hash_Algorithm_Mismatch';
 	case 0x80520009: return 'Failure_LockSecret_Invalid_Duration';
@@ -174,7 +174,7 @@ const toStringInternal = code => {
 	case 0x80FF00C9: return 'Failure_Chain_Unconfirmed_Cache_Too_Full';
 	case 0x80FE0001: return 'Failure_Consumer_Empty_Input';
 	case 0x80FE1001: return 'Failure_Consumer_Block_Transactions_Hash_Mismatch';
-	case 0x81FE1002: return 'Failure_Consumer_Hash_In_Recency_Cache';
+	case 0x41FE1002: return 'Neutral_Consumer_Hash_In_Recency_Cache';
 	case 0x80FE2001: return 'Failure_Consumer_Remote_Chain_Too_Many_Blocks';
 	case 0x80FE2002: return 'Failure_Consumer_Remote_Chain_Improper_Link';
 	case 0x80FE2003: return 'Failure_Consumer_Remote_Chain_Duplicate_Transactions';
@@ -192,8 +192,8 @@ const toStringInternal = code => {
 const status = {
 	/**
 	 * Converts a status code to a string.
-	 * @param {numeric} code The status code.
-	 * @returns {string} The string representation of the status code.
+	 * @param {numeric} code Status code.
+	 * @returns {string} String representation of the status code.
 	 */
 	toString: code => {
 		const str = toStringInternal(code);

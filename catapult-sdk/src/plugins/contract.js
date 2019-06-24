@@ -18,11 +18,11 @@ const constants = { sizes };
 const contractPlugin = {
 	registerSchema: builder => {
 		builder.addTransactionSupport(EntityType.modifyContract, {
-			duration: 	{ type: ModelType.uint64, schemaName: 'modifyContract.duration' },
-			hash: 		{ type: ModelType.binary, schemaName: 'modifyContract.hash' },
-			customers: 	{ type: ModelType.array, schemaName: 'modifyContract.modification' },
-			executors:	{ type: ModelType.array, schemaName: 'modifyContract.modification' },
-			verifiers: 	{ type: ModelType.array, schemaName: 'modifyContract.modification' }
+			durationDelta: 	{ type: ModelType.uint64, schemaName: 'modifyContract.durationDelta' },
+			hash: 			{ type: ModelType.binary, schemaName: 'modifyContract.hash' },
+			customers: 		{ type: ModelType.array, schemaName: 'modifyContract.modification' },
+			executors:		{ type: ModelType.array, schemaName: 'modifyContract.modification' },
+			verifiers: 		{ type: ModelType.array, schemaName: 'modifyContract.modification' }
 		});
 
 		builder.addSchema('modifyContract.modification', {

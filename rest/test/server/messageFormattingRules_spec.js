@@ -48,6 +48,28 @@ describe('message formatting rules', () => {
 		expect(result).to.equal('FEDCBA9876543210');
 	});
 
+	it('can format status code type', () => {
+		// Arrange:
+		const code = 0x80530008;
+
+		// Act:
+		const result = formattingRules[ModelType.statusCode](code);
+
+		// Assert:
+		expect(result).to.equal('Failure_Signature_Not_Verifiable');
+	});
+
+	it('can format string type', () => {
+		// Arrange:
+		const object = test.factory.createBinary(Buffer.from('6361746170756C74', 'hex'));
+
+		// Act:
+		const result = formattingRules[ModelType.string](object);
+
+		// Assert:
+		expect(result).to.equal('catapult');
+	});
+
 	it('can format uint16 type', () => {
 		// Arrange:
 		const object = 56;
@@ -68,27 +90,5 @@ describe('message formatting rules', () => {
 
 		// Assert:
 		expect(result).to.deep.equal([1, 2]);
-	});
-
-	it('can format string type', () => {
-		// Arrange:
-		const object = test.factory.createBinary(Buffer.from('6361746170756C74', 'hex'));
-
-		// Act:
-		const result = formattingRules[ModelType.string](object);
-
-		// Assert:
-		expect(result).to.equal('catapult');
-	});
-
-	it('can format status code type', () => {
-		// Arrange:
-		const code = 0x80530008;
-
-		// Act:
-		const result = formattingRules[ModelType.statusCode](code);
-
-		// Assert:
-		expect(result).to.equal('Failure_Signature_Not_Verifiable');
 	});
 });

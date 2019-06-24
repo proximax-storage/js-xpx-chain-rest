@@ -69,6 +69,7 @@ const lockPlugin = {
 			lock: { type: ModelType.object, schemaName: 'secretLockInfo.lock' }
 		});
 		builder.addSchema('secretLockInfo.lock', Object.assign({}, commonLockInfoSchema, {
+			compositeHash: ModelType.binary,
 			/* hashAlgorithm */
 			secret: ModelType.binary,
 			recipient: ModelType.binary
@@ -83,6 +84,7 @@ const lockPlugin = {
 		}));
 		builder.addTransactionSupport(EntityType.secretProof, {
 			secret: ModelType.binary,
+			recipient: ModelType.binary,
 			proof: ModelType.binary
 		});
 	},
@@ -129,6 +131,7 @@ const lockPlugin = {
 				const transaction = {};
 				transaction.hashAlgorithm = parser.uint8();
 				transaction.secret = parser.buffer(constants.sizes.hash256);
+				transaction.recipient = parser.buffer(constants.sizes.addressDecoded);
 				const proofSize = parser.uint16();
 				transaction.proof = parser.buffer(proofSize);
 				return transaction;
@@ -137,6 +140,7 @@ const lockPlugin = {
 			serialize: (transaction, serializer) => {
 				serializer.writeUint8(transaction.hashAlgorithm);
 				serializer.writeBuffer(transaction.secret);
+				serializer.writeBuffer(transaction.recipient);
 				const proofSize = transaction.proof.length;
 				serializer.writeUint16(proofSize);
 				serializer.writeBuffer(transaction.proof);

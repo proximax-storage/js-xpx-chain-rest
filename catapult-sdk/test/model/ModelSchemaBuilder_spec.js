@@ -187,7 +187,7 @@ describe('model schema builder', () => {
 				'blockHeader.blockTransactionsHash',
 				'blockHeader.blockReceiptsHash',
 				'blockHeader.stateHash',
-				'blockHeader.beneficiaryPublicKey',
+				'blockHeader.beneficiary',
 				'blockHeader.signature',
 				'blockHeader.signer',
 				'blockHeaderMetadata.address',
