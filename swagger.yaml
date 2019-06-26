@@ -1999,6 +1999,8 @@ components:
         - blockReceiptsHash
         - stateHash
         - beneficiary
+        - feeInterest
+        - feeInterestDenominator
         properties:
           height:
             $ref: "#/components/schemas/UInt64DTO"
@@ -2041,6 +2043,16 @@ components:
             type: string
             description: The public key of the optional beneficiary designated by
               harvester.
+            example: 0
+          feeInterest:
+            type: integer
+            description: The part of the transaction fee harvester is willing to get.
+              From 0 up to FeeInterestDenominator. The customer gets
+              (FeeInterest / FeeInterestDenominator)'th part of the maximum transaction fee.
+            example: 0
+          feeInterestDenominator:
+            type: integer
+            description: Denominator of the transaction fee.
             example: 0
     HeightInfoDTO:
       type: object
