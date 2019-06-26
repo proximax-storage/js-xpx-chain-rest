@@ -1775,7 +1775,11 @@ components:
         values:
           type: array
           description: The address, transaction type or mosaic id to filter.
-          items: {}
+          items:
+            oneOf:
+            - type: string
+            - $ref: "#/components/schemas/UInt64DTO"
+            - type: integer
     AccountPropertiesModificationDTO:
       type: object
       required:
@@ -1787,7 +1791,11 @@ components:
         values:
           type: array
           description: The address, transaction type or mosaic id to filter.
-          items: {}
+          items:
+            oneOf:
+            - type: string
+            - $ref: "#/components/schemas/UInt64DTO"
+            - type: integer
     ContractInfoDTO:
       type: object
       required:
