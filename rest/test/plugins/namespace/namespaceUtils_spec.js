@@ -152,26 +152,24 @@ describe('namespace utils', () => {
 			return processorFunction(req, { send: sendFake }, nextFake).then(() => {
 				// Assert:
 				expect(sendFake.firstCall.args[0]).to.deep.equal({
-					payload: {
-						accountNames: [
-							{
-								[fieldName]: 1,
-								names: [
-									'a',
-									'b.c',
-									'd.e.g'
-								]
-							},
-							{
-								[fieldName]: 2,
-								names: [
-									'a',
-									'b.c',
-									'd.e.g'
-								]
-							}
-						]
-					},
+					payload: [
+						{
+							[fieldName]: 1,
+							names: [
+								'a',
+								'b.c',
+								'd.e.g'
+							]
+						},
+						{
+							[fieldName]: 2,
+							names: [
+								'a',
+								'b.c',
+								'd.e.g'
+							]
+						}
+					],
 					type: schemaName
 				});
 
