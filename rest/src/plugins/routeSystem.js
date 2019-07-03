@@ -20,18 +20,20 @@
 
 const accountProperties = require('./accountProperties');
 const aggregate = require('./aggregate');
+const config = require('./config');
+const contract = require('./contract');
 const empty = require('./empty');
 const lock = require('./lock');
 const MessageChannelBuilder = require('../connection/MessageChannelBuilder');
 const metadata = require('./metadata');
 const mosaic = require('./mosaic');
 const multisig = require('./multisig');
-const contract = require('./contract');
 const namespace = require('./namespace');
 const receipts = require('./receipts');
+const upgrade = require('./upgrade');
 
 const plugins = {
-	accountLink: empty, accountProperties, aggregate, contract, lock, metadata, mosaic, multisig, namespace, receipts, transfer: empty
+	accountLink: empty, accountProperties, aggregate, config, contract, lock, metadata, mosaic, multisig, namespace, receipts, transfer: empty, upgrade
 };
 
 module.exports = {

@@ -116,7 +116,7 @@ const contractPlugin = {
 		};
 
 		codecBuilder.addTransactionSupport(EntityType.metadataAddress, {
-			deserialize: (parser, size, txCodecs, preprocessedBytes) => {
+			deserialize: (parser, size, txCodecs, preprocessedBytes = 0) => {
 				const addressParser = p => p.buffer(constants.sizes.addressDecoded);
 				return deserialize(parser, size - preprocessedBytes, addressParser);
 			},
@@ -128,7 +128,7 @@ const contractPlugin = {
 		});
 
 		codecBuilder.addTransactionSupport(EntityType.metadataMosaic, {
-			deserialize: (parser, size, txCodecs, preprocessedBytes) => {
+			deserialize: (parser, size, txCodecs, preprocessedBytes = 0) => {
 				const addressParser = p => p.uint64();
 				return deserialize(parser, size - preprocessedBytes, addressParser);
 			},
@@ -140,7 +140,7 @@ const contractPlugin = {
 		});
 
 		codecBuilder.addTransactionSupport(EntityType.metadataNamespace, {
-			deserialize: (parser, size, txCodecs, preprocessedBytes) => {
+			deserialize: (parser, size, txCodecs, preprocessedBytes = 0) => {
 				const addressParser = p => p.uint64();
 				return deserialize(parser, size - preprocessedBytes, addressParser);
 			},

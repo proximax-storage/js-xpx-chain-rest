@@ -36,6 +36,8 @@ const toStringInternal = code => {
 	case 0x80430016: return 'Failure_Core_Invalid_Version';
 	case 0x80430017: return 'Failure_Core_Invalid_Transaction_Fee';
 	case 0x80430069: return 'Failure_Core_Block_Harvester_Ineligible';
+	case 0x80430018: return 'Failure_Core_Invalid_FeeInterest';
+	case 0x80430019: return 'Failure_Core_Invalid_FeeInterestDenominator';
 	case 0x81480007: return 'Failure_Hash_Exists';
 	case 0x80530008: return 'Failure_Signature_Not_Verifiable';
 	case 0x804C00AA: return 'Failure_AccountLink_Invalid_Action';
@@ -51,6 +53,8 @@ const toStringInternal = code => {
 	case 0x80410004: return 'Failure_Aggregate_Redundant_Cosignatures';
 	case 0x80411001: return 'Failure_Aggregate_Ineligible_Cosigners';
 	case 0x80411002: return 'Failure_Aggregate_Missing_Cosigners';
+	case 0x80411005: return 'Failure_Aggregate_Plugin_Config_Malformed';
+	case 0x80411006: return 'Failure_Aggregate_Bonded_Not_Enabled';
 	case 0x80570001: return 'Failure_Contract_Modify_Customer_Unsupported_Modification_Type';
 	case 0x80570002: return 'Failure_Contract_Modify_Customer_In_Both_Sets';
 	case 0x80570003: return 'Failure_Contract_Modify_Customer_Redundant_Modifications';
@@ -67,12 +71,21 @@ const toStringInternal = code => {
 	case 0x8057000E: return 'Failure_Contract_Modify_Not_A_Verifier';
 	case 0x8057000F: return 'Failure_Contract_Modify_Already_A_Verifier';
 	case 0x80570010: return 'Failure_Contract_Modify_Invalid_Duration';
+	case 0x80570011: return 'Failure_Contract_Plugin_Config_Malformed';
+	case 0x80590001: return 'Failure_CatapultConfig_Invalid_Signer';
+	case 0x80590002: return 'Failure_CatapultConfig_BlockChain_Config_Too_Large';
+	case 0x80590003: return 'Failure_CatapultConfig_Config_Redundant';
+	case 0x80590004: return 'Failure_CatapultConfig_BlockChain_Config_Malformed';
+	case 0x80590005: return 'Failure_CatapultConfig_Plugin_Config_Malformed';
+	case 0x80590006: return 'Failure_CatapultConfig_SupportedEntityVersions_Config_Too_Large';
+	case 0x80590007: return 'Failure_CatapultConfig_SupportedEntityVersions_Config_Malformed';
 	case 0x80480001: return 'Failure_LockHash_Invalid_Mosaic_Id';
 	case 0x80480002: return 'Failure_LockHash_Invalid_Mosaic_Amount';
 	case 0x80480003: return 'Failure_LockHash_Hash_Exists';
 	case 0x80480004: return 'Failure_LockHash_Hash_Does_Not_Exist';
 	case 0x80480005: return 'Failure_LockHash_Inactive_Hash';
 	case 0x80480006: return 'Failure_LockHash_Invalid_Duration';
+	case 0x80480007: return 'Failure_LockHash_Plugin_Config_Malformed';
 	case 0x80520001: return 'Failure_LockSecret_Invalid_Hash_Algorithm';
 	case 0x80520002: return 'Failure_LockSecret_Hash_Exists';
 	case 0x80520003: return 'Failure_LockSecret_Hash_Not_Implemented';
@@ -82,6 +95,7 @@ const toStringInternal = code => {
 	case 0x80520007: return 'Failure_LockSecret_Inactive_Secret';
 	case 0x80520008: return 'Failure_LockSecret_Hash_Algorithm_Mismatch';
 	case 0x80520009: return 'Failure_LockSecret_Invalid_Duration';
+	case 0x8052000A: return 'Failure_LockSecret_Plugin_Config_Malformed';
 	case 0x803D0001: return 'Failure_Metadata_Invalid_Metadata_Type';
 	case 0x803D0002: return 'Failure_Metadata_Modification_Type_Invalid';
 	case 0x803D0003: return 'Failure_Metadata_Modification_Key_Invalid';
@@ -96,6 +110,7 @@ const toStringInternal = code => {
 	case 0x803D0016: return 'Failure_Metadata_Mosaic_Is_Not_Exist';
 	case 0x803D0017: return 'Failure_Metadata_Namespace_Is_Not_Exist';
 	case 0x803D001E: return 'Failure_Metadata_Too_Much_Keys';
+	case 0x803D001F: return 'Failure_Metadata_Plugin_Config_Malformed';
 	case 0x804D0001: return 'Failure_Mosaic_Invalid_Duration';
 	case 0x804D0002: return 'Failure_Mosaic_Invalid_Name';
 	case 0x804D0003: return 'Failure_Mosaic_Name_Id_Mismatch';
@@ -116,6 +131,7 @@ const toStringInternal = code => {
 	case 0x804D00A3: return 'Failure_Mosaic_Supply_Exceeded';
 	case 0x804D00A4: return 'Failure_Mosaic_Non_Transferable';
 	case 0x804D00AA: return 'Failure_Mosaic_Max_Mosaics_Exceeded';
+	case 0x804D00AB: return 'Failure_Mosaic_Plugin_Config_Malformed';
 	case 0x80550001: return 'Failure_Multisig_Modify_Account_In_Both_Sets';
 	case 0x80550002: return 'Failure_Multisig_Modify_Multiple_Deletes';
 	case 0x80550003: return 'Failure_Multisig_Modify_Redundant_Modifications';
@@ -129,6 +145,7 @@ const toStringInternal = code => {
 	case 0x8055000B: return 'Failure_Multisig_Modify_Max_Cosigners';
 	case 0x8055000C: return 'Failure_Multisig_Modify_Loop';
 	case 0x8055000D: return 'Failure_Multisig_Modify_Max_Multisig_Depth';
+	case 0x8055000E: return 'Failure_Multisig_Plugin_Config_Malformed';
 	case 0x80550800: return 'Failure_Multisig_Operation_Not_Permitted_By_Account';
 	case 0x804E0001: return 'Failure_Namespace_Invalid_Duration';
 	case 0x804E0002: return 'Failure_Namespace_Invalid_Name';
@@ -136,6 +153,7 @@ const toStringInternal = code => {
 	case 0x804E0004: return 'Failure_Namespace_Expired';
 	case 0x804E0005: return 'Failure_Namespace_Owner_Conflict';
 	case 0x804E0006: return 'Failure_Namespace_Id_Mismatch';
+	case 0x804E0007: return 'Failure_Namespace_Plugin_Config_Malformed';
 	case 0x804E0064: return 'Failure_Namespace_Invalid_Namespace_Type';
 	case 0x804E0065: return 'Failure_Namespace_Root_Name_Reserved';
 	case 0x804E0066: return 'Failure_Namespace_Too_Deep';
@@ -165,8 +183,15 @@ const toStringInternal = code => {
 	case 0x8050000B: return 'Failure_Property_Signer_Address_Interaction_Not_Allowed';
 	case 0x8050000C: return 'Failure_Property_Mosaic_Transfer_Not_Allowed';
 	case 0x8050000D: return 'Failure_Property_Transaction_Type_Not_Allowed';
+	case 0x8050000E: return 'Failure_Property_Plugin_Config_Malformed';
 	case 0x80540006: return 'Failure_Transfer_Message_Too_Large';
+	case 0x80540007: return 'Failure_Transfer_Plugin_Config_Malformed';
 	case 0x805400C8: return 'Failure_Transfer_Out_Of_Order_Mosaics';
+	case 0x80580001: return 'Failure_CatapultUpgrade_Invalid_Signer';
+	case 0x80580002: return 'Failure_CatapultUpgrade_Upgrade_Period_Too_Low';
+	case 0x80580003: return 'Failure_CatapultUpgrade_Redundant';
+	case 0x80580004: return 'Failure_CatapultUpgrade_Invalid_Catapult_Version';
+	case 0x80580005: return 'Failure_CatapultUpgrade_Plugin_Config_Malformed';
 	case 0x80FF0066: return 'Failure_Chain_Unlinked';
 	case 0x80FF0068: return 'Failure_Chain_Block_Not_Hit';
 	case 0x80FF0069: return 'Failure_Chain_Block_Inconsistent_State_Hash';

@@ -55,7 +55,7 @@ const contractPlugin = {
 		codecBuilder.addTransactionSupport(EntityType.modifyContract, {
 			deserialize: parser => {
 				const transaction = {};
-				transaction.duration = parser.uint64();
+				transaction.durationDelta = parser.uint64();
 				transaction.hash = parser.buffer(constants.sizes.hash256);
 
 				const customersCount = parser.uint8();
@@ -81,8 +81,8 @@ const contractPlugin = {
 			},
 
 			serialize: (transaction, serializer) => {
-				serializer.writeUint64(transaction.DurationDelta);
-				serializer.writeBuffer(transaction.Hash);
+				serializer.writeUint64(transaction.durationDelta);
+				serializer.writeBuffer(transaction.hash);
 
 				const CustomerModificationCount = transaction.customers.length;
 				const ExecutorModificationCount = transaction.executors.length;

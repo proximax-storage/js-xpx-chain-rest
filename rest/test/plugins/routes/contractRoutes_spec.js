@@ -36,7 +36,7 @@ describe('contract routes', () => {
 			);
 		});
 
-		it('/contract/:accountId', () => {
+		it('/contract/:contractId', () => {
 			// Arrange:
 			const keyGroups = [];
 			const db = test.setup.createCapturingDb('contractsByIds', keyGroups, [{ value: 'this is nonsense' }]);
@@ -45,9 +45,9 @@ describe('contract routes', () => {
 			const registerRoutes = contractRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/contract/:accountId',
+				'/contract/:contractId',
 				'get',
-				{ accountId: Valid_Public_Key },
+				{ contractId: Valid_Public_Key },
 				db,
 				null,
 				response => {

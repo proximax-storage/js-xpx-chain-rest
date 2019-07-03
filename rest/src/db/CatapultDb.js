@@ -136,9 +136,11 @@ class CatapultDb {
 			.then(mapToPromise);
 	}
 
-	queryDocuments(collectionName, conditions) {
+	queryDocuments(collectionName, conditions, options = {}) {
 		const collection = this.database.collection(collectionName);
 		return collection.find(conditions)
+			.sort(options.sort)
+			.limit(options.limit || 0)
 			.toArray()
 			.then(this.sanitizer.deleteIds);
 	}

@@ -20,11 +20,11 @@ module.exports = {
 				.then(routeUtils.createSender('contractEntry').sendArray(req.params.accountId, res, next));
 		});
 
-		server.get('/contract/:accountId', (req, res, next) => {
-			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
+		server.get('/contract/:contractId', (req, res, next) => {
+			const [type, contractId] = routeUtils.parseArgument(req.params, 'contractId', 'accountId');
 
-			return db.contractsByIds(type, [accountId])
-				.then(routeUtils.createSender('contractEntry').sendOne(req.params.accountId, res, next));
+			return db.contractsByIds(type, [contractId])
+				.then(routeUtils.createSender('contractEntry').sendOne(req.params.contractId, res, next));
 		});
 
 		server.post('/account/contracts', (req, res, next) => {

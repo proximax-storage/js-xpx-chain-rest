@@ -28,15 +28,15 @@ describe('embedded entity codec', () => {
 		return {
 			buffer: Buffer.concat([
 				Signer_Buffer,
-				Buffer.of(0x2A, 0x81, 0x1C, 0x45) // version, type
+				Buffer.of(0x2A, 0x0, 0x0, 0x81, 0x1C, 0x45) // version, type
 			]),
 			object: {
 				signer: Signer_Buffer,
-				version: 0x812A,
+				version: 0x8100002A,
 				type: 0x451C
 			}
 		};
 	};
 
-	test.binary.test.addAll(embeddedEntityCodec, 36, generateEmbeddedEntity);
+	test.binary.test.addAll(embeddedEntityCodec, 38, generateEmbeddedEntity);
 });

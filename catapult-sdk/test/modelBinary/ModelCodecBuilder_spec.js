@@ -26,9 +26,9 @@ const { expect } = require('chai');
 const constants = {
 	knownTxType: 0x4123,
 	sizes: {
-		blockHeader: 192,
-		transactionHeader: 120,
-		transaction: 120 + 8 + 1
+		blockHeader: 194,
+		transactionHeader: 122,
+		transaction: 122 + 8 + 1
 	}
 };
 
@@ -77,12 +77,12 @@ describe('model codec builder', () => {
 				test.buffer.fromSize(size),
 				Signature_Buffer,
 				Signer_Buffer,
-				Buffer.of(0x2A, 0x81, type & 0xFF, (type >> 8) & 0xFF) // version, type
+				Buffer.of(0x2A, 0x0, 0x0, 0x81, type & 0xFF, (type >> 8) & 0xFF) // version, type
 			]),
 			object: {
 				signature: Signature_Buffer,
 				signer: Signer_Buffer,
-				version: 0x812A,
+				version: 0x8100002A,
 				type
 			}
 		};

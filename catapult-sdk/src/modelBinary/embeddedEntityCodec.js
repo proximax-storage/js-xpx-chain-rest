@@ -32,7 +32,7 @@ const embeddedEntityCodec = {
 	deserialize: parser => {
 		const entity = {};
 		entity.signer = parser.buffer(constants.sizes.signer);
-		entity.version = parser.uint16();
+		entity.version = parser.uint32();
 		entity.type = parser.uint16();
 		return entity;
 	},
@@ -44,7 +44,7 @@ const embeddedEntityCodec = {
 	 */
 	serialize: (entity, serializer) => {
 		serializer.writeBuffer(entity.signer);
-		serializer.writeUint16(entity.version);
+		serializer.writeUint32(entity.version);
 		serializer.writeUint16(entity.type);
 	}
 };
