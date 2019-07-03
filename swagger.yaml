@@ -741,8 +741,8 @@ paths:
     get:
       tags:
       - Contract routes
-      summary: Get contract of account
-      description: Gets the contract for a given publicKey.
+      summary: Get contracts of account
+      description: Gets all contracts where this account is involved.
       operationId: getAccountContract
       parameters:
       - name: publicKey
@@ -757,20 +757,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ContractInfoDTO'
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContractInfoDTO'
         '404':
           description: resource not found
         '409':
           description: invalid argument
-  '/contract/{accountId}':
+  '/contract/{contractId}':
     get:
       tags:
       - Contract routes
-      summary: Get contract of account
-      description: Gets the contract for a given accountId.
+      summary: Get contract by contractId
+      description: Gets the contract for a given contractId.
       operationId: getContract
       parameters:
-      - name: accountId
+      - name: contractId
         in: path
         description: The account identifier.
         required: true
@@ -791,7 +793,7 @@ paths:
     post:
       tags:
       - Contract routes
-      summary: Get contracts for an array of publicKeys
+      summary: Get contracts for an array of contract's publicKeys
       description: Gets an array of contracts.
       operationId: getAccountContracts
       requestBody:
