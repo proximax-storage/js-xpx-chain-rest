@@ -64,7 +64,7 @@ const mosaicPlugin = {
 			deserialize: parser => {
 				const transaction = {};
 
-				transaction.nonce = parser.uint32();
+				transaction.mosaicNonce = parser.uint32();
 
 				transaction.mosaicId = parser.uint64();
 
@@ -86,7 +86,7 @@ const mosaicPlugin = {
 			},
 
 			serialize: (transaction, serializer) => {
-				serializer.writeUint32(transaction.nonce);
+				serializer.writeUint32(transaction.mosaicNonce);
 				serializer.writeUint64(transaction.mosaicId);
 
 				const propertiesCount = transaction.properties.length - numRequiredProperties;
