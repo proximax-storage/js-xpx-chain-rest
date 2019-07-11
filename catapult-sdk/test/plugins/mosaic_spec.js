@@ -112,7 +112,7 @@ describe('mosaic plugin', () => {
 				]),
 
 				object: {
-					nonce: 3100311302,
+					mosaicNonce: 3100311302,
 					mosaicId: [0x066C26F2, 0x92B28340],
 					properties: [
 						{ key: 0x00, value: [0x11, 0] },
