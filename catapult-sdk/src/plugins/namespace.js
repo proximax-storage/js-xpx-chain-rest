@@ -92,8 +92,7 @@ const namespacePlugin = {
 
 		builder.addSchema('namespaceNameTuple', {
 			namespaceId: ModelType.uint64,
-			name: ModelType.string,
-			parentId: ModelType.uint64
+			name: ModelType.string
 		});
 
 		builder.addSchema('mosaicNamesTuple', {

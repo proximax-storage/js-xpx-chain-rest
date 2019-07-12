@@ -63,37 +63,62 @@ module.exports = {
 				.then(namespaceSender.sendArray(idOptions.keyName, res, next));
 		});
 
-		const collectNames = (namespaceNameTuples, namespaceIds) => {
+		const collectNames = namespaceIds => {
 			const type = catapult.model.EntityType.registerNamespace;
 			return db.catapultDb.findNamesByIds(namespaceIds, type, { id: 'namespaceId', name: 'name', parentId: 'parentId' })
 				.then(nameTuples => {
+					const namespaceNameTuples = {};
 					nameTuples.forEach(nameTuple => {
 						// db returns null instead of undefined when parentId is not present
 						if (null === nameTuple.parentId)
 							delete nameTuple.parentId;
 
-						namespaceNameTuples.push(nameTuple);
+						namespaceNameTuples[nameTuple.namespaceId.toString()] = nameTuple;
 					});
 
 					// process all parent namespaces next
-					return nameTuples
-						.filter(nameTuple => undefined !== nameTuple.parentId)
-						.map(nameTuple => nameTuple.parentId);
+					return {
+						namespaceNameTuples,
+						nextIds: nameTuples
+							.filter(nameTuple => undefined !== nameTuple.parentId)
+							.map(nameTuple => nameTuple.parentId)
+					};
 				});
 		};
 
 		server.post('/namespace/names', (req, res, next) => {
 			const namespaceIds = routeUtils.parseArgumentAsArray(req.params, 'namespaceIds', uint64.fromHex);
 			const nameTuplesFuture = new Promise(resolve => {
-				const namespaceNameTuples = [];
-				const chain = nextIds => {
-					if (0 === nextIds.length)
-						resolve(namespaceNameTuples);
-					else
-						collectNames(namespaceNameTuples, nextIds).then(chain);
+				const result = [];
+				const chain = arg => {
+					const namespaceNameTuples = arg.namespaceNameTuples;
+
+					if (0 === result.length) {
+						for (const namespaceId in namespaceNameTuples) {
+							const tuple = namespaceNameTuples[namespaceId];
+							result.push(tuple);
+						}
+					} else {
+						result.forEach(nameTuple => {
+							if (nameTuple.parentId) {
+								const parent = namespaceNameTuples[nameTuple.parentId];
+								nameTuple.name = `${parent.name}.${nameTuple.name}`;
+								nameTuple.parentId = parent.parentId;
+
+								if (null === nameTuple.parentId)
+									delete nameTuple.parentId;
+							}
+						});
+					}
+					if (0 === arg.nextIds.length) {
+						resolve(result.map(nameTuple => {
+							delete nameTuple.parentId;
+							return nameTuple;
+						}));
+					} else { collectNames(arg.nextIds).then(chain); }
 				};
 
-				collectNames(namespaceNameTuples, namespaceIds).then(chain);
+				collectNames(namespaceIds).then(chain);
 			});
 
 			return nameTuplesFuture.then(routeUtils.createSender('namespaceNameTuple').sendArray('namespaceIds', res, next));
