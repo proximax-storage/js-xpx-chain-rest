@@ -335,29 +335,32 @@ class CatapultDb {
 
 	// region transaction retrieval for account
 
-	accountTransactionsAll(publicKey, id, pageSize, ordering) {
-		const conditions = createAccountTransactionsAllConditions(publicKey, this.networkId);
+	accountTransactionsAll(account, id, pageSize, ordering) {
+		const conditions = createAccountTransactionsAllConditions(account.accountId, this.networkId);
 		return this.queryTransactions(conditions, id, pageSize, { sortOrder: ordering });
 	}
 
-	accountTransactionsIncoming(publicKey, id, pageSize, ordering) {
-		const decoded = address.publicKeyToAddress(publicKey, this.networkId);
-		const bufferAddress = Buffer.from(decoded);
+	accountTransactionsIncoming(account, id, pageSize, ordering) {
+		let bufferAddress = null;
+		if ('publicKey' === account.type)
+			bufferAddress = Buffer.from(address.publicKeyToAddress(account.accountId, this.networkId));
+		else
+			bufferAddress = Buffer.from(account.accountId);
 		return this.queryTransactions({ 'transaction.recipient': bufferAddress }, id, pageSize, { sortOrder: ordering });
 	}
 
-	accountTransactionsOutgoing(publicKey, id, pageSize, ordering) {
-		const bufferPublicKey = Buffer.from(publicKey);
+	accountTransactionsOutgoing(account, id, pageSize, ordering) {
+		const bufferPublicKey = Buffer.from(account.accountId);
 		return this.queryTransactions({ 'transaction.signer': bufferPublicKey }, id, pageSize, { sortOrder: ordering });
 	}
 
-	accountTransactionsUnconfirmed(publicKey, id, pageSize, ordering) {
-		const conditions = createAccountTransactionsAllConditions(publicKey, this.networkId);
+	accountTransactionsUnconfirmed(account, id, pageSize, ordering) {
+		const conditions = createAccountTransactionsAllConditions(account.accountId, this.networkId);
 		return this.queryTransactions(conditions, id, pageSize, { collectionName: 'unconfirmedTransactions', sortOrder: ordering });
 	}
 
-	accountTransactionsPartial(publicKey, id, pageSize, ordering) {
-		const conditions = createAccountTransactionsAllConditions(publicKey, this.networkId);
+	accountTransactionsPartial(account, id, pageSize, ordering) {
+		const conditions = createAccountTransactionsAllConditions(account.accountId, this.networkId);
 		return this.queryTransactions(conditions, id, pageSize, { collectionName: 'partialTransactions', sortOrder: ordering });
 	}
 

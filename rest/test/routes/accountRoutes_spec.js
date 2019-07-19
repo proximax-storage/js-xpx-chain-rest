@@ -89,46 +89,72 @@ describe('account routes', () => {
 	});
 
 	describe('account transactions', () => {
-		const addAccountTransactionsTests = (apiPath, dbApiPath) => {
+		const addAccountTransactionsPublicKeyTests = (apiPath, dbApiPath) => {
 			describe(dbApiPath, () => {
 				const pagingTestsFactory = test.setup.createPagingTestsFactory(
 					{
 						routes: accountRoutes,
-						routeName: `/account/:publicKey/${apiPath}`,
+						routeName: `/account/:accountId/${apiPath}`,
 						createDb: (queriedIdentifiers, transactions) => ({
-							[dbApiPath]: (publicKey, pageId, pageSize) => {
-								queriedIdentifiers.push({ publicKey, pageId, pageSize });
+							[dbApiPath]: (accountId, pageId, pageSize) => {
+								queriedIdentifiers.push({ accountId, pageId, pageSize });
 								return Promise.resolve(transactions);
 							}
 						}),
 						config: { transactionStates: [{ dbPostfix: 'Partial', routePostfix: '/partial' }] }
 					},
-					{ publicKey: publicKeys.valid[0] },
-					{ publicKey: convert.hexToUint8(publicKeys.valid[0]) },
+					{ accountId: publicKeys.valid[0] },
+					{ accountId: { accountId: convert.hexToUint8(publicKeys.valid[0]), type: 'publicKey' } },
 					'transactionWithMetadata'
 				);
 
 				pagingTestsFactory.addDefault();
-				pagingTestsFactory.addNonPagingParamFailureTest('publicKey', '12345');
+				pagingTestsFactory.addNonPagingParamFailureTest('accountId', '12345');
+			});
+		};
+
+		const addAccountTransactionsAddressTests = (apiPath, dbApiPath) => {
+			describe(dbApiPath, () => {
+				const pagingTestsFactory = test.setup.createPagingTestsFactory(
+					{
+						routes: accountRoutes,
+						routeName: `/account/:accountId/${apiPath}`,
+						createDb: (queriedIdentifiers, transactions) => ({
+							[dbApiPath]: (accountId, pageId, pageSize) => {
+								queriedIdentifiers.push({ accountId, pageId, pageSize });
+								return Promise.resolve(transactions);
+							}
+						}),
+						config: { transactionStates: [{ dbPostfix: 'Partial', routePostfix: '/partial' }] }
+					},
+					{ accountId: addresses.valid[0] },
+					{ accountId: { accountId: address.stringToAddress(addresses.valid[0]), type: 'address' } },
+					'transactionWithMetadata'
+				);
+
+				pagingTestsFactory.addDefault();
+				pagingTestsFactory.addNonPagingParamFailureTest('accountId', '12345');
 			});
 		};
 
 		// default transaction states
-		addAccountTransactionsTests('transactions', 'accountTransactionsAll');
-		addAccountTransactionsTests('transactions/incoming', 'accountTransactionsIncoming');
-		addAccountTransactionsTests('transactions/outgoing', 'accountTransactionsOutgoing');
-		addAccountTransactionsTests('transactions/unconfirmed', 'accountTransactionsUnconfirmed');
+		addAccountTransactionsPublicKeyTests('transactions', 'accountTransactionsAll');
+		addAccountTransactionsPublicKeyTests('transactions/incoming', 'accountTransactionsIncoming');
+		addAccountTransactionsPublicKeyTests('transactions/outgoing', 'accountTransactionsOutgoing');
+		addAccountTransactionsPublicKeyTests('transactions/unconfirmed', 'accountTransactionsUnconfirmed');
 
 		// custom transaction states (enabled via custom configuration)
-		addAccountTransactionsTests('transactions/partial', 'accountTransactionsPartial');
+		addAccountTransactionsPublicKeyTests('transactions/partial', 'accountTransactionsPartial');
+
+		addAccountTransactionsAddressTests('transactions/incoming', 'accountTransactionsIncoming');
 
 		const addOrderingParamTests = (apiPath, dbApiPath) => {
 			describe(dbApiPath, () => {
 				// Arrange:
 				const createDb = (queriedIdentifiers, transactions) => ({
-					[dbApiPath]: (publicKey, pageId, pageSize, ordering) => {
+					[dbApiPath]: (accountId, pageId, pageSize, ordering) => {
 						queriedIdentifiers.push({
-							publicKey, pageId, pageSize, ordering
+							accountId, pageId, pageSize, ordering
 						});
 						return Promise.resolve(transactions);
 					}
@@ -139,16 +165,16 @@ describe('account routes', () => {
 				// Act:
 				it('queries the database with ordering param', () => test.route.executeSingle(
 					accountRoutes.register,
-					`/account/:publicKey/${apiPath}`,
+					`/account/:accountId/${apiPath}`,
 					'get',
-					Object.assign({}, { publicKey: publicKeys.valid[0] }, { ordering: 'id' }),
+					Object.assign({}, { accountId: publicKeys.valid[0] }, { ordering: 'id' }),
 					db,
 					{ transactionStates: [{ dbPostfix: 'Partial', routePostfix: '/partial' }] },
 					() => {
 						// Assert:
 						expect(keyGroups).to.deep.equal([Object.assign(
 							{},
-							{ publicKey: convert.hexToUint8(publicKeys.valid[0]) },
+							{ accountId: { accountId: convert.hexToUint8(publicKeys.valid[0]), type: 'publicKey' } },
 							{ pageId: undefined, pageSize: 0, ordering: 1 }
 						)]);
 					}

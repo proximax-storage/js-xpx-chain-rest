@@ -53,19 +53,23 @@ module.exports = {
 		});
 
 		const transactionStates = [
-			{ dbPostfix: 'All', routePostfix: '' },
-			{ dbPostfix: 'Incoming', routePostfix: '/incoming' },
-			{ dbPostfix: 'Outgoing', routePostfix: '/outgoing' },
-			{ dbPostfix: 'Unconfirmed', routePostfix: '/unconfirmed' }
+			{ dbPostfix: 'All', routePostfix: '', supportOnlyPublicKey: true },
+			{ dbPostfix: 'Incoming', routePostfix: '/incoming', supportOnlyPublicKey: false },
+			{ dbPostfix: 'Outgoing', routePostfix: '/outgoing', supportOnlyPublicKey: true },
+			{ dbPostfix: 'Unconfirmed', routePostfix: '/unconfirmed', supportOnlyPublicKey: true }
 		];
 
 		transactionStates.concat(services.config.transactionStates).forEach(state => {
-			server.get(`/account/:publicKey/transactions${state.routePostfix}`, (req, res, next) => {
-				const publicKey = routeUtils.parseArgument(req.params, 'publicKey', convert.hexToUint8);
+			server.get(`/account/:accountId/transactions${state.routePostfix}`, (req, res, next) => {
+				const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
+
+				if (state.supportOnlyPublicKey && 'publicKey' !== type)
+					throw errors.createInvalidArgumentError('Allowed only publicKey');
+
 				const pagingOptions = routeUtils.parsePagingArguments(req.params);
 				const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
-				return db[`accountTransactions${state.dbPostfix}`](publicKey, pagingOptions.id, pagingOptions.pageSize, ordering)
-					.then(transactionSender.sendArray('publicKey', res, next));
+				return db[`accountTransactions${state.dbPostfix}`]({ accountId, type }, pagingOptions.id, pagingOptions.pageSize, ordering)
+					.then(transactionSender.sendArray('accountId', res, next));
 			});
 		});
 	}
