@@ -2551,14 +2551,12 @@ components:
       - namespaceId
       - name
       properties:
-        parentId:
-          $ref: "#/components/schemas/UInt64DTO"
         namespaceId:
           $ref: "#/components/schemas/UInt64DTO"
         name:
           type: string
-          description: The name of the namespace.
-          example: cat
+          description: The full name of the namespace.
+          example: cat.currency
     AliasDTO:
       type: object
       required:

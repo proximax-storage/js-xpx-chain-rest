@@ -180,13 +180,14 @@ describe('namespace routes', () => {
 	});
 
 	describe('get namespace names by ids', () => {
-		const createParentId = parentId => ({ high_: 0, low_: parentId });
+		const createParentId = parentId => ([0, parentId]);
 
 		const createNamespace = (parentId, namespaceId) => ({
 			// 1. in db, parentId is only stored for child namespaces
 			// 2. db returns null instead of undefined when a document property is not present
 			parentId: undefined === parentId ? null : createParentId(parentId),
-			namespaceId: [0, namespaceId]
+			namespaceId: [0, namespaceId],
+			name: `${namespaceId}`
 		});
 
 		const Valid_Hex_String_Namespace_Ids = ['1234567890ABCDEF', 'ABCDEF0123456789'];
@@ -225,13 +226,7 @@ describe('namespace routes', () => {
 						expect(dbParamTuple.fieldsDescriptor).to.deep.equal({ id: 'namespaceId', name: 'name', parentId: 'parentId' });
 					});
 
-					// check response
-					let expectedPayload = [];
-					options.dbEntitiesGroupedByLevel.forEach(dbEntities => {
-						expectedPayload = expectedPayload.concat(dbEntities);
-					});
-
-					expect(response).to.deep.equal({ payload: expectedPayload, type: 'namespaceNameTuple' });
+					expect(response).to.deep.equal({ payload: options.expectedPayload, type: 'namespaceNameTuple' });
 				}
 			);
 		};
@@ -243,6 +238,7 @@ describe('namespace routes', () => {
 			dbEntitiesGroupedByLevel: [
 				[]
 			],
+			expectedPayload: [],
 			expectedNumDbQueries: 1
 		}));
 
@@ -252,6 +248,20 @@ describe('namespace routes', () => {
 			],
 			dbEntitiesGroupedByLevel: [
 				[createNamespace(undefined, 9), createNamespace(undefined, 5), createNamespace(undefined, 7)]
+			],
+			expectedPayload: [
+				{
+					name: '9',
+					namespaceId: createParentId(9)
+				},
+				{
+					name: '5',
+					namespaceId: createParentId(5)
+				},
+				{
+					name: '7',
+					namespaceId: createParentId(7)
+				}
 			],
 			expectedNumDbQueries: 1
 		}));
@@ -264,6 +274,24 @@ describe('namespace routes', () => {
 			dbEntitiesGroupedByLevel: [
 				[createNamespace(undefined, 9), createNamespace(12, 5), createNamespace(0, 3), createNamespace(16, 7)],
 				[createNamespace(undefined, 12), createNamespace(undefined, 0), createNamespace(undefined, 16)]
+			],
+			expectedPayload: [
+				{
+					name: '9',
+					namespaceId: createParentId(9)
+				},
+				{
+					name: '12.5',
+					namespaceId: createParentId(5)
+				},
+				{
+					name: '0.3',
+					namespaceId: createParentId(3)
+				},
+				{
+					name: '16.7',
+					namespaceId: createParentId(7)
+				}
 			],
 			expectedNumDbQueries: 2
 		}));
@@ -278,6 +306,20 @@ describe('namespace routes', () => {
 				[createNamespace(17, 9), createNamespace(12, 5), createNamespace(16, 7)],
 				[createNamespace(undefined, 12), createNamespace(25, 16), createNamespace(25, 17)],
 				[createNamespace(undefined, 25), createNamespace(undefined, 25)]
+			],
+			expectedPayload: [
+				{
+					name: '25.17.9',
+					namespaceId: createParentId(9)
+				},
+				{
+					name: '12.5',
+					namespaceId: createParentId(5)
+				},
+				{
+					name: '25.16.7',
+					namespaceId: createParentId(7)
+				}
 			],
 			expectedNumDbQueries: 3
 		}));
