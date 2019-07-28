@@ -1,5 +1,3 @@
-[![docs](badges/docs--green.svg)](https://bcdocs.xpxsirius.io)
-
 # ProximaX Sirius-Chain REST Code #
 
 Official ProximaX Sirius-Chain REST Code.
