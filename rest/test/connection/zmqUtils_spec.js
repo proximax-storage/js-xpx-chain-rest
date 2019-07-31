@@ -33,6 +33,7 @@ describe('zmqUtils', () => {
 		};
 
 		zsocket.monitor = (interval, numEvents) => { zsocket.monitorParamGroups.push({ interval, numEvents }); };
+		zsocket.subscribe = () => {};
 		zsocket.unmonitor = () => { ++zsocket.numUnmonitorCalls; };
 		zsocket.close = () => { ++zsocket.numCloseCalls; };
 
@@ -254,26 +255,25 @@ describe('zmqUtils', () => {
 
 	describe('createMultisocketEmitter', () => {
 		const createMockZsocketWithCapture = context => {
-			context.zsockets = {};
-			return (key, eventEmitter) => {
-				context.eventEmitter = eventEmitter;
-				context.zsockets[key] = createMockZsocket();
-				return context.zsockets[key];
+			context.zsocket = null;
+			return () => {
+				context.zsocket = createMockZsocket();
+				return context.zsocket;
 			};
 		};
-
-		it('initially has no sockets', () => {
-			// Arrange:
-			const emitter = zmqUtils.createMultisocketEmitter(() => {});
-
-			// Act + Assert:
-			expect(emitter.zsocketCount()).to.equal(0);
+		const subscriptionInfoMock = () => ({
+			filter: '',
+			handler: () => {}
 		});
+		const subscriptionInfoMockWithCapture = context => (key, emitter) => {
+			context.eventEmitter = emitter;
+			return subscriptionInfoMock();
+		};
 
 		describe('on', () => {
 			it('creates socket when new channel is subscribed', () => {
 				// Arrange:
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket, subscriptionInfoMock, test.createMockLogger());
 
 				// Act:
 				emitter.on('block', () => {});
@@ -289,7 +289,7 @@ describe('zmqUtils', () => {
 
 			it('creates socket per channel', () => {
 				// Arrange:
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket, subscriptionInfoMock, test.createMockLogger());
 
 				// Act:
 				emitter.on('block', () => {});
@@ -305,7 +305,7 @@ describe('zmqUtils', () => {
 
 			it('reuses socket when existing channel is subscribed', () => {
 				// Arrange:
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket, subscriptionInfoMock, test.createMockLogger());
 
 				// Act:
 				emitter.on('block', () => {});
@@ -319,7 +319,7 @@ describe('zmqUtils', () => {
 
 			it('bypasses socket creation when supported subevent is subscribed', () => {
 				// Arrange:
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket, subscriptionInfoMock, test.createMockLogger());
 
 				// Act:
 				emitter.on('block.close', () => {});
@@ -331,7 +331,7 @@ describe('zmqUtils', () => {
 
 			it('fails when unsupported subevent is subscribed', () => {
 				// Arrange:
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket, subscriptionInfoMock, test.createMockLogger());
 
 				// Act + Assert:
 				expect(() => emitter.on('block.foo', () => {}).to.throw('block.foo indicates an unsupported subevent'));
@@ -340,7 +340,7 @@ describe('zmqUtils', () => {
 			const assertOnlySubscribedHandlersAreInvoked = (eventName1, eventName2, numExpectedSockets) => {
 				// Arrange:
 				const context = {};
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context));
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context), subscriptionInfoMockWithCapture(context), test.createMockLogger());
 				const captures = {};
 
 				// - set up five subscriptions to two different channels
@@ -377,7 +377,7 @@ describe('zmqUtils', () => {
 			it('registers handler for propagating channel close event', () => {
 				// Arrange:
 				const context = {};
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context));
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context), subscriptionInfoMock, test.createMockLogger());
 
 				// - set up subscriptions to two channels and one subevent
 				emitter.on('block', () => {});
@@ -391,21 +391,20 @@ describe('zmqUtils', () => {
 				emitter.on('block.close', () => { captures.block = true; });
 				emitter.on('confirmedAdded.close', () => { captures.confirmedAdded = true; });
 
-				// Act: simulate close of block zsocket
-				context.zsockets.block.eventHandlers.zsocket_close[0]();
+				// Act: simulate close of zsocket
+				emitter.close();
 
 				// Assert: channel close event should have been raised for block channel only
-				expect(captures).to.deep.equal({ block: true });
+				expect(captures).to.deep.equal({ block: true, confirmedAdded: true });
 
 				// - close has also removed related socket reference and listeners
-				expect(emitter.zsocketCount()).to.equal(1);
+				expect(emitter.zsocketCount()).to.equal(0);
 				expect(emitter.listenerCount('block')).to.equal(0);
 				expect(emitter.listenerCount('block.close')).to.equal(0);
-				expect(emitter.listenerCount('confirmedAdded')).to.equal(2);
+				expect(emitter.listenerCount('confirmedAdded')).to.equal(0);
 
 				// - close has not closed the socket because it is assumed to have been closed prior to the event
-				expect(context.zsockets.block.numCloseCalls).to.equal(0);
-				expect(context.zsockets.confirmedAdded.numCloseCalls).to.equal(0);
+				expect(context.zsocket.numCloseCalls).to.equal(1);
 			});
 		});
 
@@ -413,7 +412,7 @@ describe('zmqUtils', () => {
 			it('has no effect when no matching subscribers are present', () => {
 				// Arrange:
 				const context = {};
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context));
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context), subscriptionInfoMock, test.createMockLogger());
 				emitter.on('block', () => {});
 				emitter.on('confirmedAdded', () => {});
 				emitter.on('block', () => {});
@@ -427,14 +426,13 @@ describe('zmqUtils', () => {
 				expect(emitter.listenerCount('block')).to.equal(2);
 				expect(emitter.listenerCount('confirmedAdded')).to.equal(2);
 
-				expect(context.zsockets.block.numCloseCalls).to.equal(0);
-				expect(context.zsockets.confirmedAdded.numCloseCalls).to.equal(0);
+				expect(context.zsocket.numCloseCalls).to.equal(0);
 			});
 
 			it('removes all matching channel subscribers', () => {
 				// Arrange:
 				const context = {};
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context));
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context), subscriptionInfoMock, test.createMockLogger());
 				emitter.on('block', () => {});
 				emitter.on('confirmedAdded', () => {});
 				emitter.on('block', () => {});
@@ -448,14 +446,19 @@ describe('zmqUtils', () => {
 				expect(emitter.listenerCount('block')).to.equal(0);
 				expect(emitter.listenerCount('confirmedAdded')).to.equal(2);
 
-				expect(context.zsockets.block.numCloseCalls).to.equal(1);
-				expect(context.zsockets.confirmedAdded.numCloseCalls).to.equal(0);
+				expect(context.zsocket.numCloseCalls).to.equal(0);
+
+				emitter.removeAllListeners('confirmedAdded');
+				expect(emitter.listenerCount('block')).to.equal(0);
+				expect(emitter.listenerCount('confirmedAdded')).to.equal(0);
+
+				expect(context.zsocket.numCloseCalls).to.equal(1);
 			});
 
 			it('removes all matching and subevent subscribers', () => {
 				// Arrange:
 				const context = {};
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context));
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context), subscriptionInfoMock, test.createMockLogger());
 				emitter.on('block', () => {});
 				emitter.on('block.close', () => {});
 				emitter.on('confirmedAdded', () => {});
@@ -472,13 +475,20 @@ describe('zmqUtils', () => {
 				expect(emitter.listenerCount('block.close')).to.equal(0);
 				expect(emitter.listenerCount('confirmedAdded')).to.equal(2);
 
-				expect(context.zsockets.block.numCloseCalls).to.equal(1);
-				expect(context.zsockets.confirmedAdded.numCloseCalls).to.equal(0);
+				expect(context.zsocket.numCloseCalls).to.equal(0);
+
+				emitter.removeAllListeners('confirmedAdded');
+
+				expect(emitter.listenerCount('block')).to.equal(0);
+				expect(emitter.listenerCount('block.close')).to.equal(0);
+				expect(emitter.listenerCount('confirmedAdded')).to.equal(0);
+
+				expect(context.zsocket.numCloseCalls).to.equal(1);
 			});
 
 			it('fails when attempting to remove listeners for any subevent', () => {
 				// Arrange:
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket, subscriptionInfoMock, test.createMockLogger());
 				emitter.on('block', () => {});
 				emitter.on('block.close', () => {});
 				emitter.on('confirmedAdded', () => {});
@@ -491,7 +501,7 @@ describe('zmqUtils', () => {
 
 			it('allows new subscriptions for removed channels', () => {
 				// Arrange:
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket);
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocket, subscriptionInfoMock, test.createMockLogger());
 				emitter.on('block', () => {});
 				emitter.on('confirmedAdded', () => {});
 				emitter.on('block', () => {});
@@ -514,7 +524,7 @@ describe('zmqUtils', () => {
 			it('removes all channel and subevent subscribers', () => {
 				// Arrange:
 				const context = {};
-				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context));
+				const emitter = zmqUtils.createMultisocketEmitter(createMockZsocketWithCapture(context), subscriptionInfoMock, test.createMockLogger());
 				emitter.on('block', () => {});
 				emitter.on('block.close', () => {});
 				emitter.on('confirmedAdded', () => {});
@@ -531,8 +541,7 @@ describe('zmqUtils', () => {
 				expect(emitter.listenerCount('block.close')).to.equal(0);
 				expect(emitter.listenerCount('confirmedAdded')).to.equal(0);
 
-				expect(context.zsockets.block.numCloseCalls).to.equal(1);
-				expect(context.zsockets.confirmedAdded.numCloseCalls).to.equal(1);
+				expect(context.zsocket.numCloseCalls).to.equal(1);
 			});
 		});
 	});

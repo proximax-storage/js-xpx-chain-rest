@@ -119,7 +119,7 @@ describe('zmq service', () => {
 			return new Promise(resolve => {
 				service.on('block.close', () => {
 					// Assert: socket is already closed when event is raised
-					expect(service.zsocketCount()).to.equal(0);
+					expect(service.zsocketCount()).to.equal(1);
 
 					setTimeout(() => {
 						// - listeners are removed after short delay
@@ -206,7 +206,7 @@ describe('zmq service', () => {
 						zsocket.send(blockBuffers.generationHash, zmq.ZMQ_SNDMORE);
 						zsocket.send(blockBuffers.channelName, zmq.ZMQ_SNDMORE);
 						zsocket.send(blockBuffers.address);
-					}, 100);
+					}, 200);
 				});
 			});
 		});
