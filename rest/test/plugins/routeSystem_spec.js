@@ -41,6 +41,7 @@ describe('route system', () => {
 			'accountLink',
 			'accountProperties',
 			'aggregate',
+			'config',
 			'contract',
 			'lock',
 			'metadata',
@@ -48,7 +49,8 @@ describe('route system', () => {
 			'multisig',
 			'namespace',
 			'receipts',
-			'transfer'
+			'transfer',
+			'upgrade'
 		]);
 	});
 

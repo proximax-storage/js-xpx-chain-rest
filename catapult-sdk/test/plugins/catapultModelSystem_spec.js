@@ -47,6 +47,7 @@ describe('catapult model system', () => {
 				'accountLink',
 				'accountProperties',
 				'aggregate',
+				'config',
 				'contract',
 				'lock',
 				'metadata',
@@ -54,7 +55,8 @@ describe('catapult model system', () => {
 				'multisig',
 				'namespace',
 				'receipts',
-				'transfer'
+				'transfer',
+				'upgrade'
 			]);
 		});
 	});

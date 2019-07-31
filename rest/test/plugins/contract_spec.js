@@ -26,7 +26,7 @@ describe('contract plugin', () => {
 			// Assert:
 			test.assert.assertRoutes(routes, [
 				'/account/:accountId/contracts',
-				'/contract/:accountId'
+				'/contract/:contractId'
 			]);
 		});
 

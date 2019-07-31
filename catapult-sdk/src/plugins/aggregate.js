@@ -27,8 +27,8 @@ const sizes = require('../modelBinary/sizes');
 
 const constants = { sizes: {} };
 Object.assign(constants.sizes, sizes, {
-	aggregate: 120 + 4, // size passed into deserialize includes full transaction size (even previously processed parts)
-	embedded: 40,
+	aggregate: 122 + 4, // size passed into deserialize includes full transaction size (even previously processed parts)
+	embedded: 42,
 	cosignature: sizes.signer + sizes.signature
 });
 
