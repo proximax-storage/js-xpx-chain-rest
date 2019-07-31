@@ -549,7 +549,7 @@ describe('server (bootstrapper)', () => {
 		// the tests are using custom `/ws/block*` routes
 
 		const ports = { server: 1234, mq: 7902 };
-		const delays = { publish: 50 };
+		const delays = { publish: 200 };
 
 		const createBlockBuffer = tag => Buffer.concat([
 			Buffer.of(0xC0, 0x00, 0x00, 0x00), // size
