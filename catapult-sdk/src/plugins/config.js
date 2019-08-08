@@ -36,8 +36,8 @@ const configPlugin = {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.applyHeightDelta = parser.uint64();
-				transaction.blockChainConfigSize = parser.uint32();
-				transaction.supportedEntityVersionsSize = parser.uint32();
+				transaction.blockChainConfigSize = parser.uint16();
+				transaction.supportedEntityVersionsSize = parser.uint16();
 				transaction.blockChainConfig = parser.buffer(transaction.blockChainConfigSize);
 				transaction.supportedEntityVersions = parser.buffer(transaction.supportedEntityVersionsSize);
 
@@ -46,8 +46,8 @@ const configPlugin = {
 
 			serialize: (transaction, serializer) => {
 				serializer.writeUint64(transaction.applyHeightDelta);
-				serializer.writeUint32(transaction.blockChainConfigSize);
-				serializer.writeUint32(transaction.supportedEntityVersionsSize);
+				serializer.writeUint16(transaction.blockChainConfigSize);
+				serializer.writeUint16(transaction.supportedEntityVersionsSize);
 				serializer.writeBuffer(transaction.blockChainConfig);
 				serializer.writeBuffer(transaction.supportedEntityVersions);
 			}

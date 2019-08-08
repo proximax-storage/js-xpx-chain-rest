@@ -59,12 +59,12 @@ describe('config plugin', () => {
 
 		describe('supports config transaction', () => {
 			const applyHeightDelta = Buffer.of(0x77, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
-			const blockChainConfigSize = Buffer.of(0x06, 0x00, 0x00, 0x00);
-			const supportedEntityVersionsSize = Buffer.of(0x05, 0x00, 0x00, 0x00);
+			const blockChainConfigSize = Buffer.of(0x06, 0x00);
+			const supportedEntityVersionsSize = Buffer.of(0x05, 0x00);
 			const blockChainConfig = Buffer.of(0x47, 0x0D, 0xB8, 0xFD, 0x2D, 0x81);
 			const supportedEntityVersions = Buffer.of(0xCE, 0xE1, 0x81, 0x40, 0x83);
 
-			test.binary.test.addAll(codec, 8 + 4 + 4 + 6 + 5, () => ({
+			test.binary.test.addAll(codec, 8 + 2 + 2 + 6 + 5, () => ({
 				buffer: Buffer.concat([
 					applyHeightDelta,
 					blockChainConfigSize,

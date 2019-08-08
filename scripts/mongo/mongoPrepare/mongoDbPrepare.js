@@ -68,6 +68,8 @@
 })();
 
 load('mongoAccountPropertiesDbPrepare.js')
+load('mongoCatapultConfigDbPrepare.js')
+load('mongoCatapultUpgradeDbPrepare.js')
 load('mongoContractDbPrepare.js')
 load('mongoLockInfoDbPrepare.js')
 load('mongoMetadataDbPrepare.js')
