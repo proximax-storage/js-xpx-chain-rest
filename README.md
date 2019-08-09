@@ -1,17 +1,13 @@
-# catapult-rest
+# ProximaX Sirius-Chain REST Code #
 
-[![Build Status](https://api.travis-ci.org/nemtech/catapult-rest.svg?branch=master)](https://travis-ci.org/nemtech/catapult-rest)
-[![Coverage Status](https://coveralls.io/repos/github/nemtech/catapult-rest/badge.svg?branch=master)](https://coveralls.io/github/nemtech/catapult-rest?branch=master)
+Official ProximaX Sirius-Chain REST Code.
+
+The ProximaX Sirius-Chain REST code is the REST code implementation of ProximaX blockchain layer. It directly interfaces the cpp-xpx-chain, the blockchain server code implementation of ProximaX Sirius-Chain.
 
 ## Requirements
 
 - NodeJS version 8 or 9
 - [yarn][yarn] dependency manager
-
-## License
-
-Copyright (c) 2018 Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp Licensed under the [GNU Lesser General Public License v3](LICENSE)
-
 
 [yarn]: https://yarnpkg.com/lang/en/
 
@@ -41,7 +37,7 @@ cd rest
 npm run build && npm run start ./resources/rest.json ./resources/rest.json
 ```
 
-You can change information about mongodb connection and catapult server connection in **rest/resources/rest.json**.
+You can change information about mongodb connection and cpp-xpx-chain server connection in **rest/resources/rest.json**.
 
 ## Build docker image
 
