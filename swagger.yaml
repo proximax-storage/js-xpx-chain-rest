@@ -741,8 +741,8 @@ paths:
     get:
       tags:
       - Contract routes
-      summary: Get contract of account
-      description: Gets the contract for a given publicKey.
+      summary: Get contracts of account
+      description: Gets all contracts where this account is involved.
       operationId: getAccountContract
       parameters:
       - name: publicKey
@@ -757,20 +757,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ContractInfoDTO'
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContractInfoDTO'
         '404':
           description: resource not found
         '409':
           description: invalid argument
-  '/contract/{accountId}':
+  '/contract/{contractId}':
     get:
       tags:
       - Contract routes
-      summary: Get contract of account
-      description: Gets the contract for a given accountId.
+      summary: Get contract by contractId
+      description: Gets the contract for a given contractId.
       operationId: getContract
       parameters:
-      - name: accountId
+      - name: contractId
         in: path
         description: The account identifier.
         required: true
@@ -791,7 +793,7 @@ paths:
     post:
       tags:
       - Contract routes
-      summary: Get contracts for an array of publicKeys
+      summary: Get contracts for an array of contract's publicKeys
       description: Gets an array of contracts.
       operationId: getAccountContracts
       requestBody:
@@ -1427,6 +1429,20 @@ components:
       required: true
   schemas:
     # Enumerations
+    AccountLinkTypeEnum:
+      type: integer
+      enum:
+      - 0
+      - 1
+      - 2
+      - 3
+      description: |
+        The account link types:
+        * 0 -  Unlinked. Account is not linked to another account.
+        * 1 -  Main. Account is a balance-holding account that is linked to a remote harvester account.
+        * 2 -  Remote. Account is a remote harvester account that is linked to a balance-holding account.
+        * 3 -  Remote_Unlinked. Account is a remote harvester eligible account that is unlinked.
+      example: 0
     AliasActionEnum:
       type: integer
       enum:
@@ -1722,9 +1738,12 @@ components:
           items:
             $ref: "#/components/schemas/MosaicDTO"
         accountType:
-          type: integer
+          $ref: "#/components/schemas/AccountLinkTypeEnum"
         linkedAccountKey:
+          description: |
+            The public key of a linked account. The linked account can use|provide balance for delegated harvesting.
           type: string
+          example: AC1A6E1D8DE5B17D2C6B1293F1CAD3829EEACF38D09311BB3C8E5A880092DE26
     AccountNamesDTO:
       type: object
       required:
@@ -1733,8 +1752,8 @@ components:
       properties:
         address:
           type: string
-          description: The address of the account in base 32.
-          example: SAAM2O7SSJ2A7AU3DZJMSTTRFZT5TFDPQ3ZIIJX7
+          description: The address of the account in hexadecimal.
+          example: 9081FCCB41F8C8409A9B99E485E0E28D23BD6304EF7215E01A
         names:
           type: array
           description: The mosaic linked namespace names.
@@ -1775,7 +1794,11 @@ components:
         values:
           type: array
           description: The address, transaction type or mosaic id to filter.
-          items: {}
+          items:
+            oneOf:
+            - type: string
+            - $ref: "#/components/schemas/UInt64DTO"
+            - type: integer
     AccountPropertiesModificationDTO:
       type: object
       required:
@@ -1787,7 +1810,11 @@ components:
         values:
           type: array
           description: The address, transaction type or mosaic id to filter.
-          items: {}
+          items:
+            oneOf:
+            - type: string
+            - $ref: "#/components/schemas/UInt64DTO"
+            - type: integer
     ContractInfoDTO:
       type: object
       required:
@@ -1999,6 +2026,8 @@ components:
         - blockReceiptsHash
         - stateHash
         - beneficiary
+        - feeInterest
+        - feeInterestDenominator
         properties:
           height:
             $ref: "#/components/schemas/UInt64DTO"
@@ -2041,6 +2070,16 @@ components:
             type: string
             description: The public key of the optional beneficiary designated by
               harvester.
+            example: 0
+          feeInterest:
+            type: integer
+            description: The part of the transaction fee harvester is willing to get.
+              From 0 up to FeeInterestDenominator. The customer gets
+              (FeeInterest / FeeInterestDenominator)'th part of the maximum transaction fee.
+            example: 0
+          feeInterestDenominator:
+            type: integer
+            description: Denominator of the transaction fee.
             example: 0
     HeightInfoDTO:
       type: object
@@ -2512,14 +2551,12 @@ components:
       - namespaceId
       - name
       properties:
-        parentId:
-          $ref: "#/components/schemas/UInt64DTO"
         namespaceId:
           $ref: "#/components/schemas/UInt64DTO"
         name:
           type: string
-          description: The name of the namespace.
-          example: cat
+          description: The full name of the namespace.
+          example: cat.currency
     AliasDTO:
       type: object
       required:

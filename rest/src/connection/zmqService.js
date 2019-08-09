@@ -21,9 +21,8 @@
 const zmq = require('zeromq');
 const zmqUtils = require('./zmqUtils');
 
-const createZmqSocket = (key, zmqConfig, logger) => {
+const createZmqSocket = (zmqConfig, logger) => {
 	const zsocket = zmq.socket('sub');
-	zsocket.key = key;
 	zmqUtils.prepareZsocket(zsocket, zmqConfig, logger);
 
 	zsocket.connect(`tcp://${zmqConfig.host}:${zmqConfig.port}`);
@@ -50,12 +49,8 @@ const findSubscriptionInfo = (key, emitter, codec, channelDescriptors) => {
  * @returns {object} Newly created zmq connection service that is a stripped down EventEmitter.
  */
 module.exports.createZmqConnectionService = (zmqConfig, codec, channelDescriptors, logger) =>
-	zmqUtils.createMultisocketEmitter((key, emitter) => {
-		logger.info(`subscribing to ${key}`);
-		const subscriptionInfo = findSubscriptionInfo(key, emitter, codec, channelDescriptors);
-
-		const zsocket = createZmqSocket(key, zmqConfig, logger);
-		zsocket.subscribe(subscriptionInfo.filter);
-		zsocket.on('message', subscriptionInfo.handler);
-		return zsocket;
-	});
+	zmqUtils.createMultisocketEmitter(
+		() => createZmqSocket(zmqConfig, logger),
+		(key, emitter) => findSubscriptionInfo(key, emitter, codec, channelDescriptors),
+		logger
+	);

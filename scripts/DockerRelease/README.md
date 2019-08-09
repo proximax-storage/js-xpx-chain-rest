@@ -2,7 +2,7 @@
 
 ```bash
 cd proximax-catapult-rest
-docker build -t proximax-catapult-rest -f ./scripts/DockerRelease/Dockerfile .
+docker build -t proximax-sirius-rest -f ./scripts/DockerRelease/Dockerfile .
 ```
 
 ## Run container

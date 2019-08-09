@@ -92,21 +92,11 @@ const namespacePlugin = {
 
 		builder.addSchema('namespaceNameTuple', {
 			namespaceId: ModelType.uint64,
-			name: ModelType.string,
-			parentId: ModelType.uint64
-		});
-
-		builder.addSchema('mosaicNamesTuples', {
-			mosaicNames: { type: ModelType.array, schemaName: 'mosaicNamesTuple' }
+			name: ModelType.string
 		});
 
 		builder.addSchema('mosaicNamesTuple', {
-			mosaicId: ModelType.uint64,
 			names: { type: ModelType.array, schemaName: ModelType.string }
-		});
-
-		builder.addSchema('accountNamesTuples', {
-			accountNames: { type: ModelType.array, schemaName: 'accountNamesTuple' }
 		});
 
 		builder.addSchema('accountNamesTuple', {

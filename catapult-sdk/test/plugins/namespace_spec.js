@@ -47,7 +47,7 @@ describe('namespace plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 13);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 11);
 			expect(modelSchema).to.contain.all.keys(
 				'aliasAddress',
 				'aliasMosaic',
@@ -58,9 +58,7 @@ describe('namespace plugin', () => {
 				'namespaceDescriptor.alias.empty',
 				'namespaceNameTuple',
 				'registerNamespace',
-				'mosaicNamesTuples',
 				'mosaicNamesTuple',
-				'accountNamesTuples',
 				'accountNamesTuple'
 			);
 
@@ -98,24 +96,16 @@ describe('namespace plugin', () => {
 			expect(Object.keys(modelSchema['namespaceDescriptor.alias.empty']).length).to.equal(0);
 
 			// - namespaceNameTuple
-			expect(Object.keys(modelSchema.namespaceNameTuple).length).to.equal(3);
-			expect(modelSchema.namespaceNameTuple).to.contain.all.keys(['namespaceId', 'name', 'parentId']);
+			expect(Object.keys(modelSchema.namespaceNameTuple).length).to.equal(2);
+			expect(modelSchema.namespaceNameTuple).to.contain.all.keys(['namespaceId', 'name']);
 
 			// - register namespace
 			expect(Object.keys(modelSchema.registerNamespace).length).to.equal(Object.keys(modelSchema.transaction).length + 4);
 			expect(modelSchema.registerNamespace).to.contain.all.keys(['namespaceId', 'parentId', 'duration', 'name']);
 
-			// - mosaic names tuples
-			expect(Object.keys(modelSchema.mosaicNamesTuples).length).to.equal(1);
-			expect(modelSchema.mosaicNamesTuples).to.contain.all.keys(['mosaicNames']);
-
 			// - mosaic names tuple
-			expect(Object.keys(modelSchema.mosaicNamesTuple).length).to.equal(2);
-			expect(modelSchema.mosaicNamesTuple).to.contain.all.keys(['mosaicId', 'names']);
-
-			// - account names tuples
-			expect(Object.keys(modelSchema.accountNamesTuples).length).to.equal(1);
-			expect(modelSchema.accountNamesTuples).to.contain.all.keys(['accountNames']);
+			expect(Object.keys(modelSchema.mosaicNamesTuple).length).to.equal(1);
+			expect(modelSchema.mosaicNamesTuple).to.contain.all.keys(['names']);
 
 			// - account names tuple
 			expect(Object.keys(modelSchema.accountNamesTuple).length).to.equal(2);

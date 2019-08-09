@@ -782,7 +782,10 @@ describe('catapult db', () => {
 					return runDbTest(
 						{ [getCollectionName(traits)]: seedTransactions },
 						// Act: retrieve transactions for an account
-						db => db[traits.dbFunctionName](keySelector(keys), undefined, undefined, queryOrdering),
+						db => db[traits.dbFunctionName](
+							{ accountId: keySelector(keys), type: 'publicKey' },
+							undefined, undefined, queryOrdering
+						),
 						transactions => {
 							// Assert: expected transactions are ordered
 							assertEqualDocuments(expectedTransactionIndexes.map(index => seedTransactions[index]), transactions);
@@ -947,7 +950,7 @@ describe('catapult db', () => {
 					return runDbTest(
 						{ [getCollectionName(traits)]: seedTransactions },
 						// Act: retrieve transactions from the second account
-						db => db[traits.dbFunctionName](keys[1]),
+						db => db[traits.dbFunctionName]({ accountId: keys[1], type: 'publicKey' }),
 						transactions => {
 							// Assert: only the transactions matching the second account were returned
 							assertEqualDocuments(traits.getAccount2Transactions(seedTransactions), transactions);
@@ -962,7 +965,7 @@ describe('catapult db', () => {
 					return runDbTest(
 						{ [getCollectionName(traits)]: seedTransactions },
 						// Act: query passing a custom id
-						db => db[traits.dbFunctionName](keys[1], traits.startId),
+						db => db[traits.dbFunctionName]({ accountId: keys[1], type: 'publicKey' }, traits.startId),
 						transactions => {
 							// Assert: only the transactions after the passed id should be returned
 							assertEqualDocuments(traits.getAccount2FilteredTransactions(seedTransactions, [2]), transactions);
@@ -977,7 +980,7 @@ describe('catapult db', () => {
 					return runDbTest(
 						{ [getCollectionName(traits)]: seedTransactions },
 						// Act: query with a custom page size
-						db => db[traits.dbFunctionName](key, undefined, pageSize),
+						db => db[traits.dbFunctionName]({ accountId: key, type: 'publicKey' }, undefined, pageSize),
 						transactions => {
 							// Assert: at most a single page was returned (subtract 1 because oids are 0-based)
 							const expectedIndexes = [];
@@ -1128,7 +1131,7 @@ describe('catapult db', () => {
 				return runDbTest(
 					{ [getCollectionName(traits)]: seedTransactions },
 					// Act: retrieve transactions for an account
-					db => db[traits.dbFunctionName](key),
+					db => db[traits.dbFunctionName]({ accountId: key, type: 'publicKey' }),
 					transactions => {
 						// Assert: expected transactions are available
 						assertEqualDocuments(expectedTransactionIndexes.map(index => seedTransactions[index]), transactions);
@@ -1160,7 +1163,7 @@ describe('catapult db', () => {
 					return runDbTest(
 						{ [getCollectionName(traits)]: seedTransactions },
 						// Act: retrieve transactions for an account
-						db => db[traits.dbFunctionName](key),
+						db => db[traits.dbFunctionName]({ accountId: key, type: 'publicKey' }),
 						transactions => {
 							// Assert: expected transactions are available and have stitched sub documents
 							assertEqualDocuments(expectedTransactionIndexes.map(index => {

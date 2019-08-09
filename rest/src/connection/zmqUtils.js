@@ -80,7 +80,7 @@ module.exports = {
 		};
 
 		const closeWithError = (message, err) => {
-			logger.error(`zmq ${zsocket.key}: ${message}`, err);
+			logger.error(`zmq : ${message}`, err);
 			zsocket.close();
 		};
 
@@ -108,29 +108,62 @@ module.exports = {
 	/**
 	 * Creates a multisocket emitter.
 	 * @param {function} zsocketFactory Factory for creating a zmq socket given a key.
+	 * @param {function} subcriptionInfoFactory Factory for creating a subcription info.
+	 * @param {object} logger It is logger=).
 	 * @returns {object} Event emitter with partial interface (on, removeAllListeners, listenerCount).
 	 */
-	createMultisocketEmitter: zsocketFactory => {
+	createMultisocketEmitter: (zsocketFactory, subcriptionInfoFactory, logger) => {
 		const emitter = new EventEmitter();
-		const zsockets = {};
+		let zsocket = null;
+		const subscriptions = {};
+		const handlers = {};
+
+		function handle(topic) {
+			const handler = handlers[topic.toString()];
+
+			if (handler)
+				handler(...arguments);
+		}
+
+		let multisocketEmitter = null;
+
+		const closeZSocket = () => {
+			logger.info('closeZSocket');
+			zsocket = null;
+			Object.keys(subscriptions).forEach(key => {
+				multisocketEmitter.removeAllListeners(key);
+			});
+		};
+
+		const getZSocket = () => {
+			if (!zsocket) {
+				zsocket = zsocketFactory();
+				zsocket.subscribe('');
+				zsocket.on('message', handle);
+				zsocket.on('zsocket_close', () => {
+					closeZSocket();
+				});
+			}
+
+			return zsocket;
+		};
+
+		zsocket = getZSocket();
 		const isSubEvent = key => -1 !== key.indexOf('.');
 		const isValidSubEvent = key => key.endsWith('.close');
-		const multisocketEmitter = {
+		multisocketEmitter = {
 			on: (key, callback) => {
+				if (!getZSocket())
+					throw Error(`zsocket was not created for ${key}`);
+
 				if (isSubEvent(key)) {
 					if (!isValidSubEvent(key))
 						throw Error(`${key} indicates an unsupported subevent`);
-				} else if (!(key in zsockets)) {
-					const zsocket = zsocketFactory(key, emitter);
-					zsocket.on('zsocket_close', () => {
-						// firing of close indicates socket is fully closed, so prevent it from being closed again
-						// by bypassing close in removeAllListeners
-						delete zsockets[key];
-
-						emitter.emit(`${key}.close`);
-						multisocketEmitter.removeAllListeners(key);
-					});
-					zsockets[key] = zsocket;
+				} else if (!(key in subscriptions)) {
+					logger.info(`subscribing to ${key}`);
+					const info = subcriptionInfoFactory(key, emitter);
+					subscriptions[key] = info;
+					handlers[info.filter.toString()] = info.handler;
 				}
 
 				emitter.on(key, callback);
@@ -140,31 +173,37 @@ module.exports = {
 				if (isSubEvent(key))
 					throw Error(`${key} must be a channel`);
 
+				logger.info(`unsubscribing to ${key}`);
+				emitter.emit(`${key}.close`);
 				emitter.removeAllListeners(key);
 				emitter.removeAllListeners(`${key}.close`);
-				if (!(key in zsockets))
+				if (!(key in subscriptions))
 					return;
 
-				const zsocket = zsockets[key];
-				delete zsockets[key];
-				zsocket.close();
+				const info = subscriptions[key];
+				delete handlers[info.filter];
+				delete subscriptions[key];
+
+				if (0 === multisocketEmitter.zsocketCount() && zsocket)
+					multisocketEmitter.close();
 			},
 
 			listenerCount: key => emitter.listenerCount(key),
 
 			/**
-			  * Gets the number of active zmq sockets.
-			  * @returns {numeric} Number of active zmq sockets.
+			  * Gets the number of active subscriptions.
+			  * @returns {numeric} Number of active subscriptions.
 			  */
-			zsocketCount: () => Object.keys(zsockets).length,
+			zsocketCount: () => Object.keys(subscriptions).length,
 
 			/**
-			 * Closes all zsockets.
+			 * Closes all subscriptions and zsocket.
 			 */
 			close: () => {
-				Object.keys(zsockets).forEach(key => {
-					multisocketEmitter.removeAllListeners(key);
-				});
+				if (zsocket) {
+					zsocket.close();
+					closeZSocket();
+				}
 			}
 		};
 
