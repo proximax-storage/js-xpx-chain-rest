@@ -79,6 +79,8 @@ const toStringInternal = code => {
 	case 0x80590005: return 'Failure_CatapultConfig_Plugin_Config_Malformed';
 	case 0x80590006: return 'Failure_CatapultConfig_SupportedEntityVersions_Config_Too_Large';
 	case 0x80590007: return 'Failure_CatapultConfig_SupportedEntityVersions_Config_Malformed';
+	case 0x80590008: return 'Failure_CatapultConfig_Catapult_Config_Trx_Cannot_Be_Unsupported';
+	case 0x80590009: return 'Failure_CatapultConfig_Plugin_Config_Missing';
 	case 0x80480001: return 'Failure_LockHash_Invalid_Mosaic_Id';
 	case 0x80480002: return 'Failure_LockHash_Invalid_Mosaic_Amount';
 	case 0x80480003: return 'Failure_LockHash_Hash_Exists';
@@ -145,8 +147,8 @@ const toStringInternal = code => {
 	case 0x8055000B: return 'Failure_Multisig_Modify_Max_Cosigners';
 	case 0x8055000C: return 'Failure_Multisig_Modify_Loop';
 	case 0x8055000D: return 'Failure_Multisig_Modify_Max_Multisig_Depth';
-	case 0x8055000E: return 'Failure_Multisig_Plugin_Config_Malformed';
 	case 0x80550800: return 'Failure_Multisig_Operation_Not_Permitted_By_Account';
+	case 0x8055000E: return 'Failure_Multisig_Plugin_Config_Malformed';
 	case 0x804E0001: return 'Failure_Namespace_Invalid_Duration';
 	case 0x804E0002: return 'Failure_Namespace_Invalid_Name';
 	case 0x804E0003: return 'Failure_Namespace_Name_Id_Mismatch';
@@ -185,13 +187,14 @@ const toStringInternal = code => {
 	case 0x8050000D: return 'Failure_Property_Transaction_Type_Not_Allowed';
 	case 0x8050000E: return 'Failure_Property_Plugin_Config_Malformed';
 	case 0x80540006: return 'Failure_Transfer_Message_Too_Large';
-	case 0x80540007: return 'Failure_Transfer_Plugin_Config_Malformed';
 	case 0x805400C8: return 'Failure_Transfer_Out_Of_Order_Mosaics';
+	case 0x80540007: return 'Failure_Transfer_Plugin_Config_Malformed';
 	case 0x80580001: return 'Failure_CatapultUpgrade_Invalid_Signer';
 	case 0x80580002: return 'Failure_CatapultUpgrade_Upgrade_Period_Too_Low';
 	case 0x80580003: return 'Failure_CatapultUpgrade_Redundant';
 	case 0x80580004: return 'Failure_CatapultUpgrade_Invalid_Catapult_Version';
 	case 0x80580005: return 'Failure_CatapultUpgrade_Plugin_Config_Malformed';
+	case 0x80580006: return 'Failure_CatapultUpgrade_Catapult_Version_Lower_Than_Current';
 	case 0x80FF0066: return 'Failure_Chain_Unlinked';
 	case 0x80FF0068: return 'Failure_Chain_Block_Not_Hit';
 	case 0x80FF0069: return 'Failure_Chain_Block_Inconsistent_State_Hash';
