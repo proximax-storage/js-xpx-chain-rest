@@ -29,6 +29,8 @@ describe('entity type enumeration', () => {
 			registerNamespace: 0x414E,
 			aliasAddress: 0x424E,
 			aliasMosaic: 0x434E,
+			catapultConfig: 0x4159,
+			catapultUpgrade: 0x4158,
 			metadataAddress: 0x413D,
 			metadataMosaic: 0x423D,
 			metadataNamespace: 0x433D,

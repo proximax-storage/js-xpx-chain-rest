@@ -552,10 +552,10 @@ describe('server (bootstrapper)', () => {
 		const delays = { publish: 200 };
 
 		const createBlockBuffer = tag => Buffer.concat([
-			Buffer.of(0xC0, 0x00, 0x00, 0x00), // size
+			Buffer.of(0xC2, 0x00, 0x00, 0x00), // size
 			Buffer.from(test.random.bytes(test.constants.sizes.signature)), // signature
 			Buffer.from('A4C656B45C02A02DEF64F15DD781DD5AF29698A353F414FAAA9CDB364A09F98F', 'hex'), // signer
-			Buffer.of(0x03, 0x00, 0x00, 0x80), // version, type
+			Buffer.of(0x03, 0x00, 0x00, 0x00, 0x00, 0x80), // version, type
 			Buffer.of(0x97, 0x87, 0x45, 0x0E, tag || 0xE1, 0x6C, 0xB6, 0x62), // height
 			Buffer.from(test.random.bytes(8)), // timestamp
 			Buffer.from(test.random.bytes(8)), // difficulty

@@ -91,7 +91,7 @@ describe('model formatter', () => {
 			assertCanParseAndFormatBlock(Buffer.concat([
 				Buffer.alloc(4), // size
 				buffers.blockHeader
-			]), 192);
+			]), 194);
 		});
 
 		it('can parse and format with transactions', () => {

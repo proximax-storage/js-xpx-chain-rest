@@ -30,9 +30,9 @@ const { expect } = require('chai');
 const constants = {
 	knownTxType: 0x0022,
 	sizes: {
-		aggregate: 120 + 4, // includes transaction header
-		transaction: 120,
-		embedded: 40 + 8,
+		aggregate: 122 + 4, // includes transaction header
+		transaction: 122,
+		embedded: 42 + 8,
 		cosignature: 96
 	}
 };
@@ -135,14 +135,14 @@ describe('aggregate plugin', () => {
 				buffer: Buffer.concat([
 					test.buffer.fromSize(constants.sizes.embedded + extraSize),
 					Signer_Buffer,
-					Buffer.of(0x2A, 0x81, type & 0xFF, (type >> 8) & 0xFF), // version, type
+					Buffer.of(0x2A, 0x0, 0x0, 0x81, type & 0xFF, (type >> 8) & 0xFF), // version, type
 					Buffer.of(0x46, 0x8B, 0x15, 0x2D), // alpha
 					Buffer.of(extraSize, 0x30, 0xE8, 0x50), // beta
 					Buffer.alloc(extraSize)
 				]),
 				object: {
 					signer: Signer_Buffer,
-					version: 0x812A,
+					version: 0x8100002A,
 					type,
 
 					alpha: 0x2D158B46,

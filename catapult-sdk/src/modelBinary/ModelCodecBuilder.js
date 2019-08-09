@@ -26,8 +26,8 @@ const verifiableEntityCodec = require('./verifiableEntityCodec');
 
 const constants = {
 	sizes: {
-		blockHeader: 192,
-		transactionHeader: 120
+		blockHeader: 194,
+		transactionHeader: 122
 	}
 };
 

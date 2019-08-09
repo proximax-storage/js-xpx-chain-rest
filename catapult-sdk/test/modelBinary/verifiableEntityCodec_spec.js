@@ -30,16 +30,16 @@ describe('verifiable entity codec', () => {
 			buffer: Buffer.concat([
 				Signature_Buffer,
 				Signer_Buffer,
-				Buffer.of(0x2A, 0x81, 0x1C, 0x45) // version, type
+				Buffer.of(0x2A, 0x0, 0x0, 0x81, 0x1C, 0x45) // version, type
 			]),
 			object: {
 				signature: Signature_Buffer,
 				signer: Signer_Buffer,
-				version: 0x812A,
+				version: 0x8100002A,
 				type: 0x451C
 			}
 		};
 	};
 
-	test.binary.test.addAll(verifiableEntityCodec, 100, generateVerifiableEntity);
+	test.binary.test.addAll(verifiableEntityCodec, 102, generateVerifiableEntity);
 });
