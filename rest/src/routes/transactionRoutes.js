@@ -47,7 +47,8 @@ module.exports = {
 			server,
 			services.connections,
 			{ routeName: '/transaction', packetType: PacketType.pushTransactions },
-			params => routeUtils.parseArgument(params, 'payload', convert.hexToUint8)
+			params => routeUtils.parseArgument(params, 'payload', convert.hexToUint8),
+			services.transactionCache
 		);
 
 		routeUtils.addGetPostDocumentRoutes(
