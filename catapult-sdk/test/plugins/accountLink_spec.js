@@ -79,7 +79,7 @@ describe('account link plugin', () => {
 				]),
 				object: {
 					remoteAccountKey,
-					linkAction: 0x01
+					action: 0x01
 				}
 			}));
 		});
