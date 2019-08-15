@@ -41,13 +41,13 @@ const accountLinkPlugin = {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.remoteAccountKey = parser.buffer(constants.sizes.signer);
-				transaction.linkAction = parser.uint8();
+				transaction.action = parser.uint8();
 				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
 				serializer.writeBuffer(transaction.remoteAccountKey);
-				serializer.writeUint8(transaction.linkAction);
+				serializer.writeUint8(transaction.action);
 			}
 		});
 	}

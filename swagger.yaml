@@ -3144,12 +3144,12 @@ components:
       type: object
       required:
       - remoteAccountKey
-      - linkAction
+      - action
       properties:
         remoteAccountKey:
           type: string
           description: The public key of the remote account.
-        linkAction:
+        action:
           $ref: "#/components/schemas/LinkActionEnum"
     AccountLinkTransactionDTO:
       type: object
