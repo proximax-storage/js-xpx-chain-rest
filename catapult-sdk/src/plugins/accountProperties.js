@@ -40,7 +40,7 @@ const accountPropertiesCreateBaseCodec = valueCodec => ({
 		const propertiesCount = parser.uint8();
 		for (let i = 0; i < propertiesCount; ++i) {
 			transaction.modifications.push({
-				modificationType: parser.uint8(),
+				type: parser.uint8(),
 				value: valueCodec.deserializeValue(parser)
 			});
 		}
@@ -50,7 +50,7 @@ const accountPropertiesCreateBaseCodec = valueCodec => ({
 		serializer.writeUint8(transaction.propertyType);
 		serializer.writeUint8(transaction.modifications.length);
 		for (let i = 0; i < transaction.modifications.length; ++i) {
-			serializer.writeUint8(transaction.modifications[i].modificationType);
+			serializer.writeUint8(transaction.modifications[i].type);
 			valueCodec.serializeValue(serializer, transaction.modifications[i].value);
 		}
 	}

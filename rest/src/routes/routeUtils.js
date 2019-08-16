@@ -251,8 +251,9 @@ const routeUtils = {
  	 * @param {object} connections Api server connection pool.
 	 * @param {object} routeInfo Information about the route.
 	 * @param {Function} parser Parser to use to parse the route parameters into a packet payload.
+	 * @param {object} transactionCache Cache of transactions.
 	 */
-	addPutPacketRoute: (server, connections, routeInfo, parser) => {
+	addPutPacketRoute: (server, connections, routeInfo, parser, transactionCache) => {
 		const createPacketFromBuffer = (data, packetType) => {
 			const length = packetHeader.size + data.length;
 			const header = packetHeader.createBuffer(packetType, length);
@@ -260,14 +261,28 @@ const routeUtils = {
 			return Buffer.concat(buffers, length);
 		};
 
+		let processTransaction = null;
+
+		if (transactionCache) {
+			processTransaction = function (packetBuffer, res, next) {
+				transactionCache.addTransactionBuffer(packetBuffer);
+				res.send(202, { message: `packet ${routeInfo.packetType} was pushed to the rest via ${routeInfo.routeName}` });
+				next();
+			};
+		} else {
+			processTransaction = function (packetBuffer, res, next) {
+				return connections.lease()
+					.then(connection => connection.send(packetBuffer))
+					.then(() => {
+						res.send(202, { message: `packet ${routeInfo.packetType} was pushed to the network via ${routeInfo.routeName}` });
+						next();
+					});
+			};
+		}
+
 		server.put(routeInfo.routeName, (req, res, next) => {
 			const packetBuffer = createPacketFromBuffer(parser(req.params), routeInfo.packetType);
-			return connections.lease()
-				.then(connection => connection.send(packetBuffer))
-				.then(() => {
-					res.send(202, { message: `packet ${routeInfo.packetType} was pushed to the network via ${routeInfo.routeName}` });
-					next();
-				});
+			return processTransaction(packetBuffer, res, next);
 		});
 	},
 

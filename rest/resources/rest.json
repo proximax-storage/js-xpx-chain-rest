@@ -26,6 +26,10 @@
     "timeout": 1000
   },
 
+  "transactionCache": {
+    "flushFrequency": 1500
+  },
+
   "websocket": {
     "mq": {
       "host": "127.0.0.1",

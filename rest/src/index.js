@@ -30,6 +30,7 @@ const routeSystem = require('./plugins/routeSystem');
 const winston = require('winston');
 const { createConnection } = require('net');
 const { createConnectionService } = require('./connection/connectionService');
+const { createTransactionCache } = require('./server/transactionCache');
 const { createZmqConnectionService } = require('./connection/zmqService');
 
 const configureLogging = config => {
@@ -110,7 +111,8 @@ const registerRoutes = (server, db, services) => {
 			apiNode: services.config.apiNode,
 			websocket: services.config.websocket
 		},
-		connections: services.connectionService
+		connections: services.connectionService,
+		transactionCache: services.transactionCache
 	};
 
 	// 2. configure extension routes
@@ -153,7 +155,13 @@ const registerRoutes = (server, db, services) => {
 			serviceManager.pushService(server, 'close');
 
 			const connectionService = createConnectionService(config, createConnection, catapult.auth.createAuthPromise, winston.verbose);
-			registerRoutes(server, db, { codec: serverAndCodec.codec, config, connectionService });
+			let transactionCache = null;
+			if (config.transactionCache)
+				transactionCache = createTransactionCache(config.transactionCache, connectionService, winston.verbose);
+
+			registerRoutes(server, db, {
+				codec: serverAndCodec.codec, config, connectionService, transactionCache
+			});
 
 			winston.info(`listening on port ${config.port}`);
 			server.listen(config.port);

@@ -177,7 +177,7 @@ describe('account properties plugin', () => {
 			const splitModificationValues = values => {
 				const mods = [];
 				for (let i = 0; i < values.length; ++i)
-					mods.push({ modificationType: values[i][0], value: values[i][1] });
+					mods.push({ type: values[i][0], value: values[i][1] });
 				return mods;
 			};
 
