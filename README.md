@@ -28,13 +28,14 @@ To run a rest server, you need to install mongodb first, or change mongodb addre
 ```
 cd ./scripts/mongo/
 sudo ./installMongoDb.sh
+service mongod restart
 cd mongoPrepare/
 ./mongors.sh
 ```
 Then you can run rest server:
 ```
 cd rest
-npm run build && npm run start ./resources/rest.json ./resources/rest.json
+yarn run build && yarn run start
 ```
 
 You can change information about mongodb connection and cpp-xpx-chain server connection in **rest/resources/rest.json**.
