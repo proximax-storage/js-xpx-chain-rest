@@ -28,6 +28,7 @@ const fs = require('fs');
 const messageFormattingRules = require('./server/messageFormattingRules');
 const routeSystem = require('./plugins/routeSystem');
 const winston = require('winston');
+const path = require('path');
 const { createConnection } = require('net');
 const { createConnectionService } = require('./connection/connectionService');
 const { createTransactionCache } = require('./server/transactionCache');
@@ -42,26 +43,14 @@ const configureLogging = config => {
 };
 
 const loadConfig = () => {
-	let configFiles = process.argv.slice(2);
-	if (0 === configFiles.length)
-		configFiles = ['../resources/rest.json'];
+	let configFilePath;
+	if (2 >= process.argv.length)
+		configFilePath = path.join(__dirname, '../resources/rest.json');
+	else
+		configFilePath = process.argv[2];
 
-	let config;
-	configFiles.forEach(configFile => {
-		winston.info(`loading config from ${configFile}`);
-		const partialConfig = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-
-		if (config) {
-			// override config
-			catapult.utils.objects.checkSchemaAgainstTemplate(config, partialConfig);
-			catapult.utils.objects.deepAssign(config, partialConfig);
-		} else {
-			// primary config
-			config = partialConfig;
-		}
-	});
-
-	return config;
+	winston.info(`loading config from ${configFilePath}`);
+	return JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
 };
 
 const createServiceManager = () => {
@@ -93,7 +82,7 @@ const createServer = config => {
 		ws: messageFormattingRules
 	});
 	return {
-		server: bootstrapper.createServer(config.crossDomainHttpMethods, formatters.create(modelSystem.formatters)),
+		server: bootstrapper.createServer(config.crossDomainHttpMethods, formatters.create(modelSystem.formatters), config.port),
 		codec: modelSystem.codec
 	};
 };
@@ -129,7 +118,6 @@ const registerRoutes = (server, db, services) => {
 (() => {
 	const config = loadConfig();
 	configureLogging(config.logging);
-	winston.verbose('finished loading rest server config', config);
 
 	const network = catapult.model.networkInfo.networks[config.network.name];
 	if (!network) {

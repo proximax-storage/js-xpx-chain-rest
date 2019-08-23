@@ -213,7 +213,7 @@ describe('server (bootstrapper)', () => {
 
 			// these headers should be stamped when cross domain is allowed
 			if (shouldAllowCrossDomain) {
-				expect(headers['access-control-allow-origin']).to.equal('*');
+				expect(headers['access-control-allow-origin']).to.equal(`http://localhost:${options.port}`);
 				expect(headers['access-control-allow-methods']).to.equal(options.allowMethods);
 				expect(headers['access-control-allow-headers']).to.equal('Content-Type');
 			}
@@ -330,7 +330,7 @@ describe('server (bootstrapper)', () => {
 			// region cross domain
 
 			it('does not add cross domain headers when not in configured cross domain http methods ', done => {
-				makeJsonHippie(`/dummy/${dummyIds.valid}`, method, { crossDomainHttpMethods: ['FOO', 'BAR'] })
+				makeJsonHippie(`/dummy/${dummyIds.valid}`, method, { crossDomainHttpMethods: ['FOO', 'BAR'], port: 3000 })
 					.expectStatus(200)
 					.end((headers, body) => {
 						// Assert:
@@ -343,7 +343,7 @@ describe('server (bootstrapper)', () => {
 			});
 
 			it('adds cross domain headers when in configured cross domain http methods ', done => {
-				makeJsonHippie(`/dummy/${dummyIds.valid}`, method, { crossDomainHttpMethods: ['FOO', method.toUpperCase(), 'BAR'] })
+				makeJsonHippie(`/dummy/${dummyIds.valid}`, method, { crossDomainHttpMethods: ['FOO', method.toUpperCase(), 'BAR'], port: 3000 })
 					.expectStatus(200)
 					.end((headers, body) => {
 						// Assert:
@@ -442,7 +442,7 @@ describe('server (bootstrapper)', () => {
 
 		describe('OPTIONS', () => {
 			const makeJsonHippieForOptions = route => {
-				const server = createServer({ crossDomainHttpMethods: ['FOO', 'OPTIONS', 'BAR'] });
+				const server = createServer({ crossDomainHttpMethods: ['FOO', 'OPTIONS', 'BAR'], port: 3000 });
 				const routeHandler = (req, res, next) => {
 					res.send(200);
 					next();

@@ -189,6 +189,8 @@ const toStringInternal = code => {
 	case 0x80540006: return 'Failure_Transfer_Message_Too_Large';
 	case 0x805400C8: return 'Failure_Transfer_Out_Of_Order_Mosaics';
 	case 0x80540007: return 'Failure_Transfer_Plugin_Config_Malformed';
+	case 0x80540006: return 'Failure_Transfer_Too_Many_Mosaics';
+	case 0x80540006: return 'Failure_Transfer_Zero_Amount';
 	case 0x80580001: return 'Failure_CatapultUpgrade_Invalid_Signer';
 	case 0x80580002: return 'Failure_CatapultUpgrade_Upgrade_Period_Too_Low';
 	case 0x80580003: return 'Failure_CatapultUpgrade_Redundant';
