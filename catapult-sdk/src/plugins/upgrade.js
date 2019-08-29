@@ -14,34 +14,34 @@ const ModelType = require('../model/ModelType');
  */
 const upgradePlugin = {
 	registerSchema: builder => {
-		builder.addTransactionSupport(EntityType.catapultUpgrade, {
-			upgradePeriod: 			{ type: ModelType.uint64, schemaName: 'catapultUpgrade.upgradePeriod' },
-			newCatapultVersion:		{ type: ModelType.uint64, schemaName: 'catapultUpgrade.newCatapultVersion' },
+		builder.addTransactionSupport(EntityType.blockchainUpgrade, {
+			upgradePeriod: 			{ type: ModelType.uint64, schemaName: 'blockchainUpgrade.upgradePeriod' },
+			newBlockchainVersion:		{ type: ModelType.uint64, schemaName: 'blockchainUpgrade.newBlockchainVersion' },
 		});
 
-		builder.addSchema('catapultUpgradeEntry', {
-			catapultUpgrade: { type: ModelType.object, schemaName: 'catapultUpgrade.height' }
+		builder.addSchema('blockchainUpgradeEntry', {
+			blockchainUpgrade: { type: ModelType.object, schemaName: 'blockchainUpgrade.height' }
 		});
 
-		builder.addSchema('catapultUpgrade.height', {
+		builder.addSchema('blockchainUpgrade.height', {
 			height:					ModelType.uint64,
-			catapultVersion:		ModelType.uint64,
+			blockChainVersion:		ModelType.uint64,
 		});
 	},
 
 	registerCodecs: codecBuilder => {
-		codecBuilder.addTransactionSupport(EntityType.catapultUpgrade, {
+		codecBuilder.addTransactionSupport(EntityType.blockchainUpgrade, {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.upgradePeriod = parser.uint64();
-				transaction.newCatapultVersion = parser.uint64();
+				transaction.newBlockchainVersion = parser.uint64();
 
 				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
 				serializer.writeUint64(transaction.upgradePeriod);
-				serializer.writeUint64(transaction.newCatapultVersion);
+				serializer.writeUint64(transaction.newBlockchainVersion);
 			}
 		});
 	}

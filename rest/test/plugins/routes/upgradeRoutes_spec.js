@@ -27,7 +27,7 @@ describe('upgrade routes', () => {
 				response => {
 					// Assert:
 					expect(keyGroups).to.deep.equal([12 /* height */, 1 /* limit */]);
-					expect(response).to.deep.equal({ payload: { value: 'this is nonsense' }, type: 'catapultUpgradeEntry' });
+					expect(response).to.deep.equal({ payload: { value: 'this is nonsense' }, type: 'blockchainUpgradeEntry' });
 				}
 			);
 		});

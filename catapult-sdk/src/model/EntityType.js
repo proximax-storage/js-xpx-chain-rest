@@ -63,11 +63,11 @@ const EntityType = {
 	/** Aggregate bonded transaction. */
 	aggregateBonded: 0x4241,
 
-	/** Catapult Config transaction. */
-	catapultConfig: 0x4159,
+	/** Network Config transaction. */
+	networkConfig: 0x4159,
 
-	/** Catapult Upgrade transaction. */
-	catapultUpgrade: 0x4158,
+	/** Blockchain Upgrade transaction. */
+	blockchainUpgrade: 0x4158,
 
 	/** Hash lock transaction. */
 	hashLock: 0x4148,

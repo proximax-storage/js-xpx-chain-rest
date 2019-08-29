@@ -13,7 +13,7 @@ module.exports = {
 		server.get('/config/:height', (req, res, next) => {
 			const height = parseHeight(req.params);
 			return db.configsLessOrEqualThanHeight(height, 1 /* limit */)
-				.then(routeUtils.createSender('catapultConfigEntry').sendOne(req.params.height, res, next));
+				.then(routeUtils.createSender('networkConfigEntry').sendOne(req.params.height, res, next));
 		});
 	}
 };

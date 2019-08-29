@@ -789,7 +789,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CatapultConfigDTO'
+                $ref: '#/components/schemas/NetworkConfigDTO'
         '404':
           description: resource not found
         '409':
@@ -1438,7 +1438,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CatapultUpgradeDTO'
+                $ref: '#/components/schemas/BlockchainUpgradeDTO'
         '404':
           description: resource not found
         '409':
@@ -1872,44 +1872,44 @@ components:
             - type: string
             - $ref: "#/components/schemas/UInt64DTO"
             - type: integer
-    CatapultConfigDTO:
+    NetworkConfigDTO:
       type: object
       required:
-      - catapultConfig
+      - networkConfig
       properties:
-        catapultConfig:
+        networkConfig:
           $ref: '#/components/schemas/ConfigDTO'
     ConfigDTO:
       type: object
       required:
       - height
-      - blockChainConfig
+      - networkConfig
       - supportedEntityVersions
       properties:
         height:
           $ref: '#/components/schemas/UInt64DTO'
-        blockChainConfig:
+        networkConfig:
           type: string
           example: "[network]\n\nidentifier = mijin-test\npublicKey = B4F12E7C9F6946091E2CB8B6D3A12B50D17CCBBF646386EA27CE2946A7423DCF\ngenerationHash = 7B631D803F912B00DC0CBED3014BBD17A302BA50B99D233B9C2D9533B842ABDF\n\n"
         supportedEntityVersions:
           type: string
           example: "{\n\t\"entities\": [\n\t\t{\n\t\t\t\"name\": \"Block\",\n\t\t\t\"type\": \"33091\",\n\t\t\t\"supportedVersions\": [3]\n\t\t}]}"
-    CatapultUpgradeDTO:
+    BlockchainUpgradeDTO:
       type: object
       required:
-      - catapultUpgrade
+      - blockchainUpgrade
       properties:
-        catapultConfig:
+        blockchainUpgrade:
           $ref: '#/components/schemas/UpgradeDTO'
     UpgradeDTO:
       type: object
       required:
       - height
-      - catapultVersion
+      - blockChainVersion
       properties:
         height:
           $ref: '#/components/schemas/UInt64DTO'
-        catapultVersion:
+        blockChainVersion:
           $ref: '#/components/schemas/UInt64DTO'
     ContractInfoDTO:
       type: object
