@@ -6,7 +6,7 @@
 
   "port": 3000,
   "crossDomainHttpMethods": ["GET", "POST", "PUT", "OPTIONS"],
-  "clientPrivateKey": "0000000000000000000000000000000000000000000000000000000000000000",
+  "clientPrivateKey": "1000000000000000000000000000000000000000000000000000000000000001",
   "extensions": ["accountLink", "accountProperties", "aggregate", "config", "contract", "lock", "metadata", "mosaic", "multisig", "namespace", "receipts", "transfer", "upgrade"],
 
   "db": {
@@ -22,7 +22,7 @@
   "apiNode": {
     "host": "127.0.0.1",
     "port": 7900,
-    "publicKey": "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+    "publicKey": "460458B98E2BAA36A8E95DE9B320379E89898885B71CF0174E02F1324FAFFAC1",
     "timeout": 1000
   },
 

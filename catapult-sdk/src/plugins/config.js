@@ -14,31 +14,31 @@ const ModelType = require('../model/ModelType');
  */
 const configPlugin = {
 	registerSchema: builder => {
-		builder.addTransactionSupport(EntityType.catapultConfig, {
-			applyHeightDelta: 			{ type: ModelType.uint64, schemaName: 'catapultConfig.applyHeightDelta' },
-			blockChainConfig:			{ type: ModelType.string, schemaName: 'catapultConfig.blockChainConfig' },
-			supportedEntityVersions:	{ type: ModelType.string, schemaName: 'catapultConfig.supportedEntityVersions' },
+		builder.addTransactionSupport(EntityType.networkConfig, {
+			applyHeightDelta: 			{ type: ModelType.uint64, schemaName: 'networkConfig.applyHeightDelta' },
+			networkConfig:			{ type: ModelType.string, schemaName: 'networkConfig.networkConfig' },
+			supportedEntityVersions:	{ type: ModelType.string, schemaName: 'networkConfig.supportedEntityVersions' },
 		});
 
-		builder.addSchema('catapultConfigEntry', {
-			catapultConfig: { type: ModelType.object, schemaName: 'catapultConfigEntry.height' }
+		builder.addSchema('networkConfigEntry', {
+			networkConfig: { type: ModelType.object, schemaName: 'networkConfigEntry.height' }
 		});
 
-		builder.addSchema('catapultConfigEntry.height', {
+		builder.addSchema('networkConfigEntry.height', {
 			height:						ModelType.uint64,
-			blockChainConfig:			ModelType.string,
+			networkConfig:			ModelType.string,
 			supportedEntityVersions:	ModelType.string,
 		});
 	},
 
 	registerCodecs: codecBuilder => {
-		codecBuilder.addTransactionSupport(EntityType.catapultConfig, {
+		codecBuilder.addTransactionSupport(EntityType.networkConfig, {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.applyHeightDelta = parser.uint64();
-				transaction.blockChainConfigSize = parser.uint16();
+				transaction.networkConfigSize = parser.uint16();
 				transaction.supportedEntityVersionsSize = parser.uint16();
-				transaction.blockChainConfig = parser.buffer(transaction.blockChainConfigSize);
+				transaction.networkConfig = parser.buffer(transaction.networkConfigSize);
 				transaction.supportedEntityVersions = parser.buffer(transaction.supportedEntityVersionsSize);
 
 				return transaction;
@@ -46,9 +46,9 @@ const configPlugin = {
 
 			serialize: (transaction, serializer) => {
 				serializer.writeUint64(transaction.applyHeightDelta);
-				serializer.writeUint16(transaction.blockChainConfigSize);
+				serializer.writeUint16(transaction.networkConfigSize);
 				serializer.writeUint16(transaction.supportedEntityVersionsSize);
-				serializer.writeBuffer(transaction.blockChainConfig);
+				serializer.writeBuffer(transaction.networkConfig);
 				serializer.writeBuffer(transaction.supportedEntityVersions);
 			}
 		});

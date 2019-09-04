@@ -32,27 +32,25 @@ module.exports = {
 		};
 
 		server.get('/account/:accountId/metadata', (req, res, next) => {
-			let accountId = routeUtils.parseArgument(req.params, 'accountId', ParseMetadataId);
-
+			const accountId = routeUtils.parseArgument(req.params, 'accountId', ParseMetadataId);
 			return db.metadatasByIds([accountId])
 				.then(routeUtils.createSender('metadataEntry').sendOne(req.params.accountId, res, next));
 		});
 
 		server.get('/mosaic/:mosaicId/metadata', (req, res, next) => {
-			let mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', ParseMetadataId);
+			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', ParseMetadataId);
 			return db.metadatasByIds([mosaicId])
 				.then(routeUtils.createSender('metadataEntry').sendOne(req.params.mosaicId, res, next));
 		});
 
 		server.get('/namespace/:namespaceId/metadata', (req, res, next) => {
-			let namespaceId = routeUtils.parseArgument(req.params, 'namespaceId', ParseMetadataId);
+			const namespaceId = routeUtils.parseArgument(req.params, 'namespaceId', ParseMetadataId);
 			return db.metadatasByIds([namespaceId])
 				.then(routeUtils.createSender('metadataEntry').sendOne(req.params.namespaceId, res, next));
 		});
 
 		server.get('/metadata/:metadataId', (req, res, next) => {
-			let metadataId = routeUtils.parseArgument(req.params, 'metadataId', ParseMetadataId);
-
+			const metadataId = routeUtils.parseArgument(req.params, 'metadataId', ParseMetadataId);
 			return db.metadatasByIds([metadataId])
 				.then(routeUtils.createSender('metadataEntry').sendOne(req.params.metadataId, res, next));
 		});

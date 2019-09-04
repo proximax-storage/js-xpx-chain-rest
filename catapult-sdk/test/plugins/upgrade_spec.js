@@ -24,15 +24,15 @@ describe('upgrade plugin', () => {
 
 			// Assert:
 			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 3);
-			expect(modelSchema).to.contain.all.keys(['catapultUpgrade', 'catapultUpgradeEntry', 'catapultUpgrade.height']);
+			expect(modelSchema).to.contain.all.keys(['blockchainUpgrade', 'blockchainUpgradeEntry', 'blockchainUpgrade.height']);
 
-			expect(Object.keys(modelSchema['catapultUpgrade.height']).length).to.equal(2);
-			expect(modelSchema['catapultUpgrade.height'])
-				.to.contain.all.keys(['height', 'catapultVersion']);
+			expect(Object.keys(modelSchema['blockchainUpgrade.height']).length).to.equal(2);
+			expect(modelSchema['blockchainUpgrade.height'])
+				.to.contain.all.keys(['height', 'blockChainVersion']);
 
 			// - upgrade
-			expect(Object.keys(modelSchema.catapultUpgrade).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
-			expect(modelSchema.catapultUpgrade).to.contain.all.keys(['upgradePeriod', 'newCatapultVersion']);
+			expect(Object.keys(modelSchema.blockchainUpgrade).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
+			expect(modelSchema.blockchainUpgrade).to.contain.all.keys(['upgradePeriod', 'newBlockchainVersion']);
 		});
 	});
 
@@ -52,23 +52,23 @@ describe('upgrade plugin', () => {
 
 			// Assert: codec was registered
 			expect(Object.keys(codecs).length).to.equal(1);
-			expect(codecs).to.contain.all.keys([EntityType.catapultUpgrade.toString()]);
+			expect(codecs).to.contain.all.keys([EntityType.blockchainUpgrade.toString()]);
 		});
 
-		const codec = getCodecs()[EntityType.catapultUpgrade];
+		const codec = getCodecs()[EntityType.blockchainUpgrade];
 
 		describe('supports upgrade transaction', () => {
 			const upgradePeriod = Buffer.of(0x0, 0x0, 0x0, 0x0, 0x77, 0x0, 0x0, 0x0);
-			const newCatapultVersion = Buffer.of(0x00, 0x0, 0x0, 0x0, 0x4, 0x0, 0x0, 0x0);
+			const newBlockchainVersion = Buffer.of(0x00, 0x0, 0x0, 0x0, 0x4, 0x0, 0x0, 0x0);
 
 			test.binary.test.addAll(codec, 8 + 8, () => ({
 				buffer: Buffer.concat([
 					upgradePeriod,
-					newCatapultVersion
+					newBlockchainVersion
 				]),
 				object: {
 					upgradePeriod: [0, 119],
-					newCatapultVersion: [0, 4]
+					newBlockchainVersion: [0, 4]
 				}
 			}));
 		});

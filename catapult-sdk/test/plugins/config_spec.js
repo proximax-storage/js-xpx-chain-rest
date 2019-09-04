@@ -24,15 +24,15 @@ describe('config plugin', () => {
 
 			// Assert:
 			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 3);
-			expect(modelSchema).to.contain.all.keys(['catapultConfig', 'catapultConfigEntry', 'catapultConfigEntry.height']);
+			expect(modelSchema).to.contain.all.keys(['networkConfig', 'networkConfigEntry', 'networkConfigEntry.height']);
 
-			expect(Object.keys(modelSchema['catapultConfigEntry.height']).length).to.equal(3);
-			expect(modelSchema['catapultConfigEntry.height'])
-				.to.contain.all.keys(['height', 'blockChainConfig', 'supportedEntityVersions']);
+			expect(Object.keys(modelSchema['networkConfigEntry.height']).length).to.equal(3);
+			expect(modelSchema['networkConfigEntry.height'])
+				.to.contain.all.keys(['height', 'networkConfig', 'supportedEntityVersions']);
 
 			// - config
-			expect(Object.keys(modelSchema.catapultConfig).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
-			expect(modelSchema.catapultConfig).to.contain.all.keys(['applyHeightDelta', 'blockChainConfig', 'supportedEntityVersions']);
+			expect(Object.keys(modelSchema.networkConfig).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
+			expect(modelSchema.networkConfig).to.contain.all.keys(['applyHeightDelta', 'networkConfig', 'supportedEntityVersions']);
 		});
 	});
 
@@ -52,31 +52,31 @@ describe('config plugin', () => {
 
 			// Assert: codec was registered
 			expect(Object.keys(codecs).length).to.equal(1);
-			expect(codecs).to.contain.all.keys([EntityType.catapultConfig.toString()]);
+			expect(codecs).to.contain.all.keys([EntityType.networkConfig.toString()]);
 		});
 
-		const codec = getCodecs()[EntityType.catapultConfig];
+		const codec = getCodecs()[EntityType.networkConfig];
 
 		describe('supports config transaction', () => {
 			const applyHeightDelta = Buffer.of(0x77, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
-			const blockChainConfigSize = Buffer.of(0x06, 0x00);
+			const networkConfigSize = Buffer.of(0x06, 0x00);
 			const supportedEntityVersionsSize = Buffer.of(0x05, 0x00);
-			const blockChainConfig = Buffer.of(0x47, 0x0D, 0xB8, 0xFD, 0x2D, 0x81);
+			const networkConfig = Buffer.of(0x47, 0x0D, 0xB8, 0xFD, 0x2D, 0x81);
 			const supportedEntityVersions = Buffer.of(0xCE, 0xE1, 0x81, 0x40, 0x83);
 
 			test.binary.test.addAll(codec, 8 + 2 + 2 + 6 + 5, () => ({
 				buffer: Buffer.concat([
 					applyHeightDelta,
-					blockChainConfigSize,
+					networkConfigSize,
 					supportedEntityVersionsSize,
-					blockChainConfig,
+					networkConfig,
 					supportedEntityVersions
 				]),
 				object: {
 					applyHeightDelta: [119, 0],
-					blockChainConfigSize: 0x06,
+					networkConfigSize: 0x06,
 					supportedEntityVersionsSize: 0x05,
-					blockChainConfig,
+					networkConfig,
 					supportedEntityVersions
 				}
 			}));
