@@ -108,11 +108,13 @@ const toStringInternal = code => {
 	case 0x803D0010: return 'Failure_Metadata_Address_Modification_Not_Permitted';
 	case 0x803D0011: return 'Failure_Metadata_Mosaic_Modification_Not_Permitted';
 	case 0x803D0012: return 'Failure_Metadata_Namespace_Modification_Not_Permitted';
-	case 0x803D0015: return 'Failure_Metadata_Address_Is_Not_Exist';
-	case 0x803D0016: return 'Failure_Metadata_Mosaic_Is_Not_Exist';
-	case 0x803D0017: return 'Failure_Metadata_Namespace_Is_Not_Exist';
+	case 0x803D0015: return 'Failure_Metadata_Address_Not_Found';
+	case 0x803D0016: return 'Failure_Metadata_Mosaic_Not_Found';
+	case 0x803D0017: return 'Failure_Metadata_Namespace_Not_Found';
 	case 0x803D001E: return 'Failure_Metadata_Too_Much_Keys';
 	case 0x803D001F: return 'Failure_Metadata_Plugin_Config_Malformed';
+	case 0x803D0020: return 'Failure_Metadata_MosaicId_Malformed';
+	case 0x803D0021: return 'Failure_Metadata_NamespaceId_Malformed';
 	case 0x804D0001: return 'Failure_Mosaic_Invalid_Duration';
 	case 0x804D0002: return 'Failure_Mosaic_Invalid_Name';
 	case 0x804D0003: return 'Failure_Mosaic_Name_Id_Mismatch';
