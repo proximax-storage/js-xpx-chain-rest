@@ -67,7 +67,17 @@ module.exports = {
 					throw errors.createInvalidArgumentError('Allowed only publicKey');
 
 				const pagingOptions = routeUtils.parsePagingArguments(req.params);
-				const ordering = routeUtils.parseArgument(req.params, 'ordering', input => ('id' === input ? 1 : -1));
+				let ordering = -1;
+
+				if (req.params['ordering']) {
+					ordering = routeUtils.parseArgument(req.params, 'ordering', input => {
+						if ('id' === input)
+							return 1;
+						else if ('-id' == input)
+							return -1;
+						else throw errors.createInvalidArgumentError('Invalid id');
+					});
+				}
 				return db[`accountTransactions${state.dbPostfix}`]({ accountId, type }, pagingOptions.id, pagingOptions.pageSize, ordering)
 					.then(transactionSender.sendArray('accountId', res, next));
 			});

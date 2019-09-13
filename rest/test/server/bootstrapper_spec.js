@@ -477,9 +477,9 @@ describe('server (bootstrapper)', () => {
 				runBasicOptionsTest('/dummy', 'POST', done);
 			});
 
-			it('prefers exact matches', done => {
-				// notice that /dummy/names could potentially match GET /dummy/:dummyId
-				runBasicOptionsTest('/dummy/names', 'POST', done);
+			it('allows all matches', done => {
+				// notice that /dummy/names could also match GET /dummy/:dummyId
+				runBasicOptionsTest('/dummy/names', 'GET, POST', done);
 			});
 
 			it('handles non existent route properly', done => {

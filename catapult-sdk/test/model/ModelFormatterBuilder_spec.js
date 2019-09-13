@@ -173,11 +173,7 @@ describe('model formatter builder', () => {
 					mosaics: [
 						{ id: 0, amount: 0 },
 						{ id: 0, amount: 0 }
-					],
-					reputation: {
-						positiveInteractions: 0,
-						negativeInteractions: 0
-					}
+					]
 				}
 			});
 
@@ -195,11 +191,7 @@ describe('model formatter builder', () => {
 					mosaics: [
 						{ id: 'uint64', amount: 'uint64' },
 						{ id: 'uint64', amount: 'uint64' }
-					],
-					reputation: {
-						positiveInteractions: 'uint64',
-						negativeInteractions: 'uint64'
-					}
+					]
 				}
 			});
 		});

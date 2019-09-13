@@ -175,9 +175,9 @@ class CatapultDb {
 	 * @returns {Promise} Promise that resolves to the sizes of collections in the database.
 	 */
 	storageInfo() {
-		const blockCountPromise = this.database.collection('blocks').count();
-		const transactionCountPromise = this.database.collection('transactions').count();
-		const accountCountPromise = this.database.collection('accounts').count();
+		const blockCountPromise = this.database.collection('blocks').countDocuments();
+		const transactionCountPromise = this.database.collection('transactions').countDocuments();
+		const accountCountPromise = this.database.collection('accounts').countDocuments();
 		return Promise.all([blockCountPromise, transactionCountPromise, accountCountPromise])
 			.then(storageInfo => ({ numBlocks: storageInfo[0], numTransactions: storageInfo[1], numAccounts: storageInfo[2] }));
 	}
@@ -371,29 +371,8 @@ class CatapultDb {
 	accountsByIds(ids) {
 		// id will either have address property or publicKey property set; in the case of publicKey, convert it to address
 		const buffers = ids.map(id => Buffer.from((id.publicKey ? address.publicKeyToAddress(id.publicKey, this.networkId) : id.address)));
-		return this.database.collection('accounts').aggregate([
-			{ $match: { 'account.address': { $in: buffers } } },
-			{
-				$lookup: {
-					from: 'reputations',
-					localField: 'account.address',
-					foreignField: 'reputation.accountAddress',
-					as: 'reputationArray'
-				}
-			}])
-			.toArray()
-			.then(this.sanitizer.deleteIds)
+		return this.queryDocuments('accounts', { 'account.address': { $in: buffers } })
 			.then(entities => entities.map(accountWithMetadata => {
-				const { account } = accountWithMetadata;
-				if (0 < accountWithMetadata.reputationArray.length) {
-					const reputationWithMetadata = accountWithMetadata.reputationArray.pop();
-					account.reputation = {
-						positiveInteractions: reputationWithMetadata.reputation.positiveInteractions,
-						negativeInteractions: reputationWithMetadata.reputation.negativeInteractions
-					};
-				}
-
-				delete accountWithMetadata.reputationArray;
 				return accountWithMetadata;
 			}));
 	}
