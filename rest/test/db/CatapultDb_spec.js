@@ -664,8 +664,8 @@ describe('catapult db', () => {
 			// transaction data
 			const transaction = {
 				type: 0x12345,
-				parentMarkerId: Long.fromNumber(parentId),
-				markerId: Long.fromNumber(markerId),
+				parentMarkerId: parentId,
+				markerId,
 				markerName: `marker-${markerId}`
 			};
 
@@ -698,9 +698,9 @@ describe('catapult db', () => {
 		);
 
 		const createExpected = (parentId, markerId) => ({
-			markerId: Long.fromNumber(markerId),
+			markerId: markerId,
 			markerName: `marker-${markerId}`,
-			parentMarkerId: Long.fromNumber(parentId)
+			parentMarkerId: parentId
 		});
 
 		it('returns empty array for unknown ids', () =>
@@ -1215,17 +1215,8 @@ describe('catapult db', () => {
 		const publicKeyUnknown = test.random.publicKey();
 		const decodedAddressUnknown = keyToAddress(publicKeyUnknown);
 
-		const transformDbAccount = (dbAccountDocument, dbReputationDocument) => {
+		const transformDbAccount = (dbAccountDocument) => {
 			const accountWithMetadata = Object.assign({}, dbAccountDocument);
-			const { account } = accountWithMetadata;
-			if (dbReputationDocument) {
-				const reputationWithMetadata = Object.assign({}, dbReputationDocument);
-				const { reputation } = reputationWithMetadata;
-				account.reputation = {
-					positiveInteractions: reputation.positiveInteractions,
-					negativeInteractions: reputation.negativeInteractions
-				};
-			}
 			return accountWithMetadata;
 		};
 
@@ -1233,15 +1224,14 @@ describe('catapult db', () => {
 			it(description, () => {
 				// Arrange:
 				const seedAccounts = test.db.createAccounts(publicKey, options);
-				const seedReputations = test.db.createReputations([publicKey], 1);
 
 				// Assert:
 				return runDbTest(
-					{ accounts: seedAccounts, reputations: seedReputations },
+					{ accounts: seedAccounts },
 					db => db.accountsByIds([accountId]),
 					accounts => {
 						// Assert: compare against the transformed account instead of the db account
-						const account = transformDbAccount(seedAccounts[0], seedReputations[0]);
+						const account = transformDbAccount(seedAccounts[0]);
 						expect(accounts).to.deep.equal([account]);
 					}
 				);
@@ -1252,7 +1242,7 @@ describe('catapult db', () => {
 			it('returns empty array for unknown ids', () =>
 				// Assert:
 				runDbTest(
-					{ accounts: test.db.createAccounts(publicKey, options), reputations: test.db.createReputations([publicKey], 1) },
+					{ accounts: test.db.createAccounts(publicKey, options) },
 					db => db.accountsByIds([accountId]),
 					accounts => expect(accounts).to.deep.equal([])
 				));
@@ -1316,29 +1306,28 @@ describe('catapult db', () => {
 					numImportances: 1
 				});
 				const publicKeys = seedAccounts.map(seedAccount => seedAccount.account.publicKey.buffer);
-				const seedReputations = test.db.createReputations(publicKeys, publicKeys.length / 2);
 
 				// Assert:
-				return runTest(seedAccounts, publicKeys, seedReputations);
+				return runTest(seedAccounts, publicKeys);
 			};
 
 			it('returns multiple matching accounts', () =>
 				// Arrange:
-				runMultipleAccountsByIdsTests((seedAccounts, publicKeys, seedReputations) => runDbTest(
-					{ accounts: seedAccounts, reputations: seedReputations },
+				runMultipleAccountsByIdsTests((seedAccounts, publicKeys) => runDbTest(
+					{ accounts: seedAccounts },
 					db => db.accountsByIds([
 						{ publicKey: publicKeys[1] },
 						{ address: keyToAddress(publicKeys[3]) },
 						{ publicKey: publicKeys[4] }
 					]),
 					accounts => expect(accounts).to.deep.equal([1, 3, 4].map(index =>
-						transformDbAccount(seedAccounts[index], seedReputations[index])))
+						transformDbAccount(seedAccounts[index])))
 				)));
 
 			it('returns only known matching accounts', () =>
 				// Arrange:
-				runMultipleAccountsByIdsTests((seedAccounts, publicKeys, seedReputations) => runDbTest(
-					{ accounts: seedAccounts, reputations: seedReputations },
+				runMultipleAccountsByIdsTests((seedAccounts, publicKeys) => runDbTest(
+					{ accounts: seedAccounts },
 					db => db.accountsByIds([
 						{ publicKey: publicKeys[1] },
 						{ publicKey: test.random.publicKey() },
@@ -1346,7 +1335,7 @@ describe('catapult db', () => {
 						{ address: keyToAddress(publicKeys[3]) }
 					]),
 					accounts => expect(accounts).to.deep.equal([1, 3].map(index =>
-						transformDbAccount(seedAccounts[index], seedReputations[index])))
+						transformDbAccount(seedAccounts[index])))
 				)));
 		});
 	});

@@ -37,9 +37,9 @@ const { createZmqConnectionService } = require('./connection/zmqService');
 const configureLogging = config => {
 	winston.remove(winston.transports.Console);
 	if ('production' !== process.env.NODE_ENV)
-		winston.add(winston.transports.Console, config.console);
+		winston.add(new winston.transports.Console(config.console));
 
-	winston.add(winston.transports.File, config.file);
+	winston.add(new winston.transports.File(config.file));
 };
 
 const loadConfig = () => {

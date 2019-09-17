@@ -41,6 +41,6 @@ describe('connector', () => {
 
 				// Assert:
 				expect(client).to.not.equal(null);
-				expect(client.db().s.databaseName).to.equal('tokyo');
+				expect(client.db().s.namespace.db).to.equal('tokyo');
 			}));
 });
