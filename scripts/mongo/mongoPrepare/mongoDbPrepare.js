@@ -70,7 +70,6 @@
 load('mongoAccountPropertiesDbPrepare.js')
 load('mongoNetworkConfigDbPrepare.js')
 load('mongoBlockchainUpgradeDbPrepare.js')
-load('mongoContractDbPrepare.js')
 load('mongoLockInfoDbPrepare.js')
 load('mongoMetadataDbPrepare.js')
 load('mongoMosaicDbPrepare.js')
