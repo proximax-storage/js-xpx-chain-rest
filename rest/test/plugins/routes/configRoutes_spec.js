@@ -27,7 +27,7 @@ describe('config routes', () => {
 				response => {
 					// Assert:
 					expect(keyGroups).to.deep.equal([12 /* height */, 1 /* limit */]);
-					expect(response).to.deep.equal({ payload: { value: 'this is nonsense' }, type: 'catapultConfigEntry' });
+					expect(response).to.deep.equal({ payload: { value: 'this is nonsense' }, type: 'networkConfigEntry' });
 				}
 			);
 		});

@@ -68,12 +68,10 @@
 })();
 
 load('mongoAccountPropertiesDbPrepare.js')
-load('mongoCatapultConfigDbPrepare.js')
-load('mongoCatapultUpgradeDbPrepare.js')
-load('mongoContractDbPrepare.js')
+load('mongoNetworkConfigDbPrepare.js')
+load('mongoBlockchainUpgradeDbPrepare.js')
 load('mongoLockInfoDbPrepare.js')
 load('mongoMetadataDbPrepare.js')
 load('mongoMosaicDbPrepare.js')
 load('mongoMultisigDbPrepare.js')
 load('mongoNamespaceDbPrepare.js')
-load('mongoReputationDbPrepare.js')

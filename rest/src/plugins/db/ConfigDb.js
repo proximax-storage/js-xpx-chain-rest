@@ -25,15 +25,15 @@ class ConfigDb {
 	 */
 	configsLessOrEqualThanHeight(height, limit = 0) {
 		return this.catapultDb.queryDocuments(
-			'catapultConfigs',
+			'networkConfigs',
 			{
-				'catapultConfig.height': {
+				'networkConfig.height': {
 					$lte: convertToLong(height)
 				}
 			},
 			{
 				sort: {
-					'catapultConfig.height': -1
+					'networkConfig.height': -1
 				},
 				limit
 			}

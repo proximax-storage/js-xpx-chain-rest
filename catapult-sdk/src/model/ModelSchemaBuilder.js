@@ -123,11 +123,6 @@ class ModelSchemaBuilder {
 				publicKeyHeight: ModelType.uint64,
 				linkedAccountKey: ModelType.binary,
 				mosaics: { type: ModelType.array, schemaName: 'mosaic' },
-				reputation: { type: ModelType.object, schemaName: 'reputation' }
-			},
-			reputation: {
-				positiveInteractions: ModelType.uint64,
-				negativeInteractions: ModelType.uint64
 			},
 			mosaic: {
 				id: ModelType.uint64,

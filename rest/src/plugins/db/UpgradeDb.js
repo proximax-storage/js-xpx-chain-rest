@@ -25,15 +25,15 @@ class UpgradeDb {
 	 */
 	upgradsLessOrEqualThanHeight(height, limit = 0) {
 		return this.catapultDb.queryDocuments(
-			'catapultUpgrades',
+			'blockchainUpgrades',
 			{
-				'catapultUpgrade.height': {
+				'blockchainUpgrade.height': {
 					$lte: convertToLong(height)
 				}
 			},
 			{
 				sort: {
-					'catapultUpgrade.height': -1
+					'blockchainUpgrade.height': -1
 				},
 				limit
 			}

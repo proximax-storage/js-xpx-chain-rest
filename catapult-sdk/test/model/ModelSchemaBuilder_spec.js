@@ -83,7 +83,6 @@ describe('model schema builder', () => {
 				'transactionStatus',
 
 				'account',
-				'reputation',
 				'mosaic',
 				'accountMetadata',
 				'accountWithMetadata',
@@ -149,7 +148,6 @@ describe('model schema builder', () => {
 				'transactionWithMetadata.meta',
 				'transactionWithMetadata.transaction',
 				'transactionStatus.meta',
-				'account.reputation',
 				'accountWithMetadata.meta',
 				'accountWithMetadata.account',
 
@@ -233,8 +231,6 @@ describe('model schema builder', () => {
 
 				'account.addressHeight',
 				'account.publicKeyHeight',
-				'reputation.positiveInteractions',
-				'reputation.negativeInteractions',
 				'mosaic.id',
 				'mosaic.amount',
 
