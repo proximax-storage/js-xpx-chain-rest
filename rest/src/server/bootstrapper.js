@@ -35,11 +35,11 @@ const toRestError = err => {
 	return restError;
 };
 
-const createCrossDomainHeaderAdder = (crossDomainHttpMethods, port) => {
+const createCrossDomainHeaderAdder = (crossDomainHttpMethods, cors) => {
 	const allowMethods = crossDomainHttpMethods.join(',');
 	return (requestMethod, res) => {
 		if (crossDomainHttpMethods.some(method => method === requestMethod)) {
-			res.header('Access-Control-Allow-Origin', `http://localhost:${port}`);
+			res.header('Access-Control-Allow-Origin', cors ? cors : '*');
 			res.header('Access-Control-Allow-Methods', allowMethods);
 			res.header('Access-Control-Allow-Headers', 'Content-Type');
 		}
@@ -80,7 +80,7 @@ module.exports = {
 	 * @param {object} formatters Formatters to use for formatting responses.
 	 * @returns {object} Server.
 	 */
-	createServer: (crossDomainHttpMethods, formatters, port) => {
+	createServer: (crossDomainHttpMethods, formatters, cors) => {
 		// create the server using a custom formatter
 		const server = restify.createServer({
 			name: '', // disable server header in response
@@ -90,7 +90,7 @@ module.exports = {
 		});
 
 		// only allow application/json
-		const addCrossDomainHeaders = createCrossDomainHeaderAdder(crossDomainHttpMethods || [], port);
+		const addCrossDomainHeaders = createCrossDomainHeaderAdder(crossDomainHttpMethods || [], cors);
 		server.pre(catapultRestifyPlugins.body());
 
 		server.use(catapultRestifyPlugins.crossDomain(addCrossDomainHeaders));

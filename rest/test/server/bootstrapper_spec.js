@@ -135,7 +135,7 @@ const createServer = options => {
 		}
 	});
 
-	const server = bootstrapper.createServer((options || {}).crossDomainHttpMethods, serverFormatters);
+	const server = bootstrapper.createServer((options || {}).crossDomainHttpMethods, serverFormatters, (options || {}).cors);
 	servers.push(server);
 	return server;
 };
@@ -213,7 +213,7 @@ describe('server (bootstrapper)', () => {
 
 			// these headers should be stamped when cross domain is allowed
 			if (shouldAllowCrossDomain) {
-				expect(headers['access-control-allow-origin']).to.equal(`http://localhost:${options.port}`);
+				expect(headers['access-control-allow-origin']).to.equal(options.cors ? options.cors : '*');
 				expect(headers['access-control-allow-methods']).to.equal(options.allowMethods);
 				expect(headers['access-control-allow-headers']).to.equal('Content-Type');
 			}
@@ -343,11 +343,11 @@ describe('server (bootstrapper)', () => {
 			});
 
 			it('adds cross domain headers when in configured cross domain http methods ', done => {
-				makeJsonHippie(`/dummy/${dummyIds.valid}`, method, { crossDomainHttpMethods: ['FOO', method.toUpperCase(), 'BAR'], port: 3000 })
+				makeJsonHippie(`/dummy/${dummyIds.valid}`, method, { crossDomainHttpMethods: ['FOO', method.toUpperCase(), 'BAR'], cors: 'localhost:3000' })
 					.expectStatus(200)
 					.end((headers, body) => {
 						// Assert:
-						assertPayloadHeaders(headers, 63, { allowMethods: `FOO,${method.toUpperCase()},BAR` });
+						assertPayloadHeaders(headers, 63, { allowMethods: `FOO,${method.toUpperCase()},BAR`, cors: 'localhost:3000' });
 						expect(body).to.deep.equal({
 							id: 123, height: [10, 0], scoreLow: [16, 0], scoreHigh: [11, 0]
 						});
@@ -442,7 +442,7 @@ describe('server (bootstrapper)', () => {
 
 		describe('OPTIONS', () => {
 			const makeJsonHippieForOptions = route => {
-				const server = createServer({ crossDomainHttpMethods: ['FOO', 'OPTIONS', 'BAR'], port: 3000 });
+				const server = createServer({ crossDomainHttpMethods: ['FOO', 'OPTIONS', 'BAR'], cors: '*' });
 				const routeHandler = (req, res, next) => {
 					res.send(200);
 					next();
