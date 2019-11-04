@@ -219,6 +219,20 @@ const toStringInternal = code => {
 	case 0x80FE3005: return 'Failure_Consumer_Remote_Chain_Too_Far_In_Future';
 	case 0x80450101: return 'Failure_Extension_Partial_Transaction_Cache_Prune';
 	case 0x80450102: return 'Failure_Extension_Partial_Transaction_Dependency_Removed';
+	case 0x805D0001: return 'Failure_Exchange_Offer_Doesnt_Exist';
+	case 0x805D0002: return 'Failure_Exchange_Zero_Amount';
+	case 0x805D0003: return 'Failure_Exchange_Zero_Price';
+	case 0x805D0004: return 'Failure_Exchange_No_Offers';
+	case 0x805D0005: return 'Failure_Exchange_Mosaic_Not_Allowed';
+	case 0x805D0006: return 'Failure_Exchange_Buying_Own_Units_Is_Not_Allowed';
+	case 0x805D0007: return 'Failure_Exchange_Not_Enough_Units_In_Offer';
+	case 0x805D0008: return 'Failure_Exchange_Invalid_Price';
+	case 0x805D0009: return 'Failure_Exchange_Account_Doesnt_Have_Any_Offer';
+	case 0x805D000A: return 'Failure_Exchange_Offer_Duration_Too_Large';
+	case 0x805D000B: return 'Failure_Exchange_Plugin_Config_Malformed';
+	case 0x805D000C: return 'Failure_Exchange_No_Offered_Mosaics_To_Remove';
+	case 0x805D000D: return 'Failure_Exchange_Duplicated_Offer_In_Request';
+	case 0x805D000E: return 'Failure_Exchange_Offer_Exists';
 	default: return undefined;
 	}
 };

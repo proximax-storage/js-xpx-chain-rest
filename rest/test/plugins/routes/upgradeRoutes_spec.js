@@ -13,7 +13,7 @@ describe('upgrade routes', () => {
 		it('/upgrade/:height', () => {
 			// Arrange:
 			const keyGroups = [];
-			const db = test.setup.createCapturingDb('upgradsLessOrEqualThanHeight', keyGroups, [{ value: 'this is nonsense' }]);
+			const db = test.setup.createCapturingDb('upgradesLessOrEqualThanHeight', keyGroups, [{ value: 'this is nonsense' }]);
 
 			// Act:
 			const registerRoutes = upgradeRoutes.register;

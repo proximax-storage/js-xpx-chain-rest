@@ -88,7 +88,16 @@ const EntityType = {
 	accountPropertiesEntityType: 0x4350,
 
 	/** Account link transaction. */
-	accountLink: 0x414C
+	accountLink: 0x414C,
+
+	/** Exchange offer transaction. */
+	exchangeOffer: 0x415D,
+
+	/** Exchange transaction. */
+	exchange: 0x425D,
+
+	/** Remove exchange offer transaction. */
+	removeExchangeOffer: 0x435D
 };
 
 module.exports = EntityType;
