@@ -23,7 +23,7 @@ class UpgradeDb {
 	 * @param {number} limit the query
 	 * @returns {Promise.<array>} The upgrade entries.
 	 */
-	upgradsLessOrEqualThanHeight(height, limit = 0) {
+	upgradesLessOrEqualThanHeight(height, limit = 0) {
 		return this.catapultDb.queryDocuments(
 			'blockchainUpgrades',
 			{
