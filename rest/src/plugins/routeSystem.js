@@ -23,7 +23,7 @@ const aggregate = require('./aggregate');
 const config = require('./config');
 const contract = require('./contract');
 const empty = require('./empty');
-const empty = require('./exchange');
+const exchange = require('./exchange');
 const lock = require('./lock');
 const MessageChannelBuilder = require('../connection/MessageChannelBuilder');
 const metadata = require('./metadata');
@@ -32,9 +32,10 @@ const multisig = require('./multisig');
 const namespace = require('./namespace');
 const receipts = require('./receipts');
 const upgrade = require('./upgrade');
+const service = require('./service');
 
 const plugins = {
-	accountLink: empty, accountProperties, aggregate, config, contract, exchange, lock, metadata, mosaic, multisig, namespace, receipts, transfer: empty, upgrade
+	accountLink: empty, accountProperties, aggregate, exchange, config, contract, lock, metadata, mosaic, multisig, namespace, receipts, service, transfer: empty, upgrade
 };
 
 module.exports = {

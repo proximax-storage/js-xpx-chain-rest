@@ -69,6 +69,24 @@ const EntityType = {
 	/** Blockchain Upgrade transaction. */
 	blockchainUpgrade: 0x4158,
 
+	/** Prepare Drive transaction. */
+	prepareDrive: 0x415A,
+
+	/** Join To Drive transaction. */
+	joinToDrive: 0x425A,
+
+	/** Drive File System transaction. */
+	driveFileSystem: 0x435A,
+
+	/** Files Deposit transaction. */
+	filesDeposit: 0x445A,
+
+	/** End Drive transaction. */
+	endDrive: 0x455A,
+
+	/** Delete Reward transaction. */
+	deleteReward: 0x465A,
+
 	/** Hash lock transaction. */
 	hashLock: 0x4148,
 
