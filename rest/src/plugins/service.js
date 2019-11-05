@@ -4,23 +4,23 @@
  *** license that can be found in the LICENSE file.
  **/
 
-/** @module plugins/config */
-const ExchangeDb = require('./db/ExchangeDb');
-const exchangeRoutes = require('./routes/exchangeRoutes');
+/** @module plugins/service */
+const ServiceDb = require('./db/ServiceDb');
+const serviceRoutes = require('./routes/serviceRoutes');
 
 /**
- * Creates a exchange plugin.
+ * Creates a service plugin.
  * @type {module:plugins/CatapultRestPlugin}
  */
 
 module.exports = {
-	createDb: db => new ExchangeDb(db),
+	createDb: db => new ServiceDb(db),
 
 	registerTransactionStates: () => {},
 
 	registerMessageChannels: () => {},
 
 	registerRoutes: (...args) => {
-		exchangeRoutes.register(...args);
+		serviceRoutes.register(...args);
 	}
 };

@@ -33,10 +33,9 @@ const exchangePlugin = {
 		});
 
 		builder.addSchema('offer', {
-			mosaicId: 	ModelType.uint64,
-			amount: 	ModelType.uint64,
-			cost: 		ModelType.uint64,
-			type: 		ModelType.uint8,
+			mosaicId: 		ModelType.uint64,
+			mosaicAmount: 	ModelType.uint64,
+			cost: 			ModelType.uint64,
 		});
 
 		builder.addTransactionSupport(EntityType.removeExchangeOffer, {
@@ -45,7 +44,6 @@ const exchangePlugin = {
 
 		builder.addSchema('offerMosaic', {
 			mosaicId: 	ModelType.uint64,
-			offerType:	ModelType.uint8,
 		});
 
 		builder.addSchema('exchangeEntry', {
@@ -75,7 +73,7 @@ const exchangePlugin = {
 		const readOffer = function (parser) {
 			const offer = {};
 			offer.mosaicId = parser.uint64();
-			offer.amount = parser.uint64();
+			offer.mosaicAmount = parser.uint64();
 			offer.cost = parser.uint64();
 			offer.type = parser.uint8();
 
@@ -92,13 +90,13 @@ const exchangePlugin = {
 		codecBuilder.addTransactionSupport(EntityType.exchangeOffer, {
 			deserialize: parser => {
 				const transaction = {};
-				const bytesLeft = parser.numUnprocessedBytes();
+				transaction.offersCount = parser.uint8();
 				transaction.offers = [];
-				while (0 < bytesLeft) {
+				let count = transaction.offersCount;
+				while (count--) {
 					const offerWithDuration = {};
 					offerWithDuration.offer = readOffer(parser);
 					offerWithDuration.duration = parser.uint64();
-					bytesLeft -= 8 + 8 + 8 + 1 + 8;
 					transaction.offers.push(offerWithDuration);
 				}
 
@@ -106,6 +104,7 @@ const exchangePlugin = {
 			},
 
 			serialize: (transaction, serializer) => {
+				serializer.writeUint8(transaction.offersCount);
 				transaction.offers.forEach(offerWithDuration => {
 					writeOffer(offerWithDuration.offer, serializer);
 					serializer.writeUint64(offerWithDuration.duration);
@@ -116,13 +115,13 @@ const exchangePlugin = {
 		codecBuilder.addTransactionSupport(EntityType.exchange, {
 			deserialize: parser => {
 				const transaction = {};
-				const bytesLeft = parser.numUnprocessedBytes();
+				transaction.offersCount = parser.uint8();
 				transaction.offers = [];
-				while (0 < bytesLeft) {
+				let count = transaction.offersCount;
+				while (count--) {
 					const matchedOffer = {};
 					matchedOffer.offer = readOffer(parser);
 					matchedOffer.owner = parser.buffer(32);
-					bytesLeft -= 8 + 8 + 8 + 1 + 32;
 					transaction.offers.push(matchedOffer);
 				}
 
@@ -130,6 +129,7 @@ const exchangePlugin = {
 			},
 
 			serialize: (transaction, serializer) => {
+				serializer.writeUint8(transaction.offersCount);
 				transaction.offers.forEach(matchedOffer => {
 					writeOffer(matchedOffer.offer, serializer);
 					serializer.writeBuffer(matchedOffer.owner);
@@ -140,13 +140,13 @@ const exchangePlugin = {
 		codecBuilder.addTransactionSupport(EntityType.removeExchangeOffer, {
 			deserialize: parser => {
 				const transaction = {};
-				const bytesLeft = parser.numUnprocessedBytes();
+				transaction.offersCount = parser.uint8();
 				transaction.offers = [];
-				while (0 < bytesLeft) {
+				let count = transaction.offersCount;
+				while (count--) {
 					const offerMosaic = {};
 					offerMosaic.mosaicId = parser.uint64();
 					offerMosaic.offerType = parser.uint8();
-					bytesLeft -= 8 + 1;
 					transaction.offers.push(offerMosaic);
 				}
 
@@ -154,6 +154,7 @@ const exchangePlugin = {
 			},
 
 			serialize: (transaction, serializer) => {
+				serializer.writeUint8(transaction.offersCount);
 				transaction.offers.forEach(offerMosaic => {
 					serializer.writeUint64(offerMosaic.mosaicId);
 					serializer.writeUint8(offerMosaic.offerType);

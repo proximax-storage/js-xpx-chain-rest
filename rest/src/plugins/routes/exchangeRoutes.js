@@ -10,7 +10,7 @@ const parseOwner = params => routeUtils.parseArgument(params, 'owner', 'publicKe
 
 module.exports = {
 	register: (server, db) => {
-		server.get('/config/:owner', (req, res, next) => {
+		server.get('/exchange/:owner', (req, res, next) => {
 			const owner = parseOwner(req.params);
 			return db.exchangesByKeys(owner)
 				.then(routeUtils.createSender('exchangeEntry').sendOne(req.params.owner, res, next));
