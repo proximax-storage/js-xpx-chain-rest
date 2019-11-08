@@ -4,10 +4,10 @@
  *** license that can be found in the LICENSE file.
  * */
 
-const OfferType = {
-	Buy: 	1,
-	Sell: 	2,
-};
+const MongoDb = require('mongodb');
+const AccountType = require('../AccountType');
+
+const { Long } = MongoDb;
 
 class ExchangeDb {
 	/**
@@ -16,49 +16,77 @@ class ExchangeDb {
 	 */
 	constructor(db) {
 		this.catapultDb = db;
+
+		this.deleteExpiredOffersFromObject = dbObject => {
+			if (dbObject) {
+				delete dbObject.expiredBuyOffers;
+				delete dbObject.expiredSellOffers;
+			}
+
+			return dbObject;
+		};
+
+		this.deleteExpiredOffersFromArray = dbObjects => {
+			dbObjects.forEach(dbObject => {
+				deleteExpiredOffersFromObject(dbObject);
+			});
+
+			return dbObjects;
+		};
 	}
-	
 
 	// region exchange retrieval
 
 	/**
-	 * Retrieves the exchange entries for the given keys.
-	 * @param {array<object>} keys Account public keys.
+	 * Retrieves the exchange entries for the given owner ids.
+	 * @param {module:db/AccountType} idType Type of account ids.
+	 * @param {array<object>} ids Owner public keys or addresses.
 	 * @returns {Promise.<array>} The exchange entries.
 	 */
-	exchangesByKeys(keys) {
-		const buffers = keys.map(key => Buffer.from(key));
-		return this.catapultDb.queryDocuments('exchanges', { ['exchange.owner']: { $in: buffers } });
+	exchangesByIds(idType, ids) {
+		const buffers = ids.map(id => Buffer.from(id));
+		const fieldName = (AccountType.publicKey === idType) ? 'exchange.owner' : 'exchange.ownerAddress';
+		return this.catapultDb.queryDocuments('exchanges', { [fieldName]: { $in: buffers } })
+			.then(this.deleteExpiredOffersFromObject);
 	}
 
 	/**
 	 * Retrieves the exchange entries with the offers of the given type with the given mosaicIds.
 	 * @param {OfferType} offerType Type of offers to search.
-	 * @param {array<object>} mosaicIds Required mosaic ids.
+	 * @param {Array.<module:catapult.utils/uint64~uint64>} mosaicIds Required mosaic ids.
+	 * @param {string} id Paging id.
+	 * @param {int} pageSize Page size.
+	 * @param {object} options Additional options.
 	 * @returns {Promise.<array>} The exchange entries.
 	 */
-	exchangesByMosaicIds(offerType, mosaicIds) {
-		const buffers = mosaicIds.map(mosaicId => Buffer.from(mosaicId));
-		const offerFieldName = (OfferType.Buy == offerType) ? 'buyOffers' : 'sellOffers';
-		return this.catapultDb.queryDocuments('exchanges', { ['exchange.${offerFieldName}.mosaicId']: { $in: buffers } });
+	exchangesByMosaicIds(offerType, mosaicIds, id, pageSize, options) {
+		const mosaicIds = ids.map(id => new Long(id[0], id[1]));
+		const offerFieldName = (OfferType.Buy === offerType) ? 'buyOffers' : 'sellOffers';
+		const conditions = { [`exchange.${offerFieldName}.mosaicId`]: { $in: mosaicIds } };
+		return this.catapultDb.queryPagedDocuments('exchanges', conditions, id, pageSize, options)
+			.then(this.deleteExpiredOffersFromArray);
 	}
 
 	/**
 	 * Retrieves the exchange entries with the offers of the given type with the given mosaicIds
 	 * and mosaic amount not less than the given amount.
 	 * @param {OfferType} offerType Type of offers to search.
-	 * @param {array<object>} mosaicIds Required mosaic ids.
+	 * @param {Array.<module:catapult.utils/uint64~uint64>} mosaicIds Required mosaic ids.
 	 * @param {Uint64} minAmount Minimum offered mosaic amount.
+	 * @param {string} id Paging id.
+	 * @param {int} pageSize Page size.
+	 * @param {object} options Additional options.
 	 * @returns {Promise.<array>} The exchange entries.
 	 */
-	exchangesByMosaicIdsAndMinAmount(offerType, mosaicIds, minAmount) {
-		const buffers = mosaicIds.map(mosaicId => Buffer.from(mosaicId));
-		const offerFieldName = (OfferType.Buy == offerType) ? 'buyOffers' : 'sellOffers';
-		return this.catapultDb.queryDocuments('exchanges',
-		{ $and: [
-			{ ['exchange.${offerFieldName}.mosaicId']: { $in: buffers } }, 
-			{ ['exchange.${offerFieldName}.amount']: { $gte: Buffer.from(minAmount) } }
-		]});
+	exchangesByMosaicIdsAndMinAmount(offerType, mosaicIds, minAmount, id, pageSize, options) {
+		const mosaicIds = ids.map(id => new Long(id[0], id[1]));
+		const offerFieldName = (OfferType.Buy === offerType) ? 'buyOffers' : 'sellOffers';
+		const conditions = { $and: [
+			{ [`exchange.${offerFieldName}.mosaicId`]: { $in: mosaicIds } }, 
+			{ [`exchange.${offerFieldName}.amount`]: { $gte: Buffer.from(minAmount) } }
+		]};
+		return this.catapultDb.queryPagedDocuments('exchanges', conditions, id, pageSize, options)
+			.then(this.deleteExpiredOffersFromArray);
 	}
 
 	// endregion

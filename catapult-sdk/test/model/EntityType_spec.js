@@ -46,7 +46,10 @@ describe('entity type enumeration', () => {
 			accountPropertiesAddress: 0x4150,
 			accountPropertiesMosaic: 0x4250,
 			accountPropertiesEntityType: 0x4350,
-			accountLink: 0x414C
+			accountLink: 0x414C,
+			exchangeOffer: 0x415D,
+			exchange: 0x425D,
+			removeExchangeOffer: 0x435D
 		});
 	});
 

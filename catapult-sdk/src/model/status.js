@@ -233,6 +233,7 @@ const toStringInternal = code => {
 	case 0x805D000C: return 'Failure_Exchange_No_Offered_Mosaics_To_Remove';
 	case 0x805D000D: return 'Failure_Exchange_Duplicated_Offer_In_Request';
 	case 0x805D000E: return 'Failure_Exchange_Offer_Exists';
+	case 0x805D000F: return 'Failure_Exchange_Zero_Offer_Duration';
 	default: return undefined;
 	}
 };

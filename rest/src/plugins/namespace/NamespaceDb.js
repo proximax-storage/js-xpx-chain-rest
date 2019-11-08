@@ -111,6 +111,36 @@ class NamespaceDb {
 	// endregion
 
 	/**
+	 * Retrieves aliased mosaic id of a namespace with the given namespace id.
+	 * @param {module:catapult.utils/uint64~uint64} id Namespace id.
+	 * @returns {Promise.<module:catapult.utils/uint64~uint64>} Aliased mosaic id.
+	 */
+	mosaicIdByNamespaceId(id) {
+		// const namespaceId = convertToLong(id);
+		const namespaceId = new Long(id[0], id[1]);
+		const conjunctionConditions = { $or: [] };
+
+		for (let level = 0; 3 > level; ++level) {
+			conjunctionConditions.$or.push({ $and: [
+				{ [`namespace.level${level}`]: namespaceId },
+				{ 'namespace.depth': level + 1 }
+			] });
+		}
+
+		const conditions = { $and: [] };
+		conditions.$and.push(conjunctionConditions);
+		conditions.$and.push({ 'namespace.alias.type': catapult.model.namespace.aliasType.mosaic });
+
+		return this.catapultDb.queryDocument('namespaces', conditions)
+			.then(dbObject => {
+				if (dbObject) {
+					return dbObject.namespace.alias.mosaicId;
+				}
+				return undefined;
+			});
+	}
+
+	/**
 	 * Retrieves transactions that registered the specified namespaces.
 	 * @param {Array.<module:catapult.utils/uint64~uint64>} namespaceIds Namespace ids.
 	 * @returns {Promise.<array>} Register namespace transactions.
