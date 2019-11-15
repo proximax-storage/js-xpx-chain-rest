@@ -6,35 +6,40 @@
 
 const catapult = require('catapult-sdk');
 const routeUtils = require('../../routes/routeUtils');
-const namespaceDb = require('../namespace/NamespaceDb');
 
 const { uint64 } = catapult.utils;
 
 module.exports = {
 	register: (server, db) => {
-		const exchangeSender = routeUtils.createSender('exchangeEntry');
-
 		server.get(`/account/:accountId/exchange`, (req, res, next) => {
 			const [idType, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
 			return db.exchangesByIds(idType, [accountId])
-				.then(exchangeSender.sendOne(req.params.accountId, res, next));
+				.then(routeUtils.createSender('exchangeEntry').sendOne(req.params.accountId, res, next));
 		});
 
-		server.post(`/exchange/:type/:assetId`, (req, res, next) => {
+		server.get(`/exchange/:type/:mosaicId`, (req, res, next) => {
 			const offerTypeStr = req.params['type'];
-			if (offerTypeStr != 'buy' && offerTypeStr != 'sell')
+			if (offerTypeStr !== 'buy' && offerTypeStr !== 'sell')
 				throw errors.createInvalidArgumentError(`offer type ${offerTypeStr} is invalid`);
-			const offerType = (offerTypeStr === 'buy') ? db.OfferType.Buy : db.OfferType.Sell;
 
-			const assetId = routeUtils.parseArgument(req.params, 'assetId', uint64.fromHex);
-			const mosaicId = namespaceDb.mosaicIdByNamespaceId(assetId);
-			if (!mosaicId)
-				mosaicId = assetId;
-				
+			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', uint64.fromHex);
+			// TODO: add namespace id resolve
+
 			const pagingOptions = routeUtils.parsePagingArguments(req.params);
+			let ordering = offerTypeStr === 'sell' ? 1 : -1;
 
-			return db.exchangesByMosaicIds(offerType, [mosaicId], pagingOptions.id, pagingOptions.pageSize)
-				.then(exchangeSender.sendArray('mosaicId', res, next));
+			if (req.params['ordering']) {
+				ordering = routeUtils.parseArgument(req.params, 'ordering', input => {
+					if ('id' === input)
+						return 1;
+					else if ('-id' == input)
+						return -1;
+					else throw errors.createInvalidArgumentError('Invalid id');
+				});
+			}
+
+			return db.exchangesByMosaicIds(offerTypeStr, [mosaicId], pagingOptions.id, pagingOptions.pageSize, ordering)
+				.then(routeUtils.createSender('offerInfo').sendArray('mosaicId', res, next));
 		});
 	}
 };

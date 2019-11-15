@@ -111,8 +111,9 @@ class MessageChannelBuilder {
 	 * @param {string} name Channel name.
 	 * @param {string} markerChar Channel marker character.
 	 * @param {function} handler Channel data handler.
+	 * @param {function} filter before handle.
 	 */
-	add(name, markerChar, handler) {
+	add(name, markerChar, handler, filter) {
 		if (name in this.descriptors)
 			throw Error(`'${name}' channel has already been registered`);
 
@@ -130,7 +131,7 @@ class MessageChannelBuilder {
 			channelHandler = handlers[handler](name);
 		}
 
-		this.descriptors[name] = { filter: this.createAddressFilter(markerChar), handler: channelHandler };
+		this.descriptors[name] = { filter: filter ? filter(markerChar) : this.createAddressFilter(markerChar), handler: channelHandler };
 		this.channelMarkers[markerChar] = 1;
 	}
 

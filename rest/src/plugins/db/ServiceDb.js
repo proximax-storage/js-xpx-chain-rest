@@ -17,7 +17,7 @@ const removeDeletedFiles = function(driveEntries) {
 	driveEntries.forEach(driveEntry => {
 		const files = [];
 		driveEntry.drive.files.forEach(file => {
-			if (file.actions[file.actions.length - 1].type != fileActions.remove && file.deposit == 0)
+			if (file.actions[file.actions.length - 1].type != fileActions.remove || file.deposit != 0)
 				files.push(file);
 		});
 

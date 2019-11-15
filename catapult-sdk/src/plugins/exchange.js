@@ -47,25 +47,40 @@ const exchangePlugin = {
 		});
 
 		builder.addSchema('exchangeEntry', {
-			owner:		ModelType.binary,
+			exchange:	{ type: ModelType.object, schemaName: 'exchangeEntry.exchange' },
+		});
+
+		builder.addSchema('exchangeEntry.exchange', {
+			owner:				ModelType.binary,
+			ownerAddress:		ModelType.binary,
 			buyOffers:	{ type: ModelType.array, schemaName: 'exchangeEntry.buyOffer' },
 			sellOffers:	{ type: ModelType.array, schemaName: 'exchangeEntry.sellOffer' },
 		});
 
 		builder.addSchema('exchangeEntry.buyOffer', {
-			offer: 			{ type: ModelType.object, schemaName: 'exchangeEntry.offerBase' },
-			residualCost:	ModelType.uint64,
-		});
-
-		builder.addSchema('exchangeEntry.sellOffer', {
-			offer:	{ type: ModelType.object, schemaName: 'exchangeEntry.offerBase' },
-		});
-
-		builder.addSchema('exchangeEntry.offerBase', {
+			mosaicId: 		ModelType.uint64,
 			amount: 		ModelType.uint64,
 			initialAmount:	ModelType.uint64,
 			initialCost:	ModelType.uint64,
 			deadline: 		ModelType.uint64,
+			residualCost:	ModelType.uint64,
+		});
+
+		builder.addSchema('exchangeEntry.sellOffer', {
+			mosaicId: 		ModelType.uint64,
+			amount: 		ModelType.uint64,
+			initialAmount:	ModelType.uint64,
+			initialCost:	ModelType.uint64,
+			deadline: 		ModelType.uint64,
+		});
+
+		builder.addSchema('offerInfo', {
+			mosaicId: 		ModelType.uint64,
+			amount: 		ModelType.uint64,
+			initialAmount:	ModelType.uint64,
+			initialCost:	ModelType.uint64,
+			deadline: 		ModelType.uint64,
+			owner: 			ModelType.binary,
 		});
 	},
 

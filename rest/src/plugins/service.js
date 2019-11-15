@@ -7,18 +7,54 @@
 /** @module plugins/service */
 const ServiceDb = require('./db/ServiceDb');
 const serviceRoutes = require('./routes/serviceRoutes');
+const catapult = require('catapult-sdk');
+
+const { BinaryParser } = catapult.parser;
+const { address, networkInfo } = catapult.model;
 
 /**
  * Creates a service plugin.
  * @type {module:plugins/CatapultRestPlugin}
  */
 
+const supportedReceipt = {
+	driveState: 0x615B,
+};
+
 module.exports = {
 	createDb: db => new ServiceDb(db),
 
 	registerTransactionStates: () => {},
 
-	registerMessageChannels: () => {},
+	registerMessageChannels: (builder, services) => {
+		const topic = 'b';
+		builder.add('driveState', topic, (codec, emit, filter) => (topic, buffer) => {
+			const parser = new BinaryParser();
+			parser.push(buffer);
+
+			const size = parser.uint32();
+			const version = parser.uint32();
+			const type = parser.uint16();
+
+			switch (type) {
+				case supportedReceipt.driveState:
+					const driveKey = parser.buffer(catapult.constants.sizes.signer);
+					const state = parser.uint8();
+
+					const driveAddress = address.publicKeyToAddress(driveKey, networkInfo.networks[services.config.network.name].id);
+					if (Buffer.compare(driveAddress, address.stringToAddress(filter)))
+						return;
+
+					const meta = { channelName: 'driveState', address: driveAddress };
+
+					emit({ type: 'service.driveStateWithMetadata', payload: { driveKey, state, meta } });
+			}
+		}, function(address) {
+			return () => {
+				return Buffer.of(topic.charCodeAt(0))
+			}
+		});
+	},
 
 	registerRoutes: (...args) => {
 		serviceRoutes.register(...args);

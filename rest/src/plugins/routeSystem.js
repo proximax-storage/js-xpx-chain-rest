@@ -62,7 +62,7 @@ module.exports = {
 
 			const plugin = plugins[pluginName];
 			plugin.registerTransactionStates(transactionStates);
-			plugin.registerMessageChannels(messageChannelBuilder);
+			plugin.registerMessageChannels(messageChannelBuilder, services);
 			plugin.registerRoutes(server, plugin.createDb(db), services);
 		});
 
