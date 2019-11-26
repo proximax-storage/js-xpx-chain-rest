@@ -35,8 +35,8 @@ const findSubscriptionInfo = (key, emitter, codec, channelDescriptors) => {
 		throw new Error(`unknown topic category ${topicCategory}`);
 
 	const descriptor = channelDescriptors[topicCategory];
-	const handler = descriptor.handler(codec, data => { emitter.emit(key, data); });
 	const filter = descriptor.filter(topicParam);
+	const handler = descriptor.handler(codec, data => { emitter.emit(key, data); }, topicParam);
 	return { filter, handler };
 };
 
