@@ -42,6 +42,11 @@
     "allowOptionalAddress": true
   },
 
+  "throttling": {
+    "burst": 20,
+    "rate": 5
+  },
+
   "logging": {
     "console": {
       "colorize": true,

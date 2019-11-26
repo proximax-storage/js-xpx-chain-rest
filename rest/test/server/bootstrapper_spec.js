@@ -26,6 +26,9 @@ const formatters = require('../../src/server/formatters');
 const hippie = require('hippie');
 const MessageChannelBuilder = require('../../src/connection/MessageChannelBuilder');
 const test = require('../testUtils');
+const restify = require('restify');
+const sinon = require('sinon');
+const winston = require('winston');
 const WebSocket = require('ws');
 const zmq = require('zeromq');
 const { createZmqConnectionService } = require('../../src/connection/zmqService');
@@ -107,35 +110,35 @@ const addRestRoutes = server => {
 
 const servers = [];
 
-const createServer = options => {
-	const serverFormatters = formatters.create({
-		[(options && options.formatterName) || 'json']: {
-			chainInfo: {
-				// real formatting is not actually being tested, so just drop high part
-				format: chainInfo => {
-					const formatUint64 = uint64 => (uint64 ? [uint64[0], 0] : undefined);
-					return {
-						id: chainInfo.id,
-						height: formatUint64(chainInfo.height),
-						scoreLow: formatUint64(chainInfo.scoreLow),
-						scoreHigh: formatUint64(chainInfo.scoreHigh)
-					};
-				}
-			},
-			blockHeaderWithMetadata: {
-				// real formatting is not actually being tested, so just format a few properties
-				format: blockHeaderWithMetadata => {
-					const { block } = blockHeaderWithMetadata;
-					return {
-						height: block.height,
-						signer: catapult.utils.convert.uint8ToHex(block.signer)
-					};
-				}
+const serverFormatters = options =>  formatters.create({
+	[(options && options.formatterName) || 'json']: {
+		chainInfo: {
+			// real formatting is not actually being tested, so just drop high part
+			format: chainInfo => {
+				const formatUint64 = uint64 => (uint64 ? [uint64[0], 0] : undefined);
+				return {
+					id: chainInfo.id,
+					height: formatUint64(chainInfo.height),
+					scoreLow: formatUint64(chainInfo.scoreLow),
+					scoreHigh: formatUint64(chainInfo.scoreHigh)
+				};
+			}
+		},
+		blockHeaderWithMetadata: {
+			// real formatting is not actually being tested, so just format a few properties
+			format: blockHeaderWithMetadata => {
+				const { block } = blockHeaderWithMetadata;
+				return {
+					height: block.height,
+					signer: catapult.utils.convert.uint8ToHex(block.signer)
+				};
 			}
 		}
-	});
+	}
+});
 
-	const server = bootstrapper.createServer((options || {}).crossDomainHttpMethods, serverFormatters, (options || {}).cors);
+const createServer = options => {
+	const server = bootstrapper.createServer((options || {}).crossDomainHttpMethods, serverFormatters(options), (options || {}).cors, (options || {}).throttling);
 	servers.push(server);
 	return server;
 };
@@ -149,6 +152,82 @@ describe('server (bootstrapper)', () => {
 			const server = servers.pop();
 			server.close();
 		}
+	});
+
+	// throttling tests are not ideal (can't guarantee those were added to the server) because everything related
+	// to the restify server happens intrinsically and is too coupled - those are best-effort tests
+	describe('throttling config', () => {
+		it('uses provided config', done => {
+			// Arrange:
+			const throttlingConfig = {
+				burst: 20,
+				rate: 5
+			};
+			const spy = sinon.spy(restify.plugins, 'throttle');
+
+			// Act:
+			bootstrapper.createServer([], serverFormatters(), undefined, throttlingConfig);
+
+			// Assert:
+			expect(spy.calledOnceWith({
+				burst: 20,
+				rate: 5,
+				ip: true
+			})).to.equal(true);
+
+			spy.restore();
+			done();
+		});
+
+		it('does not throttle if no configuration present', done => {
+			// Arrange:
+			const spy = sinon.spy(restify.plugins, 'throttle');
+
+			// Act:
+			bootstrapper.createServer([], serverFormatters());
+
+			// Assert:
+			expect(spy.notCalled).to.equal(true);
+
+			spy.restore();
+			done();
+		});
+
+		describe('does not throttle for incomplete configuration and logs a warning', () => {
+			it('missing rate', done => {
+				// Arrange:
+				const spy = sinon.spy(restify.plugins, 'throttle');
+				const logSpy = sinon.spy(winston, 'warn');
+
+				// Act:
+				bootstrapper.createServer([], serverFormatters(), undefined, { burst: 20 });
+
+				// Assert:
+				expect(spy.notCalled).to.equal(true);
+				expect(logSpy.calledOnceWith('throttling was not enabled - configuration is invalid or incomplete')).to.equal(true);
+
+				spy.restore();
+				logSpy.restore();
+				done();
+			});
+
+			it('missing burst', done => {
+				// Arrange:
+				const spy = sinon.spy(restify.plugins, 'throttle');
+				const logSpy = sinon.spy(winston, 'warn');
+
+				// Act:
+				bootstrapper.createServer([], serverFormatters(), undefined, { rate: 20 });
+
+				// Assert:
+				expect(spy.notCalled).to.equal(true);
+				expect(logSpy.calledOnceWith('throttling was not enabled - configuration is invalid or incomplete')).to.equal(true);
+
+				spy.restore();
+				logSpy.restore();
+				done();
+			});
+		});
 	});
 
 	describe('HTTP', () => {
