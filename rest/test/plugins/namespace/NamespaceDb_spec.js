@@ -242,33 +242,34 @@ describe('namespace db', () => {
 			.catch(() => Promise.resolve())
 			.then(() => db.database.collection(collectionName)[Array.isArray(entities) ? 'insertMany' : 'insertOne'](entities));
 
+	const aliasTypeMosaic = catapult.model.namespace.aliasType.mosaic;
+	const aliasTypeAddress = catapult.model.namespace.aliasType.address;
+	const lifetime = { start: 0, end: 100 };
+	const createNamespace = (namespaceId, aliasTarget, aliasType, depth, expirationHeight) => ({
+		namespace: {
+			depth,
+			level0: 1 >= depth ? convertToLong(namespaceId) : '',
+			level1: 2 === depth ? convertToLong(namespaceId) : '',
+			level2: 3 === depth ? convertToLong(namespaceId) : '',
+			alias: {
+				type: aliasType,
+				mosaicId: aliasType === aliasTypeMosaic ? convertToLong(aliasTarget) : null,
+				address: aliasType === aliasTypeAddress
+					? new Binary(Buffer.from(address.stringToAddress(aliasTarget)))
+					: null
+			},
+			startHeight: convertToLong(expirationHeight.start),
+			endHeight: convertToLong(expirationHeight.end)
+		}
+	});
+
 	describe('activeNamespacesWithAlias', () => {
-		const aliasTypeMosaic = catapult.model.namespace.aliasType.mosaic;
-		const aliasTypeAddress = catapult.model.namespace.aliasType.address;
 		const testAddress = {
 			one: 'SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXWV',
 			two: 'SCFZFP7N5C3P6EHP5D2UJ7GQD7Q7ZIENV4NZ6ELN',
 			three: 'SAAM2O7SSJ2A7AU3DZJMSTTRFZT5TFDPQ3ZIIJX7'
 		};
-		const lifetime = { start: 0, end: 100 };
-		const createNamespace = (namespaceId, aliasTarget, aliasType, depth, expirationHeight) => ({
-			namespace: {
-				depth,
-				level0: 1 >= depth ? convertToLong(namespaceId) : '',
-				level1: 2 === depth ? convertToLong(namespaceId) : '',
-				level2: 3 === depth ? convertToLong(namespaceId) : '',
-				alias: {
-					type: aliasType,
-					mosaicId: aliasType === catapult.model.namespace.aliasType.mosaic ? convertToLong(aliasTarget) : null,
-					address: aliasType === catapult.model.namespace.aliasType.address
-						? new Binary(Buffer.from(address.stringToAddress(aliasTarget)))
-						: null
-				},
-				startHeight: convertToLong(expirationHeight.start),
-				endHeight: convertToLong(expirationHeight.end)
-			}
-		});
-
+	
 		it('returns namespaces by mosaic ids', () => {
 			// Arrange:
 			const db = new CatapultDb({ networkId: testDbOptions.networkId });
@@ -390,6 +391,35 @@ describe('namespace db', () => {
 					]
 				))
 				.then(entities => { expect(entities).to.deep.equal([namespace3]); })
+				.then(() => db.close());
+		});
+	});
+
+	describe('mosaicIdByNamespaceId', () => {
+		const db = new CatapultDb({ networkId: testDbOptions.networkId });
+		const dbFacade = new NamespaceDb(db);
+		const prepareMosaicIdByNamespaceIdTest = () => {
+			return db.connect(testDbOptions.url, 'test')
+				.then(() => populateCollection(db, 'namespaces', [
+					createNamespace([12, 34], [56, 78], aliasTypeMosaic, 1, lifetime)
+				]));
+		};
+
+		it('returns mosaic id by namespace id', () => {
+			return prepareMosaicIdByNamespaceIdTest()
+				// Act:
+				.then(() => dbFacade.mosaicIdByNamespaceId([12, 34]))
+				// Assert:
+				.then(mosaicId => { expect(mosaicId).to.deep.equal(convertToLong([56, 78])); })
+				.then(() => db.close());
+		});
+
+		it('returns undefined for no namespaces with namespace id', () => {
+			return prepareMosaicIdByNamespaceIdTest()
+				// Act:
+				.then(() => dbFacade.mosaicIdByNamespaceId([43, 21]))
+				// Assert:
+				.then(mosaicId => { expect(mosaicId).equal(undefined); })
 				.then(() => db.close());
 		});
 	});

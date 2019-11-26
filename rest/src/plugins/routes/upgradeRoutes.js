@@ -12,7 +12,7 @@ module.exports = {
 	register: (server, db) => {
 		server.get('/upgrade/:height', (req, res, next) => {
 			const height = parseHeight(req.params);
-			return db.upgradsLessOrEqualThanHeight(height, 1 /* limit */)
+			return db.upgradesLessOrEqualThanHeight(height, 1 /* limit */)
 				.then(routeUtils.createSender('blockchainUpgradeEntry').sendOne(req.params.height, res, next));
 		});
 	}
