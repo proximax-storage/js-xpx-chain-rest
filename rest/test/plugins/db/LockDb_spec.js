@@ -191,6 +191,101 @@ describe('lock db', () => {
 				toDbApiId: owner => owner.address
 			}));
 		});
+
+		const addLockBySecretTests = traits => {
+			const assertLocks = (dbCallParams, lockGroups) =>
+				// Assert:
+				test.db.runDbTest(
+					traits.collectionName,
+					lockGroups.seed,
+					db => db[traits.dbMethodName](...dbCallParams),
+					locks => {
+						// Assert:
+						const expectedLocks = lockGroups.expected;
+						const expectedIds = expectedLocks.map(lock => lock._id);
+
+						const ids = locks.map(lock => lock._id);
+						expect(locks.length).to.equal(expectedLocks.length);
+						expect(ids).to.deep.equal(expectedIds);
+						expect(locks).to.deep.equal(expectedLocks);
+					}
+				);
+
+			const createRandomLocks = (startId, count) => {
+				const locks = [];
+				for (let id = startId; id < startId + count; ++id)
+					locks.push(traits.createLockInfo(id, createOwner(), traits.createRandomHash()));
+				return locks;
+			};
+
+			it('returns empty array for secret with no locks', () => {
+				// Arrange: create 3 locks
+				const allLocks = traits.createLockInfos(3, createOwner(), traits.createRandomHash());
+
+				// Assert:
+				return assertLocks([traits.createRandomHash()], {
+					seed: allLocks,
+					expected: []
+				});
+			});
+
+			it('returns all locks for single secret with locks', () => {
+				// Arrange: create 10 locks
+				const secret = traits.createRandomHash();
+				const seedLocks = traits.createLockInfos(10, createOwner(), secret);
+
+				// - create additional 5 locks with random secret
+				const additionalLocks = createRandomLocks(20, 5);
+
+				// Assert:
+				return assertLocks(
+					[secret],
+					{ seed: seedLocks.concat(additionalLocks), expected: seedLocks.reverse() }
+				);
+			});
+
+			describe('paging', () => {
+				it('query respects supplied document id', () => {
+					// Arrange: create 10 locks
+					const secret = traits.createRandomHash();
+					const seedLocks = traits.createLockInfos(10, createOwner(), secret).reverse();
+					const expectedLocks = seedLocks.slice(8);
+
+					// Assert:
+					return assertLocks(
+						[secret, seedLocks[7]._id.toString()],
+						{ seed: seedLocks, expected: expectedLocks }
+					);
+				});
+
+				const assertPageSize = (pageSize, expectedSize) => {
+					// Arrange: create 200 locks
+					const secret = traits.createRandomHash();
+					const seedLocks = traits.createLockInfos(200, createOwner(), secret);
+					const expectedLocks = seedLocks.slice(0, 200).reverse().slice(0, expectedSize);
+
+					// Assert:
+					expect(expectedSize).to.equal(expectedLocks.length);
+					return assertLocks(
+						[secret, undefined, pageSize],
+						{ seed: seedLocks, expected: expectedLocks }
+					);
+				};
+
+				// minimum and maximum values are set in CatapultDb ctor
+				it('query respects page size', () => assertPageSize(12, 12));
+				it('query ensures minimum page size', () => assertPageSize(5, 10));
+				it('query ensures maximum page size', () => assertPageSize(150, 100));
+			});
+		};
+
+		describe('secretLocks by secret', () => addLockBySecretTests({
+			collectionName: 'secret',
+			dbMethodName: 'secretLocksBySecret',
+			createRandomHash: testUtils.random.hash,
+			createLockInfo: test.db.createSecretLockInfoSecret,
+			createLockInfos: test.db.createSecretLockInfosSecret,
+		}));
 	});
 
 	describe('fetch individual', () => {
@@ -233,11 +328,11 @@ describe('lock db', () => {
 			dbFunctionName: 'hashLockByHash'
 		}));
 
-		describe('secret lock by secret', () => addTests({
-			createRandomHash: testUtils.random.secret,
-			createLockInfo: test.db.createSecretLockInfo,
+		describe('secret locks by composite hash', () => addTests({
+			createRandomHash: testUtils.random.hash,
+			createLockInfo: test.db.createSecretLockInfoCompositeHash,
 			type: 'secret',
-			dbFunctionName: 'secretLockBySecret'
+			dbFunctionName: 'secretLockByCompositeHash'
 		}));
 	});
 });

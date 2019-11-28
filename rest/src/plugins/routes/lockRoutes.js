@@ -38,6 +38,14 @@ module.exports = {
 				.then(routeUtils.createSender('secretLockInfo').sendArray('accountId', res, next));
 		});
 
+		server.get('/lock/secret/:secret', (req, res, next) => {
+			const secret = routeUtils.parseArgument(req.params, 'secret', 'hash256');
+			const pagingOptions = routeUtils.parsePagingArguments(req.params);
+
+			return db.secretLocksBySecret(secret, pagingOptions.id, pagingOptions.pageSize)
+				.then(routeUtils.createSender('secretLockInfo').sendArray('secret', res, next));
+		});
+
 		server.get('/lock/hash/:hash', (req, res, next) => {
 			const hash = routeUtils.parseArgument(req.params, 'hash', 'hash256');
 
@@ -45,11 +53,11 @@ module.exports = {
 				.then(routeUtils.createSender('hashLockInfo').sendOne(req.params.hash, res, next));
 		});
 
-		server.get('/lock/secret/:secret', (req, res, next) => {
-			const secret = routeUtils.parseArgument(req.params, 'secret', 'hash256');
+		server.get('/lock/compositeHash/:compositeHash', (req, res, next) => {
+			const compositeHash = routeUtils.parseArgument(req.params, 'compositeHash', 'hash256');
 
-			return db.secretLockBySecret(secret)
-				.then(routeUtils.createSender('secretLockInfo').sendOne(req.params.secret, res, next));
+			return db.secretLockByCompositeHash(compositeHash)
+				.then(routeUtils.createSender('secretLockInfo').sendOne(req.params.compositeHash, res, next));
 		});
 	}
 };

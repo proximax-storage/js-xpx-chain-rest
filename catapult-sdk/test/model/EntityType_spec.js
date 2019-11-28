@@ -37,6 +37,8 @@ describe('entity type enumeration', () => {
 			deleteReward: 0x465A,
 			driveFileSystem: 0x435A,
 			endDrive: 0x455A,
+			startDriveVerification: 0x475A,
+			endDriveVerification: 0x485A,
 			exchange: 0x425D,
 			exchangeOffer: 0x415D,
 			filesDeposit: 0x445A,

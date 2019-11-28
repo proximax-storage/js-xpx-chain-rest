@@ -49,8 +49,21 @@ const servicePlugin = {
 			driveKey: 			{ type: ModelType.binary, schemaName: 'filesDeposit.driveKey' },
 		});
 
+		builder.addTransactionSupport(EntityType.startDriveVerification, {
+			driveKey: 				{ type: ModelType.binary, schemaName: 'filesDeposit.driveKey' },
+		});
+
+		builder.addTransactionSupport(EntityType.endDriveVerification, {
+			verificationFailures:	{ type: ModelType.array, schemaName: 'drive.verificationFailures' },
+		});
+
 		builder.addTransactionSupport(EntityType.deleteReward, {
 			deletedFiles: 			{ type: ModelType.array, schemaName: 'deleteReward.deletedFile' },
+		});
+
+		builder.addSchema('drive.verificationFailures', {
+			replicator: 		ModelType.binary,
+			blockHash: 			ModelType.binary,
 		});
 
 		builder.addSchema('deleteReward.deletedFile', {
@@ -189,6 +202,46 @@ const servicePlugin = {
 
 			serialize: (transaction, serializer) => {
 				serializer.writeBuffer(transaction.driveKey);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.startDriveVerification, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.driveKey = parser.buffer(constants.sizes.signer);
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.driveKey);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.endDriveVerification, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.failuresCount = parser.uint16();
+				transaction.verificationFailures = [];
+
+				let i = transaction.failuresCount;
+				while (i--) {
+					const failure = {};
+					failure.replicator = parser.buffer(constants.sizes.signer);
+					failure.blockHash = parser.buffer(constants.sizes.signer);
+					transaction.verificationFailures.push(failure);
+				}
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeUint16(transaction.verificationFailures.length);
+
+				for (let i = 0; i < transaction.verificationFailures.length; ++i) {
+					serializer.writeBuffer(transaction.verificationFailures[i].replicator);
+					serializer.writeBuffer(transaction.verificationFailures[i].blockHash);
+				}
 			}
 		});
 
