@@ -35,11 +35,11 @@ const createLockInfo = (id, owner, hashPropertyName, value) => ({
 	}
 });
 
-const createLockInfos = ((numRounds, owner, hashPropertyName, startdId = 0) => {
+const createLockInfos = ((numRounds, owner, hashPropertyName, startdId = 0, value) => {
 	const lockInfos = [];
 
 	for (let i = 0; i < numRounds; ++i)
-		lockInfos.push(createLockInfo(startdId + i, owner, hashPropertyName, test.random.hash()));
+		lockInfos.push(createLockInfo(startdId + i, owner, hashPropertyName, value ? value : test.random.hash()));
 
 	return lockInfos;
 });
@@ -49,7 +49,10 @@ const lockDbTestUtils = {
 		createHashLockInfo: (id, owner, value) => createLockInfo(id, owner, 'hash', value),
 		createHashLockInfos: (numRounds, owner, startdId = 0) => createLockInfos(numRounds, owner, 'hash', startdId),
 		createSecretLockInfo: (id, owner, value) => createLockInfo(id, owner, 'secret', value),
+		createSecretLockInfoSecret: (id, owner, secret) => createLockInfo(id, owner, 'secret', secret),
+		createSecretLockInfoCompositeHash: (id, owner, compositeHash) => createLockInfo(id, owner, 'compositeHash', compositeHash),
 		createSecretLockInfos: (numRounds, owner, startdId = 0) => createLockInfos(numRounds, owner, 'secret', startdId),
+		createSecretLockInfosSecret: (numRounds, owner, secret, startdId = 0) => createLockInfos(numRounds, owner, 'secret', startdId, secret),
 		runDbTest: (lockName, dbEntities, issueDbCommand, assertDbCommandResult) =>
 			dbTestUtils.db.runDbTest(dbEntities, `${lockName}LockInfos`, db => new LockDb(db), issueDbCommand, assertDbCommandResult)
 	}

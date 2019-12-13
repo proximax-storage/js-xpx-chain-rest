@@ -42,6 +42,7 @@ describe('lock plugin', () => {
 				'/account/:accountId/lock/hash',
 				'/account/:accountId/lock/secret',
 				'/lock/hash/:hash',
+				'/lock/compositeHash/:compositeHash',
 				'/lock/secret/:secret'
 			]);
 		});

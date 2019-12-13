@@ -85,13 +85,27 @@ class LockDb {
 	}
 
 	/**
-	 * Retrieves secret info for given secret.
-	 * @param {Uint8Array} secret Secret hash.
-	 * @returns {Promise.<object>} Secret lock info for a secret.
+	 * Retrieves secret info for given composite hash.
+	 * @param {Uint8Array} hash composite hash.
+	 * @returns {Promise.<object>} Secret lock info for a composite hash.
 	 */
-	secretLockBySecret(secret) {
-		return this.catapultDb.queryDocument('secretLockInfos', { 'lock.secret': Buffer.from(secret) })
+	secretLockByCompositeHash(hash) {
+		return this.catapultDb.queryDocument('secretLockInfos', { 'lock.compositeHash': Buffer.from(hash) })
 			.then(this.catapultDb.sanitizer.copyAndDeleteId);
+	}
+
+	/**
+	 * Retrieves secret infos for given secret.
+	 * @param {Uint8Array} secret Secret hash.
+	 * @param {string} id Paging id.
+	 * @param {int} pageSize Page size.
+	 * @param {object} options Additional options.
+	 * @returns {Promise.<array>} Secret lock info for a secret.
+	 */
+	secretLocksBySecret(secret, id, pageSize, options) {
+		const conditions = { $and: [{ ['lock.secret']: Buffer.from(secret) }] };
+		return this.catapultDb.queryPagedDocuments('secretLockInfos', conditions, id, pageSize, options)
+			.then(this.catapultDb.sanitizer.copyAndDeleteIds);
 	}
 
 	// endregion
