@@ -34,7 +34,7 @@ describe('entity type enumeration', () => {
 			aliasAddress: 0x424E,
 			aliasMosaic: 0x434E,
 			blockchainUpgrade: 0x4158,
-			deleteReward: 0x465A,
+			driveFilesReward: 0x465A,
 			driveFileSystem: 0x435A,
 			endDrive: 0x455A,
 			startDriveVerification: 0x475A,

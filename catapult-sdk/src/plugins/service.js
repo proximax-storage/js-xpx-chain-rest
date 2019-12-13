@@ -37,7 +37,7 @@ const servicePlugin = {
 			rootHash: 			{ type: ModelType.binary, schemaName: 'driveFileSystem.rootHash' },
 			xorRootHash: 		{ type: ModelType.binary, schemaName: 'driveFileSystem.rootHash' },
 			addActions: 		{ type: ModelType.array, schemaName: 'driveFileSystem.addfiles' },
-			removeActions: 		{ type: ModelType.array, schemaName: 'filesDeposit.files' },
+			removeActions: 		{ type: ModelType.array, schemaName: 'driveFileSystem.addfiles' },
 		});
 
 		builder.addTransactionSupport(EntityType.filesDeposit, {
@@ -57,22 +57,16 @@ const servicePlugin = {
 			verificationFailures:	{ type: ModelType.array, schemaName: 'drive.verificationFailures' },
 		});
 
-		builder.addTransactionSupport(EntityType.deleteReward, {
-			deletedFiles: 			{ type: ModelType.array, schemaName: 'deleteReward.deletedFile' },
-		});
-
 		builder.addSchema('drive.verificationFailures', {
 			replicator: 		ModelType.binary,
 			blockHash: 			ModelType.binary,
 		});
 
-		builder.addSchema('deleteReward.deletedFile', {
-			fileHash: 		ModelType.binary,
-			size:			ModelType.uint64,
-			uploadInfos: 	{ type: ModelType.array, schemaName: 'deleteReward.uploadInfo' },
+		builder.addTransactionSupport(EntityType.driveFilesReward, {
+			uploadInfos: 	{ type: ModelType.array, schemaName: 'driveFilesReward.uploadInfo' },
 		});
 
-		builder.addSchema('deleteReward.uploadInfo', {
+		builder.addSchema('driveFilesReward.uploadInfo', {
 			participant: 		ModelType.binary,
 			uploaded:			ModelType.uint64,
 		});
@@ -102,29 +96,22 @@ const servicePlugin = {
 			payments:		{ type: ModelType.array, schemaName: 'paymentInformation' },
 		});
 
-		builder.addSchema('fileAction', {
-			height:				ModelType.uint64
-		});
-
 		builder.addSchema('fileInfo', {
 			fileHash:		ModelType.binary,
-			deposit:		ModelType.uint64,
 			size:			ModelType.uint64,
-			payments:		{ type: ModelType.array, schemaName: 'paymentInformation' },
-			actions:		{ type: ModelType.array, schemaName: 'fileAction' },
 		});
 
-		builder.addSchema('fileWithoutDeposit', {
+		builder.addSchema('inactiveFilesWithoutDeposit', {
 			fileHash:		ModelType.binary,
-			count:			ModelType.uint16,
+			heights:		{ type: ModelType.array, schemaName: ModelType.uint64 },
 		});
 
 		builder.addSchema('replicatorInfo', {
-			replicator:				ModelType.binary,
-			start:					ModelType.uint64,
-			end:					ModelType.uint64,
-			deposit:				ModelType.uint64,
-			filesWithoutDeposit:	{ type: ModelType.array, schemaName: 'fileWithoutDeposit' },
+			replicator:						ModelType.binary,
+			start:							ModelType.uint64,
+			end:							ModelType.uint64,
+			activeFilesWithoutDeposit:		{ type: ModelType.array, schemaName: ModelType.binary },
+			inactiveFilesWithoutDeposit:	{ type: ModelType.array, schemaName: 'inactiveFilesWithoutDeposit' },
 		});
 
 		builder.addSchema('drive', {
@@ -143,6 +130,8 @@ const servicePlugin = {
 			billingHistory: 		{ type: ModelType.array, schemaName: 'billingPeriodDescription' },
 			files: 					{ type: ModelType.array, schemaName: 'fileInfo' },
 			replicators: 			{ type: ModelType.array, schemaName: 'replicatorInfo' },
+			removedReplicators: 	{ type: ModelType.array, schemaName: 'replicatorInfo' },
+			uploadPayments: 		{ type: ModelType.array, schemaName: 'paymentInformation' },
 		});
 
 		builder.addSchema('service.driveStateWithMetadata', {
@@ -273,6 +262,7 @@ const servicePlugin = {
 				deserializeFiles(parser, transaction.removeActionsCount, transaction.removeActions, (parser) => {
 					const file = {};
 					file.fileHash = parser.buffer(constants.sizes.hash256);
+					file.fileSize = parser.uint64();
 					return file;
 				});
 
@@ -293,6 +283,7 @@ const servicePlugin = {
 
 				for (let i = 0; i < transaction.removeActions.length; ++i) {
 					serializer.writeBuffer(transaction.removeActions[i].fileHash);
+					serializer.writeUint64(transaction.removeActions[i].fileSize);
 				}
 			}
 		});
@@ -322,45 +313,30 @@ const servicePlugin = {
 			}
 		});
 
-		codecBuilder.addTransactionSupport(EntityType.deleteReward, {
-			deserialize: (parser, size, txCodecs, preprocessedBytes = 0) => {
-				let bodySize = size - preprocessedBytes;
+		codecBuilder.addTransactionSupport(EntityType.driveFilesReward, {
+			deserialize: parser => {
 				const transaction = {};
-				transaction.deletedFiles = [];
+				transaction.uploadInfos = [];
+				transaction.uploadInfosCount = parser.uint16();
 
-				while (bodySize > 0) {
-					const deletedFile = {};
-					deletedFile.fileHash = parser.buffer(constants.sizes.hash256);
-					deletedFile.size = parser.uint32();
-					deletedFile.uploadInfos = [];
-
-					let size = deletedFile.size - (constants.sizes.hash256 + 4);
-					while (size > 0) {
-						deletedFile.uploadInfos.push({
-							participant: parser.buffer(constants.sizes.hash256),
-							uploaded: parser.uint64(),
-						});
-						size -= constants.sizes.hash256 + 8;
-					}
-
-					transaction.deletedFiles.push(deletedFile);
-					bodySize -= deletedFile.size;
+				let count = transaction.uploadInfosCount;
+				while (count > 0) {
+					transaction.uploadInfos.push({
+						participant: parser.buffer(constants.sizes.hash256),
+						uploaded: parser.uint64(),
+					});
+					--count;
 				}
 
 				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
-				for (let i = 0; i < transaction.deletedFiles.length; ++i) {
-					const deletedFile = transaction.deletedFiles[i];
-					serializer.writeBuffer(deletedFile.fileHash);
-					serializer.writeUint32(deletedFile.size);
-
-					for (let j = 0; j < deletedFile.uploadInfos.length; ++j) {
-						const uploadInfo = deletedFile.uploadInfos[j];
-						serializer.writeBuffer(uploadInfo.participant);
-						serializer.writeUint64(uploadInfo.uploaded);
-					}
+				serializer.writeUint16(transaction.uploadInfosCount);
+				for (let i = 0; i < transaction.uploadInfos.length; ++i) {
+					const uploadInfo = transaction.uploadInfos[i];
+					serializer.writeBuffer(uploadInfo.participant);
+					serializer.writeUint64(uploadInfo.uploaded);
 				}
 			}
 		});
