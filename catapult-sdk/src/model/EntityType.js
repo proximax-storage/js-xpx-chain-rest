@@ -84,8 +84,14 @@ const EntityType = {
 	/** End Drive transaction. */
 	endDrive: 0x455A,
 
-	/** Delete Reward transaction. */
-	deleteReward: 0x465A,
+	/** Drive Files Reward transaction. */
+	driveFilesReward: 0x465A,
+
+	/** Start Drive Verification transaction. */
+	startDriveVerification: 0x475A,
+
+	/** End Drive Verification transaction. */
+	endDriveVerification: 0x485A,
 
 	/** Hash lock transaction. */
 	hashLock: 0x4148,

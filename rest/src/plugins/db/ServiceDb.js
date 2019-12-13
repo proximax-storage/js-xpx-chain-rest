@@ -5,27 +5,6 @@
  * */
 
 const AccountType = require('../AccountType');
-const { longToUint64 } = require('../../db/dbUtils');
-
-const fileActions = {
-	add: 0,
-	remove: 1,
-};
-
-// TODO: Remove removed replicators
-const removeDeletedFiles = function(driveEntries) {
-	driveEntries.forEach(driveEntry => {
-		const files = [];
-		driveEntry.drive.files.forEach(file => {
-			if (file.actions[file.actions.length - 1].type != fileActions.remove || file.deposit != 0)
-				files.push(file);
-		});
-
-		driveEntry.drive.files = files;
-	});
-
-	return driveEntries;
-};
 
 const driveRoles = ['owner', 'replicator'];
 
@@ -49,7 +28,7 @@ class ServiceDb {
 	getDriveByAccountId(type, accountId) {
 		const buffer = Buffer.from(accountId);
 		const fieldName = (AccountType.publicKey === type) ? 'drive.multisig' : 'drive.multisigAddress';
-		return this.catapultDb.queryDocuments('drives', { [fieldName]: buffer }).then(removeDeletedFiles);
+		return this.catapultDb.queryDocuments('drives', { [fieldName]: buffer });
 	}
 
 	/**
@@ -84,7 +63,7 @@ class ServiceDb {
 
 		return this.catapultDb.queryDocuments('drives', {
 			$or: query
-		}).then(removeDeletedFiles);
+		});
 	}
 
 	// endregion

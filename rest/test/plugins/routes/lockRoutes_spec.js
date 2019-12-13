@@ -40,6 +40,19 @@ describe('lock routes', () => {
 				}
 			}),
 			routeCaptureMethod
+		}),
+		createLockPagingRouteInfoSecret: (routeName, routeCaptureMethod, dbMethod) => ({
+			routes: lockRoutes,
+			routeName,
+			createDb: (keyGroups, documents) => ({
+				[dbMethod]: (secret, pageId, pageSize) => {
+					keyGroups.push({
+						secret, pageId, pageSize
+					});
+					return Promise.resolve(documents);
+				}
+			}),
+			routeCaptureMethod
 		})
 	};
 
@@ -119,6 +132,34 @@ describe('lock routes', () => {
 		});
 	});
 
+	describe('get secret lock infos by secret', () => {
+		describe('get by secret', () => {
+			const compositeHash = '5994471ABB01112AFCC18159F6CC74B4F511B99806DA59B3CAF5A9C173CACFC5';
+			const addGetTests = traits => {
+				const pagingTestsFactory = test.setup.createPagingTestsFactory(
+					factory.createLockPagingRouteInfoSecret('/lock/secret/:secret', 'get', 'secretLocksBySecret'),
+					traits.valid.params,
+					traits.valid.expected,
+					'secretLockInfo'
+				);
+
+				pagingTestsFactory.addDefault();
+				pagingTestsFactory.addNonPagingParamFailureTest('secret', traits.invalid.secret);
+			};
+
+			describe('by secret', () => addGetTests({
+				valid: {
+					params: { secret: compositeHash },
+					expected: { secret: convert.hexToUint8(compositeHash) }
+				},
+				invalid: {
+					secret: '12345',
+					error: 'unrecognized hex char \'1G\''
+				}
+			}));
+		});
+	});
+
 	describe('get hash lock info by hash', () => {
 		const hash = 'C54AFD996DF1F52748EBC5B40F8D0DC242A6A661299149F5F96A0C21ECCB653F';
 		test.route.document.addGetDocumentRouteTests(lockRoutes.register, {
@@ -135,18 +176,18 @@ describe('lock routes', () => {
 		});
 	});
 
-	describe('get secret lock info by hash', () => {
-		const secret = '5994471ABB01112AFCC18159F6CC74B4F511B99806DA59B3CAF5A9C173CACFC5';
+	describe('get secret lock info by composite hash', () => {
+		const compositeHash = '5994471ABB01112AFCC18159F6CC74B4F511B99806DA59B3CAF5A9C173CACFC5';
 		test.route.document.addGetDocumentRouteTests(lockRoutes.register, {
-			route: '/lock/secret/:secret',
+			route: '/lock/compositeHash/:compositeHash',
 			inputs: {
-				valid: { object: { secret }, parsed: [convert.hexToUint8(secret)], printable: secret },
+				valid: { object: { compositeHash }, parsed: [convert.hexToUint8(compositeHash)], printable: compositeHash },
 				invalid: {
-					object: { secret: '12345' },
-					error: 'secret has an invalid format'
+					object: { compositeHash: '12345' },
+					error: 'compositeHash has an invalid format'
 				}
 			},
-			dbApiName: 'secretLockBySecret',
+			dbApiName: 'secretLockByCompositeHash',
 			type: 'secretLockInfo'
 		});
 	});
