@@ -21,8 +21,8 @@ class ServiceDb {
 
 	/**
 	 * Retrieves the drive entry by account id.
-	 * @param {module:db/AccountType} type Type of account ids.
-	 * @param {array<object>} accountIds Account ids.
+	 * @param {module:db/AccountType} type Type of account id.
+	 * @param {array<object>} accountId Account id.
 	 * @returns {Promise.<object>} The drive entry.
 	 */
 	getDriveByAccountId(type, accountId) {

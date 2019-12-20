@@ -5,6 +5,7 @@
  **/
 
 const routeUtils = require('../../routes/routeUtils');
+const errors = require('../../server/errors');
 
 module.exports = {
 	register: (server, db) => {

@@ -32,8 +32,6 @@ module.exports = {
 			const parser = new BinaryParser();
 			parser.push(buffer);
 
-			const size = parser.uint32();
-			const version = parser.uint32();
 			const type = parser.uint16();
 
 			switch (type) {

@@ -7,6 +7,9 @@
 /** @module plugins/exchange */
 const EntityType = require('../model/EntityType');
 const ModelType = require('../model/ModelType');
+const sizes = require('../modelBinary/sizes');
+
+const constants = { sizes };
 
 /**
  * Creates a exchange plugin.
@@ -88,7 +91,7 @@ const exchangePlugin = {
 		const readOffer = function (parser) {
 			const offer = {};
 			offer.mosaicId = parser.uint64();
-			offer.mosaicAmount = parser.uint64();
+			offer.amount = parser.uint64();
 			offer.cost = parser.uint64();
 			offer.type = parser.uint8();
 
@@ -136,7 +139,7 @@ const exchangePlugin = {
 				while (count--) {
 					const matchedOffer = {};
 					matchedOffer.offer = readOffer(parser);
-					matchedOffer.owner = parser.buffer(32);
+					matchedOffer.owner = parser.buffer(constants.sizes.signer);
 					transaction.offers.push(matchedOffer);
 				}
 
