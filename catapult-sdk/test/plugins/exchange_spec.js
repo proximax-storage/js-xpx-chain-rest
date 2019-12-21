@@ -23,13 +23,12 @@ describe('exchange plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 12);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 11);
 			expect(modelSchema).to.contain.all.keys([
 				'exchangeOffer',
 				'offerWithDuration',
 				'exchange',
 				'matchedOffer',
-				'offer',
 				'removeExchangeOffer',
 				'offerMosaic',
 				'exchangeEntry',
@@ -42,17 +41,14 @@ describe('exchange plugin', () => {
 			expect(Object.keys(modelSchema.exchangeOffer).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
 			expect(modelSchema.exchangeOffer).to.contain.all.keys(['offers']);
 
-			expect(Object.keys(modelSchema['offerWithDuration']).length).to.equal(2);
-			expect(modelSchema['offerWithDuration']).to.contain.all.keys(['offer', 'duration']);
+			expect(Object.keys(modelSchema['offerWithDuration']).length).to.equal(4);
+			expect(modelSchema['offerWithDuration']).to.contain.all.keys(['mosaicId', 'mosaicAmount', 'cost', 'duration']);
 
 			expect(Object.keys(modelSchema.exchange).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
 			expect(modelSchema.exchange).to.contain.all.keys(['offers']);
 
-			expect(Object.keys(modelSchema['matchedOffer']).length).to.equal(2);
-			expect(modelSchema['matchedOffer']).to.contain.all.keys(['offer', 'owner']);
-
-			expect(Object.keys(modelSchema['offer']).length).to.equal(3);
-			expect(modelSchema['offer']).to.contain.all.keys(['mosaicId', 'mosaicAmount', 'cost']);
+			expect(Object.keys(modelSchema['matchedOffer']).length).to.equal(4);
+			expect(modelSchema['matchedOffer']).to.contain.all.keys(['mosaicId', 'mosaicAmount', 'cost', 'owner']);
 
 			expect(Object.keys(modelSchema.removeExchangeOffer).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
 			expect(modelSchema.removeExchangeOffer).to.contain.all.keys(['offers']);
@@ -128,21 +124,17 @@ describe('exchange plugin', () => {
 					offersCount: 0x02,
 					offers: [
 						{
-							offer: {
-								mosaicId: [0x01, 0],
-								amount: [0x02, 0],
-								cost: [0x03, 0],
-								type: 0x04
-							},
+							mosaicId: [0x01, 0],
+							mosaicAmount: [0x02, 0],
+							cost: [0x03, 0],
+							type: 0x04,
 							duration: [0x05, 0]
 						},
 						{
-							offer: {
-								mosaicId: [0x06, 0],
-								amount: [0x07, 0],
-								cost: [0x08, 0],
-								type: 0x09
-							},
+							mosaicId: [0x06, 0],
+							mosaicAmount: [0x07, 0],
+							cost: [0x08, 0],
+							type: 0x09,
 							duration: [0x0A, 0]
 						}
 					]
@@ -180,21 +172,17 @@ describe('exchange plugin', () => {
 					offersCount: 0x02,
 					offers: [
 						{
-							offer: {
-								mosaicId: [0x01, 0],
-								amount: [0x02, 0],
-								cost: [0x03, 0],
-								type: 0x04
-							},
+							mosaicId: [0x01, 0],
+							mosaicAmount: [0x02, 0],
+							cost: [0x03, 0],
+							type: 0x04,
 							owner: offerOwner1
 						},
 						{
-							offer: {
-								mosaicId: [0x06, 0],
-								amount: [0x07, 0],
-								cost: [0x08, 0],
-								type: 0x09
-							},
+							mosaicId: [0x06, 0],
+							mosaicAmount: [0x07, 0],
+							cost: [0x08, 0],
+							type: 0x09,
 							owner: offerOwner2
 						}
 					]
