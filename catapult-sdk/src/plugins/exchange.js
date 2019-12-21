@@ -22,7 +22,9 @@ const exchangePlugin = {
 		});
 
 		builder.addSchema('offerWithDuration', {
-			offer: { type: ModelType.object, schemaName: 'offer' },
+			mosaicId: 		ModelType.uint64,
+			mosaicAmount: 	ModelType.uint64,
+			cost: 			ModelType.uint64,
 			duration: ModelType.uint64,
 		});
 
@@ -31,14 +33,10 @@ const exchangePlugin = {
 		});
 
 		builder.addSchema('matchedOffer', {
-			offer: { type: ModelType.object, schemaName: 'offer' },
-			owner: ModelType.binary,
-		});
-
-		builder.addSchema('offer', {
 			mosaicId: 		ModelType.uint64,
 			mosaicAmount: 	ModelType.uint64,
 			cost: 			ModelType.uint64,
+			owner: 			ModelType.binary,
 		});
 
 		builder.addTransactionSupport(EntityType.removeExchangeOffer, {
@@ -91,7 +89,7 @@ const exchangePlugin = {
 		const readOffer = function (parser) {
 			const offer = {};
 			offer.mosaicId = parser.uint64();
-			offer.amount = parser.uint64();
+			offer.mosaicAmount = parser.uint64();
 			offer.cost = parser.uint64();
 			offer.type = parser.uint8();
 
@@ -100,7 +98,7 @@ const exchangePlugin = {
 
 		const writeOffer = function (offer, serializer) {
 			serializer.writeUint64(offer.mosaicId);
-			serializer.writeUint64(offer.amount);
+			serializer.writeUint64(offer.mosaicAmount);
 			serializer.writeUint64(offer.cost);
 			serializer.writeUint8(offer.type);
 		};
@@ -112,8 +110,7 @@ const exchangePlugin = {
 				transaction.offers = [];
 				let count = transaction.offersCount;
 				while (count--) {
-					const offerWithDuration = {};
-					offerWithDuration.offer = readOffer(parser);
+					const offerWithDuration = readOffer(parser);
 					offerWithDuration.duration = parser.uint64();
 					transaction.offers.push(offerWithDuration);
 				}
@@ -124,7 +121,7 @@ const exchangePlugin = {
 			serialize: (transaction, serializer) => {
 				serializer.writeUint8(transaction.offersCount);
 				transaction.offers.forEach(offerWithDuration => {
-					writeOffer(offerWithDuration.offer, serializer);
+					writeOffer(offerWithDuration, serializer);
 					serializer.writeUint64(offerWithDuration.duration);
 				});
 			}
@@ -137,8 +134,7 @@ const exchangePlugin = {
 				transaction.offers = [];
 				let count = transaction.offersCount;
 				while (count--) {
-					const matchedOffer = {};
-					matchedOffer.offer = readOffer(parser);
+					const matchedOffer = readOffer(parser);
 					matchedOffer.owner = parser.buffer(constants.sizes.signer);
 					transaction.offers.push(matchedOffer);
 				}
@@ -149,7 +145,7 @@ const exchangePlugin = {
 			serialize: (transaction, serializer) => {
 				serializer.writeUint8(transaction.offersCount);
 				transaction.offers.forEach(matchedOffer => {
-					writeOffer(matchedOffer.offer, serializer);
+					writeOffer(matchedOffer, serializer);
 					serializer.writeBuffer(matchedOffer.owner);
 				});
 			}
