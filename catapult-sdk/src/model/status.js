@@ -194,7 +194,7 @@ const toStringInternal = code => {
 	case 0x8050000E: return 'Failure_Property_Plugin_Config_Malformed';
 	case 0x805A0001: return 'Failure_Service_Drive_Duration_Is_Not_Multiple_Of_BillingPeriod';
 	case 0x805A0002: return 'Failure_Service_Wrong_Percent_Approvers';
-	case 0x805A0003: return 'Failure_Service_Min_Replicators_More_Than_Relicas';
+	case 0x805A0003: return 'Failure_Service_Min_Replicators_More_Than_Replicas';
 	case 0x805A0004: return 'Failure_Service_Drive_Invalid_Duration';
 	case 0x805A0005: return 'Failure_Service_Drive_Invalid_Billing_Period';
 	case 0x805A0006: return 'Failure_Service_Drive_Invalid_Billing_Price';
@@ -221,8 +221,7 @@ const toStringInternal = code => {
 	case 0x805A001B: return 'Failure_Service_Drive_Processed_Full_Duration';
 	case 0x805A001C: return 'Failure_Service_Zero_Upload_Info';
 	case 0x805A001D: return 'Failure_Service_Participant_Redundant';
-	case 0x805A001E: return 'Failure_Service_Participant_It_Not_Part_Of_Drive';
-	case 0x805A001F: return 'Failure_Service_Replicator_Didnt_Put_Deposit';
+	case 0x805A001E: return 'Failure_Service_Participant_Is_Not_Registered_To_Drive';
 	case 0x805A0020: return 'Failure_Service_Zero_Deleted_Files';
 	case 0x805A0021: return 'Failure_Service_Zero_Infos';
 	case 0x805A0022: return 'Failure_Service_File_Deposit_Is_Zero';
@@ -231,6 +230,10 @@ const toStringInternal = code => {
 	case 0x805A0025: return 'Failure_Service_Verification_Is_Not_Active';
 	case 0x805A0026: return 'Failure_Service_Verification_Has_Not_Timed_Out';
 	case 0x805A0027: return 'Failure_Service_Drive_Is_Not_In_Progress';
+	case 0x805A0028: return 'Failure_Service_Replicator_Has_Active_File_Without_Deposit';
+	case 0x805A0029: return 'Failure_Service_Remove_Files_Not_Same_File_Size';
+	case 0x805A002A: return 'Failure_Service_Doesnt_Contain_Streaming_Tokens';
+	case 0x805A002B: return 'Failure_Service_Drive_Size_Exceeded';
 	case 0x80540006: return 'Failure_Transfer_Message_Too_Large';
 	case 0x805400C8: return 'Failure_Transfer_Out_Of_Order_Mosaics';
 	case 0x80540007: return 'Failure_Transfer_Plugin_Config_Malformed';

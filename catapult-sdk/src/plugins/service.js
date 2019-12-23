@@ -54,12 +54,13 @@ const servicePlugin = {
 		});
 
 		builder.addTransactionSupport(EntityType.endDriveVerification, {
-			verificationFailures:	{ type: ModelType.array, schemaName: 'drive.verificationFailures' },
+			verificationFailures:	{ type: ModelType.array, schemaName: 'drive.verificationFailure' },
 		});
 
-		builder.addSchema('drive.verificationFailures', {
+		builder.addSchema('drive.verificationFailure', {
+			size:				ModelType.uint32,
 			replicator: 		ModelType.binary,
-			blockHash: 			ModelType.binary,
+			blockHashes: 		{ type: ModelType.array, schemaName: ModelType.binary },
 		});
 
 		builder.addTransactionSupport(EntityType.driveFilesReward, {
@@ -125,6 +126,7 @@ const servicePlugin = {
 			billingPeriod:			ModelType.uint64,
 			billingPrice:			ModelType.uint64,
 			size:					ModelType.uint64,
+			occupiedSpace:			ModelType.uint64,
 			replicas:				ModelType.uint16,
 			minReplicators:			ModelType.uint16,
 			billingHistory: 		{ type: ModelType.array, schemaName: 'billingPeriodDescription' },
@@ -208,28 +210,39 @@ const servicePlugin = {
 		});
 
 		codecBuilder.addTransactionSupport(EntityType.endDriveVerification, {
-			deserialize: parser => {
+			deserialize: (parser, size, txCodecs, preprocessedBytes = 0) => {
+				let bodySize = size - preprocessedBytes;
 				const transaction = {};
-				transaction.failuresCount = parser.uint16();
 				transaction.verificationFailures = [];
 
-				let i = transaction.failuresCount;
-				while (i--) {
-					const failure = {};
-					failure.replicator = parser.buffer(constants.sizes.signer);
-					failure.blockHash = parser.buffer(constants.sizes.signer);
-					transaction.verificationFailures.push(failure);
+				while (bodySize > 0) {
+					const verificationFailure = {};
+					verificationFailure.size = parser.uint32();
+					verificationFailure.replicator = parser.buffer(constants.sizes.signer);
+					verificationFailure.blockHashes = [];
+
+					let size = verificationFailure.size - (4 + constants.sizes.signer);
+					while (size > 0) {
+						verificationFailure.blockHashes.push(parser.buffer(constants.sizes.hash256));
+						size -= constants.sizes.hash256;
+					}
+
+					transaction.verificationFailures.push(verificationFailure);
+					bodySize -= verificationFailure.size;
 				}
 
 				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
-				serializer.writeUint16(transaction.verificationFailures.length);
-
 				for (let i = 0; i < transaction.verificationFailures.length; ++i) {
-					serializer.writeBuffer(transaction.verificationFailures[i].replicator);
-					serializer.writeBuffer(transaction.verificationFailures[i].blockHash);
+					const verificationFailure = transaction.verificationFailures[i];
+					serializer.writeUint32(verificationFailure.size);
+					serializer.writeBuffer(verificationFailure.replicator);
+
+					for (let j = 0; j < verificationFailure.blockHashes.length; ++j) {
+						serializer.writeBuffer(verificationFailure.blockHashes[j]);
+					}
 				}
 			}
 		});
