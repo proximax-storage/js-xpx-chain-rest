@@ -83,8 +83,8 @@ const toStringInternal = code => {
 	case 0x80590009: return 'Failure_NetworkConfig_Plugin_Config_Missing';
 	case 0x8059000A: return 'Failure_NetworkConfig_ImportanceGrouping_Less_Or_Equal_Half_MaxRollbackBlocks';
 	case 0x8059000B: return 'Failure_NetworkConfig_HarvestBeneficiaryPercentage_Exceeds_One_Hundred';
-	case 0x8059000B: return 'Failure_NetworkConfig_MaxMosaicAtomicUnits_Invalid';
-	case 0x8059000B: return 'Failure_NetworkConfig_ApplyHeightDelta_Zero';
+	case 0x8059000C: return 'Failure_NetworkConfig_MaxMosaicAtomicUnits_Invalid';
+	case 0x8059000D: return 'Failure_NetworkConfig_ApplyHeightDelta_Zero';
 	case 0x80480001: return 'Failure_LockHash_Invalid_Mosaic_Id';
 	case 0x80480002: return 'Failure_LockHash_Invalid_Mosaic_Amount';
 	case 0x80480003: return 'Failure_LockHash_Hash_Exists';
@@ -234,13 +234,12 @@ const toStringInternal = code => {
 	case 0x805A0029: return 'Failure_Service_Remove_Files_Not_Same_File_Size';
 	case 0x805A002A: return 'Failure_Service_Doesnt_Contain_Streaming_Tokens';
 	case 0x805A002B: return 'Failure_Service_Drive_Size_Exceeded';
+	case 0x805A002C: return 'Failure_Service_Failed_Block_Hashes_Missing';
 	case 0x80540006: return 'Failure_Transfer_Message_Too_Large';
 	case 0x805400C8: return 'Failure_Transfer_Out_Of_Order_Mosaics';
 	case 0x80540007: return 'Failure_Transfer_Plugin_Config_Malformed';
 	case 0x80540008: return 'Failure_Transfer_Too_Many_Mosaics';
 	case 0x80540009: return 'Failure_Transfer_Zero_Amount';
-	case 0x80540006: return 'Failure_Transfer_Too_Many_Mosaics';
-	case 0x80540006: return 'Failure_Transfer_Zero_Amount';
 	case 0x80580001: return 'Failure_BlockChainUpgrade_Invalid_Signer';
 	case 0x80580002: return 'Failure_BlockChainUpgrade_Upgrade_Period_Too_Low';
 	case 0x80580003: return 'Failure_BlockChainUpgrade_Redundant';
