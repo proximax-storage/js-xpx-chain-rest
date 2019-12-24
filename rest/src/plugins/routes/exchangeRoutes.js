@@ -6,6 +6,8 @@
 
 const catapult = require('catapult-sdk');
 const routeUtils = require('../../routes/routeUtils');
+const errors = require('../../server/errors');
+const NamespaceDb = require('../namespace/NamespaceDb');
 
 const { uint64 } = catapult.utils;
 
@@ -20,25 +22,28 @@ module.exports = {
 		server.get(`/exchange/:type/:mosaicId`, (req, res, next) => {
 			const offerTypeStr = req.params['type'];
 			if (offerTypeStr !== 'buy' && offerTypeStr !== 'sell')
-				throw errors.createInvalidArgumentError(`offer type ${offerTypeStr} is invalid`);
-
-			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', uint64.fromHex);
-			// TODO: add namespace id resolve
+				throw errors.createInvalidArgumentError(`type has an invalid format`);
 
 			const pagingOptions = routeUtils.parsePagingArguments(req.params);
 			let ordering = offerTypeStr === 'sell' ? 1 : -1;
-
 			if (req.params['ordering']) {
 				ordering = routeUtils.parseArgument(req.params, 'ordering', input => {
 					if ('id' === input)
 						return 1;
 					else if ('-id' == input)
 						return -1;
-					else throw errors.createInvalidArgumentError('Invalid id');
+					else throw errors.createInvalidArgumentError(`invalid ordering ${input}`);
 				});
 			}
 
-			return db.exchangesByMosaicIds(offerTypeStr, [mosaicId], pagingOptions.id, pagingOptions.pageSize, ordering)
+			let assetId = routeUtils.parseArgument(req.params, 'mosaicId', uint64.fromHex);
+			const namespaceDb = new NamespaceDb(db.getCatapultDb());
+			return namespaceDb.mosaicIdByNamespaceId(assetId)
+				.then(mosaicId => {
+					if (mosaicId)
+						assetId = mosaicId;
+					return db.exchangesByMosaicIds(offerTypeStr, [assetId], pagingOptions.id, pagingOptions.pageSize, ordering);
+				})
 				.then(routeUtils.createSender('offerInfo').sendArray('mosaicId', res, next));
 		});
 	}
