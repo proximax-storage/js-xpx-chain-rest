@@ -32,7 +32,7 @@ describe('service plugin', () => {
 				'endDrive',
 				'startDriveVerification',
 				'endDriveVerification',
-				'drive.verificationFailures',
+				'drive.verificationFailure',
 				'driveFilesReward',
 				'driveFilesReward.uploadInfo',
 				'driveFileSystem.addfiles',
@@ -83,8 +83,8 @@ describe('service plugin', () => {
 			expect(Object.keys(modelSchema.endDriveVerification).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
 			expect(modelSchema.endDriveVerification).to.contain.all.keys(['verificationFailures']);
 
-			expect(Object.keys(modelSchema['drive.verificationFailures']).length).to.equal(2);
-			expect(modelSchema['drive.verificationFailures']).to.contain.all.keys(['replicator', 'blockHash']);
+			expect(Object.keys(modelSchema['drive.verificationFailure']).length).to.equal(3);
+			expect(modelSchema['drive.verificationFailure']).to.contain.all.keys(['size', 'replicator', 'blockHashes']);
 
 			expect(Object.keys(modelSchema.driveFilesReward).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
 			expect(modelSchema.driveFilesReward).to.contain.all.keys(['uploadInfos']);
@@ -122,7 +122,7 @@ describe('service plugin', () => {
 				'inactiveFilesWithoutDeposit'
 			]);
 
-			expect(Object.keys(modelSchema['drive']).length).to.equal(17);
+			expect(Object.keys(modelSchema['drive']).length).to.equal(18);
 			expect(modelSchema['drive']).to.contain.all.keys([
 				'multisig',
 				'multisigAddress',
@@ -134,6 +134,7 @@ describe('service plugin', () => {
 				'billingPeriod',
 				'billingPrice',
 				'size',
+				'occupiedSpace',
 				'replicas',
 				'minReplicators',
 				'billingHistory',
@@ -243,30 +244,39 @@ describe('service plugin', () => {
 
 		describe('supports end drive verification transaction', () => {
 			const codec = getCodecs()[EntityType.endDriveVerification];
-			const failuresCount = Buffer.of(0x02, 0x0);
+			const size1 = Buffer.of(0x64, 0x0, 0x0, 0x0);
 			const replicator1 = createHash(0x01);
 			const blockHash1 = createHash(0x02);
-			const replicator2 = createHash(0x03);
-			const blockHash2 = createHash(0x04);
+			const blockHash2 = createHash(0x03);
+			const size2 = Buffer.of(0x84, 0x0, 0x0, 0x0);
+			const replicator2 = createHash(0x04);
+			const blockHash3 = createHash(0x05);
+			const blockHash4 = createHash(0x06);
+			const blockHash5 = createHash(0x07);
 
-			test.binary.test.addAll(codec, 2 + 4 * 32, () => ({
+			test.binary.test.addAll(codec, 2 * (4 + 32) + 5 * 32, () => ({
 				buffer: Buffer.concat([
-					failuresCount,
+					size1,
 					replicator1,
 					blockHash1,
+					blockHash2,
+					size2,
 					replicator2,
-					blockHash2
+					blockHash3,
+					blockHash4,
+					blockHash5
 				]),
 				object: {
-					failuresCount: 0x02,
 					verificationFailures: [
 						{
+							size: 100,
 							replicator: replicator1,
-							blockHash: blockHash1
+							blockHashes: [ blockHash1, blockHash2 ]
 						},
 						{
+							size: 132,
 							replicator: replicator2,
-							blockHash: blockHash2
+							blockHashes: [ blockHash3, blockHash4, blockHash5 ]
 						}
 					]
 				}
