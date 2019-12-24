@@ -235,6 +235,7 @@ const toStringInternal = code => {
 	case 0x805A002A: return 'Failure_Service_Doesnt_Contain_Streaming_Tokens';
 	case 0x805A002B: return 'Failure_Service_Drive_Size_Exceeded';
 	case 0x805A002C: return 'Failure_Service_Failed_Block_Hashes_Missing';
+	case 0x805A002D: return 'Failure_Service_Duplicate_Failed_Block_Hashes';
 	case 0x80540006: return 'Failure_Transfer_Message_Too_Large';
 	case 0x805400C8: return 'Failure_Transfer_Out_Of_Order_Mosaics';
 	case 0x80540007: return 'Failure_Transfer_Plugin_Config_Malformed';
