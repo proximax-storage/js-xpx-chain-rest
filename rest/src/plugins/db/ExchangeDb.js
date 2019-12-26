@@ -10,9 +10,9 @@ const AccountType = require('../AccountType');
 const { Long } = MongoDb;
 
 const deleteExpiredOffersFromObject = dbObject => {
-	if (dbObject) {
-		delete dbObject.expiredBuyOffers;
-		delete dbObject.expiredSellOffers;
+	if (dbObject && dbObject.exchange) {
+		delete dbObject.exchange.expiredBuyOffers;
+		delete dbObject.exchange.expiredSellOffers;
 	}
 
 	return dbObject;
@@ -26,7 +26,7 @@ const deleteExpiredOffersFromArray = dbObjects => {
 	return dbObjects;
 };
 
-const extractOfferInfo = (dbObjects, fieldName, mosaicIds) => {
+const extractOfferInfo = (dbObjects, fieldName, mosaicIds, ordering) => {
 	const result = [];
 	dbObjects.forEach(dbObject => {
 		const exchangeInfo = dbObject.exchange;
@@ -44,6 +44,10 @@ const extractOfferInfo = (dbObjects, fieldName, mosaicIds) => {
 		});
 	});
 
+	result.sort((a, b) => {
+		return (a.price > b.price) ? ordering : ((a.price < b.price) ? -ordering : 0);
+	});
+
 	return result;
 };
 
@@ -54,6 +58,10 @@ class ExchangeDb {
 	 */
 	constructor(db) {
 		this.catapultDb = db;
+	}
+
+	getCatapultDb() {
+		return this.catapultDb;
 	}
 
 	// region exchange retrieval
@@ -68,7 +76,7 @@ class ExchangeDb {
 		const buffers = ids.map(id => Buffer.from(id));
 		const fieldName = (AccountType.publicKey === idType) ? 'exchange.owner' : 'exchange.ownerAddress';
 		return this.catapultDb.queryDocuments('exchanges', { [fieldName]: { $in: buffers } })
-			.then(deleteExpiredOffersFromObject);
+			.then(deleteExpiredOffersFromArray);
 	}
 
 	/**
@@ -85,7 +93,7 @@ class ExchangeDb {
 		const offerFieldName = ('buy' === offerType) ? 'buyOffers' : 'sellOffers';
 		const conditions = { [`exchange.${offerFieldName}.mosaicId`]: { $in: ids } };
 		const extractor = function(dbObjects) {
-			return extractOfferInfo(dbObjects, offerFieldName, ids);
+			return extractOfferInfo(dbObjects, offerFieldName, ids, ordering);
 		};
 
 		const options = {
