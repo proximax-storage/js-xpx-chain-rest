@@ -16,8 +16,9 @@ const createDriveEntry = (id, multisig, owner, replicators) => ({
 	drive: {
 		multisig: new Binary(multisig.publicKey),
 		multisigAddress: new Binary(multisig.address),
-		owner: owner,
-		replicators: replicators
+		owner: owner ? new Binary(owner) : null,
+		replicators: replicators && replicators.length ?
+			replicators.map(key => { return { replicator: new Binary(key) }}) : null
 	}
 });
 

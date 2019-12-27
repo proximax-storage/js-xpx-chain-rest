@@ -5,6 +5,7 @@
  **/
 
 const test = require('./utils/upgradeDbTestUtils');
+const { expect } = require('chai');
 
 describe('upgrade db', () => {
 	describe('upgrade less than or equal height', () => {
@@ -17,6 +18,7 @@ describe('upgrade db', () => {
 			const expectedHeights = heights.slice(((0 === limit) ? 0 : height - limit), height).reverse();
 			const entries = test.db.createUpgradeEntries(heights);
 			const expectedEntries = test.db.createUpgradeEntries(expectedHeights);
+			expectedEntries.forEach(entry => { delete entry._id; });
 
 			// Assert:
 			return test.db.runDbTest(
@@ -29,11 +31,11 @@ describe('upgrade db', () => {
 		};
 
 		it('without limit', () => {
-			assertUpgradesLessOrEqualThanHeight(70, 0);
+			return assertUpgradesLessOrEqualThanHeight(70, 0);
 		});
 
 		it('with limit', () => {
-			assertUpgradesLessOrEqualThanHeight(70, 40);
+			return assertUpgradesLessOrEqualThanHeight(70, 40);
 		});
 	});
 });
