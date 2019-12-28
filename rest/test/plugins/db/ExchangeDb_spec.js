@@ -53,101 +53,101 @@ describe('exchange db', () => {
 			const expectedOffers = [];
 			for (let i = 0; i < expectedIndexes.length; ++i)
 				expectedOffers.push(extractOffer(entries, fieldName, expectedIndexes[i][0], expectedIndexes[i][1], offerType));
-			expectedOffers.sort((offer1, offer2) => { sortOffers(offer1, offer2, ordering); });
+			expectedOffers.sort((offer1, offer2) => sortOffers(offer1, offer2, ordering));
 
 			// Assert:
 			return test.db.runDbTest(
 				entries,
 				db => db.exchangesByMosaicIds(offerTypeString, mosaicIds, undefined, 0, ordering),
-				entities => { expect(entities).to.deep.equal(expectedOffers); }
+				entities => expect(entities).to.deep.equal(expectedOffers)
 			);
 		};
 
 		describe('ascending buy offers', () => {
 			const assertAscendingBuyOffers = (mosaicIds, expectedIndexes) => {
-				assertExchangesByMosaicIds('buy', 'buyOffers', 1, 1, mosaicIds, expectedIndexes);
+				return assertExchangesByMosaicIds('buy', 'buyOffers', 1, 1, mosaicIds, expectedIndexes);
 			};
 	
 			it('returns empty array for unknown mosaic ids', () => {
-				assertAscendingBuyOffers([[123, 456]], []);
+				return assertAscendingBuyOffers([[123, 456]], []);
 			});
 	
 			it('returns single matching offer', () => {
-				assertAscendingBuyOffers([[150, 0]], [[1, 0]]);
+				return assertAscendingBuyOffers([[150, 0]], [[1, 0]]);
 			});
 	
 			it('returns multiple matching offers', () => {
-				assertAscendingBuyOffers([[52, 0], [150, 0]], [[0, 2], [1, 0]]);
+				return assertAscendingBuyOffers([[52, 0], [150, 0]], [[0, 2], [1, 0]]);
 			});
 	
 			it('returns only offers with matching mosaic ids', () => {
-				assertAscendingBuyOffers([[52, 0], [123, 456], [150, 0]], [[0, 2], [1, 0]]);
+				return assertAscendingBuyOffers([[52, 0], [123, 456], [150, 0]], [[0, 2], [1, 0]]);
 			});
 		});
 
 		describe('descending buy offers', () => {
 			const assertDescendingBuyOffers = (mosaicIds, expectedIndexes) => {
-				assertExchangesByMosaicIds('buy', 'buyOffers', 1, -1, mosaicIds, expectedIndexes);
+				return assertExchangesByMosaicIds('buy', 'buyOffers', 1, -1, mosaicIds, expectedIndexes);
 			};
 	
 			it('returns empty array for unknown mosaic ids', () => {
-				assertDescendingBuyOffers([[123, 456]], []);
+				return assertDescendingBuyOffers([[123, 456]], []);
 			});
 	
 			it('returns single matching offer', () => {
-				assertDescendingBuyOffers([[150, 0]], [[1, 0]]);
+				return assertDescendingBuyOffers([[150, 0]], [[1, 0]]);
 			});
 	
 			it('returns multiple matching offers', () => {
-				assertDescendingBuyOffers([[52, 0], [150, 0]], [[0, 2], [1, 0]]);
+				return assertDescendingBuyOffers([[52, 0], [150, 0]], [[0, 2], [1, 0]]);
 			});
 	
 			it('returns only offers with matching mosaic ids', () => {
-				assertDescendingBuyOffers([[52, 0], [123, 456], [100, 0]], [[0, 2], [1, 0]]);
+				return assertDescendingBuyOffers([[52, 0], [123, 456], [150, 0]], [[0, 2], [1, 0]]);
 			});
 		});
 
 		describe('ascending sell offers', () => {
 			const assertAscendingSellOffers = (mosaicIds, expectedIndexes) => {
-				assertExchangesByMosaicIds('sell', 'sellOffers', 0, 1, mosaicIds, expectedIndexes);
+				return assertExchangesByMosaicIds('sell', 'sellOffers', 0, 1, mosaicIds, expectedIndexes);
 			};
 
 			it('returns empty array for unknown mosaic ids', () => {
-				assertAscendingSellOffers([[123, 456]], []);
+				return assertAscendingSellOffers([[123, 456]], []);
 			});
 
 			it('returns single matching offer', () => {
-				assertAscendingSellOffers([[100, 0]], [[1, 0]]);
+				return assertAscendingSellOffers([[100, 0]], [[1, 0]]);
 			});
 
 			it('returns multiple matching offers', () => {
-				assertAscendingSellOffers([[1, 0], [100, 0]], [[0, 1], [1, 0]]);
+				return assertAscendingSellOffers([[1, 0], [100, 0]], [[0, 1], [1, 0]]);
 			});
 
 			it('returns only offers with matching mosaic ids', () => {
-				assertAscendingSellOffers([[1, 0], [123, 456], [100, 0]], [[0, 1], [1, 0]]);
+				return assertAscendingSellOffers([[1, 0], [123, 456], [100, 0]], [[0, 1], [1, 0]]);
 			});
 		});
 
 		describe('descending sell offers', () => {
 			const assertDescendingSellOffers = (mosaicIds, expectedIndexes) => {
-				assertExchangesByMosaicIds('sell', 'sellOffers', 0, -1, mosaicIds, expectedIndexes);
+				return assertExchangesByMosaicIds('sell', 'sellOffers', 0, -1, mosaicIds, expectedIndexes);
 			};
 
 			it('returns empty array for unknown mosaic ids', () => {
-				assertDescendingSellOffers([[123, 456]], []);
+				return assertDescendingSellOffers([[123, 456]], []);
 			});
 
 			it('returns single matching offer', () => {
-				assertDescendingSellOffers([[100, 0]], [[1, 0]]);
+				return assertDescendingSellOffers([[100, 0]], [[1, 0]]);
 			});
 
 			it('returns multiple matching offers', () => {
-				assertDescendingSellOffers([[1, 0], [100, 0]], [[0, 1], [1, 0]]);
+				return assertDescendingSellOffers([[1, 0], [100, 0]], [[0, 1], [1, 0]]);
 			});
 
 			it('returns only offers with matching mosaic ids', () => {
-				assertDescendingSellOffers([[1, 0], [123, 456], [100, 0]], [[0, 1], [1, 0]]);
+				return assertDescendingSellOffers([[1, 0], [123, 456], [100, 0]], [[0, 1], [1, 0]]);
 			});
 		});
 
@@ -157,34 +157,35 @@ describe('exchange db', () => {
 				const accounts = [];
 				for (let i = 0; i < 100; ++i)
 					accounts.push(test.random.account());
-				const entries = test.db.createExchangeEntriesWithMosaicId(accounts, [123, 456]);
+				const entries = test.db.createExchangeEntriesWithMosaicId(accounts, 1234);
 				const expectedOffers = [];
-				for (let i = 10; i < 100; ++i)
+				for (let i = (ordering > 0 ? 10 : 0); i < (ordering > 0 ? 100 : 9); ++i)
 					expectedOffers.push(extractOffer(entries, fieldName, i, 0, offerType));
-				expectedOffers.sort((offer1, offer2) => { sortOffers(offer1, offer2, ordering); });
+				expectedOffers.sort((offer1, offer2) => sortOffers(offer1, offer2, ordering));
+				const id = entries[9]._id.toString();
 
 				// Assert:
 				return test.db.runDbTest(
 					entries,
-					db => db.exchangesByMosaicIds(offerTypeString, [[123, 456]], entries[8]._id.toString(), 0, ordering),
-					entities => { expect(entities).to.deep.equal(expectedOffers); }
+					db => db.exchangesByMosaicIds(offerTypeString, [[1234, 0]], id, 100, ordering),
+					entities => expect(entities).to.deep.equal(expectedOffers)
 				);
 			};
 
 			it('ascending buy offers', () => {
-				assertExchangesByMosaicIdsWithDocumentId('buy', 'buyOffers', 1, 1);
+				return assertExchangesByMosaicIdsWithDocumentId('buy', 'buyOffers', 1, 1);
 			});
 
 			it('descending buy offers', () => {
-				assertExchangesByMosaicIdsWithDocumentId('buy', 'buyOffers', 1, -1);
+				return assertExchangesByMosaicIdsWithDocumentId('buy', 'buyOffers', 1, -1);
 			});
 
 			it('ascending sell offers', () => {
-				assertExchangesByMosaicIdsWithDocumentId('sell', 'sellOffers', 0, 1);
+				return assertExchangesByMosaicIdsWithDocumentId('sell', 'sellOffers', 0, 1);
 			});
 
 			it('descending sell offers', () => {
-				assertExchangesByMosaicIdsWithDocumentId('sell', 'sellOffers', 0, -1);
+				return assertExchangesByMosaicIdsWithDocumentId('sell', 'sellOffers', 0, -1);
 			});
 		});
 
@@ -195,70 +196,66 @@ describe('exchange db', () => {
 				for (let i = 0; i < 200; ++i)
 					accounts.push(test.random.account());
 				const entries = test.db.createExchangeEntriesWithMosaicId(accounts, 1234);
-				const expectedOffers = [];
-				for (let i = 0; i < expectedSize; ++i)
-					expectedOffers.push(extractOffer(entries, fieldName, i, 0, offerType));
-				expectedOffers.sort((offer1, offer2) => { sortOffers(offer1, offer2, ordering); });
 
 				// Assert:
 				return test.db.runDbTest(
 					entries,
 					db => db.exchangesByMosaicIds(offerTypeString, [[1234, 0]], undefined, pageSize, ordering),
-					entities => { expect(entities).to.deep.equal(expectedOffers); }
+					entities => expect(entities.length).to.equal(expectedSize)
 				);
 			};
 
 			describe('query respects page size', () => {
 				it('ascending buy offers', () => {
-					assertExchangesByMosaicIdsWithPaging('buy', 'buyOffers', 1, 1, 50, 50);
+					return assertExchangesByMosaicIdsWithPaging('buy', 'buyOffers', 1, 1, 50, 50);
 				});
 
 				it('descending buy offers', () => {
-					assertExchangesByMosaicIdsWithPaging('buy', 'buyOffers', 1, -1, 50, 50);
+					return assertExchangesByMosaicIdsWithPaging('buy', 'buyOffers', 1, -1, 50, 50);
 				});
 
 				it('ascending sell offers', () => {
-					assertExchangesByMosaicIdsWithPaging('sell', 'sellOffers', 0, 1, 50, 50);
+					return assertExchangesByMosaicIdsWithPaging('sell', 'sellOffers', 0, 1, 50, 50);
 				});
 
 				it('descending sell offers', () => {
-					assertExchangesByMosaicIdsWithPaging('sell', 'sellOffers', 0, -1, 50, 50);
+					return assertExchangesByMosaicIdsWithPaging('sell', 'sellOffers', 0, -1, 50, 50);
 				});
 			});
 
 			describe('query ensures minimum page size', () => {
 				it('ascending buy offers', () => {
-					assertExchangesByMosaicIdsWithPaging('buy', 'buyOffers', 1, 1, 5, 10);
+					return assertExchangesByMosaicIdsWithPaging('buy', 'buyOffers', 1, 1, 5, 10);
 				});
 
 				it('descending buy offers', () => {
-					assertExchangesByMosaicIdsWithPaging('buy', 'buyOffers', 1, -1, 5, 10);
+					return assertExchangesByMosaicIdsWithPaging('buy', 'buyOffers', 1, -1, 5, 10);
 				});
 
 				it('ascending sell offers', () => {
-					assertExchangesByMosaicIdsWithPaging('sell', 'sellOffers', 0, 1, 5, 10);
+					return assertExchangesByMosaicIdsWithPaging('sell', 'sellOffers', 0, 1, 5, 10);
 				});
 
 				it('descending sell offers', () => {
-					assertExchangesByMosaicIdsWithPaging('sell', 'sellOffers', 0, -1, 5, 10);
+					return assertExchangesByMosaicIdsWithPaging('sell', 'sellOffers', 0, -1, 5, 10);
 				});
 			});
 
 			describe('query ensures maximum page size', () => {
 				it('ascending buy offers', () => {
-					assertExchangesByMosaicIdsWithPaging('buy', 'buyOffers', 1, 1, 150, 100);
+					return assertExchangesByMosaicIdsWithPaging('buy', 'buyOffers', 1, 1, 150, 100);
 				});
 
 				it('descending buy offers', () => {
-					assertExchangesByMosaicIdsWithPaging('buy', 'buyOffers', 1, -1, 150, 100);
+					return assertExchangesByMosaicIdsWithPaging('buy', 'buyOffers', 1, -1, 150, 100);
 				});
 
 				it('ascending sell offers', () => {
-					assertExchangesByMosaicIdsWithPaging('sell', 'sellOffers', 0, 1, 150, 100);
+					return assertExchangesByMosaicIdsWithPaging('sell', 'sellOffers', 0, 1, 150, 100);
 				});
 
 				it('descending sell offers', () => {
-					assertExchangesByMosaicIdsWithPaging('sell', 'sellOffers', 0, -1, 150, 100);
+					return assertExchangesByMosaicIdsWithPaging('sell', 'sellOffers', 0, -1, 150, 100);
 				});
 			});
 		});

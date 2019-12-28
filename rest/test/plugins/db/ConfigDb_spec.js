@@ -5,6 +5,7 @@
  **/
 
 const test = require('./utils/configDbTestUtils');
+const { expect } = require('chai');
 
 describe('config db', () => {
 	describe('config less than or equal height', () => {
@@ -17,23 +18,22 @@ describe('config db', () => {
 			const expectedHeights = heights.slice(((0 === limit) ? 0 : height - limit), height).reverse();
 			const entries = test.db.createConfigEntries(heights);
 			const expectedEntries = test.db.createConfigEntries(expectedHeights);
+			expectedEntries.forEach(entry => { delete entry._id; });
 
 			// Assert:
 			return test.db.runDbTest(
 				entries,
 				db => db.configsLessOrEqualThanHeight(height, limit),
-				entities => {
-					expect(entities).to.deep.equal(expectedEntries);
-				}
+				entities => expect(entities).to.deep.equal(expectedEntries)
 			);
 		};
 
 		it('without limit', () => {
-			assertConfigsLessOrEqualThanHeight(70, 0);
+			return assertConfigsLessOrEqualThanHeight(70, 0);
 		});
 
 		it('with limit', () => {
-			assertConfigsLessOrEqualThanHeight(70, 40);
+			return assertConfigsLessOrEqualThanHeight(70, 40);
 		});
 	});
 });
