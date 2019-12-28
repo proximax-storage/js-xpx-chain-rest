@@ -24,25 +24,24 @@ describe('drive db', () => {
 					driveInfos.push({ multisig: account });
 					expectedEntries.push(test.db.createDriveEntry(driveInfos.length, account));
 				});
+				expectedEntries.forEach(entry => { delete entry._id; });
 				const entries = test.db.createDriveEntries(driveInfos);
 
 				// Assert:
 				return test.db.runDbTest(
 					entries,
-					db => db.getDriveByAccountId(traits.accountType, traits.toDbApiId(account)),
-					entities => {
-						expect(entities).to.deep.equal(expectedEntries);
-					}
+					db => db.getDriveByAccountId(traits.type, traits.toDbApiId(account)),
+					entities => expect(entities).to.deep.equal(expectedEntries)
 				);
 			};
 
 			it('returns empty array for unknown id', () => {
-				assertDriveByAccountId(generateAccount(), []);
+				return assertDriveByAccountId(generateAccount(), []);
 			});
 
 			it('returns matching entry', () => {
 				const account = generateAccount();
-				assertDriveByAccountId(account, [account]);
+				return assertDriveByAccountId(account, [account]);
 			});
 		};
 
@@ -64,9 +63,8 @@ describe('drive db', () => {
 			expect(() => { db.getDrivesByPublicKeyAndRole(generateAccount().publicKey, ['invalidRole']) }).to.throw();
 		});
 
-		const knownKey = generateAccount().publicKey;
 		const generateDriveInfo = (additionalParticipant) => {
-			const replicators = [{ replicator: generateAccount().publicKey }, { replicator: generateAccount().publicKey }];
+			const replicators = [ generateAccount().publicKey, generateAccount().publicKey ];
 			if (additionalParticipant && 'replicator' === additionalParticipant.role)
 				replicators.push(additionalParticipant.key);
 			const additionalParticipantHasOwnerRole = (additionalParticipant && 'owner' === additionalParticipant.role);
@@ -75,9 +73,7 @@ describe('drive db', () => {
 
 		const generateDriveInfos = (count) => {
 			const driveInfos = [];
-			driveInfos.push(generateDriveInfo({ role: 'owner', knownKey }));
-			driveInfos.push(generateDriveInfo({ role: 'replicator', knownKey }));
-			for (let i = 0; i < count - 2; ++i) {
+			for (let i = 0; i < count; ++i) {
 				driveInfos.push(generateDriveInfo());
 			}
 
@@ -87,54 +83,60 @@ describe('drive db', () => {
 		const assertDrivesByPublicKeyAndRole = (publicKey, roles, additionalDriveInfos) => {
 			// Arrange:
 			const driveInfos = generateDriveInfos(5);
-			const entries = test.db.createDriveEntries(driveInfos);
 			const expectedEntries = [];
 			additionalDriveInfos.forEach(driveInfo => {
 				driveInfos.push(driveInfo);
 				expectedEntries.push(test.db.createDriveEntry(driveInfos.length, driveInfo.multisig, driveInfo.owner, driveInfo.replicators));
 			});
+			expectedEntries.forEach(entry => { delete entry._id; });
+			const entries = test.db.createDriveEntries(driveInfos);
 
 			// Assert:
 			return test.db.runDbTest(
 				entries,
 				db => db.getDrivesByPublicKeyAndRole(publicKey, roles),
-				entities => {
-					expect(entities).to.deep.equal(expectedEntries);
-				}
+				entities =>
+					expect(entities).to.deep.equal(expectedEntries)
 			);
 		};
 
-		it('returns empty array when no roles', () => {
-			assertDrivesByPublicKeyAndRole(knownKey, [], []);
-		});
-
 		describe('returns empty array for unknown key', () => {
 			it('both owner and replicator', () => {
-				assertDrivesByPublicKeyAndRole(generateAccount().publicKey, ['owner', 'replicator'], []);
+				return assertDrivesByPublicKeyAndRole(generateAccount().publicKey, ['owner', 'replicator'], []);
 			});
 
 			it('only owner', () => {
-				assertDrivesByPublicKeyAndRole(generateAccount().publicKey, ['owner'], []);
+				return assertDrivesByPublicKeyAndRole(generateAccount().publicKey, ['owner'], []);
 			});
 
 			it('only replicator', () => {
-				assertDrivesByPublicKeyAndRole(generateAccount().publicKey, ['replicator'], []);
+				return assertDrivesByPublicKeyAndRole(generateAccount().publicKey, ['replicator'], []);
 			});
 		});
 
-		it('returns entries with matching owner and replicator', () => {
+		const assertDrivesByRoles = (roles) => {
 			const key = generateAccount().publicKey;
-			assertDrivesByPublicKeyAndRole(key, ['owner', 'replicator'], [
+			return assertDrivesByPublicKeyAndRole(key, roles, [
 				generateDriveInfo({ role: 'owner', key }),
 				generateDriveInfo({ role: 'owner', key }),
 				generateDriveInfo({ role: 'replicator', key }),
 				generateDriveInfo({ role: 'replicator', key })
 			]);
+		};
+
+		describe('returns entries with matching owner and replicator', () => {
+			it('roles set', () => {
+				return assertDrivesByRoles(['owner', 'replicator']);
+			});
+
+			it('roles not set', () => {
+				return assertDrivesByRoles([]);
+			});
 		});
 
 		it('returns entries with matching owner', () => {
 			const key = generateAccount().publicKey;
-			assertDrivesByPublicKeyAndRole(key, ['owner'], [
+			return assertDrivesByPublicKeyAndRole(key, ['owner'], [
 				generateDriveInfo({ role: 'owner', key }),
 				generateDriveInfo({ role: 'owner', key })
 			]);
@@ -142,7 +144,7 @@ describe('drive db', () => {
 
 		it('returns entries with matching replicator', () => {
 			const key = generateAccount().publicKey;
-			assertDrivesByPublicKeyAndRole(key, ['replicator'], [
+			return assertDrivesByPublicKeyAndRole(key, ['replicator'], [
 				generateDriveInfo({ role: 'replicator', key }),
 				generateDriveInfo({ role: 'replicator', key })
 			]);

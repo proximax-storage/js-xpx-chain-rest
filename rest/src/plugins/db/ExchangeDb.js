@@ -91,7 +91,7 @@ class ExchangeDb {
 	exchangesByMosaicIds(offerType, mosaicIds, pagingId, pageSize, ordering) {
 		const ids = mosaicIds.map(id => new Long(id[0], id[1]));
 		const offerFieldName = ('buy' === offerType) ? 'buyOffers' : 'sellOffers';
-		const conditions = { [`exchange.${offerFieldName}.mosaicId`]: { $in: ids } };
+		const conditions = { $and: [ { [`exchange.${offerFieldName}.mosaicId`]: { $in: ids } } ] };
 		const extractor = function(dbObjects) {
 			return extractOfferInfo(dbObjects, offerFieldName, ids, ordering);
 		};

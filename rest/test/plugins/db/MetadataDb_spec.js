@@ -4,8 +4,8 @@
  *** license that can be found in the LICENSE file.
  **/
 
-const AccountType = require('../../../src/plugins/AccountType');
 const test = require('./utils/metadataDbTestUtils');
+const { expect } = require('chai');
 
 describe('metadata db', () => {
 	const generateAddress = test.random.address;
@@ -21,25 +21,24 @@ describe('metadata db', () => {
 				metadataIds.push(metadataId);
 				expectedEntries.push(test.db.createMetadataEntry(metadataIds.length, metadataId));
 			});
+			expectedEntries.forEach(entry => { delete entry._id; });
 			const entries = test.db.createMetadataEntries(metadataIds);
 
 			// Assert:
 			return test.db.runDbTest(
 				entries,
-				db => db.getMetadataById(metadataId),
-				entities => {
-					expect(entities).to.deep.equal(expectedEntries);
-				}
+				db => db.metadatasByIds([metadataId]),
+				entities => expect(entities).to.deep.equal(expectedEntries)
 			);
 		};
 
 		it('returns empty array for unknown id', () => {
-			assertMetadataById(generateAddress(), []);
+			return assertMetadataById(generateAddress(), []);
 		});
 
 		it('returns matching entry', () => {
 			const metadataId = generateAddress();
-			assertMetadataById(metadataId, [metadataId]);
+			return assertMetadataById(metadataId, [metadataId]);
 		});
 	});
 });
