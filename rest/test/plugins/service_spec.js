@@ -57,6 +57,8 @@ describe('service plugin', () => {
 
 			// Act:
 			const buffer = Buffer.concat([
+				Buffer.of(0x5B, 0x0, 0x0, 0x0),
+				Buffer.of(0x5B, 0x0, 0x0, 0x0),
 				Buffer.of(0x0, 0x61),
 				driveKey,
 				Buffer.of(0x02)
@@ -77,6 +79,8 @@ describe('service plugin', () => {
 
 			// Act:
 			const buffer = Buffer.concat([
+				Buffer.of(0x5B, 0x0, 0x0, 0x0),
+				Buffer.of(0x5B, 0x0, 0x0, 0x0),
 				Buffer.of(0x5B, 0x61),
 				driveKey,
 				Buffer.of(0x02)
@@ -97,6 +101,8 @@ describe('service plugin', () => {
 
 			// Act:
 			const buffer = Buffer.concat([
+				Buffer.of(0x5B, 0x0, 0x0, 0x0),
+				Buffer.of(0x5B, 0x0, 0x0, 0x0),
 				Buffer.of(0x5B, 0x61),
 				driveKey,
 				Buffer.of(0x02)
