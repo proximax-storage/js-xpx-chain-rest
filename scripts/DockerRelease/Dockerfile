@@ -1,5 +1,5 @@
 #FROM alpine:3.6
-FROM node:8.12.0-alpine
+FROM node:10.18.0-alpine
 
 # Install alpine-sdk (gcc)
 RUN apk add --update alpine-sdk
@@ -22,7 +22,7 @@ RUN cd /catapult-rest/catapult-sdk && \
 #------------------------
 # Actual target image which only contains the required binaries
 #------------------------
-FROM node:8.12.0-alpine
+FROM node:10.18.0-alpine
 
 # Install alpine-sdk (gcc)
 RUN apk add --update alpine-sdk
