@@ -21,7 +21,7 @@ pipeline {
     stage('Build') {
       steps {
         echo 'Starting Docker Container'
-        withDockerContainer(image: 'node:8-alpine', args: '-u root') {
+        withDockerContainer(image: 'node:10.18.0-alpine', args: '-u root') {
           echo 'Installing dependencies'
           sh 'apk add python python-dev py-pip alpine-sdk'
 
@@ -42,7 +42,7 @@ pipeline {
     stage('Unit Test') {
       steps {
        echo 'Starting Docker Container'
-        withDockerContainer(image: 'node:8-alpine', args: '-u root --network="host"') {
+        withDockerContainer(image: 'node:10.18.0-alpine', args: '-u root --network="host"') {
           echo 'Testing catapult-sdk'
           sh '(cd catapult-sdk; npm run test)'
 

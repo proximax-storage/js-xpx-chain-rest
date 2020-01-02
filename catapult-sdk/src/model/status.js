@@ -51,6 +51,8 @@ const toStringInternal = code => {
 	case 0x80410002: return 'Failure_Aggregate_No_Transactions';
 	case 0x80410003: return 'Failure_Aggregate_Too_Many_Cosignatures';
 	case 0x80410004: return 'Failure_Aggregate_Redundant_Cosignatures';
+	case 0x80410005: return 'Failure_Aggregate_Plugin_Config_Malformed';
+	case 0x80410006: return 'Failure_Aggregate_Bonded_Not_Enabled';
 	case 0x80411001: return 'Failure_Aggregate_Ineligible_Cosigners';
 	case 0x80411002: return 'Failure_Aggregate_Missing_Cosigners';
 	case 0x80411005: return 'Failure_Aggregate_Plugin_Config_Malformed';

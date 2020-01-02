@@ -1,4 +1,4 @@
-FROM node:8.12.0-alpine
+FROM node:10.18.0-alpine
 
 # Install alpine-sdk (gcc)
 RUN apk add --update alpine-sdk
