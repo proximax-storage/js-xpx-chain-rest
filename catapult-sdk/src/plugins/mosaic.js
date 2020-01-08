@@ -72,13 +72,13 @@ const mosaicPlugin = {
 
 				transaction.properties = [];
 				for (let i = 0; i < numRequiredProperties; ++i)
-					transaction.properties.push({ key: i, value: uint64.fromUint(parser.uint8()) });
+					transaction.properties.push({ id: i, value: uint64.fromUint(parser.uint8()) });
 
 				if (0 < propertiesCount) {
 					for (let i = 0; i < propertiesCount; ++i) {
-						const key = parser.uint8();
+						const id = parser.uint8();
 						const value = parser.uint64();
-						transaction.properties.push({ key, value });
+						transaction.properties.push({ id, value });
 					}
 				}
 
@@ -98,19 +98,19 @@ const mosaicPlugin = {
 				// notice that required property values are uint8 size
 				for (let i = 0; i < numRequiredProperties; ++i) {
 					const property = transaction.properties[i];
-					if (i !== property.key)
-						throw Error(`unexpected property ${property.key} at position ${i} in bag`);
+					if (i !== property.id)
+						throw Error(`unexpected property ${property.id} at position ${i} in bag`);
 
 					const value = uint64.compact(property.value);
 					if ('number' !== typeof value || 0xFF < value)
-						throw Error(`property ${property.key} value is too large`);
+						throw Error(`property ${property.id} value is too large`);
 
 					serializer.writeUint8(value);
 				}
 
 				for (let i = 0; i < propertiesCount; ++i) {
 					const property = transaction.properties[numRequiredProperties + i];
-					serializer.writeUint8(property.key);
+					serializer.writeUint8(property.id);
 					serializer.writeUint64(property.value);
 				}
 			}
