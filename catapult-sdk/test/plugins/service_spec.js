@@ -23,7 +23,7 @@ describe('service plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 20);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 23);
 			expect(modelSchema).to.contain.all.keys([
 				'prepareDrive',
 				'joinToDrive',
@@ -44,7 +44,9 @@ describe('service plugin', () => {
 				'inactiveFilesWithoutDeposit',
 				'replicatorInfo',
 				'drive',
-				'service.driveStateWithMetadata'
+				'service.driveStateWithMetadata',
+				'startFileDownload',
+				'endFileDownload',
 			]);
 
 			expect(Object.keys(modelSchema.prepareDrive).length).to.equal(Object.keys(modelSchema.transaction).length + 8);
@@ -146,6 +148,15 @@ describe('service plugin', () => {
 
 			expect(Object.keys(modelSchema['service.driveStateWithMetadata']).length).to.equal(2);
 			expect(modelSchema['service.driveStateWithMetadata']).to.contain.all.keys(['driveKey', 'meta']);
+
+			expect(Object.keys(modelSchema.startFileDownload).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
+			expect(modelSchema.startFileDownload).to.contain.all.keys(['driveKey', 'files']);
+
+			expect(Object.keys(modelSchema.endFileDownload).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
+			expect(modelSchema.endFileDownload).to.contain.all.keys(['recipient', 'files']);
+
+			expect(Object.keys(modelSchema['endFileDownload.files']).length).to.equal(1);
+			expect(modelSchema['endFileDownload.files']).to.contain.all.keys(['fileHash']);
 		});
 	});
 
@@ -171,7 +182,7 @@ describe('service plugin', () => {
 			const codecs = getCodecs();
 
 			// Assert: codec was registered
-			expect(Object.keys(codecs).length).to.equal(8);
+			expect(Object.keys(codecs).length).to.equal(10);
 			expect(codecs).to.contain.all.keys([
 				EntityType.prepareDrive.toString(),
 				EntityType.joinToDrive.toString(),
@@ -180,7 +191,9 @@ describe('service plugin', () => {
 				EntityType.endDriveVerification.toString(),
 				EntityType.driveFileSystem.toString(),
 				EntityType.filesDeposit.toString(),
-				EntityType.driveFilesReward.toString()
+				EntityType.driveFilesReward.toString(),
+				EntityType.startFileDownload.toString(),
+				EntityType.endFileDownload.toString(),
 			]);
 		});
 
@@ -408,6 +421,70 @@ describe('service plugin', () => {
 						{
 							participant: participant2,
 							uploaded: [0x04, 0x0]
+						}
+					]
+				}
+			}));
+		});
+
+		describe('supports start file download transaction', () => {
+			const codec = getCodecs()[EntityType.startFileDownload];
+			const driveKey = createHash(0x01);
+			const fileCount = Buffer.of(0x02, 0x0);
+			const fileHash1 = createHash(0x02);
+			const size1 = Buffer.of(0x03, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+			const fileHash2 = createHash(0x04);
+			const size2 = Buffer.of(0x05, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+
+			test.binary.test.addAll(codec, 32 + 2 + 2 * (32 + 8), () => ({
+				buffer: Buffer.concat([
+					driveKey,
+					fileCount,
+					fileHash1,
+					size1,
+					fileHash2,
+					size2
+				]),
+				object: {
+					driveKey,
+					fileCount: 0x02,
+					files: [
+						{
+							fileHash: fileHash1,
+							size: [0x03, 0x0]
+						},
+						{
+							fileHash: fileHash2,
+							size: [0x05, 0x0]
+						}
+					]
+				}
+			}));
+		});
+
+		describe('supports end file download transaction', () => {
+			const codec = getCodecs()[EntityType.endFileDownload];
+			const recipient = createHash(0x01);
+			const fileCount = Buffer.of(0x02, 0x0);
+			const fileHash1 = createHash(0x02);
+			const fileHash2 = createHash(0x03);
+
+			test.binary.test.addAll(codec, 32 + 2 + 2 * 32, () => ({
+				buffer: Buffer.concat([
+					recipient,
+					fileCount,
+					fileHash1,
+					fileHash2
+				]),
+				object: {
+					recipient,
+					fileCount: 0x02,
+					files: [
+						{
+							fileHash: fileHash1
+						},
+						{
+							fileHash: fileHash2
 						}
 					]
 				}

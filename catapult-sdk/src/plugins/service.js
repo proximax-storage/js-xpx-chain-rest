@@ -140,6 +140,20 @@ const servicePlugin = {
 			driveKey: ModelType.binary,
 			meta: { type: ModelType.object, schemaName: 'topicMetadata' }
 		});
+
+		builder.addTransactionSupport(EntityType.startFileDownload, {
+			driveKey: 				{ type: ModelType.binary, schemaName: 'startFileDownload.driveKey' },
+			files: 					{ type: ModelType.array, schemaName: 'fileInfo' },
+		});
+
+		builder.addTransactionSupport(EntityType.endFileDownload, {
+			recipient: 				{ type: ModelType.binary, schemaName: 'endFileDownload.recipient' },
+			files: 					{ type: ModelType.array, schemaName: 'endFileDownload.files' }
+		});
+
+		builder.addSchema('endFileDownload.files', {
+			fileHash: ModelType.binary
+		});
 	},
 
 	registerCodecs: codecBuilder => {
@@ -351,6 +365,59 @@ const servicePlugin = {
 					serializer.writeBuffer(uploadInfo.participant);
 					serializer.writeUint64(uploadInfo.uploaded);
 				}
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.startFileDownload, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.driveKey = parser.buffer(constants.sizes.signer);
+				transaction.fileCount = parser.uint16();
+				transaction.files = [];
+
+				let count = transaction.fileCount;
+				while (count-- > 0) {
+					transaction.files.push({
+						fileHash: parser.buffer(constants.sizes.hash256),
+						size: parser.uint64(),
+					});
+				}
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.driveKey);
+				serializer.writeUint16(transaction.fileCount);
+				for (let i = 0; i < transaction.files.length; ++i) {
+					const file = transaction.files[i];
+					serializer.writeBuffer(file.fileHash);
+					serializer.writeUint64(file.size);
+				}
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.endFileDownload, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.recipient = parser.buffer(constants.sizes.signer);
+				transaction.fileCount = parser.uint16();
+				transaction.files = [];
+
+				deserializeFiles(parser, transaction.fileCount, transaction.files, (parser) => {
+					const file = {};
+					file.fileHash = parser.buffer(constants.sizes.hash256);
+					return file;
+				});
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.recipient);
+				serializer.writeUint16(transaction.fileCount);
+				for (let i = 0; i < transaction.files.length; ++i)
+					serializer.writeBuffer(transaction.files[i].fileHash);
 			}
 		});
 	}
