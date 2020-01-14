@@ -143,11 +143,13 @@ const servicePlugin = {
 
 		builder.addTransactionSupport(EntityType.startFileDownload, {
 			driveKey: 				{ type: ModelType.binary, schemaName: 'startFileDownload.driveKey' },
+			operationToken: 		{ type: ModelType.binary, schemaName: 'startFileDownload.operationToken' },
 			files: 					{ type: ModelType.array, schemaName: 'fileInfo' },
 		});
 
 		builder.addTransactionSupport(EntityType.endFileDownload, {
 			recipient: 				{ type: ModelType.binary, schemaName: 'endFileDownload.recipient' },
+			operationToken: 		{ type: ModelType.binary, schemaName: 'startFileDownload.operationToken' },
 			files: 					{ type: ModelType.array, schemaName: 'endFileDownload.files' }
 		});
 
@@ -372,6 +374,7 @@ const servicePlugin = {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.driveKey = parser.buffer(constants.sizes.signer);
+				transaction.operationToken = parser.buffer(constants.sizes.signer);
 				transaction.fileCount = parser.uint16();
 				transaction.files = [];
 
@@ -388,6 +391,7 @@ const servicePlugin = {
 
 			serialize: (transaction, serializer) => {
 				serializer.writeBuffer(transaction.driveKey);
+				serializer.writeBuffer(transaction.operationToken);
 				serializer.writeUint16(transaction.fileCount);
 				for (let i = 0; i < transaction.files.length; ++i) {
 					const file = transaction.files[i];
@@ -401,6 +405,7 @@ const servicePlugin = {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.recipient = parser.buffer(constants.sizes.signer);
+				transaction.operationToken = parser.buffer(constants.sizes.signer);
 				transaction.fileCount = parser.uint16();
 				transaction.files = [];
 
@@ -415,6 +420,7 @@ const servicePlugin = {
 
 			serialize: (transaction, serializer) => {
 				serializer.writeBuffer(transaction.recipient);
+				serializer.writeBuffer(transaction.operationToken);
 				serializer.writeUint16(transaction.fileCount);
 				for (let i = 0; i < transaction.files.length; ++i)
 					serializer.writeBuffer(transaction.files[i].fileHash);
