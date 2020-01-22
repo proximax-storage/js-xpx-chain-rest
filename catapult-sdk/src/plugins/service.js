@@ -148,13 +148,29 @@ const servicePlugin = {
 		});
 
 		builder.addTransactionSupport(EntityType.endFileDownload, {
-			recipient: 				{ type: ModelType.binary, schemaName: 'endFileDownload.recipient' },
+			fileRecipient: 			{ type: ModelType.binary, schemaName: 'endFileDownload.fileRecipient' },
 			operationToken: 		{ type: ModelType.binary, schemaName: 'startFileDownload.operationToken' },
-			files: 					{ type: ModelType.array, schemaName: 'endFileDownload.files' }
+			files: 					{ type: ModelType.array, schemaName: ModelType.binary }
 		});
 
-		builder.addSchema('endFileDownload.files', {
-			fileHash: ModelType.binary
+		builder.addSchema('downloadEntry', {
+			downloadInfo:			{ type: ModelType.object, schemaName: 'downloadInfo' }
+		});
+
+		builder.addSchema('downloadInfo', {
+			driveKey:				ModelType.binary,
+			driveAddress:			ModelType.binary,
+			fileRecipients: 		{ type: ModelType.array, schemaName: 'fileRecipient' },
+		});
+
+		builder.addSchema('fileRecipient', {
+			key:					ModelType.binary,
+			downloads:				{ type: ModelType.array, schemaName: 'download' }
+		});
+
+		builder.addSchema('download', {
+			operationToken:			ModelType.binary,
+			files:					{ type: ModelType.array, schemaName: ModelType.binary }
 		});
 	},
 
@@ -404,26 +420,24 @@ const servicePlugin = {
 		codecBuilder.addTransactionSupport(EntityType.endFileDownload, {
 			deserialize: parser => {
 				const transaction = {};
-				transaction.recipient = parser.buffer(constants.sizes.signer);
+				transaction.fileRecipient = parser.buffer(constants.sizes.signer);
 				transaction.operationToken = parser.buffer(constants.sizes.signer);
 				transaction.fileCount = parser.uint16();
 				transaction.files = [];
 
 				deserializeFiles(parser, transaction.fileCount, transaction.files, (parser) => {
-					const file = {};
-					file.fileHash = parser.buffer(constants.sizes.hash256);
-					return file;
+					return parser.buffer(constants.sizes.hash256);
 				});
 
 				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
-				serializer.writeBuffer(transaction.recipient);
+				serializer.writeBuffer(transaction.fileRecipient);
 				serializer.writeBuffer(transaction.operationToken);
 				serializer.writeUint16(transaction.fileCount);
 				for (let i = 0; i < transaction.files.length; ++i)
-					serializer.writeBuffer(transaction.files[i].fileHash);
+					serializer.writeBuffer(transaction.files[i]);
 			}
 		});
 	}

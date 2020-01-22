@@ -27,12 +27,35 @@ const createDriveEntries = (driveInfos) => {
 	return driveInfos.map(driveInfo => createDriveEntry(++i, driveInfo.multisig, driveInfo.owner, driveInfo.replicators));
 };
 
+const createDownloadEntry = (id, account, fileRecipients) => ({
+	_id: dbTestUtils.db.createObjectId(id),
+	downloadInfo: {
+		driveKey: new Binary(account.publicKey),
+		driveAddress: new Binary(account.address),
+		fileRecipients: fileRecipients && fileRecipients.length ?
+			fileRecipients.map(fileRecipient => { return {
+				key: new Binary(fileRecipient.key),
+				downloads: fileRecipient.downloads.map(download => { return {
+					operationToken: new Binary(download.operationToken),
+					files: download.files.map(fileHash => new Binary(fileHash))
+				}})
+			}}) : null,
+	}
+});
+
+const createDownloadEntries = (downloadInfos) => {
+	let i = 0;
+	return downloadInfos.map(downloadInfo => createDownloadEntry(++i, downloadInfo.account, downloadInfo.fileRecipients));
+};
+
 const driveDbTestUtils = {
 	db: {
 		createDriveEntry,
 		createDriveEntries,
-		runDbTest: (dbEntities, issueDbCommand, assertDbCommandResult) =>
-			dbTestUtils.db.runDbTest(dbEntities, 'drives', db => new ServiceDb(db), issueDbCommand, assertDbCommandResult)
+		createDownloadEntry,
+		createDownloadEntries,
+		runDbTest: (dbEntities, collectionName, issueDbCommand, assertDbCommandResult) =>
+			dbTestUtils.db.runDbTest(dbEntities, collectionName, db => new ServiceDb(db), issueDbCommand, assertDbCommandResult)
 	}
 };
 Object.assign(driveDbTestUtils, test);

@@ -238,6 +238,9 @@ const toStringInternal = code => {
 	case 0x805A002B: return 'Failure_Service_Drive_Size_Exceeded';
 	case 0x805A002C: return 'Failure_Service_Failed_Block_Hashes_Missing';
 	case 0x805A002D: return 'Failure_Service_Duplicate_Failed_Block_Hashes';
+	case 0x805A002E: return 'Failure_Service_Max_Replicators_Reached';
+	case 0x805A002F: return 'Failure_Service_File_Download_Already_In_Progress';
+	case 0x805A0030: return 'Failure_Service_File_Download_Not_In_Progress';
 	case 0x80540006: return 'Failure_Transfer_Message_Too_Large';
 	case 0x805400C8: return 'Failure_Transfer_Out_Of_Order_Mosaics';
 	case 0x80540007: return 'Failure_Transfer_Plugin_Config_Malformed';

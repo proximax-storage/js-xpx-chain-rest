@@ -126,7 +126,7 @@ describe('exchange routes', () => {
 			}));
 		});
 
-		describe('sell offer type with namespace id', () => {
+		describe('buy offer type with namespace id', () => {
 			describe('descending order by default', () => addGetTests({
 				params: {mosaicId: namespaceId, type: 'buy'},
 				expected: {type: 'buy', assetIds, ordering: -1},

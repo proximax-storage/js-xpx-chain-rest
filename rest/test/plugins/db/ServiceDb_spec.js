@@ -11,6 +11,7 @@ const { expect } = require('chai');
 
 describe('drive db', () => {
 	const generateAccount = test.random.account;
+	const generateHash = test.random.hash;
 
 	describe('drive by account id', () => {
 		const addDriveByAccountIdTests = traits => {
@@ -30,6 +31,7 @@ describe('drive db', () => {
 				// Assert:
 				return test.db.runDbTest(
 					entries,
+					'drives',
 					db => db.getDriveByAccountId(traits.type, traits.toDbApiId(account)),
 					entities => expect(entities).to.deep.equal(expectedEntries)
 				);
@@ -94,9 +96,9 @@ describe('drive db', () => {
 			// Assert:
 			return test.db.runDbTest(
 				entries,
+				'drives',
 				db => db.getDrivesByPublicKeyAndRole(publicKey, roles),
-				entities =>
-					expect(entities).to.deep.equal(expectedEntries)
+				entities => expect(entities).to.deep.equal(expectedEntries)
 			);
 		};
 
@@ -149,5 +151,258 @@ describe('drive db', () => {
 				generateDriveInfo({ role: 'replicator', key })
 			]);
 		});
+	});
+
+	describe('file downloads', () => {
+		const generateDownloadInfo = (account, fileRecipient, operationToken) => { return {
+			account: account ? account : generateAccount(),
+			fileRecipients: [
+				{
+					key: fileRecipient ? fileRecipient : generateAccount().publicKey,
+					downloads: [
+						{
+							operationToken: operationToken ? operationToken : generateHash(),
+							files: [
+								generateHash(),
+								generateHash(),
+								generateHash(),
+							]
+						},
+						{
+							operationToken: generateHash(),
+							files: [
+								generateHash(),
+								generateHash(),
+								generateHash(),
+							]
+						}
+					]
+				},
+				{
+					key: generateAccount().publicKey,
+					downloads: [
+						{
+							operationToken: generateHash(),
+							files: [
+								generateHash(),
+								generateHash(),
+								generateHash(),
+							]
+						},
+						{
+							operationToken: generateHash(),
+							files: [
+								generateHash(),
+								generateHash(),
+								generateHash(),
+							]
+						}
+					]
+				}
+			]
+		}};
+
+		const addGetDownloadsByDriveIdTests = traits => {
+			const assertDownloadsByDriveId = (account, additionalAccounts) => {
+				// Arrange:
+				const downloadInfos = [];
+				for (let i = 0; i < 5; ++i)
+					downloadInfos.push({ account: generateAccount()});
+				const expectedEntries = [];
+				additionalAccounts.forEach(account => {
+					const downloadInfo = generateDownloadInfo(account);
+					downloadInfos.push(downloadInfo);
+					expectedEntries.push(test.db.createDownloadEntry(downloadInfos.length, downloadInfo.account, downloadInfo.fileRecipients));
+				});
+				expectedEntries.forEach(entry => { delete entry._id; });
+				const entries = test.db.createDownloadEntries(downloadInfos);
+
+				// Assert:
+				return test.db.runDbTest(
+					entries,
+					'downloads',
+					db => db.getDownloadsByDriveId(traits.type, traits.toDbApiId(account)),
+					entities =>
+						expect(entities).to.deep.equal(expectedEntries)
+				);
+			};
+
+			it('returns empty array for unknown id', () => {
+				return assertDownloadsByDriveId(generateAccount(), []);
+			});
+
+			it('returns matching entry', () => {
+				const account = generateAccount();
+				return assertDownloadsByDriveId(account, [account]);
+			});
+		};
+
+		describe('by drive public key', () => addGetDownloadsByDriveIdTests({
+			type: AccountType.publicKey,
+			toDbApiId: account => account.publicKey
+		}));
+
+		describe('by drive address', () => addGetDownloadsByDriveIdTests({
+			type: AccountType.address,
+			toDbApiId: account => account.address
+		}));
+
+		const addGetDownloadsByKeyTests = traits => {
+			const generateDownloadInfos = (count, key) => {
+				const downloadInfos = [];
+				for (let i = 0; i < count; ++i) {
+					downloadInfos.push(traits.generateDownloadInfo(key ? key : traits.generateKey()));
+				}
+
+				return downloadInfos;
+			};
+
+			it('returns empty array for unknown key', () => {
+				// Arrange:
+				const entries = test.db.createDownloadEntries(generateDownloadInfos(5));
+
+				// Assert:
+				return test.db.runDbTest(
+					entries,
+					'downloads',
+					db => traits.getDownloads(db, traits.generateKey()),
+					entities => expect(entities.length).to.equal(0)
+				);
+			});
+
+			it('returns download info from matching entries', () => {
+				// Arrange:
+				const key = traits.generateKey();
+				const downloadInfos = generateDownloadInfos(5);
+				const additionalDownloadInfo = traits.generateDownloadInfo(key);
+				downloadInfos.push(additionalDownloadInfo);
+				const entries = test.db.createDownloadEntries(downloadInfos);
+				const expectedEntry = test.db.createDownloadEntry(downloadInfos.length, additionalDownloadInfo.account, additionalDownloadInfo.fileRecipients);
+				traits.filter(expectedEntry, key);
+
+				// Assert:
+				return test.db.runDbTest(
+					entries,
+					'downloads',
+					db => traits.getDownloads(db, key),
+					entities =>
+						expect(entities).to.deep.equal([expectedEntry])
+				);
+			});
+
+			describe('query respects supplied document id', () => {
+				const assertDownloadsWithDocumentId = (sortOrder) => {
+					// Arrange:
+					const key = traits.generateKey();
+					const downloadInfos = generateDownloadInfos(100, key);
+					const entries = test.db.createDownloadEntries(downloadInfos);
+					const id = entries[9]._id.toString();
+					let expectedEntries = sortOrder > 0 ?
+						test.db.createDownloadEntries(downloadInfos.slice(10)) :
+						test.db.createDownloadEntries(downloadInfos.slice(0, 9).reverse());
+					expectedEntries.map(entry => traits.filter(entry, key));
+
+					// Assert:
+					return test.db.runDbTest(
+						entries,
+						'downloads',
+						db => traits.getDownloads(db, key, id, 100, sortOrder),
+						entities =>
+							expect(entities).to.deep.equal(expectedEntries)
+					);
+				};
+
+				it('ascending order', () => {
+					return assertDownloadsWithDocumentId(1);
+				});
+
+				it('descending order', () => {
+					return assertDownloadsWithDocumentId(-1);
+				});
+			});
+
+			describe('paging', () => {
+				const assertDownloadsWithPaging = (sortOrder, pageSize, expectedSize) => {
+					// Arrange:
+					const key = traits.generateKey();
+					const downloadInfos = generateDownloadInfos(200, key);
+					const entries = test.db.createDownloadEntries(downloadInfos);
+
+					// Assert:
+					return test.db.runDbTest(
+						entries,
+						'downloads',
+						db => traits.getDownloads(db, key, undefined, pageSize, sortOrder),
+						entities => expect(entities.length).to.equal(expectedSize)
+					);
+				};
+
+				describe('query respects page size', () => {
+					it('ascending order', () => {
+						return assertDownloadsWithPaging(1, 50, 50);
+					});
+
+					it('descending order', () => {
+						return assertDownloadsWithPaging(-1, 50, 50);
+					});
+				});
+
+				describe('query ensures minimum page size', () => {
+					it('ascending order', () => {
+						return assertDownloadsWithPaging(1, 5, 10);
+					});
+
+					it('descending order', () => {
+						return assertDownloadsWithPaging(-1, 5, 10);
+					});
+				});
+
+				describe('query ensures maximum page size', () => {
+					it('ascending order', () => {
+						return assertDownloadsWithPaging(1, 150, 100);
+					});
+
+					it('descending order', () => {
+						return assertDownloadsWithPaging(-1, 150, 100);
+					});
+				});
+			});
+		};
+
+		describe('by file recipient key', () => addGetDownloadsByKeyTests({
+			generateKey: () => generateAccount().publicKey,
+			generateDownloadInfo: (fileRecipient) => generateDownloadInfo(undefined, fileRecipient),
+			getDownloads: (db, fileRecipient, pagingId, pageSize, sortOrder) => {
+				return db.getDownloadsByFileRecipient(fileRecipient, pagingId, pageSize, { sortOrder });
+			},
+			filter: (entry, key) => {
+				entry.downloadInfo.fileRecipients = [entry.downloadInfo.fileRecipients.find(fileRecipient =>
+					fileRecipient.key.toString() === key.toString())];
+				delete entry._id;
+
+				return entry;
+			}
+		}));
+
+		describe('by operation token', () => addGetDownloadsByKeyTests({
+			generateKey: generateHash,
+			generateDownloadInfo: (operationToken) => generateDownloadInfo(undefined, undefined, operationToken),
+			getDownloads: (db, operationToken, pagingId, pageSize, sortOrder) => {
+				return db.getDownloadsByOperationToken(operationToken, pagingId, pageSize, { sortOrder });
+			},
+			filter: (entry, key) => {
+				const fileRecipients = entry.downloadInfo.fileRecipients;
+				fileRecipients.forEach(
+					fileRecipient => {
+						const download = fileRecipient.downloads.find(download => download.operationToken.toString() === key.toString())
+						fileRecipient.downloads = download ? [download] : [];
+					}
+				);
+				entry.downloadInfo.fileRecipients = fileRecipients.filter(fileRecipient => fileRecipient.downloads.length);
+				delete entry._id;
+
+				return entry;
+			}
+		}));
 	});
 });

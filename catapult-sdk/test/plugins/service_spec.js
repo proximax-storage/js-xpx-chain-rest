@@ -23,7 +23,7 @@ describe('service plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 23);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 26);
 			expect(modelSchema).to.contain.all.keys([
 				'prepareDrive',
 				'joinToDrive',
@@ -47,6 +47,10 @@ describe('service plugin', () => {
 				'service.driveStateWithMetadata',
 				'startFileDownload',
 				'endFileDownload',
+				'downloadEntry',
+				'downloadInfo',
+				'fileRecipient',
+				'download',
 			]);
 
 			expect(Object.keys(modelSchema.prepareDrive).length).to.equal(Object.keys(modelSchema.transaction).length + 8);
@@ -153,10 +157,19 @@ describe('service plugin', () => {
 			expect(modelSchema.startFileDownload).to.contain.all.keys(['driveKey', 'operationToken', 'files']);
 
 			expect(Object.keys(modelSchema.endFileDownload).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
-			expect(modelSchema.endFileDownload).to.contain.all.keys(['recipient', 'operationToken', 'files']);
+			expect(modelSchema.endFileDownload).to.contain.all.keys(['fileRecipient', 'operationToken', 'files']);
 
-			expect(Object.keys(modelSchema['endFileDownload.files']).length).to.equal(1);
-			expect(modelSchema['endFileDownload.files']).to.contain.all.keys(['fileHash']);
+			expect(Object.keys(modelSchema['downloadEntry']).length).to.equal(1);
+			expect(modelSchema['downloadEntry']).to.contain.all.keys(['downloadInfo']);
+
+			expect(Object.keys(modelSchema['downloadInfo']).length).to.equal(3);
+			expect(modelSchema['downloadInfo']).to.contain.all.keys(['driveKey', 'driveAddress', 'fileRecipients']);
+
+			expect(Object.keys(modelSchema['fileRecipient']).length).to.equal(2);
+			expect(modelSchema['fileRecipient']).to.contain.all.keys(['key', 'downloads']);
+
+			expect(Object.keys(modelSchema['download']).length).to.equal(2);
+			expect(modelSchema['download']).to.contain.all.keys(['operationToken', 'files']);
 		});
 	});
 
@@ -467,7 +480,7 @@ describe('service plugin', () => {
 
 		describe('supports end file download transaction', () => {
 			const codec = getCodecs()[EntityType.endFileDownload];
-			const recipient = createHash(0x01);
+			const fileRecipient = createHash(0x01);
 			const operationToken = createHash(0x02);
 			const fileCount = Buffer.of(0x02, 0x0);
 			const fileHash1 = createHash(0x03);
@@ -475,24 +488,17 @@ describe('service plugin', () => {
 
 			test.binary.test.addAll(codec, 32 + 32 + 2 + 2 * 32, () => ({
 				buffer: Buffer.concat([
-					recipient,
+					fileRecipient,
 					operationToken,
 					fileCount,
 					fileHash1,
 					fileHash2
 				]),
 				object: {
-					recipient,
+					fileRecipient,
 					operationToken,
 					fileCount: 0x02,
-					files: [
-						{
-							fileHash: fileHash1
-						},
-						{
-							fileHash: fileHash2
-						}
-					]
+					files: [ fileHash1, fileHash2 ]
 				}
 			}));
 		});

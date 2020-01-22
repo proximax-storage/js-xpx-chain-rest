@@ -8,6 +8,28 @@ const AccountType = require('../AccountType');
 
 const driveRoles = ['owner', 'replicator'];
 
+const filterDownloadsByFileRecipient = (dbObject, key) => {
+	dbObject.downloadInfo.fileRecipients = [dbObject.downloadInfo.fileRecipients.find(fileRecipient =>
+		fileRecipient.key.toString() === key)];
+	delete dbObject._id;
+
+	return dbObject;
+};
+
+const filterDownloadsByOperationToken = (dbObject, token) => {
+	const fileRecipients = dbObject.downloadInfo.fileRecipients;
+	fileRecipients.forEach(
+		fileRecipient => {
+			const download = fileRecipient.downloads.find(download => download.operationToken.toString() === token)
+			fileRecipient.downloads = download ? [download] : [];
+		}
+	);
+	dbObject.downloadInfo.fileRecipients = fileRecipients.filter(fileRecipient => fileRecipient.downloads.length);
+	delete dbObject._id;
+
+	return dbObject;
+};
+
 class ServiceDb {
 	/**
 	 * Creates ServiceDb around CatapultDb.
@@ -32,7 +54,7 @@ class ServiceDb {
 	}
 
 	/**
-	 * Retrieves the drive entries for given account and role.
+	 * Retrieves the drive entries by account and role.
 	 * @param {object} publicKey The account public key.
 	 * @param {array<string>} roles The role of account in the drive.
 	 * If filter is null or empty, returns all drives which contains public key of account.
@@ -64,6 +86,52 @@ class ServiceDb {
 		return this.catapultDb.queryDocuments('drives', {
 			$or: query
 		});
+	}
+
+	/**
+	 * Retrieves the file downloads by drive id.
+	 * @param {module:db/AccountType} type Type of drive id.
+	 * @param {array<object>} driveId Drive id.
+	 * @returns {Promise.<array>} File download info.
+	 */
+	getDownloadsByDriveId(type, driveId) {
+		const buffer = Buffer.from(driveId);
+		const fieldName = (AccountType.publicKey === type) ? 'downloadInfo.driveKey' : 'downloadInfo.driveAddress';
+		return this.catapultDb.queryDocuments('downloads', { [fieldName]: buffer });
+	}
+
+	/**
+	 * Retrieves the file downloads by file recipient.
+	 * @param {array<object>} fileRecipient Public key of file recipient.
+	 * @param {string} id Paging id.
+	 * @param {int} pageSize Page size.
+	 * @returns {Promise.<array>} File download info.
+	 */
+	getDownloadsByFileRecipient(fileRecipient, pagingId, pageSize, options) {
+		const key = Buffer.from(fileRecipient);
+		const filter = function(dbObjects) {
+			const strKey = key.toString();
+			return dbObjects.map(dbObject => filterDownloadsByFileRecipient(dbObject, strKey));
+		};
+		const conditions = { $and: [ { ['downloadInfo.fileRecipients.key']: key } ] };
+		return this.catapultDb.queryPagedDocuments('downloads', conditions, pagingId, pageSize, options).then(filter);
+	}
+
+	/**
+	 * Retrieves the file downloads by operation token.
+	 * @param {array<object>} operationToken File download operation token.
+	 * @param {string} id Paging id.
+	 * @param {int} pageSize Page size.
+	 * @returns {Promise.<array>} File download info.
+	 */
+	getDownloadsByOperationToken(operationToken, pagingId, pageSize, options) {
+		const token = Buffer.from(operationToken);
+		const filter = function(dbObjects) {
+			const strToken = token.toString();
+			return dbObjects.map(dbObject => filterDownloadsByOperationToken(dbObject, strToken));
+		};
+		const conditions = { $and: [ { ['downloadInfo.fileRecipients.downloads.operationToken']: token } ] };
+		return this.catapultDb.queryPagedDocuments('downloads', conditions, pagingId, pageSize, options).then(filter);
 	}
 
 	// endregion
