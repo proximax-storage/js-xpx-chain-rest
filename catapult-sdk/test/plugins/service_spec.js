@@ -49,7 +49,7 @@ describe('service plugin', () => {
 
 			expect(Object.keys(modelSchema.prepareDrive).length).to.equal(Object.keys(modelSchema.transaction).length + 8);
 			expect(modelSchema.prepareDrive).to.contain.all.keys([
-				'owner',
+				'drive',
 				'duration',
 				'billingPeriod',
 				'billingPrice',
@@ -186,7 +186,7 @@ describe('service plugin', () => {
 
 		describe('supports prepare drive transaction', () => {
 			const codec = getCodecs()[EntityType.prepareDrive];
-			const owner = createHash(0x01);
+			const drive = createHash(0x01);
 			const duration = Buffer.of(0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 			const billingPeriod = Buffer.of(0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 			const billingPrice = Buffer.of(0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
@@ -197,7 +197,7 @@ describe('service plugin', () => {
 
 			test.binary.test.addAll(codec, 32 + 4 * 8 + 2 * 2 + 1, () => ({
 				buffer: Buffer.concat([
-					owner,
+					drive,
 					duration,
 					billingPeriod,
 					billingPrice,
@@ -207,7 +207,7 @@ describe('service plugin', () => {
 					percentApprovers
 				]),
 				object: {
-					owner,
+					drive,
 					duration: [0x02, 0x0],
 					billingPeriod: [0x03, 0x0],
 					billingPrice: [0x04, 0x0],
