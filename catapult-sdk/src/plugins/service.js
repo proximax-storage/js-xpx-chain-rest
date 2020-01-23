@@ -18,7 +18,7 @@ const constants = { sizes };
 const servicePlugin = {
 	registerSchema: builder => {
 		builder.addTransactionSupport(EntityType.prepareDrive, {
-			drive: 				{ type: ModelType.binary, schemaName: 'prepareDrive.drive' },
+			owner: 				{ type: ModelType.binary, schemaName: 'prepareDrive.owner' },
 			duration:			{ type: ModelType.uint64, schemaName: 'prepareDrive.duration' },
 			billingPeriod:		{ type: ModelType.uint64, schemaName: 'prepareDrive.billingPeriod' },
 			billingPrice:		{ type: ModelType.uint64, schemaName: 'prepareDrive.billingPrice' },
@@ -146,7 +146,7 @@ const servicePlugin = {
 		codecBuilder.addTransactionSupport(EntityType.prepareDrive, {
 			deserialize: parser => {
 				const transaction = {};
-				transaction.drive = parser.buffer(constants.sizes.signer);
+				transaction.owner = parser.buffer(constants.sizes.signer);
 				transaction.duration = parser.uint64();
 				transaction.billingPeriod = parser.uint64();
 				transaction.billingPrice = parser.uint64();
@@ -159,7 +159,7 @@ const servicePlugin = {
 			},
 
 			serialize: (transaction, serializer) => {
-				serializer.writeBuffer(transaction.drive);
+				serializer.writeBuffer(transaction.owner);
 				serializer.writeUint64(transaction.duration);
 				serializer.writeUint64(transaction.billingPeriod);
 				serializer.writeUint64(transaction.billingPrice);
