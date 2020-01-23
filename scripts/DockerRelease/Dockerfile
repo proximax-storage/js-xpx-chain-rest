@@ -16,7 +16,7 @@ RUN cd /catapult-rest/catapult-sdk && \
     yarn install && \
     yarn rebuild && \
     cd /catapult-rest/rest && \
-    yarn install --production  --modules-folder /catapult-rest/rest/node_modules && \
+    yarn install --production  --modules-folder /catapult-rest/node_modules && \
     npm run build
 
 #------------------------
@@ -34,7 +34,7 @@ RUN apk add --update \
     py-pip
 
 # copy required libs
-COPY --from=0 /catapult-rest/rest/node_modules /node_modules
+COPY --from=0 /catapult-rest/node_modules /node_modules
 
 # catapult-sdk
 COPY --from=0 /catapult-rest/catapult-sdk /node_modules/catapult-sdk
