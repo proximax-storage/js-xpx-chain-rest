@@ -85,6 +85,7 @@ class ModelSchemaBuilder {
 			transactionMetadata: {
 				address: ModelType.binary,
 				aggregateHash: ModelType.binary,
+				uniqueAggregateHash: ModelType.binary,
 				aggregateId: ModelType.objectId,
 				id: ModelType.objectId,
 				height: ModelType.uint64,

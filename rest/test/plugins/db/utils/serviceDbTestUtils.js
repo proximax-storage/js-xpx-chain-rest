@@ -9,7 +9,7 @@ const MongoDb = require('mongodb');
 const ServiceDb = require('../../../../src/plugins/db/ServiceDb');
 const test = require('../../../testUtils');
 
-const { Binary } = MongoDb;
+const { Binary, Long } = MongoDb;
 
 const createDriveEntry = (id, multisig, owner, replicators) => ({
 	_id: dbTestUtils.db.createObjectId(id),
@@ -27,25 +27,31 @@ const createDriveEntries = (driveInfos) => {
 	return driveInfos.map(driveInfo => createDriveEntry(++i, driveInfo.multisig, driveInfo.owner, driveInfo.replicators));
 };
 
-const createDownloadEntry = (id, account, fileRecipients) => ({
+const createDownloadEntry = (id, account, operationToken, fileRecipient, files) => ({
 	_id: dbTestUtils.db.createObjectId(id),
 	downloadInfo: {
 		driveKey: new Binary(account.publicKey),
 		driveAddress: new Binary(account.address),
-		fileRecipients: fileRecipients && fileRecipients.length ?
-			fileRecipients.map(fileRecipient => { return {
-				key: new Binary(fileRecipient.key),
-				downloads: fileRecipient.downloads.map(download => { return {
-					operationToken: new Binary(download.operationToken),
-					files: download.files.map(fileHash => new Binary(fileHash))
-				}})
+		operationToken: new Binary(operationToken),
+		fileRecipient: new Binary(fileRecipient),
+		height: Long.fromNumber(0),
+		files: files && files.length ?
+			files.map(file => { return {
+				fileHash: new Binary(file.fileHash),
+				fileSize: Long.fromNumber(file.fileSize)
 			}}) : null,
 	}
 });
 
 const createDownloadEntries = (downloadInfos) => {
 	let i = 0;
-	return downloadInfos.map(downloadInfo => createDownloadEntry(++i, downloadInfo.account, downloadInfo.fileRecipients));
+	return downloadInfos.map(downloadInfo => createDownloadEntry(
+		++i,
+		downloadInfo.account,
+		downloadInfo.operationToken,
+		downloadInfo.fileRecipient,
+		downloadInfo.files
+	));
 };
 
 const driveDbTestUtils = {

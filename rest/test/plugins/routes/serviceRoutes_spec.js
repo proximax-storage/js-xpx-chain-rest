@@ -109,19 +109,19 @@ describe('service routes', () => {
 		});
 	});
 
-	describe('/drive/:accountId/downloads', () => {
-		const addGetDriveDownloadsByDriveId = traits => {
+	describe('/downloads/:operationToken', () => {
+		const addGetDownloadsByOperationToken = traits => {
 			// Arrange:
 			const keyGroups = [];
-			const db = test.setup.createCapturingDb('getDownloadsByDriveId', keyGroups, [{value: 'this is nonsense'}]);
+			const db = test.setup.createCapturingDb('getDownloadsByOperationToken', keyGroups, [{value: 'this is nonsense'}]);
 
 			// Act:
 			const registerRoutes = serviceRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/drive/:accountId/downloads',
+				'/downloads/:operationToken',
 				'get',
-				{accountId: traits.accountId},
+				{operationToken: traits.operationToken},
 				db,
 				null,
 				response => {
@@ -132,14 +132,9 @@ describe('service routes', () => {
 			);
 		};
 
-		it('with public key', () => addGetDriveDownloadsByDriveId({
-			accountId: publicKeys.valid[0],
-			expected: ['publicKey', convert.hexToUint8(publicKeys.valid[0])]
-		}));
-
-		it('with address', () => addGetDriveDownloadsByDriveId({
-			accountId: addresses.valid[0],
-			expected: ['address', address.stringToAddress(addresses.valid[0])]
+		it('with operation token', () => addGetDownloadsByOperationToken({
+			operationToken: hashes256.valid[0],
+			expected: [convert.hexToUint8(hashes256.valid[0])]
 		}));
 	});
 
@@ -157,9 +152,10 @@ describe('service routes', () => {
 					});
 					return Promise.resolve(documents);
 				},
-				getDownloadsByOperationToken: (operationToken, pageId, pageSize, options) => {
+				getDownloadsByDriveId: (type, driveId, pageId, pageSize, options) => {
 					keyGroups.push({
-						operationToken,
+						type,
+						driveId,
 						pageId,
 						pageSize,
 						options
@@ -180,8 +176,17 @@ describe('service routes', () => {
 		);
 
 		pagingTestsFactory.addDefault();
-		pagingTestsFactory.addFailureTest(traits.invalid.name, traits.invalid.params, traits.invalid.error);
+		if (traits.invalid)
+			pagingTestsFactory.addFailureTest(traits.invalid.name, traits.invalid.params, traits.invalid.error);
 	};
+
+	describe('/drive/:accountId/downloads', () => addGetTests({
+		routeName: '/drive/:accountId/downloads',
+		valid: {
+			params: { accountId: publicKeys.valid[0] },
+			expected: { driveId: convert.hexToUint8(publicKeys.valid[0]), options: undefined, type: "publicKey" }
+		}
+	}));
 
 	describe('/account/:accountId/downloads', () => addGetTests({
 		routeName: '/account/:accountId/downloads',
@@ -193,19 +198,6 @@ describe('service routes', () => {
 			name: 'accountId is invalid',
 			params: { ['accountId']: addresses.valid[0] },
 			error: 'Allowed only publicKey'
-		}
-	}));
-
-	describe('/downloads/:operationToken', () => addGetTests({
-		routeName: '/downloads/:operationToken',
-		valid: {
-			params: { operationToken: hashes256.valid[0] },
-			expected: { operationToken: convert.hexToUint8(hashes256.valid[0]), options: undefined }
-		},
-		invalid: {
-			name: 'operationToken is invalid',
-			params: { ['operationToken']: hashes256.invalid[0] },
-			error: 'operationToken has an invalid format'
 		}
 	}));
 });

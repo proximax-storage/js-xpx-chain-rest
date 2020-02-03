@@ -23,7 +23,7 @@ describe('service plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 26);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 24);
 			expect(modelSchema).to.contain.all.keys([
 				'prepareDrive',
 				'joinToDrive',
@@ -49,8 +49,6 @@ describe('service plugin', () => {
 				'endFileDownload',
 				'downloadEntry',
 				'downloadInfo',
-				'fileRecipient',
-				'download',
 			]);
 
 			expect(Object.keys(modelSchema.prepareDrive).length).to.equal(Object.keys(modelSchema.transaction).length + 8);
@@ -153,8 +151,8 @@ describe('service plugin', () => {
 			expect(Object.keys(modelSchema['service.driveStateWithMetadata']).length).to.equal(2);
 			expect(modelSchema['service.driveStateWithMetadata']).to.contain.all.keys(['driveKey', 'meta']);
 
-			expect(Object.keys(modelSchema.startFileDownload).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
-			expect(modelSchema.startFileDownload).to.contain.all.keys(['driveKey', 'operationToken', 'files']);
+			expect(Object.keys(modelSchema.startFileDownload).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
+			expect(modelSchema.startFileDownload).to.contain.all.keys(['driveKey', 'files']);
 
 			expect(Object.keys(modelSchema.endFileDownload).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
 			expect(modelSchema.endFileDownload).to.contain.all.keys(['fileRecipient', 'operationToken', 'files']);
@@ -162,14 +160,8 @@ describe('service plugin', () => {
 			expect(Object.keys(modelSchema['downloadEntry']).length).to.equal(1);
 			expect(modelSchema['downloadEntry']).to.contain.all.keys(['downloadInfo']);
 
-			expect(Object.keys(modelSchema['downloadInfo']).length).to.equal(3);
-			expect(modelSchema['downloadInfo']).to.contain.all.keys(['driveKey', 'driveAddress', 'fileRecipients']);
-
-			expect(Object.keys(modelSchema['fileRecipient']).length).to.equal(2);
-			expect(modelSchema['fileRecipient']).to.contain.all.keys(['key', 'downloads']);
-
-			expect(Object.keys(modelSchema['download']).length).to.equal(2);
-			expect(modelSchema['download']).to.contain.all.keys(['operationToken', 'files']);
+			expect(Object.keys(modelSchema['downloadInfo']).length).to.equal(6);
+			expect(modelSchema['downloadInfo']).to.contain.all.keys(['operationToken', 'driveKey', 'driveAddress', 'fileRecipient', 'files', 'height']);
 		});
 	});
 
@@ -443,35 +435,32 @@ describe('service plugin', () => {
 		describe('supports start file download transaction', () => {
 			const codec = getCodecs()[EntityType.startFileDownload];
 			const driveKey = createHash(0x01);
-			const operationToken = createHash(0x02);
 			const fileCount = Buffer.of(0x02, 0x0);
 			const fileHash1 = createHash(0x03);
-			const size1 = Buffer.of(0x04, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+			const fileSize1 = Buffer.of(0x04, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
 			const fileHash2 = createHash(0x05);
-			const size2 = Buffer.of(0x06, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+			const fileSize2 = Buffer.of(0x06, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
 
-			test.binary.test.addAll(codec, 32 + 32 + 2 + 2 * (32 + 8), () => ({
+			test.binary.test.addAll(codec, 32 + 2 + 2 * (32 + 8), () => ({
 				buffer: Buffer.concat([
 					driveKey,
-					operationToken,
 					fileCount,
 					fileHash1,
-					size1,
+					fileSize1,
 					fileHash2,
-					size2
+					fileSize2
 				]),
 				object: {
 					driveKey,
-					operationToken,
 					fileCount: 0x02,
 					files: [
 						{
 							fileHash: fileHash1,
-							size: [0x04, 0x0]
+							fileSize: [0x04, 0x0]
 						},
 						{
 							fileHash: fileHash2,
-							size: [0x06, 0x0]
+							fileSize: [0x06, 0x0]
 						}
 					]
 				}
@@ -484,21 +473,34 @@ describe('service plugin', () => {
 			const operationToken = createHash(0x02);
 			const fileCount = Buffer.of(0x02, 0x0);
 			const fileHash1 = createHash(0x03);
-			const fileHash2 = createHash(0x04);
+			const fileSize1 = Buffer.of(0x04, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+			const fileHash2 = createHash(0x05);
+			const fileSize2 = Buffer.of(0x06, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
 
-			test.binary.test.addAll(codec, 32 + 32 + 2 + 2 * 32, () => ({
+			test.binary.test.addAll(codec, 32 + 32 + 2 + 2 * (32 + 8), () => ({
 				buffer: Buffer.concat([
 					fileRecipient,
 					operationToken,
 					fileCount,
 					fileHash1,
-					fileHash2
+					fileSize1,
+					fileHash2,
+					fileSize2
 				]),
 				object: {
 					fileRecipient,
 					operationToken,
 					fileCount: 0x02,
-					files: [ fileHash1, fileHash2 ]
+					files: [
+						{
+							fileHash: fileHash1,
+							fileSize: [0x04, 0x0]
+						},
+						{
+							fileHash: fileHash2,
+							fileSize: [0x06, 0x0]
+						}
+					]
 				}
 			}));
 		});

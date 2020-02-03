@@ -34,9 +34,10 @@ module.exports = {
 		});
 
 		server.get('/drive/:accountId/downloads', (req, res, next) => {
+			const pagingOptions = routeUtils.parsePagingArguments(req.params);
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
-			return db.getDownloadsByDriveId(type, accountId)
-				.then(routeUtils.createSender('downloadEntry').sendOne('accountId', res, next));
+			return db.getDownloadsByDriveId(type, accountId, pagingOptions.id, pagingOptions.pageSize)
+				.then(routeUtils.createSender('downloadEntry').sendArray('accountId', res, next));
 		});
 
 		server.get('/account/:accountId/downloads', (req, res, next) => {
@@ -51,10 +52,9 @@ module.exports = {
 		});
 
 		server.get('/downloads/:operationToken', (req, res, next) => {
-			const pagingOptions = routeUtils.parsePagingArguments(req.params);
 			const operationToken = routeUtils.parseArgument(req.params, 'operationToken', 'hash256');
-			return db.getDownloadsByOperationToken(operationToken, pagingOptions.id, pagingOptions.pageSize)
-				.then(routeUtils.createSender('downloadEntry').sendArray('operationToken', res, next));
+			return db.getDownloadsByOperationToken(operationToken)
+				.then(routeUtils.createSender('downloadEntry').sendOne('operationToken', res, next));
 		});
 	}
 };

@@ -198,6 +198,7 @@ describe('model schema builder', () => {
 				'transaction.signer',
 				'transactionMetadata.address',
 				'transactionMetadata.aggregateHash',
+				'transactionMetadata.uniqueAggregateHash',
 				'transactionMetadata.hash',
 				'transactionMetadata.merkleComponentHash',
 

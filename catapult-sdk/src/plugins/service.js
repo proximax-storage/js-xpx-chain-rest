@@ -143,14 +143,13 @@ const servicePlugin = {
 
 		builder.addTransactionSupport(EntityType.startFileDownload, {
 			driveKey: 				{ type: ModelType.binary, schemaName: 'startFileDownload.driveKey' },
-			operationToken: 		{ type: ModelType.binary, schemaName: 'startFileDownload.operationToken' },
-			files: 					{ type: ModelType.array, schemaName: 'fileInfo' },
+			files: 					{ type: ModelType.array, schemaName: 'driveFileSystem.addfiles' },
 		});
 
 		builder.addTransactionSupport(EntityType.endFileDownload, {
 			fileRecipient: 			{ type: ModelType.binary, schemaName: 'endFileDownload.fileRecipient' },
-			operationToken: 		{ type: ModelType.binary, schemaName: 'startFileDownload.operationToken' },
-			files: 					{ type: ModelType.array, schemaName: ModelType.binary }
+			operationToken: 		{ type: ModelType.binary, schemaName: 'endFileDownload.operationToken' },
+			files: 					{ type: ModelType.array, schemaName: 'driveFileSystem.addfiles' },
 		});
 
 		builder.addSchema('downloadEntry', {
@@ -158,19 +157,12 @@ const servicePlugin = {
 		});
 
 		builder.addSchema('downloadInfo', {
+			operationToken:			ModelType.binary,
 			driveKey:				ModelType.binary,
 			driveAddress:			ModelType.binary,
-			fileRecipients: 		{ type: ModelType.array, schemaName: 'fileRecipient' },
-		});
-
-		builder.addSchema('fileRecipient', {
-			key:					ModelType.binary,
-			downloads:				{ type: ModelType.array, schemaName: 'download' }
-		});
-
-		builder.addSchema('download', {
-			operationToken:			ModelType.binary,
-			files:					{ type: ModelType.array, schemaName: ModelType.binary }
+			fileRecipient:			ModelType.binary,
+			height:					ModelType.uint64,
+			files: 					{ type: ModelType.array, schemaName: 'driveFileSystem.addfiles' },
 		});
 	},
 
@@ -390,7 +382,6 @@ const servicePlugin = {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.driveKey = parser.buffer(constants.sizes.signer);
-				transaction.operationToken = parser.buffer(constants.sizes.signer);
 				transaction.fileCount = parser.uint16();
 				transaction.files = [];
 
@@ -398,7 +389,7 @@ const servicePlugin = {
 				while (count-- > 0) {
 					transaction.files.push({
 						fileHash: parser.buffer(constants.sizes.hash256),
-						size: parser.uint64(),
+						fileSize: parser.uint64(),
 					});
 				}
 
@@ -407,12 +398,11 @@ const servicePlugin = {
 
 			serialize: (transaction, serializer) => {
 				serializer.writeBuffer(transaction.driveKey);
-				serializer.writeBuffer(transaction.operationToken);
 				serializer.writeUint16(transaction.fileCount);
 				for (let i = 0; i < transaction.files.length; ++i) {
 					const file = transaction.files[i];
 					serializer.writeBuffer(file.fileHash);
-					serializer.writeUint64(file.size);
+					serializer.writeUint64(file.fileSize);
 				}
 			}
 		});
@@ -421,13 +411,17 @@ const servicePlugin = {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.fileRecipient = parser.buffer(constants.sizes.signer);
-				transaction.operationToken = parser.buffer(constants.sizes.signer);
+				transaction.operationToken = parser.buffer(constants.sizes.hash256);
 				transaction.fileCount = parser.uint16();
 				transaction.files = [];
 
-				deserializeFiles(parser, transaction.fileCount, transaction.files, (parser) => {
-					return parser.buffer(constants.sizes.hash256);
-				});
+				let count = transaction.fileCount;
+				while (count-- > 0) {
+					transaction.files.push({
+						fileHash: parser.buffer(constants.sizes.hash256),
+						fileSize: parser.uint64(),
+					});
+				}
 
 				return transaction;
 			},
@@ -436,8 +430,11 @@ const servicePlugin = {
 				serializer.writeBuffer(transaction.fileRecipient);
 				serializer.writeBuffer(transaction.operationToken);
 				serializer.writeUint16(transaction.fileCount);
-				for (let i = 0; i < transaction.files.length; ++i)
-					serializer.writeBuffer(transaction.files[i]);
+				for (let i = 0; i < transaction.files.length; ++i) {
+					const file = transaction.files[i];
+					serializer.writeBuffer(file.fileHash);
+					serializer.writeUint64(file.fileSize);
+				}
 			}
 		});
 	}
