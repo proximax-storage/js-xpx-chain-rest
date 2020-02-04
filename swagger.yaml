@@ -17,9 +17,6 @@ tags:
 - name: Config routes
   description: |
     Config related endpoints.
-- name: Contract routes
-  description: |
-    Contract related endpoints.
 - name: Chain routes
   description: |
     Chain related endpoints.
@@ -47,6 +44,16 @@ tags:
 - name: Upgrade routes
   description: |
     Upgrade related endpoints.
+- name: Lock routes
+  description: |
+    Lock related endpoints.
+- name: Exchange routes
+  description: |
+    Exchange related endpoints.
+- name: Service routes
+  description: |
+    Service related endpoints.
+    
 paths:
   "/account/{accountId}":
     get:
@@ -740,33 +747,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServerDTO"
-  '/account/{publicKey}/contracts':
-    get:
-      tags:
-      - Contract routes
-      summary: Get contracts of account
-      description: Gets all contracts where this account is involved.
-      operationId: getAccountContract
-      parameters:
-      - name: publicKey
-        in: path
-        description: The public key of the account.
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ContractInfoDTO'
-        '404':
-          description: resource not found
-        '409':
-          description: invalid argument
   '/config/{height}':
     get:
       tags:
@@ -792,75 +772,6 @@ paths:
                 $ref: '#/components/schemas/NetworkConfigDTO'
         '404':
           description: resource not found
-        '409':
-          description: invalid argument
-  '/contract/{contractId}':
-    get:
-      tags:
-      - Contract routes
-      summary: Get contract by contractId
-      description: Gets the contract for a given contractId.
-      operationId: getContract
-      parameters:
-      - name: contractId
-        in: path
-        description: The account identifier.
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ContractInfoDTO'
-        '404':
-          description: resource not found
-        '409':
-          description: invalid argument
-  '/account/contracts':
-    post:
-      tags:
-      - Contract routes
-      summary: Get contracts for an array of contract's publicKeys
-      description: Gets an array of contracts.
-      operationId: getAccountContracts
-      requestBody:
-        $ref: "#/components/requestBodies/publicKeys"
-      responses:
-        '200':
-          description: success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ContractInfoDTO'
-        '400':
-          description: invalid content
-        '409':
-          description: invalid argument
-  '/contract':
-    post:
-      tags:
-      - Contract routes
-      summary: Get contracts for an array of publicKeys or addresses
-      description: Gets an array of contracts.
-      operationId: getContracts
-      requestBody:
-        $ref: "#/components/requestBodies/accountIds"
-      responses:
-        '200':
-          description: success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ContractInfoDTO'
-        '400':
-          description: invalid content
         '409':
           description: invalid argument
   '/account/{accountId}/metadata':
@@ -1443,6 +1354,273 @@ paths:
           description: resource not found
         '409':
           description: invalid argument
+  
+  '/account/{accountId}/exchange':
+    get:
+      tags:
+      - Exchange routes
+      summary: Get exchange offers by account id
+      description: Return exchange offer by account id. 
+      operationId: getAccountExchangeOffers
+      parameters:
+      - name: accountId
+        in: path
+        description: The public key or address of the account.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountExchangesDTO"
+        "404":
+          description: resource not found
+        "409":
+          description: invalid argument
+  '/exchange/{offerType}/{mosaicId}':
+    get:
+      tags:
+      - Exchange routes
+      summary: Get exchange offer by type and mosaic id
+      description: Get exchange offer by type and mosaic id. 
+      operationId: getExchangeOffers
+      parameters:
+      - name: offerType
+        in: path
+        description: The of exchange offer.
+        required: true
+        schema:
+          type: string
+      - name: mosaicId
+        in: path
+        description: The mosaic identifier.
+        required: true
+        schema:
+          type: string
+          format: hex
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExchangesDTO"
+        "404":
+          description: resource not found
+        "409":
+          description: invalid argument
+   
+  '/drive/{accountId}':
+    get:
+      tags:
+      - Service routes
+      summary: Get drive by accountId
+      description: Get drive by accountId. 
+      operationId: getAccountDrives
+      parameters:
+      - name: accountId
+        in: path
+        description: ID of a drive.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DriveDTO"
+        "404":
+          description: resource not found
+        "409":
+          description: invalid argument
+  '/account/{accountId}/drive':
+    get:
+      tags:
+      - Service routes
+      summary: Get drive by id
+      description: Get drive by id. 
+      operationId: getDrive
+      parameters:
+      - name: accountId
+        in: path
+        description: ID of a drive.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DrivesDTO"
+        "404":
+          description: resource not found
+        "409":
+          description: invalid argument
+  '/account/{accountId}/drive/{role}':
+    get:
+      tags:
+      - Service routes
+      summary: Get drive by id and role
+      description: Get drive by id and role.
+      operationId: getDriveByRole
+      parameters:
+      - name: accountId
+        in: path
+        description: ID of a drive.
+        required: true
+        schema:
+          type: string
+      - name: role
+        in: path
+        description: Role in drive.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DrivesDTO"
+        "404":
+          description: resource not found
+        "409":
+          description: invalid argument
+
+  '/account/{accountId}/lock/hash':
+    get:
+      tags:
+      - Lock routes
+      summary: Get account lock hash
+      description: Get account lock hash. 
+      operationId: getAccountLockHash
+      parameters:
+      - name: accountId
+        in: path
+        description: The public key or address of the account.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HashLockInfoDTO"
+        "404":
+          description: resource not found
+        "409":
+          description: invalid argument
+  '/account/{accountId}/lock/secret':
+    get:
+      tags:
+      - Lock routes
+      summary: Get account lock secret
+      description: Get account lock secret.
+      operationId: getAccountLocksecret
+      parameters:
+      - name: accountId
+        in: path
+        description: The public key or address of the account.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecretLockInfoDTO"
+        "404":
+          description: resource not found
+        "409":
+          description: invalid argument
+  '/lock/secret/{secret}':
+    get:
+      tags:
+      - Lock routes
+      summary: Get secret hash
+      description: Get secret hash. 
+      operationId: getSecretHash
+      parameters:
+      - name: secret
+        in: path
+        description: The proof hashed.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecretLockInfoDTO"
+        "404":
+          description: resource not found
+        "409":
+          description: invalid argument
+  '/lock/hash/{hash}':
+    get:
+      tags:
+      - Lock routes
+      summary: Get lock hash
+      description: Get lock hash. 
+      operationId: getLockHash
+      parameters:
+      - name: hash
+        in: path
+        description: The hash.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HashLockInfoDTO"
+        "404":
+          description: resource not found
+        "409":
+          description: invalid argument
+  '/lock/compositeHash/{compositeHash}':
+    get:
+      tags:
+      - Lock routes
+      summary: Get composite hash
+      description: Get composite hash. 
+      operationId: getCompositeHash
+      parameters:
+      - name: compositeHash
+        in: path
+        description: The composite hash of account addres and secret.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecretLockInfoDTO"
+        "404":
+          description: resource not found
+        "409":
+          description: invalid argument
+  
 externalDocs:
   description: ProximaX Developer Center
   url: 'https://proximax.io/'
@@ -1943,53 +2121,6 @@ components:
           $ref: '#/components/schemas/UInt64DTO'
         blockChainVersion:
           $ref: '#/components/schemas/UInt64DTO'
-    ContractInfoDTO:
-      type: object
-      required:
-      - contract
-      properties:
-        contract:
-          $ref: '#/components/schemas/ContractDTO'
-    ContractDTO:
-      type: object
-      required:
-      - multisig
-      - multisigAddress
-      - start
-      - duration
-      - hash
-      - customers
-      - executors
-      - verifiers
-      properties:
-        multisig:
-          type: string
-          example: "EB8923957301F796C884977234D20B0388A3AD6F865F1ACC7D3A94AFF597D59D"
-        multisigAddress:
-          type: string
-          example: "905BD08D85AF3224A62C2EDAB004CFF4432271E662B333BA34"
-        start:
-          $ref: '#/components/schemas/UInt64DTO'
-        duration:
-          $ref: '#/components/schemas/UInt64DTO'
-        hash:
-          type: string
-          example: "D8E06B597BEE34263E9C970A50B5341783EFF67EF00637644C114447BE1905DA"
-        customers:
-          type: array
-          items:
-            type: string
-            example: "A93FEB7F051F4258C73FE0BD009F50F1E71DBA8A88B6E248ECDF560D9A9AB7C3"
-        executors:
-          type: array
-          items:
-            type: string
-            example: "8599BA6DB5B81BB69F96B88DD80A3B9EB7BBF8849CBD979100E89D69C30356E0"
-        verifiers:
-          type: array
-          items:
-            type: string
-            example: "3DCB6E5EFF4D63A38902EF948E895B01D6EA497EBF84B1460C14CA5BEDCAD9F3"
     MetadataModificationDTO:
       type: object
       required:
@@ -3388,6 +3519,330 @@ components:
           type: string
           description: A short text describing the network.
           example: catapult development network
+
+    # Exchange endpoints
+    AccountExchangesDTO:
+      type: object
+      required:
+        - exchange
+      properties:
+        exchange:
+          $ref: "#/components/schemas/ExchangeDTO"
+    ExchangesDTO:
+      type: object
+      required:
+        - mosaicId
+        - amount
+        - initialAmount
+        - initialCost
+        - deadline
+        - price
+        - offer
+        - owner
+        - type 
+      properties:
+        mosaicId:
+          type: array
+          items:
+            $ref: "#/components/schemas/UInt64DTO"
+        amount:
+          type: array
+          items:
+            $ref: "#/components/schemas/UInt64DTO"
+        initialAmount:
+          type: array
+          items:
+            $ref: "#/components/schemas/UInt64DTO"
+        initialCost:
+          type: array
+          items:
+            $ref: "#/components/schemas/UInt64DTO"
+        deadline:
+          type: array
+          items:
+            $ref: "#/components/schemas/UInt64DTO"
+        price:
+          type: integer
+          example: 1
+        owner:
+          type: string
+          example: "D9A659A3AA42FD62BE88E1D96B0F10EB91F6097F8D24EC8FD7C94EC6455735EC"
+        type:
+          type: integer
+          example: 0
+    ExchangeDTO:
+      type: object
+      required:
+        - owner
+        - ownerAddress
+        - buyOffers
+        - sellOffers
+      properties:
+        owner:
+          type: string
+          description: The public key of the owner of the namespace.
+          example: "EFF9BC7472263D03EF6362B1F200FD3061BCD1BABE78F82119FB88811227CE85"
+        ownerAddress:
+          type: string
+          description: The address of the owner of the namespace in hexadecimal.
+          example: "906CBD9B8EC88014F7A4181B00C1837646BD46E504E3D72C44"
+        buyOffers:
+          type: array
+          items:
+            $ref: "#/components/schemas/OffersDTO"
+        sellOffers:
+          type: array
+          items:
+            $ref: "#/components/schemas/OffersDTO"
+    OffersDTO:
+      type: object
+      required: 
+        - mosaicId
+        - amount
+        - initialAmount
+        - initialCost
+        - deadline
+        - price
+      properties:
+        mosaicId:
+          type: array
+          items:
+            $ref: "#/components/schemas/UInt64DTO"
+        amount:
+          type: array
+          items:
+            $ref: "#/components/schemas/UInt64DTO"
+        initialAmount:
+          type: array
+          items:
+            $ref: "#/components/schemas/UInt64DTO"
+        initialCost:
+          type: array
+          items:
+            $ref: "#/components/schemas/UInt64DTO"
+        deadline:
+          type: array
+          items:
+            $ref: "#/components/schemas/UInt64DTO"
+        price:
+          type: integer
+          example: 1
+
+    # Service endpoints
+    DrivesDTO:
+      type: object
+      required: 
+        - drive
+      properties:
+        drives:
+          type: array
+          items:
+            $ref: "#/components/schemas/DriveDTO"
+    DriveDTO:
+      type: object
+      required: 
+        - multisig
+        - multisigAddress
+        - start
+        - end
+        - state
+        - owner
+        - rootHash
+        - duration
+        - billingPeriod
+        - billingPrice
+        - size
+        - occupiedSpace
+        - replicas
+        - minReplicators
+        - percentApprovers
+        - billingHistory
+        - files
+        - replicators
+        - removedReplicators
+        - uploadPayments
+      properties:
+        multisig:
+          $ref: "#/components/schemas/MultisigDTO"
+        multisigAddress:
+          $ref: "#/components/schemas/MultisigAccountInfoDTO"
+        start: 
+          $ref: "#/components/schemas/UInt64DTO" 
+        end: 
+          $ref: "#/components/schemas/UInt64DTO"
+        state: 
+          type: integer
+          example: 1
+        owner: 
+          type: string
+          example: "6A98356A93F288DC198F8932C2BEAF57F7FFDC51BC9267814C6BA0FB60B9A84A"
+        rootHash: 
+          type: string
+          example: "0000000000000000000000000000000000000000000000000000000000000000"
+        duration: 
+          $ref: "#/components/schemas/UInt64DTO"
+        billingPeriod: 
+          $ref: "#/components/schemas/UInt64DTO"
+        billingPrice: 
+          $ref: "#/components/schemas/UInt64DTO"
+        size: 
+          $ref: "#/components/schemas/UInt64DTO"
+        occupiedSpace: 
+          $ref: "#/components/schemas/UInt64DTO"
+        replicas: 
+          type: integer
+          example: 3
+        minReplicators: 
+          type: integer
+          example: 2
+        percentApprovers: 
+          type: integer
+          example: 67
+        billingHistory: 
+          type: array
+          items:
+            $ref: "#/components/schemas/BillingHistoryDTO"
+        files: 
+          type: array
+          items:
+            $ref: "#/components/schemas/FileDTO"
+        replicators: 
+          type: array
+          items:
+            $ref: "#/components/schemas/ReplicatorsDTO"
+        removedReplicators: 
+          type: array
+          items:
+            $ref: "#/components/schemas/ReplicatorsDTO"
+        uploadPayments: 
+          type: array
+          items:
+            $ref: "#/components/schemas/PaymentsDTO"
+    BillingHistoryDTO:
+      type: object
+      required: 
+        - start
+        - end
+        - payments
+      properties:
+        start: 
+          $ref: "#/components/schemas/UInt64DTO" 
+        end: 
+          $ref: "#/components/schemas/UInt64DTO"
+        payments:
+          type: array
+          items:
+            $ref: "#/components/schemas/PaymentsDTO"
+    PaymentsDTO:
+      type: object
+      required: 
+        - receiver
+        - amount
+        - height
+      properties:
+        receiver:
+          type: string
+          example: "4C8F05950159B086D67DB4394FCC627C9313A0DFD48035042F8572075843B661"
+        amount:
+          type: array
+          items:
+            $ref: "#/components/schemas/UInt64DTO"
+        height:
+          type: array
+          items:
+            $ref: "#/components/schemas/UInt64DTO"
+    ReplicatorsDTO:
+      type: object
+      required: 
+        - replicator
+        - start
+        - end
+        - activeFilesWithoutDeposit
+        - inactiveFilesWithoutDeposit
+      properties:
+        replicator:
+          type: string
+          example: "B27AA5B89DB9BC9CFC92C1F9E46A8CBB15F379C75ECF0128D475B4D5B03EC454"
+        start:
+          $ref: "#/components/schemas/UInt64DTO"
+        end:
+          $ref: "#/components/schemas/UInt64DTO"
+        activeFilesWithoutDeposit:
+          type: array
+          items: {}
+          example: {"0000000000000000000000000000000000000000000000000000000000000000"}
+        inactiveFilesWithoutDeposit:
+          type: array
+          items: {}
+          example: {"0000000000000000000000000000000000000000000000000000000000000000"}
+    FileDTO:
+      type: object
+      required: 
+        - fileHash
+        - size
+      properties:
+        fileHash:
+          type: string
+          example: "0000000000000000000000000000000000000000000000000000000000000000"
+        size:
+          type: integer
+          example: 100
+        
+    # Lock endpoints
+    HashLockInfoDTO:
+      type: object
+      required:
+        - commonLock
+        - hash
+      properties:
+        account:
+          $ref: "#/components/schemas/CommonLockInfoDTO"
+        hash:
+          type: string
+          example: "C8FC3FB54FDDFBCE0E8C71224990124E4EEC5AD5D30E592EDFA9524669A23810"
+    SecretLockInfoDTO:
+      type: object
+      required:
+        - commonLock
+        - recipient
+        - secret
+        - hashAlgorithm
+        - compositeHash
+      properties:
+        account:
+          $ref: "#/components/schemas/CommonLockInfoDTO"
+        recipient:
+          type: string
+          example: "90829855740901BAA6EF35C91CF00D0059212BF49FBAEC3277"
+        secret:
+          type: string
+          example: "C8FC3FB54FDDFBCE0E8C71224990124E4EEC5AD5D30E592EDFA9524669A23810"
+        hashAlgorithm:
+          type: integer
+          example: 0 
+        compositeHash:
+          type: string
+          example: "124E4EEC5AD5D30E592EDFA9524669A23810C8FC3FB54FDDFBCE0E8C71224990"
+    CommonLockInfoDTO:
+      type: object
+      required:
+        - account
+        - mosaicId
+        - amount
+        - height
+        - status
+      properties:
+        account:
+          $ref: "#/components/schemas/AccountDTO"
+        mosaicId:
+          $ref: "#/components/schemas/UInt64DTO"
+        amount:
+          $ref: "#/components/schemas/UInt64DTO"
+        height:
+          $ref: "#/components/schemas/UInt64DTO"
+        status:
+          type: string
+          example: 0
 
     # Node endpoints
     NodeInfoDTO:
