@@ -1515,7 +1515,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HashLockInfoDTO"
+                $ref: "#/components/schemas/HashLockWithMeta"
         "404":
           description: resource not found
         "409":
@@ -1540,7 +1540,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SecretLockInfoDTO"
+                $ref: "#/components/schemas/SecretLockWithMeta"
         "404":
           description: resource not found
         "409":
@@ -1565,7 +1565,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SecretLockInfoDTO"
+                $ref: "#/components/schemas/SecretLockWithMeta"
         "404":
           description: resource not found
         "409":
@@ -1590,7 +1590,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HashLockInfoDTO"
+                $ref: "#/components/schemas/HashLockWithMeta"
         "404":
           description: resource not found
         "409":
@@ -1615,7 +1615,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SecretLockInfoDTO"
+                $ref: "#/components/schemas/SecretLockWithMeta"
         "404":
           description: resource not found
         "409":
@@ -3562,8 +3562,8 @@ components:
           items:
             $ref: "#/components/schemas/UInt64DTO"
         price:
-          type: integer
-          example: 1
+          type: number
+          example: 1.0
         owner:
           type: string
           example: "D9A659A3AA42FD62BE88E1D96B0F10EB91F6097F8D24EC8FD7C94EC6455735EC"
@@ -3589,12 +3589,12 @@ components:
         buyOffers:
           type: array
           items:
-            $ref: "#/components/schemas/OffersDTO"
+            $ref: "#/components/schemas/OfferDTO"
         sellOffers:
           type: array
           items:
-            $ref: "#/components/schemas/OffersDTO"
-    OffersDTO:
+            $ref: "#/components/schemas/OfferDTO"
+    OfferDTO:
       type: object
       required: 
         - mosaicId
@@ -3625,20 +3625,22 @@ components:
           items:
             $ref: "#/components/schemas/UInt64DTO"
         price:
-          type: integer
-          example: 1
+          type: number
+          example: 1.0
 
     # Service endpoints
     DrivesDTO:
+      type: array
+      items:
+        $ref: "#/components/schemas/DriveDTO"
+    DriveDTO:
       type: object
-      required: 
+      required:
         - drive
       properties:
-        drives:
-          type: array
-          items:
-            $ref: "#/components/schemas/DriveDTO"
-    DriveDTO:
+        drive:
+          $ref: "#/components/schemas/DriveStructDTO"
+    DriveStructDTO:
       type: object
       required: 
         - multisig
@@ -3663,9 +3665,11 @@ components:
         - uploadPayments
       properties:
         multisig:
-          $ref: "#/components/schemas/MultisigDTO"
+          type: string
+          example: "415C7C61822B063F62A4876A6F6BA2DAAE114AB298D7AC7FC56FDBA95872C309"
         multisigAddress:
-          $ref: "#/components/schemas/MultisigAccountInfoDTO"
+          type: string
+          example: "9048760066A50F0F65820D3008A79CF73E1034A564BF44AB3E"
         start: 
           $ref: "#/components/schemas/UInt64DTO" 
         end: 
@@ -3712,8 +3716,7 @@ components:
             $ref: "#/components/schemas/ReplicatorsDTO"
         removedReplicators: 
           type: array
-          items:
-            $ref: "#/components/schemas/ReplicatorsDTO"
+          items: {}
         uploadPayments: 
           type: array
           items:
@@ -3770,11 +3773,10 @@ components:
         activeFilesWithoutDeposit:
           type: array
           items: {}
-          example: {"0000000000000000000000000000000000000000000000000000000000000000"}
+          example: ["AA2D2427E105A9B60DF634553849135DF629F1408A018D02B07A70CAFFB43093"]
         inactiveFilesWithoutDeposit:
           type: array
           items: {}
-          example: {"0000000000000000000000000000000000000000000000000000000000000000"}
     FileDTO:
       type: object
       required: 
@@ -3785,55 +3787,87 @@ components:
           type: string
           example: "0000000000000000000000000000000000000000000000000000000000000000"
         size:
-          type: integer
-          example: 100
+          $ref: "#/components/schemas/UInt64DTO"
         
     # Lock endpoints
-    HashLockInfoDTO:
+    SecretLockWithMeta:
       type: object
       required:
-        - commonLock
-        - hash
+        - meta
+        - lock
       properties:
-        account:
-          $ref: "#/components/schemas/CommonLockInfoDTO"
-        hash:
-          type: string
-          example: "C8FC3FB54FDDFBCE0E8C71224990124E4EEC5AD5D30E592EDFA9524669A23810"
+        meta:
+          $ref: "#/components/schemas/MetaLockDTO"
+        lock:
+          $ref: "#/components/schemas/SecretLockInfoDTO"
     SecretLockInfoDTO:
       type: object
       required:
-        - commonLock
-        - recipient
-        - secret
-        - hashAlgorithm
-        - compositeHash
-      properties:
-        account:
-          $ref: "#/components/schemas/CommonLockInfoDTO"
-        recipient:
-          type: string
-          example: "90829855740901BAA6EF35C91CF00D0059212BF49FBAEC3277"
-        secret:
-          type: string
-          example: "C8FC3FB54FDDFBCE0E8C71224990124E4EEC5AD5D30E592EDFA9524669A23810"
-        hashAlgorithm:
-          type: integer
-          example: 0 
-        compositeHash:
-          type: string
-          example: "124E4EEC5AD5D30E592EDFA9524669A23810C8FC3FB54FDDFBCE0E8C71224990"
-    CommonLockInfoDTO:
-      type: object
-      required:
         - account
+        - accountAddress
         - mosaicId
         - amount
         - height
         - status
+        - hashAlgorithm
+        - secret
+        - recipient
+        - compositeHash
       properties:
         account:
-          $ref: "#/components/schemas/AccountDTO"
+          type: string
+          example: "CFC31B3080B36BC3D59DF4AB936AC72F4DC15CE3C3E1B1EC5EA41415A4C33FEE"
+        accountAddress: 
+          type: string
+          example: "9052838D173BA9DC1822C12F8CC2EA1A3B88939772B7F26D84"
+        mosaicId:
+          $ref: "#/components/schemas/UInt64DTO"
+        amount:
+          $ref: "#/components/schemas/UInt64DTO"
+        height:
+          $ref: "#/components/schemas/UInt64DTO"
+        status:
+          type: integer
+          example: 0
+        hashAlgorithm:
+          type: integer
+          example: 4
+        secret:
+          type: string
+          example: "0000000000000000000000000000000000000000000000000000000000000000"
+        recipient:
+          type: string
+          example: "90CFA4D204CC396ED38A1BA693CB2482B58152E175BFE8B5BB"
+        compositeHash:
+          type: string
+          example: "B8C1A5FBAA5AB8AB62444212CABB59E2E357DD9099001A29E81C166606810AA6"
+    HashLockWithMeta:
+      type: object
+      required:
+        - meta
+        - lock
+      properties:
+        meta:
+          $ref: "#/components/schemas/MetaLockDTO"
+        lock:
+          $ref: "#/components/schemas/HashLockInfoDTO"
+    HashLockInfoDTO:
+      type: object
+      required:
+        - account
+        - accountAddress
+        - mosaicId
+        - amount
+        - height
+        - status
+        - hash
+      properties:
+        account:
+          type: string
+          example: "CFC31B3080B36BC3D59DF4AB936AC72F4DC15CE3C3E1B1EC5EA41415A4C33FEE"
+        accountAddress: 
+          type: string
+          example: "9052838D173BA9DC1822C12F8CC2EA1A3B88939772B7F26D84"
         mosaicId:
           $ref: "#/components/schemas/UInt64DTO"
         amount:
@@ -3843,6 +3877,17 @@ components:
         status:
           type: string
           example: 0
+        hash:
+          type: string
+          example: "67829ABA183FDA679273373C9973F23F0D8611371ED31C23C6D80FCAD0AE5C87"
+    MetaLockDTO:
+      type: object
+      reguired:
+        - id
+      properties:
+        id:
+          type: string
+          example: "5df25d1c84631392c2973877"
 
     # Node endpoints
     NodeInfoDTO:
