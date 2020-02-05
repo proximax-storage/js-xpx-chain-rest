@@ -1407,7 +1407,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ExchangesDTO"
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExchangesDTO"
         "404":
           description: resource not found
         "409":
@@ -1433,7 +1435,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DriveDTO"
+                type: object
+                properties:
+                  drive:
+                    $ref: "#/components/schemas/DriveDTO"
         "404":
           description: resource not found
         "409":
@@ -1458,7 +1463,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DrivesDTO"
+                type: object
+                properties:
+                  drive:
+                    $ref: "#/components/schemas/DriveDTO"
         "404":
           description: resource not found
         "409":
@@ -1479,10 +1487,10 @@ paths:
           type: string
       - name: role
         in: path
-        description: Role in drive.
+        description: Role in drive (owner or replicator).
         required: true
         schema:
-          type: string
+          $ref: "#/components/schemas/RolesTypeEnum"
       responses:
         "200":
           description: success
@@ -1515,7 +1523,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HashLockWithMeta"
+                type: array
+                items:
+                  $ref: "#/components/schemas/HashLockWithMeta"
         "404":
           description: resource not found
         "409":
@@ -1540,7 +1550,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SecretLockWithMeta"
+                type: array
+                items:
+                  $ref: "#/components/schemas/SecretLockWithMeta"
         "404":
           description: resource not found
         "409":
@@ -1781,6 +1793,19 @@ components:
         * 0x414C (16716 decimal) - Account Link Transaction.
         * 0x8043 (32835 decimal) - Nemesis block.
         * 0x8143 (33091 decimal) - Regular block.
+        * 0x415D (16733 decimal) - Add Exchange Offer Transaction.
+        * 0x425D (16989 decimal) - Exchange Offer Transaction.
+        * 0x435D (17245 decimal) - Remove Exchange Offer Transaction.
+        * 0x4157 (16727 decimal) - Modify Contract Transaction.
+        * 0x415A (16730 decimal) - Prepare Drive Transaction.
+        * 0x425A (16986 decimal) - Join To Drive Transaction.
+        * 0x435A (17242 decimal) - Drive File System Transaction.
+        * 0x445A (17498 decimal) - Files Deposit Transaction.
+        * 0x455A (17754 decimal) - End Drive Transaction.
+        * 0x465A (18010 decimal) - Drive Files Reward Transaction.
+        * 0x475A (18266 decimal) - Start Drive Verification Transaction.
+        * 0x485A (18522 decimal) - End Drive Verification Transaction.
+
     HashAlgorithmEnum:
       type: integer
       enum:
@@ -1929,6 +1954,18 @@ components:
         * 1 - A peer node.
         * 2 - An api node.
       example: 2
+    OfferTypeEnum:
+      type: integer
+      enum:
+      - 0
+      - 1
+      - 2
+      description: |
+        The role of the node:
+        * 0 - A sell offer.
+        * 1 - A buy offer.
+        * 2 - Unknown type.
+      example: 2
     # Type
     UInt64DTO:
       type: array
@@ -1938,6 +1975,9 @@ components:
       example:
       - lower
       - higher
+    HashDTO:
+      type: string
+      example: "C8FC3FB54FDDFBCE0E8C71224990124E4EEC5AD5D30E592EDFA9524669A23810"
     # Account endpoints
     AccountInfoDTO:
       type: object
@@ -2892,6 +2932,17 @@ components:
           - $ref: "#/components/schemas/SecretLockTransactionDTO"
           - $ref: "#/components/schemas/SecretProofTransactionDTO"
           - $ref: "#/components/schemas/AccountLinkTransactionDTO"
+          - $ref: "#/components/schemas/AddExchangeOfferTransactionDTO"
+          - $ref: "#/components/schemas/ExchangeOfferTransactionDTO"
+          - $ref: "#/components/schemas/RemoveExchangeOfferTransactionDTO"
+          - $ref: "#/components/schemas/PrepareDriveTransactionDTO"
+          - $ref: "#/components/schemas/JoinToDriveTransactionDTO"
+          - $ref: "#/components/schemas/DriveFileSystemTransactionDTO"
+          - $ref: "#/components/schemas/FilesDepositTransactionDTO"
+          - $ref: "#/components/schemas/EndDriveTransactionDTO"
+          - $ref: "#/components/schemas/DriveFilesRewardTransactionDTO"
+          - $ref: "#/components/schemas/StartDriveVerificationTransactionDTO"
+          - $ref: "#/components/schemas/EndDriveVerificationTransactionDTO"
     EmbeddedTransactionMetaDTO:
       type: object
       required:
@@ -3521,6 +3572,84 @@ components:
           example: catapult development network
 
     # Exchange endpoints
+    AddExchangeOfferTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+      required:
+        - offers
+      properties:
+        offers:
+          type: array
+          items:
+            $ref: "#/components/schemas/AddExchangeOfferTransactionBodyDTO"
+    ExchangeOfferTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+      required:
+        - offers
+      properties:
+        offers:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExchangeOfferTransactionBodyDTO"
+    RemoveExchangeOfferTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+      required:
+        - offers
+      properties:
+        offers:
+          type: array
+          items:
+            $ref: "#/components/schemas/RemoveExchangeOfferTransactionBodyDTO"
+    AddExchangeOfferTransactionBodyDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/OfferDTO"
+      required:
+        - duration
+      properties:
+        duration:
+            $ref: "#/components/schemas/UInt64DTO"
+    ExchangeOfferTransactionBodyDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/OfferDTO"
+      required:
+        - owner
+      properties:
+        owner:
+          type: string
+          example: "EFF9BC7472263D03EF6362B1F200FD3061BCD1BABE78F82119FB88811227CE85"
+    RemoveExchangeOfferTransactionBodyDTO:
+      type: object
+      required:
+        - mosaicId
+        - offerType
+      properties:
+        mosaicId:
+          $ref: "#/components/schemas/UInt64DTO"
+        offerType:
+          $ref: "#/components/schemas/OfferTypeEnum"
+    OfferDTO:
+      type: object
+      required: 
+        - mosaicId
+        - mosaicAmount
+        - cost
+        - type
+      properties:
+        mosaicId:
+          $ref: "#/components/schemas/UInt64DTO"
+        mosaicAmount:
+          $ref: "#/components/schemas/UInt64DTO"
+        cost:
+          $ref: "#/components/schemas/UInt64DTO"
+        type:
+          $ref: "#/components/schemas/OfferTypeEnum"
     AccountExchangesDTO:
       type: object
       required:
@@ -3563,7 +3692,7 @@ components:
             $ref: "#/components/schemas/UInt64DTO"
         price:
           type: number
-          example: 1.0
+          example: 1.5
         owner:
           type: string
           example: "D9A659A3AA42FD62BE88E1D96B0F10EB91F6097F8D24EC8FD7C94EC6455735EC"
@@ -3589,12 +3718,12 @@ components:
         buyOffers:
           type: array
           items:
-            $ref: "#/components/schemas/OfferDTO"
+            $ref: "#/components/schemas/OfferInfoDTO"
         sellOffers:
           type: array
           items:
-            $ref: "#/components/schemas/OfferDTO"
-    OfferDTO:
+            $ref: "#/components/schemas/OfferInfoDTO"
+    OfferInfoDTO:
       type: object
       required: 
         - mosaicId
@@ -3626,21 +3755,212 @@ components:
             $ref: "#/components/schemas/UInt64DTO"
         price:
           type: number
-          example: 1.0
+          example: 1.5
 
     # Service endpoints
-    DrivesDTO:
-      type: array
-      items:
-        $ref: "#/components/schemas/DriveDTO"
-    DriveDTO:
+    PrepareDriveTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/PrepareDriveTransactionBodyDTO"
+    JoinToDriveTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+      required:
+        - driveKey
+      properties:
+        driveKey:
+          type: string
+          example: "5D9513282B65A12A1B68DCB67DB64245721F7AE7822BE441FE813173803C512C"
+    DriveFileSystemTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/DriveFileSystemTransactionBodyDTO"
+    FilesDepositTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/FilesDepositTransactionBodyDTO"
+    EndDriveTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+      required:
+        - driveKey
+      properties:
+        driveKey:
+          type: string
+          example: "5D9513282B65A12A1B68DCB67DB64245721F7AE7822BE441FE813173803C512C"
+    DriveFilesRewardTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+      required:
+        - uploadInfos
+      properties:
+        uploadInfos:
+          type: array
+          items:
+            $ref: "#/components/schemas/UploadInfoDTO"
+    StartDriveVerificationTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+      required:
+        - driveKey
+      properties:
+        driveKey:
+          type: string
+          example: "5D9513282B65A12A1B68DCB67DB64245721F7AE7822BE441FE813173803C512C"
+    EndDriveVerificationTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+      required:
+        - verificationFailures
+      properties:
+        verificationFailures:
+          type: array
+          items: 
+            $ref: "#/components/schemas/FailureVerificationDTO"
+    PrepareDriveTransactionBodyDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/OfferDTO"
+      required:
+        - owner
+        - duration
+        - billingPeriod
+        - billingPrice
+        - driveSize
+        - replicas
+        - minReplicators
+        - percentApprovers
+      properties:
+        owner:
+          type: string
+          description: The public key of the owner of the drive.
+          example: "EFF9BC7472263D03EF6362B1F200FD3061BCD1BABE78F82119FB88811227CE85"
+        duration:
+            $ref: "#/components/schemas/UInt64DTO"
+        billingPeriod: 
+          $ref: "#/components/schemas/UInt64DTO"
+        billingPrice: 
+          $ref: "#/components/schemas/UInt64DTO"
+        driveSize:
+          $ref: "#/components/schemas/UInt64DTO"
+        replicas: 
+          type: integer
+          example: 3
+        minReplicators: 
+          type: integer
+          example: 2
+        percentApprovers: 
+          type: integer
+          example: 67
+    DriveFileSystemTransactionBodyDTO:
+      required:
+        - driveKey
+        - rootHash
+        - xorRootHash
+        - addActionsCount
+        - removeActionsCount
+        - addActions
+        - removeActions
+      properties:
+        driveKey:
+          type: string
+          example: "5D9513282B65A12A1B68DCB67DB64245721F7AE7822BE441FE813173803C512C"
+        rootHash:
+          $ref: "#/components/schemas/HashDTO"
+        xorRootHash:
+          $ref: "#/components/schemas/HashDTO"
+        addActionsCount:
+          type: integer
+          example: 1
+        removeActionsCount:
+          type: integer
+          example: 1
+        addActions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DriveFileSystemAddActionDTO"
+        removeActions:
+          type: array
+          items:
+            $ref: "#/components/schemas/DriveFileSystemAddActionDTO"
+    FilesDepositTransactionBodyDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+      required:
+        - driveKey
+        - filesCount
+        - files
+      properties:
+        driveKey:
+          type: string
+          example: "5D9513282B65A12A1B68DCB67DB64245721F7AE7822BE441FE813173803C512C"
+        filesCount:
+          type: integer
+          example: 1
+        files:
+          type: array
+          items:
+            $ref: "#/components/schemas/FileDepositDTO"
+    DriveFileSystemAddActionDTO:
       type: object
       required:
-        - drive
+        - fileHash
+        - fileSize
       properties:
-        drive:
-          $ref: "#/components/schemas/DriveStructDTO"
-    DriveStructDTO:
+        fileHash:
+          $ref: "#/components/schemas/HashDTO"
+        fileSize:
+          $ref: "#/components/schemas/UInt64DTO"
+    FileDepositDTO:
+      type: object 
+      required:
+        - fileHash
+      properties:
+        fileHash:
+          $ref: "#/components/schemas/HashDTO"
+    UploadInfoDTO:
+      type: object
+      required:
+        - participant
+        - uploaded
+      properties:
+        participant:
+          type: string
+          example: "EB6839C7E6BD0031FDD5F8CB5137E9BC950D7EE7756C46B767E68F3F58C24390"
+        uploaded:
+          $ref: "#/components/schemas/UInt64DTO"
+    FailureVerificationDTO:
+      type: object
+      required:
+        - replicator
+        - blockHashes
+      properties:
+        replicator:
+          type: string
+          example: "EB6839C7E6BD0031FDD5F8CB5137E9BC950D7EE7756C46B767E68F3F58C24390"
+        blockHashes:
+          type: array
+          items:
+            $ref: "#/components/schemas/HashDTO"
+
+    DrivesDTO:
+      type: object
+      schema:
+        type: array
+        items:
+          properties:
+            drive:
+              $ref: "#/components/schemas/DriveDTO"
+    DriveDTO:
       type: object
       required: 
         - multisig
@@ -3682,7 +4002,7 @@ components:
           example: "6A98356A93F288DC198F8932C2BEAF57F7FFDC51BC9267814C6BA0FB60B9A84A"
         rootHash: 
           type: string
-          example: "0000000000000000000000000000000000000000000000000000000000000000"
+          example: "0100000000000000000000000000000000000000000000000000000000000000"
         duration: 
           $ref: "#/components/schemas/UInt64DTO"
         billingPeriod: 
@@ -3787,7 +4107,7 @@ components:
       properties:
         fileHash:
           type: string
-          example: "0000000000000000000000000000000000000000000000000000000000000000"
+          example: "AA2D2427E105A9B60DF634553849135DF629F1408A018D02B07A70CAFFB43093"
         size:
           $ref: "#/components/schemas/UInt64DTO"
         
@@ -3882,9 +4202,10 @@ components:
         hash:
           type: string
           example: "67829ABA183FDA679273373C9973F23F0D8611371ED31C23C6D80FCAD0AE5C87"
+    
     MetaLockDTO:
       type: object
-      reguired:
+      required:
         - id
       properties:
         id:
