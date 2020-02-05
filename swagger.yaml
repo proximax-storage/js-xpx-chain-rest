@@ -3717,6 +3717,7 @@ components:
         removedReplicators: 
           type: array
           items: {}
+          example: []
         uploadPayments: 
           type: array
           items:
@@ -3777,6 +3778,7 @@ components:
         inactiveFilesWithoutDeposit:
           type: array
           items: {}
+          example: []
     FileDTO:
       type: object
       required: 
