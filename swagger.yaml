@@ -1375,7 +1375,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AccountExchangesDTO"
+                type: array
+                items:
+                  $ref: "#/components/schemas/AccountExchangesDTO"
         "404":
           description: resource not found
         "409":
@@ -1463,10 +1465,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  drive:
-                    $ref: "#/components/schemas/DriveDTO"
+                $ref: "#/components/schemas/DrivesArray"
         "404":
           description: resource not found
         "409":
@@ -1497,7 +1496,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DrivesDTO"
+                $ref: "#/components/schemas/DrivesArray"
+                
         "404":
           description: resource not found
         "409":
@@ -4385,14 +4385,12 @@ components:
           items:
             $ref: "#/components/schemas/HashDTO"
 
-    DrivesDTO:
-      type: object
-      schema:
-        type: array
-        items:
-          properties:
-            drive:
-              $ref: "#/components/schemas/DriveDTO"
+    DrivesArray:
+      type: array
+      items:
+        properties:
+          drive:
+            $ref: "#/components/schemas/DriveDTO"
     DriveDTO:
       type: object
       required: 
