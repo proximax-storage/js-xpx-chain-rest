@@ -35,7 +35,11 @@ class RichlistDb {
 		const mosaicId = new Long(id[0], id[1]);
 		const unwindStep = { $unwind: '$account.mosaics' };
 		const filterStep = { $match: { 'account.mosaics.id': mosaicId } };
-		const projectStep = { $project: { 'address': '$account.address', 'amount': '$account.mosaics.amount' } };
+		const projectStep = { $project: {
+			'address': '$account.address',
+			'publicKey': '$account.publicKey',
+			'amount': '$account.mosaics.amount'
+		} };
 		const sortStep = { $sort: { 'amount' : -1 } };
 
 		const pipe = [unwindStep, filterStep, projectStep, sortStep];

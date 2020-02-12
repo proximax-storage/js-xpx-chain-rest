@@ -25,9 +25,9 @@ describe('richlist plugin', () => {
 			expect(modelSchema).to.contain.all.keys(['richlistEntry']);
 
 			// - richlistEntry
-			expect(Object.keys(modelSchema['richlistEntry']).length).to.equal(2);
+			expect(Object.keys(modelSchema['richlistEntry']).length).to.equal(3);
 			expect(modelSchema['richlistEntry'])
-				.to.contain.all.keys(['address', 'amount']);
+				.to.contain.all.keys(['address', 'publicKey', 'amount']);
 		});
 	});
 

@@ -40,6 +40,7 @@ describe('richlist db', () => {
 					let i = 0;
 					entities.forEach(entity => {
 						expect(entity.address).to.not.be.undefined;
+						expect(entity.publicKey).to.not.be.undefined;
 						expect(entity.amount.high_).to.be.equal(0);
 						expect(entity.amount.low_).to.be.equal(expectedSortedBalances[i]);
 						i++;

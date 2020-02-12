@@ -29,6 +29,7 @@ const richlist = {
 	registerSchema: builder => {
 		builder.addSchema('richlistEntry', {
 			address: ModelType.binary,
+			publicKey: ModelType.binary,
 			amount: ModelType.uint64
 		});
 	},
