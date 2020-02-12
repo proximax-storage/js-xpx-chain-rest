@@ -31,11 +31,12 @@ const mosaic = require('./mosaic');
 const multisig = require('./multisig');
 const namespace = require('./namespace');
 const receipts = require('./receipts');
+const richlist = require('./richlist');
 const upgrade = require('./upgrade');
 const service = require('./service');
 
 const plugins = {
-	accountLink: empty, accountProperties, aggregate, exchange, config, contract, lock, metadata, mosaic, multisig, namespace, receipts, service, transfer: empty, upgrade
+	accountLink: empty, accountProperties, aggregate, exchange, config, contract, lock, metadata, mosaic, multisig, namespace, receipts, richlist, service, transfer: empty, upgrade
 };
 
 module.exports = {

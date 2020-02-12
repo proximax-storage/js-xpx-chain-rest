@@ -23,9 +23,9 @@ const dbFacade = require('./dbFacade');
 const errors = require('../server/errors');
 const routeResultTypes = require('./routeResultTypes');
 
-const { address } = catapult.model;
+const { address, networkInfo } = catapult.model;
 const { buildAuditPath, indexOfLeafWithHash } = catapult.crypto.merkle;
-const { convert } = catapult.utils;
+const { convert, uint64 } = catapult.utils;
 const packetHeader = catapult.packet.header;
 const constants = {
 	sizes: {
@@ -84,6 +84,13 @@ const namedParserMap = {
 			return convert.hexToUint8(str);
 
 		throw Error(`invalid length of hash512 '${str.length}'`);
+	},
+	mosaicId: str => {
+		try {
+			return uint64.fromHex(str)
+		} catch (err) {
+			throw Error(`invalid mosaic id`);
+		}
 	}
 };
 
@@ -143,6 +150,20 @@ const routeUtils = {
 
 		return parsedOptions;
 	},
+
+	/**
+	 * Parses an optional uint argument
+	 * @param {object} args Container containing the argument to parse.
+	 * @param {string} key Name of the argument to parse.
+	 * @returns {object} Parsed value.
+	 */
+	parseOptionalUintArgument: (args, key) => {
+		if (args[key])
+			return convert.tryParseUint(args[key]);
+
+		return undefined
+	},
+
 
 	/**
 	 * Generates valid page sizes from page size config.

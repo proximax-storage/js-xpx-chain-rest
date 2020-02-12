@@ -56,6 +56,7 @@ describe('catapult model system', () => {
 				'multisig',
 				'namespace',
 				'receipts',
+				'richlist',
 				'service',
 				'transfer',
 				'upgrade'
