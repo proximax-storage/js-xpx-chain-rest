@@ -150,7 +150,10 @@ describe('service plugin', () => {
 				'/drive/:accountId',
 				'/account/:accountId/drive',
 				'/account/:accountId/drive/owner',
-				'/account/:accountId/drive/replicator'
+				'/account/:accountId/drive/replicator',
+				'/drive/:accountId/downloads',
+				'/account/:accountId/downloads',
+				'/downloads/:operationToken'
 			]);
 		});
 	});

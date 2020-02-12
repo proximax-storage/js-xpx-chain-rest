@@ -32,5 +32,29 @@ module.exports = {
 					.then(routeUtils.createSender('driveEntry').sendArray('accountId', res, next));
 			});
 		});
+
+		server.get('/drive/:accountId/downloads', (req, res, next) => {
+			const pagingOptions = routeUtils.parsePagingArguments(req.params);
+			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
+			return db.getDownloadsByDriveId(type, accountId, pagingOptions.id, pagingOptions.pageSize)
+				.then(routeUtils.createSender('downloadEntry').sendArray('accountId', res, next));
+		});
+
+		server.get('/account/:accountId/downloads', (req, res, next) => {
+			const pagingOptions = routeUtils.parsePagingArguments(req.params);
+			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
+
+			if ('publicKey' !== type)
+				throw errors.createInvalidArgumentError('Allowed only publicKey');
+
+			return db.getDownloadsByFileRecipient(accountId, pagingOptions.id, pagingOptions.pageSize)
+				.then(routeUtils.createSender('downloadEntry').sendArray('accountId', res, next));
+		});
+
+		server.get('/downloads/:operationToken', (req, res, next) => {
+			const operationToken = routeUtils.parseArgument(req.params, 'operationToken', 'hash256');
+			return db.getDownloadsByOperationToken(operationToken)
+				.then(routeUtils.createSender('downloadEntry').sendOne('operationToken', res, next));
+		});
 	}
 };

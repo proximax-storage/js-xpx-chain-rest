@@ -41,6 +41,8 @@ describe('entity type enumeration', () => {
 			endDriveVerification: 0x485A,
 			exchange: 0x425D,
 			exchangeOffer: 0x415D,
+			startFileDownload: 0x495A,
+			endFileDownload: 0x4A5A,
 			filesDeposit: 0x445A,
 			hashLock: 0x4148,
 			joinToDrive: 0x425A,

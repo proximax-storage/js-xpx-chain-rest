@@ -10,7 +10,7 @@ const test = require('../../routes/utils/routeTestUtils');
 const { expect } = require('chai');
 
 const { address } = catapult.model;
-const { addresses, publicKeys } = test.sets;
+const { addresses, publicKeys, hashes256 } = test.sets;
 const { convert } = catapult.utils;
 
 describe('service routes', () => {
@@ -91,7 +91,6 @@ describe('service routes', () => {
 
 				// Act:
 				const registerRoutes = serviceRoutes.register;
-				const errorMessage = 'Allowed only publicKey';
 				return test.route.executeThrows(
 					registerRoutes,
 					`/account/:accountId/drive${state.routePostfix}`,
@@ -99,7 +98,7 @@ describe('service routes', () => {
 					{ accountId: addresses.valid[0] },
 					db,
 					null,
-					errorMessage,
+					'Allowed only publicKey',
 					409
 				);
 			};
@@ -109,4 +108,96 @@ describe('service routes', () => {
 			it('only replicator', () => assertGetDrivesByAddressAndRole(driveStates[2]));
 		});
 	});
+
+	describe('/downloads/:operationToken', () => {
+		const addGetDownloadsByOperationToken = traits => {
+			// Arrange:
+			const keyGroups = [];
+			const db = test.setup.createCapturingDb('getDownloadsByOperationToken', keyGroups, [{value: 'this is nonsense'}]);
+
+			// Act:
+			const registerRoutes = serviceRoutes.register;
+			return test.route.executeSingle(
+				registerRoutes,
+				'/downloads/:operationToken',
+				'get',
+				{operationToken: traits.operationToken},
+				db,
+				null,
+				response => {
+					// Assert:
+					expect(keyGroups).to.deep.equal(traits.expected);
+					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'downloadEntry'});
+				}
+			);
+		};
+
+		it('with operation token', () => addGetDownloadsByOperationToken({
+			operationToken: hashes256.valid[0],
+			expected: [convert.hexToUint8(hashes256.valid[0])]
+		}));
+	});
+
+	const factory = {
+		createDownloadsPagingRouteInfo: (routeName) => ({
+			routes: serviceRoutes,
+			routeName,
+			createDb: (keyGroups, documents) => ({
+				getDownloadsByFileRecipient: (fileRecipient, pageId, pageSize, options) => {
+					keyGroups.push({
+						fileRecipient,
+						pageId,
+						pageSize,
+						options
+					});
+					return Promise.resolve(documents);
+				},
+				getDownloadsByDriveId: (type, driveId, pageId, pageSize, options) => {
+					keyGroups.push({
+						type,
+						driveId,
+						pageId,
+						pageSize,
+						options
+					});
+					return Promise.resolve(documents);
+				}
+			}),
+			routeCaptureMethod: 'get'
+		})
+	};
+
+	const addGetTests = traits => {
+		const pagingTestsFactory = test.setup.createPagingTestsFactory(
+			factory.createDownloadsPagingRouteInfo(traits.routeName),
+			traits.valid.params,
+			traits.valid.expected,
+			'downloadEntry'
+		);
+
+		pagingTestsFactory.addDefault();
+		if (traits.invalid)
+			pagingTestsFactory.addFailureTest(traits.invalid.name, traits.invalid.params, traits.invalid.error);
+	};
+
+	describe('/drive/:accountId/downloads', () => addGetTests({
+		routeName: '/drive/:accountId/downloads',
+		valid: {
+			params: { accountId: publicKeys.valid[0] },
+			expected: { driveId: convert.hexToUint8(publicKeys.valid[0]), options: undefined, type: "publicKey" }
+		}
+	}));
+
+	describe('/account/:accountId/downloads', () => addGetTests({
+		routeName: '/account/:accountId/downloads',
+		valid: {
+			params: { accountId: publicKeys.valid[0] },
+			expected: { fileRecipient: convert.hexToUint8(publicKeys.valid[0]), options: undefined }
+		},
+		invalid: {
+			name: 'accountId is invalid',
+			params: { ['accountId']: addresses.valid[0] },
+			error: 'Allowed only publicKey'
+		}
+	}));
 });

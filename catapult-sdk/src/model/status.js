@@ -224,7 +224,7 @@ const toStringInternal = code => {
 	case 0x805A001C: return 'Failure_Service_Zero_Upload_Info';
 	case 0x805A001D: return 'Failure_Service_Participant_Redundant';
 	case 0x805A001E: return 'Failure_Service_Participant_Is_Not_Registered_To_Drive';
-	case 0x805A0020: return 'Failure_Service_Zero_Deleted_Files';
+	case 0x805A0020: return 'Failure_Service_No_Files_To_Download';
 	case 0x805A0021: return 'Failure_Service_Zero_Infos';
 	case 0x805A0022: return 'Failure_Service_File_Deposit_Is_Zero';
 	case 0x805A0023: return 'Failure_Service_Verification_Already_In_Progress';
@@ -233,11 +233,14 @@ const toStringInternal = code => {
 	case 0x805A0026: return 'Failure_Service_Verification_Has_Not_Timed_Out';
 	case 0x805A0027: return 'Failure_Service_Drive_Is_Not_In_Progress';
 	case 0x805A0028: return 'Failure_Service_Replicator_Has_Active_File_Without_Deposit';
-	case 0x805A0029: return 'Failure_Service_Remove_Files_Not_Same_File_Size';
+	case 0x805A0029: return 'Failure_Service_File_Size_Invalid';
 	case 0x805A002A: return 'Failure_Service_Doesnt_Contain_Streaming_Tokens';
 	case 0x805A002B: return 'Failure_Service_Drive_Size_Exceeded';
 	case 0x805A002C: return 'Failure_Service_Failed_Block_Hashes_Missing';
 	case 0x805A002D: return 'Failure_Service_Duplicate_Failed_Block_Hashes';
+	case 0x805A002E: return 'Failure_Service_Max_Replicators_Reached';
+	case 0x805A002F: return 'Failure_Service_File_Download_Already_In_Progress';
+	case 0x805A0030: return 'Failure_Service_File_Download_Not_In_Progress';
 	case 0x80540006: return 'Failure_Transfer_Message_Too_Large';
 	case 0x805400C8: return 'Failure_Transfer_Out_Of_Order_Mosaics';
 	case 0x80540007: return 'Failure_Transfer_Plugin_Config_Malformed';
