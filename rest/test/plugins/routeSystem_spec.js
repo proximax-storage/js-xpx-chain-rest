@@ -50,6 +50,7 @@ describe('route system', () => {
 			'multisig',
 			'namespace',
 			'receipts',
+			'richlist',
 			'service',
 			'transfer',
 			'upgrade'

@@ -8,7 +8,7 @@
   "crossDomainHttpMethods": ["GET", "POST", "PUT", "OPTIONS"],
   "cors": "*",
   "clientPrivateKey": "0000000000000000000000000000000000000000000000000000000000000000",
-  "extensions": ["accountLink", "accountProperties", "aggregate", "exchange", "config", "lock", "metadata", "mosaic", "multisig", "namespace", "receipts", "service", "transfer", "upgrade"],
+  "extensions": ["accountLink", "accountProperties", "aggregate", "exchange", "config", "lock", "metadata", "mosaic", "multisig", "namespace", "receipts", "richlist", "service", "transfer", "upgrade"],
 
   "db": {
     "url": "mongodb://localhost:27017/",

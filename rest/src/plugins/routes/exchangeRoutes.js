@@ -9,8 +9,6 @@ const routeUtils = require('../../routes/routeUtils');
 const errors = require('../../server/errors');
 const NamespaceDb = require('../namespace/NamespaceDb');
 
-const { uint64 } = catapult.utils;
-
 module.exports = {
 	register: (server, db) => {
 		server.get(`/account/:accountId/exchange`, (req, res, next) => {
@@ -36,7 +34,7 @@ module.exports = {
 				});
 			}
 
-			let assetId = routeUtils.parseArgument(req.params, 'mosaicId', uint64.fromHex);
+			let assetId = routeUtils.parseArgument(req.params, 'mosaicId', 'mosaicId');
 			const namespaceDb = new NamespaceDb(db.getCatapultDb());
 			return namespaceDb.mosaicIdByNamespaceId(assetId)
 				.then(mosaicId => {

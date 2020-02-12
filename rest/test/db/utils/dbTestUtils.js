@@ -259,6 +259,7 @@ const dbTestUtils = {
 	db: {
 		createDbCollection,
 		createObjectId,
+		createAccount,
 		createAccounts,
 		createDbBlock,
 		createDbTransaction,
