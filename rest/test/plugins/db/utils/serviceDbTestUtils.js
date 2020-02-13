@@ -9,7 +9,7 @@ const MongoDb = require('mongodb');
 const ServiceDb = require('../../../../src/plugins/db/ServiceDb');
 const test = require('../../../testUtils');
 
-const { Binary } = MongoDb;
+const { Binary, Long } = MongoDb;
 
 const createDriveEntry = (id, multisig, owner, replicators) => ({
 	_id: dbTestUtils.db.createObjectId(id),
@@ -27,12 +27,41 @@ const createDriveEntries = (driveInfos) => {
 	return driveInfos.map(driveInfo => createDriveEntry(++i, driveInfo.multisig, driveInfo.owner, driveInfo.replicators));
 };
 
+const createDownloadEntry = (id, account, operationToken, fileRecipient, files) => ({
+	_id: dbTestUtils.db.createObjectId(id),
+	downloadInfo: {
+		driveKey: new Binary(account.publicKey),
+		driveAddress: new Binary(account.address),
+		operationToken: new Binary(operationToken),
+		fileRecipient: new Binary(fileRecipient),
+		height: Long.fromNumber(0),
+		files: files && files.length ?
+			files.map(file => { return {
+				fileHash: new Binary(file.fileHash),
+				fileSize: Long.fromNumber(file.fileSize)
+			}}) : null,
+	}
+});
+
+const createDownloadEntries = (downloadInfos) => {
+	let i = 0;
+	return downloadInfos.map(downloadInfo => createDownloadEntry(
+		++i,
+		downloadInfo.account,
+		downloadInfo.operationToken,
+		downloadInfo.fileRecipient,
+		downloadInfo.files
+	));
+};
+
 const driveDbTestUtils = {
 	db: {
 		createDriveEntry,
 		createDriveEntries,
-		runDbTest: (dbEntities, issueDbCommand, assertDbCommandResult) =>
-			dbTestUtils.db.runDbTest(dbEntities, 'drives', db => new ServiceDb(db), issueDbCommand, assertDbCommandResult)
+		createDownloadEntry,
+		createDownloadEntries,
+		runDbTest: (dbEntities, collectionName, issueDbCommand, assertDbCommandResult) =>
+			dbTestUtils.db.runDbTest(dbEntities, collectionName, db => new ServiceDb(db), issueDbCommand, assertDbCommandResult)
 	}
 };
 Object.assign(driveDbTestUtils, test);

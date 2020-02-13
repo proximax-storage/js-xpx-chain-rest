@@ -32,7 +32,7 @@ class ServiceDb {
 	}
 
 	/**
-	 * Retrieves the drive entries for given account and role.
+	 * Retrieves the drive entries by account and role.
 	 * @param {object} publicKey The account public key.
 	 * @param {array<string>} roles The role of account in the drive.
 	 * If filter is null or empty, returns all drives which contains public key of account.
@@ -64,6 +64,44 @@ class ServiceDb {
 		return this.catapultDb.queryDocuments('drives', {
 			$or: query
 		});
+	}
+
+	/**
+	 * Retrieves the file downloads by drive id.
+	 * @param {module:db/AccountType} type Type of drive id.
+	 * @param {array<object>} driveId Drive id.
+	 * @param {string} id Paging id.
+	 * @param {int} pageSize Page size.
+	 * @returns {Promise.<array>} File download info.
+	 */
+	getDownloadsByDriveId(type, driveId, pagingId, pageSize, options) {
+		const buffer = Buffer.from(driveId);
+		const fieldName = (AccountType.publicKey === type) ? 'downloadInfo.driveKey' : 'downloadInfo.driveAddress';
+		const conditions = { $and: [ { [fieldName]: buffer } ] };
+		return this.catapultDb.queryPagedDocuments('downloads', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);
+	}
+
+	/**
+	 * Retrieves the file downloads by file recipient.
+	 * @param {array<object>} fileRecipient Public key of file recipient.
+	 * @param {string} id Paging id.
+	 * @param {int} pageSize Page size.
+	 * @returns {Promise.<array>} File download info.
+	 */
+	getDownloadsByFileRecipient(fileRecipient, pagingId, pageSize, options) {
+		const key = Buffer.from(fileRecipient);
+		const conditions = { $and: [ { ['downloadInfo.fileRecipient']: key } ] };
+		return this.catapultDb.queryPagedDocuments('downloads', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);;
+	}
+
+	/**
+	 * Retrieves the file download by operation token.
+	 * @param {array<object>} operationToken File download operation token.
+	 * @returns {Promise.<array>} File download info.
+	 */
+	getDownloadsByOperationToken(operationToken) {
+		const buffer = Buffer.from(operationToken);
+		return this.catapultDb.queryDocuments('downloads', { ['downloadInfo.operationToken']: buffer });
 	}
 
 	// endregion

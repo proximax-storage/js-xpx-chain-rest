@@ -121,7 +121,13 @@ const EntityType = {
 	exchange: 0x425D,
 
 	/** Remove exchange offer transaction. */
-	removeExchangeOffer: 0x435D
+	removeExchangeOffer: 0x435D,
+
+	/** Start file download. */
+	startFileDownload: 0x495A,
+
+	/** End file download. */
+	endFileDownload: 0x4A5A
 };
 
 module.exports = EntityType;

@@ -140,6 +140,30 @@ const servicePlugin = {
 			driveKey: ModelType.binary,
 			meta: { type: ModelType.object, schemaName: 'topicMetadata' }
 		});
+
+		builder.addTransactionSupport(EntityType.startFileDownload, {
+			driveKey: 				{ type: ModelType.binary, schemaName: 'startFileDownload.driveKey' },
+			files: 					{ type: ModelType.array, schemaName: 'driveFileSystem.addfiles' },
+		});
+
+		builder.addTransactionSupport(EntityType.endFileDownload, {
+			fileRecipient: 			{ type: ModelType.binary, schemaName: 'endFileDownload.fileRecipient' },
+			operationToken: 		{ type: ModelType.binary, schemaName: 'endFileDownload.operationToken' },
+			files: 					{ type: ModelType.array, schemaName: 'driveFileSystem.addfiles' },
+		});
+
+		builder.addSchema('downloadEntry', {
+			downloadInfo:			{ type: ModelType.object, schemaName: 'downloadInfo' }
+		});
+
+		builder.addSchema('downloadInfo', {
+			operationToken:			ModelType.binary,
+			driveKey:				ModelType.binary,
+			driveAddress:			ModelType.binary,
+			fileRecipient:			ModelType.binary,
+			height:					ModelType.uint64,
+			files: 					{ type: ModelType.array, schemaName: 'driveFileSystem.addfiles' },
+		});
 	},
 
 	registerCodecs: codecBuilder => {
@@ -350,6 +374,66 @@ const servicePlugin = {
 					const uploadInfo = transaction.uploadInfos[i];
 					serializer.writeBuffer(uploadInfo.participant);
 					serializer.writeUint64(uploadInfo.uploaded);
+				}
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.startFileDownload, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.driveKey = parser.buffer(constants.sizes.signer);
+				transaction.fileCount = parser.uint16();
+				transaction.files = [];
+
+				let count = transaction.fileCount;
+				while (count-- > 0) {
+					transaction.files.push({
+						fileHash: parser.buffer(constants.sizes.hash256),
+						fileSize: parser.uint64(),
+					});
+				}
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.driveKey);
+				serializer.writeUint16(transaction.fileCount);
+				for (let i = 0; i < transaction.files.length; ++i) {
+					const file = transaction.files[i];
+					serializer.writeBuffer(file.fileHash);
+					serializer.writeUint64(file.fileSize);
+				}
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.endFileDownload, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.fileRecipient = parser.buffer(constants.sizes.signer);
+				transaction.operationToken = parser.buffer(constants.sizes.hash256);
+				transaction.fileCount = parser.uint16();
+				transaction.files = [];
+
+				let count = transaction.fileCount;
+				while (count-- > 0) {
+					transaction.files.push({
+						fileHash: parser.buffer(constants.sizes.hash256),
+						fileSize: parser.uint64(),
+					});
+				}
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.fileRecipient);
+				serializer.writeBuffer(transaction.operationToken);
+				serializer.writeUint16(transaction.fileCount);
+				for (let i = 0; i < transaction.files.length; ++i) {
+					const file = transaction.files[i];
+					serializer.writeBuffer(file.fileHash);
+					serializer.writeUint64(file.fileSize);
 				}
 			}
 		});
