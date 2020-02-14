@@ -18,17 +18,35 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const restify = require('restify');
 const routeUtils = require('../../routes/routeUtils');
 
 module.exports = {
 	register: (server, db) => {
-		server.get('/mosaic/:mosaicId/richlist', (req, res, next) => {
+		const rateLimit = restify.plugins.throttle({
+			burst: 1,
+			rate: 1,
+			ip: true
+		});
+
+		const richListHandler = async (req, res, next) => {
 			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', 'mosaicId');
 			const page = routeUtils.parseOptionalUintArgument(req.params, 'page');
 			const pageSize = routeUtils.parseOptionalUintArgument(req.params, 'pageSize');
 
 			return db.descendingAccountMosaicBalances(mosaicId, page, pageSize)
 				.then(routeUtils.createSender('richlistEntry').sendArray(mosaicId, res, next));
-		});
+		};
+
+		// Due to wrapping of restify server with promiseAwareServer, chain handlers is not working.
+		// This anonymous function chains rateLimit and richListHandler together.
+		server.get('/mosaic/:mosaicId/richlist', (req, res, next) => {
+				return rateLimit(req, res, err => {
+					if (err)
+						return next(err);
+					else
+						return richListHandler(req, res, next)
+				})
+			});
 	}
 };

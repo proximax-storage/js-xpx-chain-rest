@@ -20,6 +20,8 @@
 
 const richlistRoutes = require('../../../src/plugins/routes/richlistRoutes');
 const test = require('../../routes/utils/routeTestUtils');
+const restify = require('restify');
+const sinon = require('sinon');
 const { expect } = require('chai');
 
 describe('richlist routes', () => {
@@ -34,11 +36,14 @@ describe('richlist routes', () => {
 					95248
 				]
 			}];
+
+			const spy = sinon.spy(restify.plugins, 'throttle');
+
 			const db = test.setup.createCapturingDb('descendingAccountMosaicBalances', keyGroups, dummyDbRes);
 
 			// Act:
 			const registerRoutes = richlistRoutes.register;
-			return test.route.executeSingle(
+			test.route.executeSingle(
 				registerRoutes,
 				'/mosaic/:mosaicId/richlist',
 				'get',
@@ -51,6 +56,15 @@ describe('richlist routes', () => {
 					expect(response).to.deep.equal({ payload: dummyDbRes, type: 'richlistEntry' });
 				}
 			);
+
+			// Assert:
+			expect(spy.calledOnceWith({
+				burst: 1,
+				rate: 1,
+				ip: true
+			})).to.equal(true);
+
+			spy.restore();
 		});
 	});
 });
