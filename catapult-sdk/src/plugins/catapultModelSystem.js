@@ -33,13 +33,15 @@ const metadata = require('./metadata');
 const mosaic = require('./mosaic');
 const multisig = require('./multisig');
 const namespace = require('./namespace');
+const operation = require('./operation');
 const receipts = require('./receipts');
 const service = require('./service');
+const supercontract = require('./supercontract');
 const transfer = require('./transfer');
 const upgrade = require('./upgrade');
 
 const plugins = {
-	accountLink, accountProperties, aggregate, exchange, config, contract, lock, metadata, mosaic, multisig, namespace, receipts, service, transfer, upgrade
+	accountLink, accountProperties, aggregate, exchange, config, contract, lock, metadata, mosaic, multisig, namespace, operation, receipts, service, supercontract, transfer, upgrade
 };
 
 /**

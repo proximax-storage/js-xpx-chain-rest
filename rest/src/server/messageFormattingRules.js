@@ -37,5 +37,6 @@ module.exports = {
 	[ModelType.statusCode]: status.toString,
 	[ModelType.string]: value => value.toString(),
 	[ModelType.uint16]: value => value,
+	[ModelType.uint32]: value => value,
 	[ModelType.uint64]: value => value
 };

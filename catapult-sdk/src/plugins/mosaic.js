@@ -31,6 +31,7 @@ const mosaicPlugin = {
 	registerSchema: builder => {
 		builder.addTransactionSupport(EntityType.mosaicDefinition, {
 			mosaicId: ModelType.uint64,
+			mosaicNonce: ModelType.uint32,
 			properties: { type: ModelType.array, schemaName: 'mosaicDefinition.mosaicProperty' }
 		});
 

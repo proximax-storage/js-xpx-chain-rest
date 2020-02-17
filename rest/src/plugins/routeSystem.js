@@ -30,12 +30,14 @@ const metadata = require('./metadata');
 const mosaic = require('./mosaic');
 const multisig = require('./multisig');
 const namespace = require('./namespace');
+const operation = require('./operation');
 const receipts = require('./receipts');
+const supercontract = require('./supercontract');
 const upgrade = require('./upgrade');
 const service = require('./service');
 
 const plugins = {
-	accountLink: empty, accountProperties, aggregate, exchange, config, contract, lock, metadata, mosaic, multisig, namespace, receipts, service, transfer: empty, upgrade
+	accountLink: empty, accountProperties, aggregate, exchange, config, contract, lock, metadata, mosaic, multisig, namespace, operation, receipts, service, supercontract, transfer: empty, upgrade
 };
 
 module.exports = {
