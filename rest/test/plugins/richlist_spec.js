@@ -35,7 +35,7 @@ describe('richlist plugin', () => {
 			const server = test.setup.createCapturingMockServer('get', routes);
 
 			// Act:
-			richlist.registerRoutes(server, {});
+			richlist.registerRoutes(server, {}, { config: {} });
 
 			// Assert:
 			test.assert.assertRoutes(routes, [

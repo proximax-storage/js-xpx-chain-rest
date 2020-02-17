@@ -21,13 +21,20 @@
 const restify = require('restify');
 const routeUtils = require('../../routes/routeUtils');
 
-module.exports = {
-	register: (server, db) => {
-		const rateLimit = restify.plugins.throttle({
-			burst: 1,
-			rate: 1,
+const getRateLimit = config => {
+	if (config.plugins && config.plugins.richlist) {
+		return restify.plugins.throttle({
+			burst: config.plugins.richlist.throttling.burst,
+			rate: config.plugins.richlist.throttling.rate,
 			ip: true
 		});
+	}
+	return undefined
+}
+
+module.exports = {
+	register: (server, db, services) => {
+		const rateLimit = getRateLimit(services.config)
 
 		const richListHandler = async (req, res, next) => {
 			const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', 'mosaicId');
@@ -38,15 +45,21 @@ module.exports = {
 				.then(routeUtils.createSender('richlistEntry').sendArray(mosaicId, res, next));
 		};
 
-		// Due to wrapping of restify server with promiseAwareServer, chain handlers is not working.
-		// This anonymous function chains rateLimit and richListHandler together.
 		server.get('/mosaic/:mosaicId/richlist', (req, res, next) => {
+
+			if (rateLimit) {
+				// Due to wrapping of restify server with promiseAwareServer, chain handlers is not working.
+				// This anonymous function chains rateLimit and richListHandler together.
 				return rateLimit(req, res, err => {
 					if (err)
 						return next(err);
 					else
 						return richListHandler(req, res, next)
 				})
-			});
+			} else {
+				return richListHandler(req, res, next)
+			}
+		});
+
 	}
 };

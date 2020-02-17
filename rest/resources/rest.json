@@ -47,6 +47,15 @@
     "rate": 5
   },
 
+  "plugins": {
+    "richlist": {
+      "throttling": {
+        "burst": 1,
+        "rate": 1
+      }
+    }
+  },
+
   "logging": {
     "console": {
       "colorize": true,

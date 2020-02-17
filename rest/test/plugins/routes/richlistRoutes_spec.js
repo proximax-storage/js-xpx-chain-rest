@@ -37,6 +37,73 @@ describe('richlist routes', () => {
 				]
 			}];
 
+			const db = test.setup.createCapturingDb('descendingAccountMosaicBalances', keyGroups, dummyDbRes);
+
+			// Act:
+			const registerRoutes = richlistRoutes.register;
+			test.route.executeSingle(
+				registerRoutes,
+				'/mosaic/:mosaicId/richlist',
+				'get',
+				{ mosaicId: '5CC0E4C7884FA22A', page: '1', pageSize: '10' },
+				db,
+				{},
+				response => {
+					// Assert:
+					expect(keyGroups).to.deep.equal([[ 2286920234, 1556145351 ] /* mosaicId */, 1 /* page */, 10 /* pageSize */]);
+					expect(response).to.deep.equal({ payload: dummyDbRes, type: 'richlistEntry' });
+				}
+			);
+		});
+	});
+
+	describe('no throttling config', () => {
+		it('/mosaic/:mosaicId/richlist', () => {
+			// Arrange:
+			const keyGroups = [];
+			const dummyDbRes = [{
+				'address': "B0CF8A95590ED878705A70DE397B45F58BD4FFE0F739900623",
+				'amount': [
+					3864353992,
+					95248
+				]
+			}];
+
+			const spy = sinon.spy(restify.plugins, 'throttle');
+
+			const db = test.setup.createCapturingDb('descendingAccountMosaicBalances', keyGroups, dummyDbRes);
+
+			// Act:
+			const registerRoutes = richlistRoutes.register;
+			test.route.executeSingle(
+				registerRoutes,
+				'/mosaic/:mosaicId/richlist',
+				'get',
+				{ mosaicId: '5CC0E4C7884FA22A'},
+				db,
+				{},
+				response => {}
+			);
+
+			// Assert:
+			expect(spy.notCalled).to.equal(true);
+
+			spy.restore();
+		});
+	});
+
+	describe('with throttling config', () => {
+		it('/mosaic/:mosaicId/richlist', () => {
+			// Arrange:
+			const keyGroups = [];
+			const dummyDbRes = [{
+				'address': "B0CF8A95590ED878705A70DE397B45F58BD4FFE0F739900623",
+				'amount': [
+					3864353992,
+					95248
+				]
+			}];
+
 			const spy = sinon.spy(restify.plugins, 'throttle');
 
 			const db = test.setup.createCapturingDb('descendingAccountMosaicBalances', keyGroups, dummyDbRes);
@@ -49,12 +116,8 @@ describe('richlist routes', () => {
 				'get',
 				{ mosaicId: '5CC0E4C7884FA22A', page: '1', pageSize: '10' },
 				db,
-				null,
-				response => {
-					// Assert:
-					expect(keyGroups).to.deep.equal([[ 2286920234, 1556145351 ] /* mosaicId */, 1 /* page */, 10 /* pageSize */]);
-					expect(response).to.deep.equal({ payload: dummyDbRes, type: 'richlistEntry' });
-				}
+				{ plugins: { richlist: { throttling: {burst: 1, rate: 1}}}},
+				response => {}
 			);
 
 			// Assert:
