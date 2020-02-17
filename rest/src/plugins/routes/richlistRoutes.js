@@ -22,7 +22,7 @@ const restify = require('restify');
 const routeUtils = require('../../routes/routeUtils');
 
 const getRateLimit = config => {
-	if (config.plugins && config.plugins.richlist) {
+	if (config.plugins && config.plugins.richlist && config.plugins.richlist.throttling) {
 		return restify.plugins.throttle({
 			burst: config.plugins.richlist.throttling.burst,
 			rate: config.plugins.richlist.throttling.rate,
