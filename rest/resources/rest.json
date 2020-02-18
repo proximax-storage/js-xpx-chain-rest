@@ -47,11 +47,11 @@
     "rate": 5
   },
 
-  "plugins": {
-    "richlist": {
+  "endpoints": {
+    "GET /mosaic/:mosaicId/richlist": {
       "throttling": {
-        "burst": 1,
-        "rate": 1
+        "burst": 10,
+        "rate": 5
       }
     }
   },

@@ -82,7 +82,7 @@ const createServer = config => {
 		ws: messageFormattingRules
 	});
 	return {
-		server: bootstrapper.createServer(config.crossDomainHttpMethods, formatters.create(modelSystem.formatters), config.cors, config.throttling),
+		server: bootstrapper.createServer(config.crossDomainHttpMethods, formatters.create(modelSystem.formatters), config.cors, config.throttling, config.endpoints),
 		codec: modelSystem.codec
 	};
 };
@@ -98,8 +98,7 @@ const registerRoutes = (server, db, services) => {
 				step: services.config.db.pageSizeStep
 			},
 			apiNode: services.config.apiNode,
-			websocket: services.config.websocket,
-			plugins: services.config.plugins
+			websocket: services.config.websocket
 		},
 		connections: services.connectionService,
 		transactionCache: services.transactionCache
