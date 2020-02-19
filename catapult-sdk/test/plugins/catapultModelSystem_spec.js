@@ -55,8 +55,10 @@ describe('catapult model system', () => {
 				'mosaic',
 				'multisig',
 				'namespace',
+				'operation',
 				'receipts',
 				'service',
+				'supercontract',
 				'transfer',
 				'upgrade'
 			]);

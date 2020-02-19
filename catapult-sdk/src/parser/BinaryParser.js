@@ -164,7 +164,7 @@ class BinaryParser {
 	 * @returns {Buffer} Read bytes.
 	 */
 	buffer(size) {
-		if (!size) return [];
+		if (!size) return Buffer.from([]);
 
 		return this.buffers.nextBuffer(size);
 	}
