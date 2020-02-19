@@ -34,12 +34,13 @@ const mosaic = require('./mosaic');
 const multisig = require('./multisig');
 const namespace = require('./namespace');
 const receipts = require('./receipts');
+const richlist = require('./richlist');
 const service = require('./service');
 const transfer = require('./transfer');
 const upgrade = require('./upgrade');
 
 const plugins = {
-	accountLink, accountProperties, aggregate, exchange, config, contract, lock, metadata, mosaic, multisig, namespace, receipts, service, transfer, upgrade
+	accountLink, accountProperties, aggregate, exchange, config, contract, lock, metadata, mosaic, multisig, namespace, receipts, richlist, service, transfer, upgrade
 };
 
 /**

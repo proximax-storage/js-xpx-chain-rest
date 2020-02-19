@@ -145,6 +145,16 @@ class CatapultDb {
 			.then(this.sanitizer.deleteIds);
 	}
 
+	queryPagedDocumentsUsingAggregate(collectionName, pipe, page, pageSize) {
+		const skipStep = { $skip: page * pageSize };
+		const limitStep = { $limit: pageSize };
+
+		const collection = this.database.collection(collectionName);
+		return collection.aggregate([...pipe, skipStep, limitStep], { promoteLongs: false })
+			.toArray()
+			.then(this.sanitizer.deleteIds);
+	}
+
 	queryDocumentsAndCopyIds(collectionName, conditions, options = {}) {
 		const collection = this.database.collection(collectionName);
 		return collection.find(conditions)
