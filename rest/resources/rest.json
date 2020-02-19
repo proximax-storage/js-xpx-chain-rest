@@ -8,7 +8,7 @@
   "crossDomainHttpMethods": ["GET", "POST", "PUT", "OPTIONS"],
   "cors": "*",
   "clientPrivateKey": "0100000000000000000000000000000000000000000000000000000000000000",
-  "extensions": ["accountLink", "accountProperties", "aggregate", "exchange", "config", "lock", "metadata", "mosaic", "multisig", "namespace", "operation", "receipts", "service", "supercontract", "transfer", "upgrade"],
+  "extensions": ["accountLink", "accountProperties", "aggregate", "exchange", "config", "lock", "metadata", "mosaic", "multisig", "namespace", "operation", "receipts", "richlist", "service", "supercontract", "transfer", "upgrade"],
 
   "db": {
     "url": "mongodb://localhost:27017/",
@@ -45,6 +45,15 @@
   "throttling": {
     "burst": 40,
     "rate": 15
+  },
+
+  "endpoints": {
+    "GET /mosaic/:mosaicId/richlist": {
+      "throttling": {
+        "burst": 10,
+        "rate": 5
+      }
+    }
   },
 
   "logging": {

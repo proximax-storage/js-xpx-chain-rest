@@ -81,7 +81,7 @@ module.exports = {
 	 * @param {object} throttlingConfig Throttling configuration parameters, if not provided throttling won't be enabled.
 	 * @returns {object} Server.
 	 */
-	createServer: (crossDomainHttpMethods, formatters, cors, throttlingConfig) => {
+	createServer: (crossDomainHttpMethods, formatters, cors, throttlingConfig, endpointsConfig) => {
 		// create the server using a custom formatter
 		const server = restify.createServer({
 			name: '', // disable server header in response
@@ -131,6 +131,23 @@ module.exports = {
 			}
 		};
 
+		const endpointRateLimit = (method, route) => {
+			const routeConfig = `${method.toUpperCase()} ${route}`;
+			if (endpointsConfig && endpointsConfig[routeConfig] && endpointsConfig[routeConfig].throttling) {
+
+				if (endpointsConfig[routeConfig].throttling.burst && endpointsConfig[routeConfig].throttling.rate) {
+					return restify.plugins.throttle({
+						burst: endpointsConfig[routeConfig].throttling.burst,
+						rate: endpointsConfig[routeConfig].throttling.rate,
+						ip: true
+					});
+				} else {
+					winston.warn(`throttling was not enabled for ${routeConfig} - configuration is invalid or incomplete`);
+				}
+			}
+			return undefined
+		};
+
 		['get', 'put', 'post'].forEach(method => {
 			promiseAwareServer[method] = (route, handler) => {
 				const promiseAwareHandler = (req, res, next) => {
@@ -147,7 +164,22 @@ module.exports = {
 					}
 				};
 
-				routeDescriptors.push({ method, route, handler: promiseAwareHandler });
+				const rateLimitHandler = endpointRateLimit(method, route);
+
+				// Chain rate limit with promise aware handler if endpoint requires throttling
+				let routeHandler = promiseAwareHandler;
+				if (rateLimitHandler) {
+					routeHandler = (req, res, next) => {
+						return rateLimitHandler(req, res, err => {
+							if (err)
+								return next(err);
+							else
+								return promiseAwareHandler(req, res, next)
+						})
+					}
+				}
+
+				routeDescriptors.push({ method, route, handler: routeHandler });
 			};
 		});
 

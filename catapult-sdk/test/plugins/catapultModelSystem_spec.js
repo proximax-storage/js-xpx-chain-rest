@@ -57,6 +57,7 @@ describe('catapult model system', () => {
 				'namespace',
 				'operation',
 				'receipts',
+				'richlist',
 				'service',
 				'supercontract',
 				'transfer',

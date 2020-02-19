@@ -152,6 +152,15 @@ describe('route utils', () => {
 			valid: hashes512.valid.map(hash => ({ id: hash, parsed: catapult.utils.convert.hexToUint8(hash) })),
 			invalid: hashes512.invalid.map(hash => ({ id: hash, error: `invalid length of hash512 '${hash.length}` }))
 		}));
+
+		describe('mosaicId', () => addParserTests({
+			parser: 'mosaicId',
+			valid: [
+				{ id: '5CC0E4C7884FA22A', parsed: [2286920234, 1556145351]},
+			],
+			invalid: ['A', 'GCC0E4C7884FA22A', '11223344556677889900'].map(id => ({ id, error: 'invalid mosaic id' }))
+		}));
+
 	});
 
 	describe('parse argument array', () => {
@@ -234,6 +243,31 @@ describe('route utils', () => {
 			expect(() => routeUtils.parsePagingArguments({ id: '112233445566778899AABBCC', pageSize: '1Y2' }))
 				.to.throw('pageSize is not a valid unsigned integer');
 		});
+	});
+
+	describe('parse optional uint argument', () => {
+		it('undefined when none provided', () => {
+			// Act:
+			expect(routeUtils.parseOptionalUintArgument({ }, 'page'))
+				.to.be.undefined;
+		});
+
+		it('undefined when invalid uint provided', () => {
+			// Act:
+			expect(routeUtils.parseOptionalUintArgument({ page: '-1', pageSize: '10' }, 'page'))
+				.to.be.undefined;
+			expect(routeUtils.parseOptionalUintArgument({ page: 'A', pageSize: '10' }, 'page'))
+				.to.be.undefined;
+		});
+
+		it('succeeds when valid uint provided', () => {
+			// Act:
+			expect(routeUtils.parseOptionalUintArgument({ page: '10', pageSize: '10' }, 'page'))
+				.to.equal(10);
+			expect(routeUtils.parseOptionalUintArgument({ page: '0', pageSize: '10' }, 'page'))
+				.to.equal(0);
+		});
+
 	});
 
 	describe('generate valid page sizes', () => {

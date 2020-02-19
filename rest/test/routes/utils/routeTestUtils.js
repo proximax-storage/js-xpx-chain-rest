@@ -188,7 +188,9 @@ const routeTestUtils = {
 			};
 
 			const next = () => { ++routeContext.numNextCalls; };
-			const req = { params };
+			const connection = { remoteAddress: '0.0.0.0' };
+			const log = { trace: () => {}};
+			const req = { params, connection, log };
 
 			const res = {
 				send: response => { routeContext.responses.push(response); },
