@@ -127,7 +127,25 @@ const EntityType = {
 	startFileDownload: 0x495A,
 
 	/** End file download. */
-	endFileDownload: 0x4A5A
+	endFileDownload: 0x4A5A,
+
+	/** Operation identify. */
+	operationIdentify: 0x415F,
+
+	/** Start operation. */
+	startOperation: 0x425F,
+
+	/** End operation. */
+	endOperation: 0x435F,
+
+	/** Deploy. */
+	deploy: 0x4160,
+
+	/** Start execute. */
+	startExecute: 0x4260,
+
+	/** End execute. */
+	endExecute: 0x4360
 };
 
 module.exports = EntityType;
