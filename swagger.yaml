@@ -1443,6 +1443,50 @@ paths:
           description: resource not found
         '409':
           description: invalid argument
+  '/mosaic/{mosaicId}/richlist':
+    get:
+      tags:
+      - Richlist routes
+      summary: Get mosaic richlist
+      description:  Get richlist of a given mosaic
+      operationId: getMosaicRichlist
+      parameters:
+      - name: mosaicId
+        in: path
+        description: The mosaic identifier.
+        schema:
+          type: string
+        required: true
+      - name: page
+        in: query
+        description: The page number of richlist entries.
+        schema:
+          type: integer
+          minimum: 10
+          maximum: 100
+          default: 25
+      - name: pageSize
+        in: query
+        description: The number of richlist entries to return for each request.
+        schema:
+          type: integer
+          minimum: 10
+          maximum: 100
+          default: 25
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                description: The array of richlist entries.
+                items:
+                  $ref: "#/components/schemas/RichlistEntryDTO"
+        '404':
+          description: resource not found
+        '409':
+          description: invalid argument
 externalDocs:
   description: ProximaX Developer Center
   url: 'https://proximax.io/'
@@ -3436,6 +3480,29 @@ components:
       properties:
         communicationTimestamps:
           $ref: "#/components/schemas/communicationTimestamps"
+
+    RichlistEntryDTO:
+      type: object
+      required:
+        - address
+        - publicKey
+        - amount
+      properties:
+        address:
+          type: string
+          description: |
+            The account address of the richlist entry.
+          example: 9081FCCB41F8C8409A9B99E485E0E28D23BD6304EF7215E01A
+        publicKey:
+          type: string
+          description: |
+            The public key of the account of richlist entry.
+          example: AC1A6E1D8DE5B17D2C6B1293F1CAD3829EEACF38D09311BB3C8E5A880092DE26
+        amount:
+          $ref: "#/components/schemas/UInt64DTO"
+          description: |
+            The amount of mosaic owned by the richlist entry.
+
     # Request bodies
     mosaicIds:
       type: object
