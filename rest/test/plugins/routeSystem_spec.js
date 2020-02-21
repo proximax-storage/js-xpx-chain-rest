@@ -49,9 +49,11 @@ describe('route system', () => {
 			'mosaic',
 			'multisig',
 			'namespace',
+			'operation',
 			'receipts',
 			'richlist',
 			'service',
+			'supercontract',
 			'transfer',
 			'upgrade'
 		]);

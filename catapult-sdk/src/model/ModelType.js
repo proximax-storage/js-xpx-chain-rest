@@ -45,8 +45,11 @@ const ModelType = {
 	/** Schema property type indicating a uint16. */
 	uint16: SchemaType.max + 6,
 
+	/** Schema property type indicating a uint32. */
+	uint32: SchemaType.max + 7,
+
 	/** Schema property type indicating a uint64 value. */
-	uint64: SchemaType.max + 7
+	uint64: SchemaType.max + 8
 };
 
 Object.assign(ModelType, SchemaType);
