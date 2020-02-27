@@ -23,11 +23,12 @@ describe('supercontract plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 6);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 8);
 			expect(modelSchema).to.contain.all.keys([
 				'deploy',
 				'startExecute',
 				'endExecute',
+				'uploadFile',
 				'execute.mosaic',
 				'superContractEntry',
 				'supercontract',
@@ -55,6 +56,15 @@ describe('supercontract plugin', () => {
 				'mosaics',
 			]);
 
+			expect(Object.keys(modelSchema.uploadFile).length).to.equal(Object.keys(modelSchema.transaction).length + 5);
+			expect(modelSchema.uploadFile).to.contain.all.keys([
+				'driveKey',
+				'rootHash',
+				'xorRootHash',
+				'addActions',
+				'removeActions'
+			]);
+
 			expect(Object.keys(modelSchema['execute.mosaic']).length).to.equal(2);
 			expect(modelSchema['execute.mosaic']).to.contain.all.keys([
 				'id',
@@ -75,6 +85,12 @@ describe('supercontract plugin', () => {
 				'mainDriveKey',
 				'fileHash',
 				'vmVersion',
+			]);
+
+			expect(Object.keys(modelSchema['uploadFile.addfiles']).length).to.equal(2);
+			expect(modelSchema['uploadFile.addfiles']).to.contain.all.keys([
+				'fileHash',
+				'fileSize'
 			]);
 		});
 	});
@@ -101,11 +117,12 @@ describe('supercontract plugin', () => {
 			const codecs = getCodecs();
 
 			// Assert: codec was registered
-			expect(Object.keys(codecs).length).to.equal(3);
+			expect(Object.keys(codecs).length).to.equal(4);
 			expect(codecs).to.contain.all.keys([
 				EntityType.deploy.toString(),
 				EntityType.startExecute.toString(),
 				EntityType.endExecute.toString(),
+				EntityType.uploadFile.toString(),
 			]);
 		});
 
@@ -213,6 +230,76 @@ describe('supercontract plugin', () => {
 							amount: [0x5, 0x0]
 						}
 					],
+				}
+			}));
+		});
+
+		describe('supports upload file transaction', () => {
+			const codec = getCodecs()[EntityType.uploadFile];
+			const driveKey = createByteArray(0x01);
+			const rootHash = createByteArray(0x02);
+			const xorRootHash = createByteArray(0x03);
+			const addActionsCount = Buffer.of(0x02, 0x0);
+			const addedFileHash1 = createByteArray(0x04);
+			const addedFileSize1 = Buffer.of(0x05, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+			const addedFileHash2 = createByteArray(0x06);
+			const addedFileSize2 = Buffer.of(0x07, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+			const removeActionsCount = Buffer.of(0x03, 0x0);
+			const removedFileHash1 = createByteArray(0x08);
+			const removedFileSize1 = Buffer.of(0x09, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+			const removedFileHash2 = createByteArray(0x0A);
+			const removedFileSize2 = Buffer.of(0x0B, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+			const removedFileHash3 = createByteArray(0x0C);
+			const removedFileSize3 = Buffer.of(0x0D, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+
+			test.binary.test.addAll(codec, 3 * 32 + 2 * 2 + 5 * (32 + 8), () => ({
+				buffer: Buffer.concat([
+					driveKey,
+					rootHash,
+					xorRootHash,
+					addActionsCount,
+					removeActionsCount,
+					addedFileHash1,
+					addedFileSize1,
+					addedFileHash2,
+					addedFileSize2,
+					removedFileHash1,
+					removedFileSize1,
+					removedFileHash2,
+					removedFileSize2,
+					removedFileHash3,
+					removedFileSize3
+				]),
+				object: {
+					driveKey,
+					rootHash,
+					xorRootHash,
+					addActionsCount: 0x02,
+					addActions: [
+						{
+							fileHash: addedFileHash1,
+							fileSize: [0x05, 0x0]
+						},
+						{
+							fileHash: addedFileHash2,
+							fileSize: [0x07, 0x0]
+						}
+					],
+					removeActionsCount: 0x03,
+					removeActions: [
+						{
+							fileHash: removedFileHash1,
+							fileSize: [0x09, 0x0]
+						},
+						{
+							fileHash: removedFileHash2,
+							fileSize: [0x0B, 0x0]
+						},
+						{
+							fileHash: removedFileHash3,
+							fileSize: [0x0D, 0x0]
+						}
+					]
 				}
 			}));
 		});

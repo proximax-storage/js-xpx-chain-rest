@@ -66,6 +66,7 @@ describe('entity type enumeration', () => {
 			startFileDownload: 0x495A,
 			startOperation: 0x425F,
 			transfer: 0x4154,
+			uploadFile: 0x4460,
 		});
 	});
 

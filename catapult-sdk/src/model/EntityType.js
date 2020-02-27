@@ -145,7 +145,10 @@ const EntityType = {
 	startExecute: 0x4260,
 
 	/** End execute. */
-	endExecute: 0x4360
+	endExecute: 0x4360,
+
+	/** Upload file. */
+	uploadFile: 0x4460
 };
 
 module.exports = EntityType;
