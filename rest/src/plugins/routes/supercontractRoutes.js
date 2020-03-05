@@ -19,5 +19,11 @@ module.exports = {
 			return db.getSuperContractByAccountId(type, accountId)
 				.then(routeUtils.createSender('superContractEntry').sendOne(req.params.accountId, res, next));
 		});
+
+		server.get('/account/:publicKey/supercontracts', (req, res, next) => {
+			const ownerPublicKey = routeUtils.parseArgument(req.params, 'publicKey', 'publicKey');
+			return db.getSuperContractsByOwnerPublicKey(ownerPublicKey)
+				.then(routeUtils.createSender('superContractEntry').sendArray(req.params.publicKey, res, next));
+		});
 	}
 };

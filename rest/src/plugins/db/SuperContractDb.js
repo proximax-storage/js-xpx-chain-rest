@@ -18,7 +18,7 @@ class SuperContractDb {
 	// region super contract retrieval
 
 	/**
-	 * Retrieves the super contract entry by account id.
+	 * Retrieves super contract entry by account id.
 	 * @param {module:db/AccountType} type Type of account id.
 	 * @param {array<object>} accountId Account id.
 	 * @returns {Promise.<object>} The super contract entry.
@@ -30,7 +30,7 @@ class SuperContractDb {
 	}
 
 	/**
-	 * Retrieves the super contract entries by drive.
+	 * Retrieves super contract entries by drive.
 	 * @param {object} publicKey The drive public key.
 	 * @returns {Promise.<array>} The super contract entries for drive.
 	 */
@@ -38,6 +38,21 @@ class SuperContractDb {
 		const buffer = Buffer.from(publicKey);
 		const fieldName = 'supercontract.mainDriveKey';
 		return this.catapultDb.queryDocuments('supercontracts', { [fieldName]: buffer });
+	}
+
+	/**
+	 * Retrieves super contract entries by owner.
+	 * @param {object} publicKey The owner public key.
+	 * @param {string} id Paging id.
+	 * @param {int} pageSize Page size.
+	 * @param {object} options Additional options.
+	 * @returns {Promise.<array>} The super contract entries owner.
+	 */
+	getSuperContractsByOwnerPublicKey(publicKey, pagingId, pageSize, options) {
+		const buffer = Buffer.from(publicKey);
+		const fieldName = 'supercontract.owner';
+		const conditions = { $and: [ { [fieldName]: buffer } ] };
+		return this.catapultDb.queryPagedDocuments('supercontracts', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);
 	}
 
 	// endregion

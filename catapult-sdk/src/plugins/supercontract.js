@@ -45,6 +45,10 @@ const superContractPlugin = {
 			removeActions: 		{ type: ModelType.array, schemaName: 'uploadFile.addfiles' },
 		});
 
+		builder.addTransactionSupport(EntityType.deactivate, {
+			superContract: 		ModelType.binary,
+		});
+
 		builder.addSchema('execute.mosaic', {
 			id: 		ModelType.uint64,
 			amount: 	ModelType.uint64,
@@ -58,6 +62,7 @@ const superContractPlugin = {
 			multisig:				ModelType.binary,
 			multisigAddress:		ModelType.binary,
 			start:					ModelType.uint64,
+			owner:					ModelType.binary,
 			end:					ModelType.uint64,
 			mainDriveKey:			ModelType.binary,
 			fileHash:				ModelType.binary,
@@ -216,6 +221,20 @@ const superContractPlugin = {
 					serializer.writeBuffer(transaction.removeActions[i].fileHash);
 					serializer.writeUint64(transaction.removeActions[i].fileSize);
 				}
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.deactivate, {
+			deserialize: parser => {
+				const transaction = {};
+
+				transaction.superContract = parser.buffer(constants.sizes.signer);
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.superContract);
 			}
 		});
 	}

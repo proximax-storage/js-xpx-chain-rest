@@ -69,4 +69,26 @@ describe('supercontract routes', () => {
 			expected: ['address', address.stringToAddress(addresses.valid[0])]
 		}));
 	});
+
+	it('/account/:publicKey/supercontracts', () => {
+		// Arrange:
+		const keyGroups = [];
+		const db = test.setup.createCapturingDb('getSuperContractsByOwnerPublicKey', keyGroups, [{value: 'this is nonsense'}]);
+
+		// Act:
+		const registerRoutes = supercontractRoutes.register;
+		return test.route.executeSingle(
+			registerRoutes,
+			'/account/:publicKey/supercontracts',
+			'get',
+			{ publicKey: publicKeys.valid[0] },
+			db,
+			null,
+			response => {
+				// Assert:
+				expect(keyGroups).to.deep.equal([convert.hexToUint8(publicKeys.valid[0])]);
+				expect(response).to.deep.equal({payload: [{value: 'this is nonsense'}], type: 'superContractEntry'});
+			}
+		);
+	});
 });
