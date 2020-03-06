@@ -27,6 +27,7 @@ const modelSchema = new ModelSchemaBuilder().build();
 const formattingRules = {
 	[ModelType.none]: () => 'none',
 	[ModelType.binary]: () => 'binary',
+	[ModelType.uint32]: () => 'uint32',
 	[ModelType.uint64]: () => 'uint64',
 	[ModelType.objectId]: () => 'objectId',
 	[ModelType.string]: () => 'string'
@@ -89,7 +90,7 @@ describe('model formatter builder', () => {
 				transaction: {
 					signature: 'binary',
 					signer: 'binary',
-					version: 'none',
+					version: 'uint32',
 					type: 'none',
 
 					maxFee: 'uint64',
@@ -140,7 +141,7 @@ describe('model formatter builder', () => {
 				block: {
 					signature: 'binary',
 					signer: 'binary',
-					version: 'none',
+					version: 'uint32',
 					type: 'none',
 
 					height: 'uint64',

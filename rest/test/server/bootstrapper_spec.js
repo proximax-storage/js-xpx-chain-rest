@@ -138,7 +138,7 @@ const serverFormatters = options =>  formatters.create({
 });
 
 const createServer = options => {
-	const server = bootstrapper.createServer((options || {}).crossDomainHttpMethods, serverFormatters(options), (options || {}).cors, (options || {}).throttling);
+	const server = bootstrapper.createServer((options || {}).crossDomainHttpMethods, serverFormatters(options), (options || {}).cors, (options || {}).throttling, (options || {}).endpoints);
 	servers.push(server);
 	return server;
 };
@@ -430,6 +430,50 @@ describe('server (bootstrapper)', () => {
 						expect(body).to.deep.equal({
 							id: 123, height: [10, 0], scoreLow: [16, 0], scoreHigh: [11, 0]
 						});
+						done();
+					});
+			});
+
+			// endregion
+
+			// region throttling endpoint config
+
+			it('throttle with config', done => {
+				// Arrange:
+				const throttlingConfig = {
+					burst: 1,
+					rate: 1
+				};
+
+				const endpointsConfig = {};
+				endpointsConfig[`${method.toUpperCase()} /dummy/:dummyId`]= { throttling: throttlingConfig };
+
+				const spy = sinon.spy(restify.plugins, 'throttle');
+
+				makeJsonHippie(`/dummy/${dummyIds.valid}`, method, { endpoints: endpointsConfig })
+					.expectStatus(200)
+					.end((headers, body) => {
+						// Assert:
+						expect(spy.calledOnceWith({
+							burst: 1,
+							rate: 1,
+							ip: true
+						})).to.equal(true);
+
+						spy.restore();
+						done();
+					});
+			});
+
+			it('no throttle without config', done => {
+				const spy = sinon.spy(restify.plugins, 'throttle');
+
+				makeJsonHippie(`/dummy/${dummyIds.valid}`, method)
+					.expectStatus(200)
+					.end((headers, body) => {
+						// Assert:
+						expect(spy.notCalled).to.equal(true);
+						spy.restore();
 						done();
 					});
 			});

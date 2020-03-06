@@ -35,6 +35,7 @@ class ModelSchemaBuilder {
 
 			verifiableEntity: {
 				signature: ModelType.binary,
+				version: ModelType.uint32,
 				signer: ModelType.binary
 			},
 

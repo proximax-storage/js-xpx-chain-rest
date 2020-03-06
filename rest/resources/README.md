@@ -32,5 +32,11 @@
       - connectTimeout - Connection timeout to blockchain
     - allowOptionalAddress - Get addresses from notification
   },
-
+  
+  - plugins Config for extensions
+    - richlist - Config for richlist extension
+      - throttling - Throttling config for richlist endpoint
+        - burst - Max number of request allowed of per second
+        - rate - Rate to fill in requests per second
+  
   - logging - Logging config

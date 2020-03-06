@@ -18,25 +18,24 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const catapult = require('catapult-sdk');
+/** @module plugins/mosaic */
+const ModelType = require('../model/ModelType');
 
-const { ModelType, status } = catapult.model;
-const { convert } = catapult.utils;
-const size = {
-	uint64dto: 2
-};
-
-module.exports = {
-	[ModelType.none]: value => value,
-	[ModelType.binary]: value => convert.uint8ToHex(value),
-	[ModelType.metadataId]: value => {
-		if (size.uint64dto === value.length)
-			return value;
-		return convert.uint8ToHex(value);
+/**
+ * Creates a mosaic plugin.
+ * @type {module:plugins/CatapultPlugin}
+ */
+const richlist = {
+	registerSchema: builder => {
+		builder.addSchema('richlistEntry', {
+			address: ModelType.binary,
+			publicKey: ModelType.binary,
+			amount: ModelType.uint64
+		});
 	},
-	[ModelType.statusCode]: status.toString,
-	[ModelType.string]: value => value.toString(),
-	[ModelType.uint16]: value => value,
-	[ModelType.uint32]: value => value,
-	[ModelType.uint64]: value => value
+
+	registerCodecs: () => {}
+
 };
+
+module.exports = richlist;
