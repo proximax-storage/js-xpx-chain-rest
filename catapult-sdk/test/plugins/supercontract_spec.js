@@ -164,15 +164,15 @@ describe('supercontract plugin', () => {
 
 			test.binary.test.addAll(codec, 1 + 32 + 1 + 2 + 2 * (8 + 8) + 4 + 6, () => ({
 				buffer: Buffer.concat([
-					mosaicsCount,
 					superContract,
 					functionSize,
+					mosaicsCount,
 					dataSize,
+					functionName,
 					mosaicId1,
 					mosaicAmount1,
 					mosaicId2,
 					mosaicAmount2,
-					functionName,
 					data,
 				]),
 				object: {

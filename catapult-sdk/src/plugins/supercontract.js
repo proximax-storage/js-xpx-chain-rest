@@ -75,10 +75,11 @@ const superContractPlugin = {
 			deserialize: parser => {
 				const transaction = {};
 
-				transaction.mosaicsCount = parser.uint8();
 				transaction.superContract = parser.buffer(constants.sizes.signer);
 				transaction.functionSize = parser.uint8();
+				transaction.mosaicsCount = parser.uint8();
 				transaction.dataSize = parser.uint16();
+				transaction.function = parser.buffer(transaction.functionSize);
 				transaction.mosaics = [];
 
 				let tmp = transaction.mosaicsCount;
@@ -89,17 +90,17 @@ const superContractPlugin = {
 					transaction.mosaics.push(mosaic);
 				}
 
-				transaction.function = parser.buffer(transaction.functionSize);
 				transaction.data = parser.buffer(transaction.dataSize);
 
 				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
-				serializer.writeUint8(transaction.mosaics.length);
 				serializer.writeBuffer(transaction.superContract);
 				serializer.writeUint8(transaction.function.length);
+				serializer.writeUint8(transaction.mosaics.length);
 				serializer.writeUint16(transaction.data.length);
+				serializer.writeBuffer(transaction.function);
 
 				for (let i = 0; i < transaction.mosaicsCount; ++i) {
 					const mosaic = transaction.mosaics[i];
@@ -107,7 +108,6 @@ const superContractPlugin = {
 					serializer.writeUint64(mosaic.amount);
 				}
 
-				serializer.writeBuffer(transaction.function);
 				serializer.writeBuffer(transaction.data);
 			}
 		});
