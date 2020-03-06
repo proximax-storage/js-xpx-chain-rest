@@ -37,6 +37,14 @@ const superContractPlugin = {
 			mosaics: 			{ type: ModelType.array, schemaName: 'execute.mosaic' }
 		});
 
+		builder.addTransactionSupport(EntityType.uploadFile, {
+			driveKey: 			{ type: ModelType.binary, schemaName: 'uploadFile.driveKey' },
+			rootHash: 			{ type: ModelType.binary, schemaName: 'uploadFile.rootHash' },
+			xorRootHash: 		{ type: ModelType.binary, schemaName: 'uploadFile.rootHash' },
+			addActions: 		{ type: ModelType.array, schemaName: 'uploadFile.addfiles' },
+			removeActions: 		{ type: ModelType.array, schemaName: 'uploadFile.addfiles' },
+		});
+
 		builder.addSchema('execute.mosaic', {
 			id: 		ModelType.uint64,
 			amount: 	ModelType.uint64,
@@ -55,6 +63,11 @@ const superContractPlugin = {
 			fileHash:				ModelType.binary,
 			vmVersion:				ModelType.uint64,
 		});
+
+		builder.addSchema('uploadFile.addfiles', {
+			fileHash: ModelType.binary,
+			fileSize: ModelType.uint64,
+		});
 	},
 
 	registerCodecs: codecBuilder => {
@@ -62,10 +75,11 @@ const superContractPlugin = {
 			deserialize: parser => {
 				const transaction = {};
 
-				transaction.mosaicsCount = parser.uint8();
 				transaction.superContract = parser.buffer(constants.sizes.signer);
 				transaction.functionSize = parser.uint8();
+				transaction.mosaicsCount = parser.uint8();
 				transaction.dataSize = parser.uint16();
+				transaction.function = parser.buffer(transaction.functionSize);
 				transaction.mosaics = [];
 
 				let tmp = transaction.mosaicsCount;
@@ -76,17 +90,17 @@ const superContractPlugin = {
 					transaction.mosaics.push(mosaic);
 				}
 
-				transaction.function = parser.buffer(transaction.functionSize);
 				transaction.data = parser.buffer(transaction.dataSize);
 
 				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
-				serializer.writeUint8(transaction.mosaics.length);
 				serializer.writeBuffer(transaction.superContract);
 				serializer.writeUint8(transaction.function.length);
+				serializer.writeUint8(transaction.mosaics.length);
 				serializer.writeUint16(transaction.data.length);
+				serializer.writeBuffer(transaction.function);
 
 				for (let i = 0; i < transaction.mosaicsCount; ++i) {
 					const mosaic = transaction.mosaics[i];
@@ -94,7 +108,6 @@ const superContractPlugin = {
 					serializer.writeUint64(mosaic.amount);
 				}
 
-				serializer.writeBuffer(transaction.function);
 				serializer.writeBuffer(transaction.data);
 			}
 		});
@@ -149,6 +162,60 @@ const superContractPlugin = {
 				serializer.writeBuffer(transaction.owner);
 				serializer.writeBuffer(transaction.fileHash);
 				serializer.writeUint64(transaction.vmVersion);
+			}
+		});
+
+		const deserializeFiles = function(parser, count, files, reader) {
+			let i = count;
+			while (i--) {
+				files.push(reader(parser));
+			}
+		};
+
+		codecBuilder.addTransactionSupport(EntityType.uploadFile, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.driveKey = parser.buffer(constants.sizes.signer);
+				transaction.rootHash = parser.buffer(constants.sizes.hash256);
+				transaction.xorRootHash = parser.buffer(constants.sizes.hash256);
+				transaction.addActionsCount = parser.uint16();
+				transaction.addActions = [];
+				transaction.removeActionsCount = parser.uint16();
+				transaction.removeActions = [];
+
+				deserializeFiles(parser, transaction.addActionsCount, transaction.addActions, (parser) => {
+					const file = {};
+					file.fileHash = parser.buffer(constants.sizes.hash256);
+					file.fileSize = parser.uint64();
+					return file;
+				});
+
+				deserializeFiles(parser, transaction.removeActionsCount, transaction.removeActions, (parser) => {
+					const file = {};
+					file.fileHash = parser.buffer(constants.sizes.hash256);
+					file.fileSize = parser.uint64();
+					return file;
+				});
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.driveKey);
+				serializer.writeBuffer(transaction.rootHash);
+				serializer.writeBuffer(transaction.xorRootHash);
+				serializer.writeUint16(transaction.addActions.length);
+				serializer.writeUint16(transaction.removeActions.length);
+
+				for (let i = 0; i < transaction.addActions.length; ++i) {
+					serializer.writeBuffer(transaction.addActions[i].fileHash);
+					serializer.writeUint64(transaction.addActions[i].fileSize);
+				}
+
+				for (let i = 0; i < transaction.removeActions.length; ++i) {
+					serializer.writeBuffer(transaction.removeActions[i].fileHash);
+					serializer.writeUint64(transaction.removeActions[i].fileSize);
+				}
 			}
 		});
 	}
