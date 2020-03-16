@@ -66,9 +66,10 @@ describe('supercontract plugin', () => {
 				'removeActions'
 			]);
 
-			expect(Object.keys(modelSchema.deactivate).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
+			expect(Object.keys(modelSchema.deactivate).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
 			expect(modelSchema.deactivate).to.contain.all.keys([
 				'superContract',
+				'driveKey',
 			]);
 
 			expect(Object.keys(modelSchema['execute.mosaic']).length).to.equal(2);
@@ -315,13 +316,16 @@ describe('supercontract plugin', () => {
 		describe('supports deactivate transaction', () => {
 			const codec = getCodecs()[EntityType.deactivate];
 			const superContract = createByteArray(0x01);
+			const driveKey = createByteArray(0x02);
 
-			test.binary.test.addAll(codec, 32, () => ({
+			test.binary.test.addAll(codec, 32 + 32, () => ({
 				buffer: Buffer.concat([
 					superContract,
+					driveKey,
 				]),
 				object: {
 					superContract,
+					driveKey,
 				}
 			}));
 		});

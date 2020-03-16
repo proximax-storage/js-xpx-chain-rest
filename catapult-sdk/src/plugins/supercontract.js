@@ -47,6 +47,7 @@ const superContractPlugin = {
 
 		builder.addTransactionSupport(EntityType.deactivate, {
 			superContract: 		ModelType.binary,
+			driveKey: 			ModelType.binary,
 		});
 
 		builder.addSchema('execute.mosaic', {
@@ -229,12 +230,14 @@ const superContractPlugin = {
 				const transaction = {};
 
 				transaction.superContract = parser.buffer(constants.sizes.signer);
+				transaction.driveKey = parser.buffer(constants.sizes.signer);
 
 				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
 				serializer.writeBuffer(transaction.superContract);
+				serializer.writeBuffer(transaction.driveKey);
 			}
 		});
 	}
