@@ -19,60 +19,60 @@ const constants = { sizes };
 const superContractPlugin = {
 	registerSchema: builder => {
 		builder.addTransactionSupport(EntityType.deploy, {
-			drive: 			ModelType.binary,
-			owner: 			ModelType.binary,
-			fileHash: 		ModelType.binary,
-			vmVersion: 		ModelType.uint64,
+			drive:				ModelType.binary,
+			owner:				ModelType.binary,
+			fileHash:			ModelType.binary,
+			vmVersion:			ModelType.uint64,
 		});
 
 		builder.addTransactionSupport(EntityType.startExecute, {
-			superContract: 		ModelType.binary,
-			function: 			ModelType.string,
-			data: 				ModelType.binary,
-			mosaics: 			{ type: ModelType.array, schemaName: 'execute.mosaic' }
+			superContract:		ModelType.binary,
+			function:			ModelType.string,
+			data:				ModelType.binary,
+			mosaics:			{ type: ModelType.array, schemaName: 'execute.mosaic' }
 		});
 
 		builder.addTransactionSupport(EntityType.endExecute, {
-			operationToken: 	ModelType.binary,
-			mosaics: 			{ type: ModelType.array, schemaName: 'execute.mosaic' }
+			operationToken:		ModelType.binary,
+			mosaics:			{ type: ModelType.array, schemaName: 'execute.mosaic' }
 		});
 
 		builder.addTransactionSupport(EntityType.uploadFile, {
-			driveKey: 			{ type: ModelType.binary, schemaName: 'uploadFile.driveKey' },
-			rootHash: 			{ type: ModelType.binary, schemaName: 'uploadFile.rootHash' },
-			xorRootHash: 		{ type: ModelType.binary, schemaName: 'uploadFile.rootHash' },
-			addActions: 		{ type: ModelType.array, schemaName: 'uploadFile.addfiles' },
-			removeActions: 		{ type: ModelType.array, schemaName: 'uploadFile.addfiles' },
+			driveKey:			{ type: ModelType.binary, schemaName: 'uploadFile.driveKey' },
+			rootHash:			{ type: ModelType.binary, schemaName: 'uploadFile.rootHash' },
+			xorRootHash:		{ type: ModelType.binary, schemaName: 'uploadFile.rootHash' },
+			addActions:			{ type: ModelType.array, schemaName: 'uploadFile.addfiles' },
+			removeActions:		{ type: ModelType.array, schemaName: 'uploadFile.addfiles' },
 		});
 
 		builder.addTransactionSupport(EntityType.deactivate, {
-			superContract: 		ModelType.binary,
-			driveKey: 			ModelType.binary,
+			superContract:		ModelType.binary,
+			driveKey:			ModelType.binary,
 		});
 
 		builder.addSchema('execute.mosaic', {
-			id: 		ModelType.uint64,
-			amount: 	ModelType.uint64,
+			id:					ModelType.uint64,
+			amount:				ModelType.uint64,
 		});
 
 		builder.addSchema('superContractEntry', {
-			supercontract: { type: ModelType.object, schemaName: 'supercontract' }
+			supercontract:		{ type: ModelType.object, schemaName: 'supercontract' }
 		});
 
 		builder.addSchema('supercontract', {
-			multisig:				ModelType.binary,
-			multisigAddress:		ModelType.binary,
-			start:					ModelType.uint64,
-			owner:					ModelType.binary,
-			end:					ModelType.uint64,
-			mainDriveKey:			ModelType.binary,
-			fileHash:				ModelType.binary,
-			vmVersion:				ModelType.uint64,
+			multisig:			ModelType.binary,
+			multisigAddress:	ModelType.binary,
+			start:				ModelType.uint64,
+			owner:				ModelType.binary,
+			end:				ModelType.uint64,
+			mainDriveKey:		ModelType.binary,
+			fileHash:			ModelType.binary,
+			vmVersion:			ModelType.uint64,
 		});
 
 		builder.addSchema('uploadFile.addfiles', {
-			fileHash: ModelType.binary,
-			fileSize: ModelType.uint64,
+			fileHash:			ModelType.binary,
+			fileSize:			ModelType.uint64,
 		});
 	},
 
