@@ -26,7 +26,8 @@ describe('supercontract plugin', () => {
 			// Assert:
 			test.assert.assertRoutes(routes, [
 				'/drive/:publicKey/supercontracts',
-				'/supercontract/:accountId'
+				'/supercontract/:accountId',
+				'/account/:publicKey/supercontracts'
 			]);
 		});
 	});
