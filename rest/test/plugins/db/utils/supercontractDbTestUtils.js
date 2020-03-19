@@ -11,12 +11,13 @@ const test = require('../../../testUtils');
 
 const { Binary } = MongoDb;
 
-const createSuperContractEntry = (id, account, mainDriveKey) => ({
+const createSuperContractEntry = (id, account, mainDriveKey, ownerKey) => ({
 	_id: dbTestUtils.db.createObjectId(id),
 	supercontract: {
 		multisig: new Binary(account.publicKey),
 		multisigAddress: new Binary(account.address),
-		mainDriveKey: new Binary(mainDriveKey)
+		mainDriveKey: new Binary(mainDriveKey),
+		owner: new Binary(ownerKey)
 	}
 });
 

@@ -23,12 +23,13 @@ describe('supercontract plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 8);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 9);
 			expect(modelSchema).to.contain.all.keys([
 				'deploy',
 				'startExecute',
 				'endExecute',
 				'uploadFile',
+				'deactivate',
 				'execute.mosaic',
 				'superContractEntry',
 				'supercontract',
@@ -65,6 +66,12 @@ describe('supercontract plugin', () => {
 				'removeActions'
 			]);
 
+			expect(Object.keys(modelSchema.deactivate).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
+			expect(modelSchema.deactivate).to.contain.all.keys([
+				'superContract',
+				'driveKey',
+			]);
+
 			expect(Object.keys(modelSchema['execute.mosaic']).length).to.equal(2);
 			expect(modelSchema['execute.mosaic']).to.contain.all.keys([
 				'id',
@@ -76,10 +83,11 @@ describe('supercontract plugin', () => {
 				'supercontract',
 			]);
 
-			expect(Object.keys(modelSchema['supercontract']).length).to.equal(7);
+			expect(Object.keys(modelSchema['supercontract']).length).to.equal(8);
 			expect(modelSchema['supercontract']).to.contain.all.keys([
 				'multisig',
 				'multisigAddress',
+				'owner',
 				'start',
 				'end',
 				'mainDriveKey',
@@ -117,12 +125,13 @@ describe('supercontract plugin', () => {
 			const codecs = getCodecs();
 
 			// Assert: codec was registered
-			expect(Object.keys(codecs).length).to.equal(4);
+			expect(Object.keys(codecs).length).to.equal(5);
 			expect(codecs).to.contain.all.keys([
 				EntityType.deploy.toString(),
 				EntityType.startExecute.toString(),
 				EntityType.endExecute.toString(),
 				EntityType.uploadFile.toString(),
+				EntityType.deactivate.toString(),
 			]);
 		});
 
@@ -300,6 +309,23 @@ describe('supercontract plugin', () => {
 							fileSize: [0x0D, 0x0]
 						}
 					]
+				}
+			}));
+		});
+
+		describe('supports deactivate transaction', () => {
+			const codec = getCodecs()[EntityType.deactivate];
+			const superContract = createByteArray(0x01);
+			const driveKey = createByteArray(0x02);
+
+			test.binary.test.addAll(codec, 32 + 32, () => ({
+				buffer: Buffer.concat([
+					superContract,
+					driveKey,
+				]),
+				object: {
+					superContract,
+					driveKey,
 				}
 			}));
 		});
