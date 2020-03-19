@@ -21,7 +21,10 @@
 /** @module plugins/mosaic */
 const EntityType = require('../model/EntityType');
 const ModelType = require('../model/ModelType');
+const sizes = require('../modelBinary/sizes');
 const uint64 = require('../utils/uint64');
+
+const constants = { sizes };
 
 /**
  * Creates a mosaic plugin.
@@ -32,6 +35,7 @@ const mosaicPlugin = {
 		builder.addTransactionSupport(EntityType.mosaicDefinition, {
 			mosaicId: ModelType.uint64,
 			mosaicNonce: ModelType.uint32,
+			levy: { type: ModelType.object, schemaName: 'mosaicDefinition.mosaicLevy' },
 			properties: { type: ModelType.array, schemaName: 'mosaicDefinition.mosaicProperty' }
 		});
 
@@ -57,6 +61,13 @@ const mosaicPlugin = {
 			owner: ModelType.binary,
 			properties: { type: ModelType.array, schemaName: 'mosaicDefinition.mosaicProperty' }
 		});
+
+		builder.addSchema('mosaicDefinition.mosaicLevy', {
+			type: ModelType.uint16,
+			recipient: ModelType.binary,
+			mosaicId: ModelType.uint64,
+			fee: ModelType.uint64
+		});
 	},
 
 	registerCodecs: codecBuilder => {
@@ -68,6 +79,12 @@ const mosaicPlugin = {
 				transaction.mosaicNonce = parser.uint32();
 
 				transaction.mosaicId = parser.uint64();
+
+				transaction.levy = {};
+				transaction.levy.type = parser.uint16();
+				transaction.levy.recipient = parser.buffer(constants.sizes.addressDecoded);
+				transaction.levy.mosaicId = parser.uint64();
+				transaction.levy.fee = parser.uint64();
 
 				const propertiesCount = parser.uint8();
 
@@ -89,6 +106,11 @@ const mosaicPlugin = {
 			serialize: (transaction, serializer) => {
 				serializer.writeUint32(transaction.mosaicNonce);
 				serializer.writeUint64(transaction.mosaicId);
+
+				serializer.writeUint16(transaction.levy.type);
+				serializer.writeBuffer(transaction.levy.recipient);
+				serializer.writeUint64(transaction.levy.mosaicId);
+				serializer.writeUint64(transaction.levy.fee);
 
 				const propertiesCount = transaction.properties.length - numRequiredProperties;
 				if (0 > propertiesCount)
