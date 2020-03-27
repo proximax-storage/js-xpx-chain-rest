@@ -68,6 +68,12 @@ const mosaicPlugin = {
 			mosaicId: ModelType.uint64,
 			fee: ModelType.uint64
 		});
+
+		builder.addTransactionSupport(EntityType.mosaicModifyLevy, {
+			modifyFlag : ModelType.uint32,
+			mosaicId: ModelType.uint64,
+			levy: { type: ModelType.object, schemaName: 'mosaicDefinition.mosaicLevy' },
+		});
 	},
 
 	registerCodecs: codecBuilder => {
@@ -152,6 +158,32 @@ const mosaicPlugin = {
 				serializer.writeUint64(transaction.mosaicId);
 				serializer.writeUint8(transaction.direction);
 				serializer.writeUint64(transaction.delta);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.mosaicModifyLevy, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.modifyFlag = parser.uint32();
+				transaction.mosaicId = parser.uint64();
+
+				transaction.levy = {};
+				transaction.levy.type = parser.uint16();
+				transaction.levy.recipient = parser.buffer(constants.sizes.addressDecoded);
+				transaction.levy.mosaicId = parser.uint64();
+				transaction.levy.fee = parser.uint64();
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeUint32(transaction.modifyFlag);
+				serializer.writeUint64(transaction.mosaicId);
+
+				serializer.writeUint16(transaction.levy.type);
+				serializer.writeBuffer(transaction.levy.recipient);
+				serializer.writeUint64(transaction.levy.mosaicId);
+				serializer.writeUint64(transaction.levy.fee);
 			}
 		});
 	}
