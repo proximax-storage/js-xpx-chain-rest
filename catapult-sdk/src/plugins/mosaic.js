@@ -35,8 +35,8 @@ const mosaicPlugin = {
 		builder.addTransactionSupport(EntityType.mosaicDefinition, {
 			mosaicId: ModelType.uint64,
 			mosaicNonce: ModelType.uint32,
+			properties: { type: ModelType.array, schemaName: 'mosaicDefinition.mosaicProperty' },
 			levy: { type: ModelType.object, schemaName: 'mosaicDefinition.mosaicLevy' },
-			properties: { type: ModelType.array, schemaName: 'mosaicDefinition.mosaicProperty' }
 		});
 
 		builder.addSchema('mosaicDefinition.mosaicProperty', {
@@ -86,12 +86,6 @@ const mosaicPlugin = {
 
 				transaction.mosaicId = parser.uint64();
 
-				transaction.levy = {};
-				transaction.levy.type = parser.uint16();
-				transaction.levy.recipient = parser.buffer(constants.sizes.addressDecoded);
-				transaction.levy.mosaicId = parser.uint64();
-				transaction.levy.fee = parser.uint64();
-
 				const propertiesCount = parser.uint8();
 
 				transaction.properties = [];
@@ -106,17 +100,20 @@ const mosaicPlugin = {
 					}
 				}
 
+				if( parser.numUnprocessedBytes() ) {
+					transaction.levy = {};
+					transaction.levy.type = parser.uint16();
+					transaction.levy.recipient = parser.buffer(constants.sizes.addressDecoded);
+					transaction.levy.mosaicId = parser.uint64();
+					transaction.levy.fee = parser.uint64();
+				}
+
 				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
 				serializer.writeUint32(transaction.mosaicNonce);
 				serializer.writeUint64(transaction.mosaicId);
-
-				serializer.writeUint16(transaction.levy.type);
-				serializer.writeBuffer(transaction.levy.recipient);
-				serializer.writeUint64(transaction.levy.mosaicId);
-				serializer.writeUint64(transaction.levy.fee);
 
 				const propertiesCount = transaction.properties.length - numRequiredProperties;
 				if (0 > propertiesCount)
@@ -141,6 +138,13 @@ const mosaicPlugin = {
 					const property = transaction.properties[numRequiredProperties + i];
 					serializer.writeUint8(property.id);
 					serializer.writeUint64(property.value);
+				}
+
+				if(transaction.version > 3) {
+					serializer.writeUint16(transaction.levy.type);
+					serializer.writeBuffer(transaction.levy.recipient);
+					serializer.writeUint64(transaction.levy.mosaicId);
+					serializer.writeUint64(transaction.levy.fee);
 				}
 			}
 		});
