@@ -51,6 +51,12 @@ const EntityType = {
 	/** Mosaic supply change transaction. */
 	mosaicSupplyChange: 0x424D,
 
+	/** Mosaic modify levy transaction. */
+	mosaicModifyLevy: 0x434D,
+
+	/** Mosaic remove levy transaction. */
+	mosaicRemoveLevy: 0x444D,
+
 	/** Modify multisig account transaction. */
 	modifyMultisigAccount: 0x4155,
 

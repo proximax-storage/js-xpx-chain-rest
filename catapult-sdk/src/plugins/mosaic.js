@@ -21,7 +21,10 @@
 /** @module plugins/mosaic */
 const EntityType = require('../model/EntityType');
 const ModelType = require('../model/ModelType');
+const sizes = require('../modelBinary/sizes');
 const uint64 = require('../utils/uint64');
+
+const constants = { sizes };
 
 /**
  * Creates a mosaic plugin.
@@ -56,6 +59,24 @@ const mosaicPlugin = {
 			height: ModelType.uint64,
 			owner: ModelType.binary,
 			properties: { type: ModelType.array, schemaName: 'mosaicDefinition.mosaicProperty' }
+		});
+
+		builder.addSchema('mosaicDefinition.mosaicLevy', {
+			type: ModelType.uint16,
+			recipient: ModelType.binary,
+			mosaicId: ModelType.uint64,
+			fee: ModelType.uint64
+		});
+
+		builder.addTransactionSupport(EntityType.mosaicModifyLevy, {
+			command : ModelType.uint32,
+			updateFlag : ModelType.uint32,
+			mosaicId: ModelType.uint64,
+			levy: { type: ModelType.object, schemaName: 'mosaicDefinition.mosaicLevy' },
+		});
+
+		builder.addTransactionSupport(EntityType.mosaicRemoveLevy, {
+			mosaicId: ModelType.uint64,
 		});
 	},
 
@@ -130,6 +151,47 @@ const mosaicPlugin = {
 				serializer.writeUint64(transaction.mosaicId);
 				serializer.writeUint8(transaction.direction);
 				serializer.writeUint64(transaction.delta);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.mosaicModifyLevy, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.command = parser.uint32();
+				transaction.updateFlag = parser.uint32();
+				transaction.mosaicId = parser.uint64();
+
+				transaction.levy = {};
+				transaction.levy.type = parser.uint16();
+				transaction.levy.recipient = parser.buffer(constants.sizes.addressDecoded);
+				transaction.levy.mosaicId = parser.uint64();
+				transaction.levy.fee = parser.uint64();
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeUint32(transaction.command);
+				serializer.writeUint32(transaction.updateFlag);
+				serializer.writeUint64(transaction.mosaicId);
+
+				serializer.writeUint16(transaction.levy.type);
+				serializer.writeBuffer(transaction.levy.recipient);
+				serializer.writeUint64(transaction.levy.mosaicId);
+				serializer.writeUint64(transaction.levy.fee);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.mosaicRemoveLevy, {
+			deserialize: parser => {
+				const transaction = {};
+
+				transaction.mosaicId = parser.uint64();
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeUint64(transaction.mosaicId);
 			}
 		});
 	}

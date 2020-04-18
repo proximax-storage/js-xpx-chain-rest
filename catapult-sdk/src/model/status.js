@@ -93,6 +93,13 @@ const toStringInternal = code => {
 		case 0x804D00A4: return 'Failure_Mosaic_Non_Transferable';
 		case 0x804D00AA: return 'Failure_Mosaic_Max_Mosaics_Exceeded';
 		case 0x804D00AB: return 'Failure_Mosaic_Plugin_Config_Malformed';
+		case 0x804D0007: return 'Failure_Mosaic_Insufficient_Levy_Balance';
+		case 0x804D0008: return 'Failure_Mosaic_Recipient_Levy_Not_Exist';
+		case 0x804D0009: return 'Failure_Mosaic_Invalid_Levy_Fee';
+		case 0x804D000A: return 'Failure_Mosaic_Ineligible_Signer';
+		case 0x804D000B: return 'Failure_Mosaic_Id_Not_Found';
+		case 0x804D000C: return 'Failure_Mosaic_Levy_Not_Found';
+		case 0x804D000D: return 'Failure_Mosaic_Levy_Already_Exist';
 		case 0x80550001: return 'Failure_Multisig_Modify_Account_In_Both_Sets';
 		case 0x80550002: return 'Failure_Multisig_Modify_Multiple_Deletes';
 		case 0x80550003: return 'Failure_Multisig_Modify_Redundant_Modifications';
