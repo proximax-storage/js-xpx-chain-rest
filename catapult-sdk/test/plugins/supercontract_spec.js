@@ -23,7 +23,7 @@ describe('supercontract plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 9);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 11);
 			expect(modelSchema).to.contain.all.keys([
 				'deploy',
 				'startExecute',
@@ -33,6 +33,8 @@ describe('supercontract plugin', () => {
 				'execute.mosaic',
 				'superContractEntry',
 				'supercontract',
+				'suspend',
+				'resume',
 			]);
 
 			expect(Object.keys(modelSchema.deploy).length).to.equal(Object.keys(modelSchema.transaction).length + 4);
@@ -100,6 +102,16 @@ describe('supercontract plugin', () => {
 				'fileHash',
 				'fileSize'
 			]);
+
+			expect(Object.keys(modelSchema.suspend).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
+			expect(modelSchema.suspend).to.contain.all.keys([
+				'superContract',
+			]);
+
+			expect(Object.keys(modelSchema.resume).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
+			expect(modelSchema.resume).to.contain.all.keys([
+				'superContract',
+			]);
 		});
 	});
 
@@ -125,13 +137,15 @@ describe('supercontract plugin', () => {
 			const codecs = getCodecs();
 
 			// Assert: codec was registered
-			expect(Object.keys(codecs).length).to.equal(5);
+			expect(Object.keys(codecs).length).to.equal(7);
 			expect(codecs).to.contain.all.keys([
 				EntityType.deploy.toString(),
 				EntityType.startExecute.toString(),
 				EntityType.endExecute.toString(),
 				EntityType.uploadFile.toString(),
 				EntityType.deactivate.toString(),
+				EntityType.suspend.toString(),
+				EntityType.resume.toString(),
 			]);
 		});
 
@@ -326,6 +340,34 @@ describe('supercontract plugin', () => {
 				object: {
 					superContract,
 					driveKey,
+				}
+			}));
+		});
+
+		describe('supports suspend transaction', () => {
+			const codec = getCodecs()[EntityType.suspend];
+			const superContract = createByteArray(0x01);
+
+			test.binary.test.addAll(codec, 32, () => ({
+				buffer: Buffer.concat([
+					superContract,
+				]),
+				object: {
+					superContract,
+				}
+			}));
+		});
+
+		describe('supports resume transaction', () => {
+			const codec = getCodecs()[EntityType.resume];
+			const superContract = createByteArray(0x01);
+
+			test.binary.test.addAll(codec, 32, () => ({
+				buffer: Buffer.concat([
+					superContract,
+				]),
+				object: {
+					superContract,
 				}
 			}));
 		});

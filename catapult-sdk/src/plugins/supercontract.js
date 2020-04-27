@@ -74,6 +74,14 @@ const superContractPlugin = {
 			fileHash:			ModelType.binary,
 			fileSize:			ModelType.uint64,
 		});
+
+		builder.addTransactionSupport(EntityType.suspend, {
+			superContract:		ModelType.binary,
+		});
+
+		builder.addTransactionSupport(EntityType.resume, {
+			superContract:		ModelType.binary,
+		});
 	},
 
 	registerCodecs: codecBuilder => {
@@ -238,6 +246,34 @@ const superContractPlugin = {
 			serialize: (transaction, serializer) => {
 				serializer.writeBuffer(transaction.superContract);
 				serializer.writeBuffer(transaction.driveKey);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.suspend, {
+			deserialize: parser => {
+				const transaction = {};
+
+				transaction.superContract = parser.buffer(constants.sizes.signer);
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.superContract);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.resume, {
+			deserialize: parser => {
+				const transaction = {};
+
+				transaction.superContract = parser.buffer(constants.sizes.signer);
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.superContract);
 			}
 		});
 	}
