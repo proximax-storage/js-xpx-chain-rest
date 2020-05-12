@@ -157,8 +157,7 @@ const mosaicPlugin = {
 		codecBuilder.addTransactionSupport(EntityType.mosaicModifyLevy, {
 			deserialize: parser => {
 				const transaction = {};
-				transaction.command = parser.uint32();
-				transaction.updateFlag = parser.uint32();
+
 				transaction.mosaicId = parser.uint64();
 
 				transaction.levy = {};
@@ -171,8 +170,6 @@ const mosaicPlugin = {
 			},
 
 			serialize: (transaction, serializer) => {
-				serializer.writeUint32(transaction.command);
-				serializer.writeUint32(transaction.updateFlag);
 				serializer.writeUint64(transaction.mosaicId);
 
 				serializer.writeUint16(transaction.levy.type);
