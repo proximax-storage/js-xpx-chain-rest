@@ -76,17 +76,17 @@ describe('db facade', () => {
 			});
 		};
 
-		const createFailed = value => ({ f: value });
-		const createFailedStatus = value => ({ group: 'failed', f: value });
-		const createTransaction = (hash, deadline, height) => ({ meta: { hash, height }, transaction: { deadline } });
+		const createFailed = value => ({ hash: Buffer.of(value) });
+		const createFailedStatus = value => ({ group: 'failed', hash: Buffer.of(value) });
+		const createTransaction = (hash, deadline, height) => ({ meta: { hash: Buffer.of(hash), height }, transaction: { deadline } });
 		const createUnconfirmedStatus = (hash, deadline) => ({
-			group: 'unconfirmed', status: 0, hash, deadline, height: 0
+			group: 'unconfirmed', status: 0, hash: Buffer.of(hash), deadline, height: 0
 		});
 		const createConfirmedStatus = (hash, deadline, height) => ({
-			group: 'confirmed', status: 0, hash, deadline, height
+			group: 'confirmed', status: 0, hash: Buffer.of(hash), deadline, height
 		});
 		const createCustomStatus = (hash, deadline, height) => ({
-			group: 'custom', status: 0, hash, deadline, height
+			group: 'custom', status: 0, hash: Buffer.of(hash), deadline, height
 		});
 
 		it('unknown hashes are properly mapped', () =>
@@ -125,10 +125,23 @@ describe('db facade', () => {
 				confirmed: [createTransaction(55, 66, 77), createTransaction(88, 99, 11)],
 				custom: [createTransaction(87, 98, 43)],
 				expected: [
-					createFailedStatus(123), createFailedStatus(456),
 					createUnconfirmedStatus(111, 222), createUnconfirmedStatus(333, 444),
 					createCustomStatus(87, 98, 43),
-					createConfirmedStatus(55, 66, 77), createConfirmedStatus(88, 99, 11)
+					createConfirmedStatus(55, 66, 77), createConfirmedStatus(88, 99, 11),
+					createFailedStatus(123), createFailedStatus(456),
+				]
+			}));
+
+		it('transaction has two statuses failed + something, then we need return not failure state', () =>
+			addTransactionStatusesByHashesTest({
+				failed: [createFailedStatus(123), createFailedStatus(456), createFailedStatus(87)],
+				unconfirmed: [createTransaction(456, 99, 0)],
+				confirmed: [createTransaction(123, 66, 77) ],
+				custom: [createTransaction(87, 98, 43)],
+				expected: [
+					createUnconfirmedStatus(456, 99, 11),
+					createCustomStatus(87, 98, 43),
+					createConfirmedStatus(123, 66, 77),
 				]
 			}));
 	});

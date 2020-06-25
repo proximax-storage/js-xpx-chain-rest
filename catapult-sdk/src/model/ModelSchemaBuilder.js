@@ -51,6 +51,7 @@ class ModelSchemaBuilder {
 				height: ModelType.uint64,
 				timestamp: ModelType.uint64,
 				difficulty: ModelType.uint64,
+				feeMultiplier: ModelType.uint32,
 				previousBlockHash: ModelType.binary,
 				blockTransactionsHash: ModelType.binary,
 				blockReceiptsHash: ModelType.binary,
