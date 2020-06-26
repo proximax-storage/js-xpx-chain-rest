@@ -353,13 +353,45 @@ class CatapultDb {
 		return this.queryTransactions(conditions, id, pageSize, { sortOrder: ordering });
 	}
 
-	accountTransactionsIncoming(account, id, pageSize, ordering) {
+	async accountTransactionsIncoming(account, id, pageSize, ordering) {
 		let bufferAddress = null;
 		if ('publicKey' === account.type)
 			bufferAddress = Buffer.from(address.publicKeyToAddress(account.accountId, this.networkId));
 		else
 			bufferAddress = Buffer.from(account.accountId);
-		return this.queryTransactions({ 'transaction.recipient': bufferAddress }, id, pageSize, { sortOrder: ordering });
+
+		let conditions = { $or: [{'transaction.recipient': bufferAddress}] };
+
+		const getAliasedCondition = async (conditions, bufferAddress) => {
+			const namespace = this.database.collection("namespaces");
+			const result = await namespace.find({'namespace.alias.address': bufferAddress}).toArray();
+
+			result.forEach(namespace => {
+				// namespace Id sequence
+				// 0x91 | namespaceId on 8 bytes | 16 bytes 0-pad = 25 bytes
+				let buffer = Buffer.alloc(25);
+				buffer[0] = 0x91;
+
+				let appendToBuffer = function( buffer, currentIndex, input) {
+					let shift = 0;
+					let mask = 0x000000ff;
+					for(let i = 0; i < 4; i++) {
+						buffer[currentIndex++] = (input & mask) >> shift;
+						shift += 8;
+						mask <<= 8;
+					}
+				};
+
+				appendToBuffer(buffer, 1, namespace.namespace.level0.getLowBits());
+				appendToBuffer(buffer, 5, namespace.namespace.level0.getHighBits());
+
+				conditions.$or.push ({ 'transaction.recipient' : buffer});
+			})
+		};
+
+		await getAliasedCondition(conditions, bufferAddress);
+
+		return this.queryTransactions(conditions, id, pageSize, { sortOrder: ordering });
 	}
 
 	accountTransactionsOutgoing(account, id, pageSize, ordering) {
