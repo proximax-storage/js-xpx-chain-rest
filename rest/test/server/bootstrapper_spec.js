@@ -682,6 +682,7 @@ describe('server (bootstrapper)', () => {
 			Buffer.of(0x97, 0x87, 0x45, 0x0E, tag || 0xE1, 0x6C, 0xB6, 0x62), // height
 			Buffer.from(test.random.bytes(8)), // timestamp
 			Buffer.from(test.random.bytes(8)), // difficulty
+			Buffer.from(test.random.bytes(4)), // feeMultiplier
 			Buffer.from(test.random.bytes(test.constants.sizes.hash256)), // previous block hash
 			Buffer.from(test.random.bytes(test.constants.sizes.hash256)) // block transactions hash
 		]);

@@ -121,6 +121,7 @@ const createDbBlock = height => {
 		timestamp: Long.fromNumber(23456),
 		height: Long.fromNumber(height),
 		difficulty: Long.fromNumber(45678),
+		feeMultiplier: 228,
 		previousBlockHash: new Binary(test.random.hash()),
 		blockTransactionsHash: new Binary(test.random.hash())
 	};

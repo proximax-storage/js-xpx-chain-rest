@@ -271,6 +271,7 @@ const toStringInternal = code => {
 		case 0x8060000C: return 'Failure_SuperContract_Execution_Is_In_Progress';
 		case 0x8060000D: return 'Failure_SuperContract_Execution_Is_Not_In_Progress';
 		case 0x8060000E: return 'Failure_SuperContract_Invalid_Drive_Key';
+		case 0x8060000F: return 'Failure_SuperContract_Count_On_Drive_Exceeded_Limit';
 		case 0x80FF0066: return 'Failure_Chain_Unlinked';
 		case 0x80FF0068: return 'Failure_Chain_Block_Not_Hit';
 		case 0x80FF0069: return 'Failure_Chain_Block_Inconsistent_State_Hash';
