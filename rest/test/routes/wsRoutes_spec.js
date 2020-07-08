@@ -18,7 +18,7 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const test = require('./utils/routeTestUtils');
+const { test } = require('./utils/routeTestUtils');
 const wsRoutes = require('../../src/routes/wsRoutes');
 const { expect } = require('chai');
 

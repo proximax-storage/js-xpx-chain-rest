@@ -7,7 +7,7 @@
 const pluginTest = require('./utils/pluginTestUtils');
 const richlist = require('../../src/plugins/richlist');
 const RichlistDb = require('../../src/plugins/db/RichlistDb');
-const test = require('../routes/utils/routeTestUtils');
+const { test } = require('../routes/utils/routeTestUtils');
 
 describe('richlist plugin', () => {
 	pluginTest.assertThat.pluginCreatesDb(richlist, RichlistDb);

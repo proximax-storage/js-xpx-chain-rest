@@ -5,7 +5,7 @@
  **/
 
 const richlistRoutes = require('../../../src/plugins/routes/richlistRoutes');
-const test = require('../../routes/utils/routeTestUtils');
+const { test } = require('../../routes/utils/routeTestUtils');
 const restify = require('restify');
 const sinon = require('sinon');
 const { expect } = require('chai');

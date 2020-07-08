@@ -7,7 +7,7 @@
 const config = require('../../src/plugins/config');
 const ConfigDb = require('../../src/plugins/db/ConfigDb');
 const pluginTest = require('./utils/pluginTestUtils');
-const test = require('../routes/utils/routeTestUtils');
+const { test } = require('../routes/utils/routeTestUtils');
 
 describe('config plugin', () => {
 	pluginTest.assertThat.pluginCreatesDb(config, ConfigDb);

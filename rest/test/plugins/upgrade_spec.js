@@ -5,7 +5,7 @@
  **/
 
 const pluginTest = require('./utils/pluginTestUtils');
-const test = require('../routes/utils/routeTestUtils');
+const { test } = require('../routes/utils/routeTestUtils');
 const upgrade = require('../../src/plugins/upgrade');
 const UpgradeDb = require('../../src/plugins/db/UpgradeDb');
 

@@ -19,7 +19,7 @@
  */
 
 const catapult = require('catapult-sdk');
-const test = require('./utils/routeTestUtils');
+const { test } = require('./utils/routeTestUtils');
 const transactionStatusRoutes = require('../../src/routes/transactionStatusRoutes');
 
 const { convert } = catapult.utils;
@@ -33,7 +33,7 @@ describe('transaction status routes', () => {
 	const errorMessage = 'has an invalid format';
 
 	test.route.document.addGetPostDocumentRouteTests(transactionStatusRoutes.register, {
-		routes: { singular: '/transaction/:hash/status', plural: '/transaction/statuses' },
+		routes: { singular: '/transactions/:hash/status', plural: '/transactions/statuses' },
 		inputs: {
 			valid: { object: { hash: hashes[0] }, parsed: [binaryHashes[0]], printable: hashes[0] },
 			validMultiple: { object: { hashes }, parsed: binaryHashes },

@@ -8,7 +8,7 @@ const service = require('../../src/plugins/service');
 const ServiceDb = require('../../src/plugins/db/ServiceDb');
 const pluginTest = require('./utils/pluginTestUtils');
 const catapult = require('catapult-sdk');
-const test = require('../routes/utils/routeTestUtils');
+const { test } = require('../routes/utils/routeTestUtils');
 const { expect } = require('chai');
 
 const { address, networkInfo } = catapult.model;

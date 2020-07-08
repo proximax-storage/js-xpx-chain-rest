@@ -71,6 +71,27 @@ describe('formatters', () => {
 			assertJsonFormat(object, '{"height":[1,4],"scoreLow":[112233,17798],"scoreHigh":[4,6]}', undefined);
 		});
 
+		it('can format catapult object with page structure', () => {
+			// Arrange:
+			const object = {
+				payload: {
+					data: [{
+							height: [1, 2],
+							scoreLow: [112233, 8899],
+							scoreHigh: [4, 3]
+					}],
+					pagination: {}
+				},
+				type: 'chainInfo',
+				structure: 'page'
+			};
+
+			// Assert: formatter doubles high part
+			assertJsonFormat(
+				object, '{"data":[{"height":[1,4],"scoreLow":[112233,17798],"scoreHigh":[4,6]}],"pagination":{}}', undefined
+			);
+		});
+
 		it('can format catapult object array', () => {
 			// Arrange:
 			const object = {
