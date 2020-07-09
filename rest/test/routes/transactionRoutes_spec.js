@@ -24,100 +24,154 @@ const routeResultTypes = require('../../src/routes/routeResultTypes');
 const transactionRoutes = require('../../src/routes/transactionRoutes');
 const { expect } = require('chai');
 const sinon = require('sinon');
+const routeUtils = require('../../src/routes/routeUtils');
 
 const { address } = catapult.model;
 const { convert } = catapult.utils;
 
+const TransactionGroups = {
+	confirmed: 'confirmed',
+	unconfirmed: 'unconfirmed',
+	partial: 'partial'
+};
+
 describe('transaction routes', () => {
-	describe('transaction', () => {
-		describe('PUT transaction', () => {
-			test.route.packet.addPutPacketRouteTests(transactionRoutes.register, {
-				routeName: '/transactions',
-				packetType: '9',
-				inputs: {
-					valid: {
-						params: {payload: '123456'},
-						parsed: Buffer.of(
-							0x0B, 0x00, 0x00, 0x00, // size (header)
-							0x09, 0x00, 0x00, 0x00, // type (header)
-							0x12, 0x34, 0x56 // payload
-						)
-					},
-					invalid: {
-						params: {payload: '1234S6'},
-						error: {key: 'payload'}
-					}
-				}
-			});
-		});
+	describe('transactions', () => {
+		const validObjectId = 'CCDDEEFF0011223344556677';
+		const validHash = '112233445566778899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00';
 
 		describe('get', () => {
-			const addGetPostTests = (dbApiName, key, ids, parsedIds) => {
-				const errorMessage = 'has an invalid format';
-				test.route.document.addGetPostDocumentRouteTests(transactionRoutes.register, {
-					routes: {singular: '/transactions/:transactionId', plural: '/transactions'},
-					inputs: {
-						valid: {object: {transactionId: ids[0]}, parsed: [parsedIds[0]], printable: ids[0]},
-						validMultiple: {object: {transactionIds: ids}, parsed: parsedIds},
-						invalid: {object: {transactionId: '12345'}, error: `transactionId ${errorMessage}`},
-						invalidMultiple: {
-							object: {transactionIds: ['12345', ids[0], ids[1]]},
-							error: `element in array transactionIds ${errorMessage}`
-						}
-					},
-					dbApiName,
-					type: routeResultTypes.transaction
-				});
-			};
+			describe('by id', () => {
+				const fakeTransaction = { meta: { addresses: [] }, transaction: { type: 12345 } };
 
-			const addHomogeneousCheck = (validIds, invalidId) => {
-				it('does not support lookup of heterogenous ids', () => {
-					// Arrange:
-					const keyGroups = [];
-					const db = test.setup.createCapturingDb('transactionsByIds', keyGroups, [{value: 'this is nonsense'}]);
+				const dbTransactionsByIdsFake = sinon.fake.resolves(fakeTransaction);
+				const dbTransactionsByHashesFake = sinon.fake.resolves(fakeTransaction);
+
+				const mockServer = new MockServer();
+				const db = {
+					transactionsByIds: dbTransactionsByIdsFake,
+					transactionsByHashes: dbTransactionsByHashesFake
+				};
+				transactionRoutes.register(mockServer.server, db, {});
+
+				const route = mockServer.getRoute('/transactions/:group/:transactionId').get();
+
+				beforeEach(() => {
+					mockServer.resetStats();
+					dbTransactionsByIdsFake.resetHistory();
+					dbTransactionsByHashesFake.resetHistory();
+				});
+
+				const runParseArgumentParamTest = (params, parserName) => {
+					// Arrange
+					const req = { params: { group: TransactionGroups.confirmed, transactionId: params } };
+					const parseArgumentSpy = sinon.spy(routeUtils, 'parseArgument');
 
 					// Act:
-					const registerRoutes = transactionRoutes.register;
-					const ids = [validIds[0], validIds[1], invalidId, validIds[2]];
-					const errorMessage = 'element in array transactionIds has an invalid format';
-					return test.route.executeThrows(
-						registerRoutes,
-						'/transactions',
-						'post',
-						{transactionIds: ids},
-						db,
-						undefined,
-						errorMessage,
-						409
-					);
+					return mockServer.callRoute(route, req).then(() => {
+						// Assert:
+						expect(parseArgumentSpy.calledOnceWith(
+							{ group: TransactionGroups.confirmed, transactionId: params },
+							'transactionId',
+							parserName
+						)).to.equal(true);
+						parseArgumentSpy.restore();
+					});
+				};
+
+				it('throws if invalid length of transaction id', () => {
+					// Arrange
+					const req = { params: { group: TransactionGroups.confirmed, transactionId: '12345' } };
+
+					// Act + Assert:
+					expect(() => mockServer.callRoute(route, req)).to.throw('invalid length of transaction id \'12345\'');
 				});
-			};
 
-			const Valid_Object_Ids = ['00112233445566778899AABB', 'CCDDEEFF0011223344556677', '8899AABBCCDDEEFF00112233'];
-			const Valid_Transaction_Hashes = [
-				'00112233445566778899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF',
-				'112233445566778899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00',
-				'2233445566778899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF0011'
-			];
+				it('calls parseArgument with correct parser for id', () => runParseArgumentParamTest(validObjectId, 'objectId'));
+				it('calls parseArgument with correct parser for hash', () => runParseArgumentParamTest(validHash, 'hash256'));
 
-			describe('objectId', () => {
-				addGetPostTests('transactionsByIds', 'transactionId', Valid_Object_Ids, Valid_Object_Ids);
-				addHomogeneousCheck(Valid_Object_Ids, Valid_Transaction_Hashes[0]);
+				describe('checks correct group is provided', () => {
+					const runValidGroupTest = group => {
+						it(`${group} - by id`, () => {
+							// Arrange
+							const req = { params: { group, transactionId: validObjectId } };
+
+							// Act:
+							mockServer.callRoute(route, req).then(() => {
+								// Assert:
+								expect(dbTransactionsByIdsFake.calledOnce).to.equal(true);
+								expect(dbTransactionsByIdsFake.firstCall.args[0]).to.equal(group);
+							});
+						});
+
+						it(`${group} - by hash`, () => {
+							// Arrange
+							const req = { params: { group, transactionId: validHash } };
+
+							// Act:
+							mockServer.callRoute(route, req).then(() => {
+								// Assert:
+								expect(dbTransactionsByHashesFake.calledOnce).to.equal(true);
+								expect(dbTransactionsByHashesFake.firstCall.args[0]).to.equal(group);
+							});
+						});
+					};
+
+					Object.keys(TransactionGroups).forEach(group => runValidGroupTest(group));
+
+					it('not found if group does not exists', () => {
+						// Arrange
+						const req = { params: { group: 'nonExistingGroup', transactionId: validObjectId } };
+
+						// Act:
+						mockServer.callRoute(route, req);
+
+						// Assert:
+						expect(mockServer.next.calledOnce).to.equal(true);
+						expect(mockServer.next.firstCall.args[0].statusCode).to.equal(404);
+					});
+				});
+
+				describe('calls correct transaction retriever with correct params', () => {
+					it('id param', () => {
+						// Arrange
+						const req = { params: { group: TransactionGroups.confirmed, transactionId: validObjectId } };
+
+						// Act:
+						return mockServer.callRoute(route, req).then(() => {
+							// Assert:
+							expect(dbTransactionsByIdsFake.calledOnce).to.equal(true);
+							expect(dbTransactionsByIdsFake.firstCall.args[1]).to.deep.equal([validObjectId]);
+
+							expect(mockServer.send.firstCall.args[0]).to.deep.equal({
+								payload: fakeTransaction,
+								type: routeResultTypes.transaction
+							});
+							expect(mockServer.next.calledOnce).to.equal(true);
+						});
+					});
+
+					it('hash param', () => {
+						// Arrange
+						const req = { params: { group: TransactionGroups.confirmed, transactionId: validHash } };
+
+						// Act:
+						return mockServer.callRoute(route, req).then(() => {
+							// Assert:
+							expect(dbTransactionsByHashesFake.calledOnce).to.equal(true);
+							expect(dbTransactionsByHashesFake.firstCall.args[1]).to.deep.equal([convert.hexToUint8(validHash)]);
+
+							expect(mockServer.send.firstCall.args[0]).to.deep.equal({
+								payload: fakeTransaction,
+								type: routeResultTypes.transaction
+							});
+							expect(mockServer.next.calledOnce).to.equal(true);
+						});
+					});
+				});
 			});
 
-			describe('transactionHash', () => {
-				addGetPostTests(
-					'transactionsByHashes',
-					'transactionId',
-					Valid_Transaction_Hashes,
-					Valid_Transaction_Hashes.map(convert.hexToUint8)
-				);
-				addHomogeneousCheck(Valid_Transaction_Hashes, Valid_Object_Ids[0]);
-			});
-		});
-
-		describe('transactions', () => {
-			describe('get', () => {
+			describe('paginated', () => {
 				const testAddressString = 'SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXWV';
 				const testAddress = address.stringToAddress(testAddressString);
 
@@ -149,7 +203,7 @@ describe('transaction routes', () => {
 				};
 				transactionRoutes.register(mockServer.server, db, services);
 
-				const route = mockServer.getRoute('/transactions').get();
+				const route = mockServer.getRoute('/transactions/:group').get();
 
 				beforeEach(() => {
 					mockServer.resetStats();
@@ -159,7 +213,7 @@ describe('transaction routes', () => {
 				describe('returns transactions', () => {
 					it('returns correct structure with transactions', () => {
 						const req = {
-							params: {}
+							params: { group: TransactionGroups.confirmed }
 						};
 
 						// Act:
@@ -178,14 +232,13 @@ describe('transaction routes', () => {
 				describe('parses filters', () => {
 					const runParseFilterTest = (filter, param, value) => {
 						it(filter, () => {
-							const req = { params: { [filter]: param } };
+							const req = { params: { group: TransactionGroups.confirmed, [filter]: param } };
 
 							const expectedResult = {
 								address: undefined,
 								height: undefined,
 								recipientAddress: undefined,
 								signerPublicKey: undefined,
-								state: undefined,
 								embedded: undefined,
 								transactionTypes: undefined
 							};
@@ -194,7 +247,7 @@ describe('transaction routes', () => {
 
 							// Act + Assert
 							return mockServer.callRoute(route, req).then(() => {
-								expect(dbTransactionsFake.firstCall.args[0]).to.deep.equal(expectedResult);
+								expect(dbTransactionsFake.firstCall.args[1]).to.deep.equal(expectedResult);
 							});
 						});
 					};
@@ -204,8 +257,7 @@ describe('transaction routes', () => {
 						{ filter: 'address', param: testAddressString, value: testAddress },
 						{ filter: 'signerPublicKey', param: testPublickeyString, value: testPublickey },
 						{ filter: 'recipientAddress', param: testAddressString, value: testAddress },
-						{ filter: 'embedded', param: 'true', value: true },
-						{ filter: 'state', param: 'confirmed', value: 'confirmed' }
+						{ filter: 'embedded', param: 'true', value: true }
 					];
 
 					testCases.forEach(testCase => {
@@ -213,16 +265,15 @@ describe('transaction routes', () => {
 					});
 
 					it('transactionTypes', () => {
-						const req = { params: { type: ['1', '5', '25'] } };
+						const req = { params: { group: TransactionGroups.confirmed, type: ['1', '5', '25'] } };
 
 						// Act + Assert
 						return mockServer.callRoute(route, req).then(() => {
-							expect(dbTransactionsFake.firstCall.args[0]).to.deep.equal({
+							expect(dbTransactionsFake.firstCall.args[1]).to.deep.equal({
 								address: undefined,
 								height: undefined,
 								recipientAddress: undefined,
 								signerPublicKey: undefined,
-								state: undefined,
 								embedded: undefined,
 								transactionTypes: [1, 5, 25]
 							});
@@ -231,42 +282,31 @@ describe('transaction routes', () => {
 				});
 
 				describe('parses options', () => {
-					it('parses options correctly', () => {
-						const req = {
-							params: {
-								pageSize: '15', pageNumber: '5', sortField: 'id', order: 'desc'
-							}
-						};
+					it('parses and forwards paging options', () => {
+						// Arrange:
+						const pagingBag = 'fakePagingBagObject';
+						const paginationParser = sinon.stub(routeUtils, 'parsePaginationArguments').returns(pagingBag);
 
-						// Act + Assert
-						return mockServer.callRoute(route, req).then(() => {
-							expect(dbTransactionsFake.firstCall.args[1]).to.deep.equal({
-								pageSize: 15,
-								pageNumber: 5,
-								sortField: '_id',
-								sortDirection: -1,
-								offset: undefined
-							});
+						// Act:
+						return mockServer.callRoute(route, { params: { group: TransactionGroups.confirmed } }).then(() => {
+							// Assert:
+							expect(dbTransactionsFake.calledOnce).to.equal(true);
+							expect(dbTransactionsFake.firstCall.args[2]).to.deep.equal(pagingBag);
+							paginationParser.restore();
 						});
 					});
 
-					// force sort field to 'id' until this is indexed/decided/developed
-					it('always defaults sortField to id', () => {
-						const req = {
-							params: {
-								pageSize: '15', pageNumber: '1', sortField: 'meta.hash'
-							}
-						};
+					it('allowed sort fields are taken into account', () => {
+						// Arrange:
+						const paginationParserSpy = sinon.spy(routeUtils, 'parsePaginationArguments');
+						const expectedAllowedSortFields = { id: 'objectId' };
 
-						// Act + Assert
-						return mockServer.callRoute(route, req).then(() => {
-							expect(dbTransactionsFake.firstCall.args[1]).to.deep.equal({
-								pageSize: 15,
-								pageNumber: 1,
-								sortField: '_id',
-								sortDirection: 1,
-								offset: undefined
-							});
+						// Act:
+						return mockServer.callRoute(route, { params: { group: TransactionGroups.confirmed } }).then(() => {
+							// Assert:
+							expect(paginationParserSpy.calledOnce).to.equal(true);
+							expect(paginationParserSpy.firstCall.args[2]).to.deep.equal(expectedAllowedSortFields);
+							paginationParserSpy.restore();
 						});
 					});
 				});
@@ -276,7 +316,7 @@ describe('transaction routes', () => {
 
 					it('address and signer public key', () => {
 						const req = {
-							params: { address: testAddressString, signerPublicKey: testPublickeyString }
+							params: { group: TransactionGroups.confirmed, address: testAddressString, signerPublicKey: testPublickeyString }
 						};
 
 						// Act + Assert
@@ -285,7 +325,7 @@ describe('transaction routes', () => {
 
 					it('address and recipient address', () => {
 						const req = {
-							params: { address: testAddressString, recipientAddress: testAddressString }
+							params: { group: TransactionGroups.confirmed, address: testAddressString, recipientAddress: testAddressString }
 						};
 
 						// Act + Assert
@@ -293,34 +333,213 @@ describe('transaction routes', () => {
 					});
 				});
 
-				describe('checks correct state is provided', () => {
-					const runValidStateTest = state => {
-						it(state, () =>
+				describe('checks correct group is provided', () => {
+					const runValidGroupTest = group => {
+						it(group, () =>
 							// Act + Assert
-							mockServer.callRoute(route, { params: { state } }).then(() => {
-								expect(dbTransactionsFake.firstCall.args[0]).to.deep.equal({
+							mockServer.callRoute(route, { params: { group } }).then(() => {
+								expect(dbTransactionsFake.firstCall.args[1]).to.deep.equal({
 									address: undefined,
 									height: undefined,
 									recipientAddress: undefined,
 									signerPublicKey: undefined,
-									state,
 									embedded: undefined,
 									transactionTypes: undefined
 								});
 							}));
 					};
 
-					['confirmed', 'unconfirmed', 'partial'].forEach(state => runValidStateTest(state));
+					Object.keys(TransactionGroups).forEach(group => runValidGroupTest(group));
 
-					it('invalid', () => {
-						const req = {
-							params: { state: 'nonsenseSatate' }
-						};
+					it('not found if group does not exists', () => {
+						// Arrange:
+						const req = { params: { group: 'nonExistingGroup' } };
 
-						// Act + Assert
-						expect(() => mockServer.callRoute(route, req)).to.throw('invalid transaction state provided');
+						// Act:
+						mockServer.callRoute(route, req);
+
+						// Assert:
+						expect(mockServer.next.calledOnce).to.equal(true);
+						expect(mockServer.next.firstCall.args[0].statusCode).to.equal(404);
 					});
 				});
+			});
+		});
+
+		describe('post', () => {
+			const fakeTransactions = [{ meta: { addresses: [] }, transaction: { type: 12345 } }];
+
+			const dbTransactionsByIdsFake = sinon.fake.resolves(fakeTransactions);
+			const dbTransactionsByHashesFake = sinon.fake.resolves(fakeTransactions);
+
+			const mockServer = new MockServer();
+			const db = {
+				transactionsByIds: dbTransactionsByIdsFake,
+				transactionsByHashes: dbTransactionsByHashesFake
+			};
+			transactionRoutes.register(mockServer.server, db, {});
+
+			const route = mockServer.getRoute('/transactions/:group').post();
+
+			beforeEach(() => {
+				mockServer.resetStats();
+				dbTransactionsByIdsFake.resetHistory();
+				dbTransactionsByHashesFake.resetHistory();
+			});
+
+			it('throws if ids or hashes are not provided', () => {
+				// Arrange
+				const req = { params: { group: TransactionGroups.confirmed } };
+
+				// Act + Assert:
+				expect(() => mockServer.callRoute(route, req)).to.throw('either ids or hashes must be provided');
+			});
+
+			it('throws if both ids and hashes are provided', () => {
+				// Arrange
+				const req = { params: { group: TransactionGroups.confirmed, transactionIds: [], hashes: [] } };
+
+				// Act + Assert:
+				expect(() => mockServer.callRoute(route, req)).to.throw('either ids or hashes must be provided');
+			});
+
+			describe('checks correct group is provided', () => {
+				const runValidGroupTest = group => {
+					it(`${group} - by ids`, () => {
+						// Arrange
+						const req = { params: { group, transactionIds: [validObjectId] } };
+
+						// Act:
+						mockServer.callRoute(route, req).then(() => {
+							// Assert:
+							expect(dbTransactionsByIdsFake.calledOnce).to.equal(true);
+							expect(dbTransactionsByIdsFake.firstCall.args[0]).to.equal(group);
+						});
+					});
+					it(`${group} - by hashes`, () => {
+						// Arrange
+						const req = { params: { group, hashes: [validHash] } };
+
+						// Act:
+						mockServer.callRoute(route, req).then(() => {
+							// Assert:
+							expect(dbTransactionsByHashesFake.calledOnce).to.equal(true);
+							expect(dbTransactionsByHashesFake.firstCall.args[0]).to.equal(group);
+						});
+					});
+				};
+
+				Object.keys(TransactionGroups).forEach(group => runValidGroupTest(group));
+
+				it('not found if group does not exists', () => {
+					// Arrange
+					const req = { params: { group: 'nonExistingGroup', transactionIds: [validObjectId] } };
+
+					// Act:
+					mockServer.callRoute(route, req);
+
+					// Assert:
+					expect(mockServer.next.calledOnce).to.equal(true);
+					expect(mockServer.next.firstCall.args[0].statusCode).to.equal(404);
+				});
+			});
+
+			const runParseArgumentAsArrayParamTest = (paramValues, paramName, parserName) => {
+				// Arrange
+				const req = { params: { group: TransactionGroups.confirmed, [paramName]: paramValues } };
+				const parseArgumentsAsArraySpy = sinon.spy(routeUtils, 'parseArgumentAsArray');
+
+				// Act:
+				return mockServer.callRoute(route, req).then(() => {
+					// Assert:
+					expect(parseArgumentsAsArraySpy.calledOnceWith(
+						{ group: TransactionGroups.confirmed, [paramName]: paramValues },
+						paramName,
+						parserName
+					)).to.equal(true);
+					parseArgumentsAsArraySpy.restore();
+				});
+			};
+
+			it('calls parseArgumentAsArray with correct parser for ids', () =>
+				runParseArgumentAsArrayParamTest([validObjectId, validObjectId], 'transactionIds', 'objectId'));
+			it('calls parseArgumentAsArray with correct parser for hashes', () =>
+				runParseArgumentAsArrayParamTest([validHash, validHash], 'hashes', 'hash256'));
+
+			describe('calls correct transaction retriever with correct params', () => {
+				it('id params', () => {
+					// Arrange
+					const req = { params: { group: TransactionGroups.confirmed, transactionIds: [validObjectId] } };
+
+					// Act:
+					return mockServer.callRoute(route, req).then(() => {
+						// Assert:
+						expect(dbTransactionsByIdsFake.calledOnce).to.equal(true);
+						expect(dbTransactionsByIdsFake.firstCall.args[1]).to.deep.equal([validObjectId]);
+
+						expect(mockServer.send.firstCall.args[0]).to.deep.equal({
+							payload: fakeTransactions,
+							type: routeResultTypes.transaction
+						});
+						expect(mockServer.next.calledOnce).to.equal(true);
+					});
+				});
+
+				it('hash params', () => {
+					// Arrange
+					const req = { params: { group: TransactionGroups.confirmed, hashes: [validHash] } };
+
+					// Act:
+					return mockServer.callRoute(route, req).then(() => {
+						// Assert:
+						expect(dbTransactionsByHashesFake.calledOnce).to.equal(true);
+						expect(dbTransactionsByHashesFake.firstCall.args[1]).to.deep.equal([convert.hexToUint8(validHash)]);
+
+						expect(mockServer.send.firstCall.args[0]).to.deep.equal({
+							payload: fakeTransactions,
+							type: routeResultTypes.transaction
+						});
+						expect(mockServer.next.calledOnce).to.equal(true);
+					});
+				});
+
+				it('hash params (provisional test until params are split into transactionIds/hashes)', () => {
+					// Arrange
+					const req = { params: { group: TransactionGroups.confirmed, transactionIds: [validHash] } };
+
+					// Act:
+					return mockServer.callRoute(route, req).then(() => {
+						// Assert:
+						expect(dbTransactionsByHashesFake.calledOnce).to.equal(true);
+						expect(dbTransactionsByHashesFake.firstCall.args[1]).to.deep.equal([convert.hexToUint8(validHash)]);
+
+						expect(mockServer.send.firstCall.args[0]).to.deep.equal({
+							payload: fakeTransactions,
+							type: routeResultTypes.transaction
+						});
+						expect(mockServer.next.calledOnce).to.equal(true);
+					});
+				});
+			});
+		});
+		describe('put', () => {
+			test.route.packet.addPutPacketRouteTests(transactionRoutes.register, {
+				routeName: '/transactions',
+				packetType: '9',
+				inputs: {
+					valid: {
+						params: { payload: '123456' },
+						parsed: Buffer.of(
+							0x0B, 0x00, 0x00, 0x00, // size (header)
+							0x09, 0x00, 0x00, 0x00, // type (header)
+							0x12, 0x34, 0x56 // payload
+						)
+					},
+					invalid: {
+						params: { payload: '1234S6' },
+						error: { key: 'payload' }
+					}
+				}
 			});
 		});
 	});

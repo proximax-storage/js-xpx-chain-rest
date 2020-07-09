@@ -95,6 +95,12 @@ const buildBlocksFromOptions = (height, numBlocks, chainHeight) => {
 const getBoundedPageSize = (pageSize, pagingOptions) =>
 	Math.max(pagingOptions.pageSizeMin, Math.min(pagingOptions.pageSizeMax, pageSize || pagingOptions.pageSizeDefault));
 
+const TransactionGroup = Object.freeze({
+	confirmed: 'transactions',
+	unconfirmed: 'unconfirmedTransactions',
+	partial: 'partialTransactions'
+});
+
 class CatapultDb {
 	// region construction / connect / disconnect
 
@@ -348,6 +354,7 @@ class CatapultDb {
 
 	/**
 	 * Retrieves filtered and paginated transactions.
+	 * @param {string} group Transactions group on which the query is made.
 	 * @param {object} filters Filters to be applied: `address` for an involved address in the query, `signerPublicKey`, `recipientAddress`,
 	 * `state`, `height`, `embedded`, `transactionTypes` array of uint. If `address` is provided, other account related filters are omitted.
 	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
@@ -355,16 +362,8 @@ class CatapultDb {
 	 * and `pageNumber`.
 	 * @returns {Promise.<object>} Transactions page.
 	 */
-	transactions(filters, options) {
-		const getCollectionName = (transactionStatus = 'confirmed') => {
-			const collectionNames = {
-				confirmed: 'transactions',
-				unconfirmed: 'unconfirmedTransactions',
-				partial: 'partialTransactions'
-			};
-			return collectionNames[transactionStatus];
-		};
-		const collectionName = getCollectionName(filters.state);
+	transactions(group, filters, options) {
+		const sortingOptions = { id: '_id' };
 
 		const buildAccountConditions = () => {
 			if (filters.address)
@@ -415,7 +414,7 @@ class CatapultDb {
 		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
 		const conditions = buildConditions();
 
-		return this.queryPagedDocuments_2(conditions, removedFields, sortConditions, collectionName, options);
+		return this.queryPagedDocuments_2(conditions, removedFields, sortConditions, TransactionGroup[group], options);
 	}
 
 	transactionsByIdsImpl(collectionName, conditions) {
@@ -437,12 +436,12 @@ class CatapultDb {
 			})));
 	}
 
-	transactionsByIds(ids) {
-		return this.transactionsByIdsImpl('transactions', { _id: { $in: ids.map(id => new ObjectId(id)) } });
+	transactionsByIds(group, ids) {
+		return this.transactionsByIdsImpl(TransactionGroup[group], { _id: { $in: ids.map(id => new ObjectId(id)) } });
 	}
 
-	transactionsByHashes(hashes) {
-		return this.transactionsByIdsImpl('transactions', { 'meta.hash': { $in: hashes.map(hash => Buffer.from(hash)) } });
+	transactionsByHashes(group, hashes) {
+		return this.transactionsByIdsImpl(TransactionGroup[group], { 'meta.hash': { $in: hashes.map(hash => Buffer.from(hash)) } });
 	}
 
 	transactionsByHashesUnconfirmed(hashes) {
