@@ -98,10 +98,11 @@ const toStringInternal = code => {
 		case 0x804D0009: return 'Failure_Mosaic_Invalid_Levy_Fee';
 		case 0x804D000A: return 'Failure_Mosaic_Ineligible_Signer';
 		case 0x804D000B: return 'Failure_Mosaic_Id_Not_Found';
-		case 0x804D000C: return 'Failure_Mosaic_Levy_Not_Found';
+		case 0x804D000C: return 'Failure_Mosaic_Levy_Entry_Not_Found';
 		case 0x804D000D: return 'Failure_Mosaic_Levy_Already_Exist';
 		case 0x804D000E: return 'Failure_Mosaic_Invalid_Levy_Type';
 		case 0x804D000F: return 'Failure_Mosaic_Current_Levy_Not_Set';
+		case 0x804D0010: return 'Failure_Mosaic_Levy_Mosaic_Not_Found_Or_Expired';
 		case 0x80550001: return 'Failure_Multisig_Modify_Account_In_Both_Sets';
 		case 0x80550002: return 'Failure_Multisig_Modify_Multiple_Deletes';
 		case 0x80550003: return 'Failure_Multisig_Modify_Redundant_Modifications';
