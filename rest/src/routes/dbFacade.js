@@ -26,6 +26,10 @@ const extractFromMetadata = (group, transaction) => ({
 	height: transaction.meta.height
 });
 
+function getBuffer(value) {
+	return value.buffer instanceof ArrayBuffer ? value : value.buffer
+}
+
 module.exports = {
 
 	/**
@@ -77,7 +81,7 @@ module.exports = {
 				objs.forEach(failureStatus => {
 					let found = false;
 					fetchedStatuses.forEach(status => {
-						if (Buffer.compare(failureStatus.hash, status.hash) === 0) {
+						if (Buffer.compare(getBuffer(failureStatus.hash), getBuffer(status.hash)) === 0) {
 							found = true;
 						}
 					})
