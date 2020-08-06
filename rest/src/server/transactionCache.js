@@ -17,6 +17,7 @@ module.exports.createTransactionCache = (transactionCacheConfig, connections, lo
 		sending: false,
 		transactions: [],
 		sendTransactionToBlockchain: () => {
+			logger(`sendTransactionToBlockchain with transactions.length = ${cache.transactions.length}`);
 			const temp = cache.transactions;
 			cache.transactions = [];
 
@@ -37,6 +38,7 @@ module.exports.createTransactionCache = (transactionCacheConfig, connections, lo
 		},
 
 		startTimer: () => {
+			logger(`startTimer when cache.sending = ${cache.sending}`);
 			if (!cache.sending) {
 				cache.sending = true;
 				setTimeout(cache.sendTransactionToBlockchain, transactionCacheConfig.flushFrequency);
