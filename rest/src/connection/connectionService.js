@@ -18,9 +18,9 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const catapult = require('catapult-sdk');
 const catapultConnection = require('./catapultConnection');
 const errors = require('../server/errors');
+const catapult = require('catapult-sdk');
 
 const { convert } = catapult.utils;
 const { createKeyPairFromPrivateKeyString } = catapult.crypto;
@@ -39,58 +39,61 @@ module.exports.createConnectionService = (config, connectionFactory, authPromise
 	const node = config.apiNode;
 	const clientKeyPair = createKeyPairFromPrivateKeyString(config.clientPrivateKey);
 	const aliveConnections = {};
-	const pendingConnections = {};
+	// the connection is not persisted until authentication is done, and this may take a while,
+	// to avoid duplicate connections those are cached in the following object
+	const authenticatingConnectionPromises = {};
 
 	/**
 	 * Opens a new connection authenticated to catapult.
 	 * @param {boolean} isPersistent Determines whether the new connection should be pooled and kept open for reuse.
 	 * @returns {Promise} A promise bound to the creation of the connection.
 	 */
-	const openAuthenticatedConnection = isPersistent => {
-		let pendingConnection = pendingConnections[node];
-		if (pendingConnection)
-			return pendingConnection;
+	const openAuthenticatedConnection = isPersistent => new Promise((resolve, reject) => {
+		logger(`connecting to ${node.host}:${node.port}`);
+		const serverSocket = connectionFactory(node.port, node.host);
+		const apiNodePublicKey = convert.hexToUint8(node.publicKey);
 
-		pendingConnection = new Promise((resolve, reject) => {
-			logger(`connecting to ${node.host}:${node.port}`);
-			const serverSocket = connectionFactory(node.port, node.host);
-			const apiNodePublicKey = convert.hexToUint8(node.publicKey);
+		serverSocket
+			.on('error', err => {
+				// capture error, otherwise net default handler will be called
+				// default error handler issues reject(), that would go through bootstraper and toRestError().
+				// the result might contain information about api node IP and port, because it might be different host,
+				// that information shouldn't be available to rest clients.
+				logger(`error raised by ${node.host}:${node.port} connection`, err);
+			})
+			.on('close', () => {
+				if (isPersistent)
+					delete aliveConnections[node];
 
-			serverSocket
-				.on('error', err => {
-					// capture error, otherwise net default handler will be called
-					// default error handler issues reject(), that would go through bootstraper and toRestError().
-					// the result might contain information about api node IP and port, because it might be different host,
-					// that information shouldn't be available to rest clients.
-					logger(`error raised by ${node.host}:${node.port} connection`, err);
-				})
-				.on('close', () => {
-					if (isPersistent) {
-						delete aliveConnections[node];
-						delete pendingConnections[node];
-					}
+				reject(errors.createServiceUnavailableError('connection failed'));
+			});
 
-					reject(errors.createServiceUnavailableError('connection failed'));
-				});
+		const authPromise = authPromiseFactory(serverSocket, clientKeyPair, apiNodePublicKey, logger)
+			.then(() => {
+				// wrap the socket in a catapult connection and save it
+				const serverConnection = catapultConnection.wrap(serverSocket);
+				if (isPersistent) {
+					aliveConnections[node] = serverConnection;
+					delete authenticatingConnectionPromises[node];
+				}
 
-			return authPromiseFactory(serverSocket, clientKeyPair, apiNodePublicKey, logger)
-				.then(() => {
-					// wrap the socket in a catapult connection and save it
-					const serverConnection = catapultConnection.wrap(serverSocket);
-					if (isPersistent) {
-						aliveConnections[node] = serverConnection;
-						delete pendingConnections[node];
-					}
+				// return and additionally, return the connection for possible queued connections on `authenticatingConnectionPromises`
+				resolve(serverConnection);
+				return serverConnection;
+			}).catch(err => {
+				if (isPersistent)
+					delete authenticatingConnectionPromises[node];
 
-					resolve(serverConnection);
-				}, reject);
-		});
+				// reject and additionally, return the connection for possible queued connections on `authenticatingConnectionPromises`
+				reject(err);
+				throw err;
+			});
 
 		if (isPersistent)
-			pendingConnections[node] = pendingConnection;
+			authenticatingConnectionPromises[node] = authPromise;
 
-		return pendingConnection;
-	};
+		return authPromise;
+	});
 
 	return {
 		/**
@@ -98,6 +101,10 @@ module.exports.createConnectionService = (config, connectionFactory, authPromise
 		 * @returns {module:connection/catapultConnection~CatapultConnection} A connection.
 		 */
 		lease: () => {
+			const authenticatingPromise = authenticatingConnectionPromises[node];
+			if (authenticatingPromise)
+				return authenticatingPromise;
+
 			const connection = aliveConnections[node];
 			if (connection)
 				return Promise.resolve(connection);
