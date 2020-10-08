@@ -34,12 +34,18 @@ module.exports.createTransactionCache = (transactionCacheConfig, connections, lo
 					cache.sending = false;
 					cache.startTimer();
 				});
+			}).catch(() => {
+				logger(`got error during connecting to send ${temp.length} transactions`);
+				// if we got error during connecting, let's add transactions back, and fire query again
+				cache.transactions = cache.transactions.concat(temp);
+				cache.sending = false;
+				cache.startTimer();
 			});
 		},
 
 		startTimer: () => {
-			logger(`startTimer when cache.sending = ${cache.sending}`);
-			if (!cache.sending) {
+			logger(`startTimer when cache.sending = ${cache.sending} and transactions.length = ${cache.transactions.length}`);
+			if (!cache.sending && cache.transactions.length) {
 				cache.sending = true;
 				setTimeout(cache.sendTransactionToBlockchain, transactionCacheConfig.flushFrequency);
 			}

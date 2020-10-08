@@ -16,6 +16,7 @@ RUN cd /catapult-rest/catapult-sdk && \
     yarn install && \
     yarn rebuild && \
     cd /catapult-rest/rest && \
+    yarn install && \
     yarn install --production  --modules-folder /catapult-rest/node_modules && \
     npm run build
 
