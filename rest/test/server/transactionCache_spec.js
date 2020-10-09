@@ -119,8 +119,13 @@ describe('transaction cache', () => {
 
 					// rejection of connection will cause infinity loop, so break it by cleaning transactions
 					transactionCache.transactions = [];
-				}, 100);
-			}, 100);
+					setTimeout(() => {
+						// Assert:
+						expect(transactionCache.transactions.length).to.equal(0);
+						expect(transactionCache.sending).to.equal(false);
+					}, 2);
+				}, 2);
+			}, 2);
 		});
 	});
 });
