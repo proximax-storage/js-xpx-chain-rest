@@ -188,11 +188,11 @@ class CatapultDb {
 	 * @returns {Promise} Promise that resolves to the sizes of collections in the database.
 	 */
 	storageInfo() {
-		const blockCountPromise = this.database.collection('blocks').countDocuments();
-		const transactionCountPromise = this.database.collection('transactions').countDocuments();
-		const accountCountPromise = this.database.collection('accounts').countDocuments();
+		const blockCountPromise = this.database.collection('blocks').stats();
+		const transactionCountPromise = this.database.collection('transactions').stats();
+		const accountCountPromise = this.database.collection('accounts').stats();
 		return Promise.all([blockCountPromise, transactionCountPromise, accountCountPromise])
-			.then(storageInfo => ({ numBlocks: storageInfo[0], numTransactions: storageInfo[1], numAccounts: storageInfo[2] }));
+			.then(storageInfo => ({ numBlocks: storageInfo[0].count, numTransactions: storageInfo[1].count, numAccounts: storageInfo[2].count }));
 	}
 
 	chainInfo() {
