@@ -19,7 +19,7 @@
  */
 
 const catapult = require('catapult-sdk');
-const nodeInfoCodec = require('../../src/sockets/nodeInfoCodec');
+const { nodeInfoCodec, nodeInfosCodec} = require('../../src/sockets/nodeInfoCodec');
 const { expect } = require('chai');
 
 const { BinaryParser } = catapult.parser;
@@ -147,5 +147,56 @@ describe('deserialize', () => {
 			roles: 2,
 			version: 23
 		});
+	});
+
+	it('returns a deserialized objects with friendlyName and host', () => {
+		// Arrange:
+		const binaryParser = new BinaryParser();
+		const friendlyNameBuffer = Buffer.from([0x10, 0x17]);
+		const hostBuffer = Buffer.from([0xCC, 0x00, 0x03]);
+		const publicKeyBuffer = Buffer.from([
+			0xE3, 0x27, 0xC0, 0xF1, 0xC9, 0x97, 0x5C, 0x3A, 0xA5, 0x1B, 0x2A, 0x41, 0x76, 0x81, 0x58, 0xC1,
+			0x07, 0x7D, 0x16, 0xB4, 0x60, 0x99, 0x9A, 0xAB, 0xE7, 0xAD, 0xB5, 0x26, 0x2B, 0xE2, 0x9A, 0x68
+		]);
+		const packetBuffer = Buffer.concat([
+			Buffer.from([0x31 + friendlyNameBuffer.length + hostBuffer.length, 0x00, 0x00, 0x00]),
+			publicKeyBuffer,
+			Buffer.from([0xDC, 0x1E, 0x90, 0x17, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, hostBuffer.length, friendlyNameBuffer.length]),
+			hostBuffer,
+			friendlyNameBuffer
+		]);
+		binaryParser.push(Buffer.from(packetBuffer));
+		binaryParser.push(Buffer.from(packetBuffer));
+		binaryParser.push(Buffer.from(packetBuffer));
+
+		// Act:
+		const deserializedData = nodeInfosCodec.deserialize(binaryParser);
+
+		// Assert:
+		expect(deserializedData).to.deep.equal([{
+			friendlyName: friendlyNameBuffer,
+			host: hostBuffer,
+			networkIdentifier: 144,
+			port: 7900,
+			publicKey: publicKeyBuffer,
+			roles: 2,
+			version: 23
+		},{
+			friendlyName: friendlyNameBuffer,
+			host: hostBuffer,
+			networkIdentifier: 144,
+			port: 7900,
+			publicKey: publicKeyBuffer,
+			roles: 2,
+			version: 23
+		},{
+			friendlyName: friendlyNameBuffer,
+			host: hostBuffer,
+			networkIdentifier: 144,
+			port: 7900,
+			publicKey: publicKeyBuffer,
+			roles: 2,
+			version: 23
+		}]);
 	});
 });
