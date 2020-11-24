@@ -10,6 +10,13 @@
   "clientPrivateKey": "0100000000000000000000000000000000000000000000000000000000000000",
   "extensions": ["accountLink", "accountProperties", "aggregate", "exchange", "config", "lock", "metadata", "mosaic", "multisig", "namespace", "operation", "receipts", "richlist", "service", "supercontract", "transfer", "upgrade"],
 
+  "https": {
+    "ca": "",
+		"certificate": "",
+		"key": "",
+		"passphrase": ""
+  },
+
   "db": {
     "url": "mongodb://localhost:27017/",
     "name": "catapult",
