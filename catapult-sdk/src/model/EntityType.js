@@ -151,7 +151,13 @@ const EntityType = {
 	uploadFile: 0x4460,
 
 	/** Deactivate super contract. */
-	deactivate: 0x4560
+	deactivate: 0x4560,
+
+	/** Suspend super contract. */
+	suspend: 0x4660,
+
+	/** Resume super contract. */
+	resume: 0x4760
 };
 
 module.exports = EntityType;
