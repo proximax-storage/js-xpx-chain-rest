@@ -79,10 +79,10 @@ module.exports = {
 	 * @param {array} crossDomainHttpMethods HTTP methods that are allowed to be accessed cross-domain.
 	 * @param {object} formatters Formatters to use for formatting responses.
 	 * @param {object} throttlingConfig Throttling configuration parameters, if not provided throttling won't be enabled.
-	 * @param {object} httpsConfig options to configure https
+	 * @param {object} https options to configure https
 	 * @returns {object} Server.
 	 */
-	createServer: (crossDomainHttpMethods, formatters, cors, throttlingConfig, httpsConfig, endpointsConfig) => {
+	createServer: (crossDomainHttpMethods, formatters, cors, throttlingConfig, https, endpointsConfig) => {
 		// create the server using a custom formatter
 		const server = restify.createServer(
 			{
@@ -90,10 +90,10 @@ module.exports = {
 				formatters: {
 					'application/json': formatters.json
 				},
-				ca: httpsConfig.ca,
-				certificate: httpsConfig.certificate,
-				key: httpsConfig.key,
-				passphrase: httpsConfig.passphrase
+				ca: https.ca,
+				certificate: https.certificate,
+				key: https.key,
+				passphrase: https.passphrase
 			}
 		);
 
