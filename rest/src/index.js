@@ -50,56 +50,49 @@ const loadConfig = () => {
 		configFilePath = process.argv[2];
 
 	winston.info(`loading config from ${configFilePath}`);
-	const mainConfig = JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
+	const config = JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
 
-	var httpsConfig = {
-		ca: null,
-		certificate: null,
-		key: null,
-		passphrase: null
-	}
+	if (!config.https)
+		config.https = {}
 
-	if ((mainConfig.https.certificate && mainConfig.https.key) ||
+	if ((config.https.certificate && config.https.key) ||
 		(process.env.HTTPS_CERTIFICATE && process.env.HTTPS_KEY)) {
 			
 		const pathToCert = process.env.HTTPS_CERTIFICATE
 						 ? process.env.HTTPS_CERTIFICATE
-						 : path.join(__dirname, mainConfig.https.certificate);
+						 : path.join(__dirname, config.https.certificate);
 
 		winston.info(`loading server certificate from ${pathToCert}`);
 		const certificate = fs.readFileSync(pathToCert);
 
-		httpsConfig.certificate = certificate;
+		config.https.certificate = certificate;
 
 		const pathToKey = process.env.HTTPS_KEY
 						? process.env.HTTPS_KEY
-						: path.join(__dirname, mainConfig.https.key);
+						: path.join(__dirname, config.https.key);
 
 		winston.info(`loading server private key from ${pathToKey}`);
 		const key = fs.readFileSync(pathToKey);
 
-		httpsConfig.key = key;
+		config.https.key = key;
 
-		httpsConfig.passphrase = process.env.HTTPS_PASSPHRASE
+		config.https.passphrase = process.env.HTTPS_PASSPHRASE
 							   ? process.env.HTTPS_PASSPHRASE
-							   : mainConfig.https.passphrase
+							   : config.https.passphrase
 
-		if (mainConfig.https.ca || process.env.HTTPS_CA) {
+		if (config.https.ca || process.env.HTTPS_CA) {
 			const pathToCa = process.env.HTTPS_CA
 						   ? process.env.HTTPS_CA
-						   : path.join(__dirname, mainConfig.https.ca);
+						   : path.join(__dirname, config.https.ca);
 
 			winston.info(`loading CA certificate from ${pathToCa}`);
 			const ca = fs.readFileSync(pathToCa);
 
-			httpsConfig.ca = ca;
+			config.https.ca = ca;
 		}
 	}
 
-	return {
-		mainConfig: mainConfig,
-		httpsConfig: httpsConfig
-	};
+	return config;
 };
 
 const createServiceManager = () => {
@@ -126,12 +119,12 @@ const connectToDbWithRetry = (db, config) => catapult.utils.future.makeRetryable
 );
 
 const createServer = config => {
-	const modelSystem = catapult.plugins.catapultModelSystem.configure(config.mainConfig.extensions, {
+	const modelSystem = catapult.plugins.catapultModelSystem.configure(config.extensions, {
 		json: dbFormattingRules,
 		ws: messageFormattingRules
 	});
 	return {
-		server: bootstrapper.createServer(config.mainConfig.crossDomainHttpMethods, formatters.create(modelSystem.formatters), config.mainConfig.cors, config.mainConfig.throttling, config.httpsConfig, config.mainConfig.endpoints),
+		server: bootstrapper.createServer(config.crossDomainHttpMethods, formatters.create(modelSystem.formatters), config.cors, config.throttling, config.https, config.endpoints),
 		codec: modelSystem.codec
 	};
 };
@@ -140,25 +133,25 @@ const registerRoutes = (server, db, services) => {
 	// 1. create a services view for extension routes
 	const servicesView = {
 		config: {
-			network: services.config.mainConfig.network,
+			network: services.config.network,
 			pageSize: {
-				min: services.config.mainConfig.db.pageSizeMin,
-				max: services.config.mainConfig.db.pageSizeMax,
-				step: services.config.mainConfig.db.pageSizeStep
+				min: services.config.db.pageSizeMin,
+				max: services.config.db.pageSizeMax,
+				step: services.config.db.pageSizeStep
 			},
-			apiNode: services.config.mainConfig.apiNode,
-			websocket: services.config.mainConfig.websocket
+			apiNode: services.config.apiNode,
+			websocket: services.config.websocket
 		},
 		connections: services.connectionService,
 		transactionCache: services.transactionCache
 	};
 
 	// 2. configure extension routes
-	const { transactionStates, messageChannelDescriptors } = routeSystem.configure(services.config.mainConfig.extensions, server, db, servicesView);
+	const { transactionStates, messageChannelDescriptors } = routeSystem.configure(services.config.extensions, server, db, servicesView);
 
 	// 3. augment services with extension-dependent config and services
 	servicesView.config.transactionStates = transactionStates;
-	servicesView.zmqService = createZmqConnectionService(services.config.mainConfig.websocket.mq, services.codec, messageChannelDescriptors, winston);
+	servicesView.zmqService = createZmqConnectionService(services.config.websocket.mq, services.codec, messageChannelDescriptors, winston);
 
 	// 4. configure basic routes
 	allRoutes.register(server, db, servicesView);
@@ -166,42 +159,42 @@ const registerRoutes = (server, db, services) => {
 
 (() => {
 	const config = loadConfig();
-	configureLogging(config.mainConfig.logging);
+	configureLogging(config.logging);
 
-	const network = catapult.model.networkInfo.networks[config.mainConfig.network.name];
+	const network = catapult.model.networkInfo.networks[config.network.name];
 	if (!network) {
-		winston.error(`no network found with name: '${config.mainConfig.network.name}'`);
+		winston.error(`no network found with name: '${config.network.name}'`);
 		return;
 	}
 
 	const serviceManager = createServiceManager();
 	const db = new CatapultDb({
 		networkId: network.id,
-		pageSizeMin: config.mainConfig.db.pageSizeMin,
-		pageSizeMax: config.mainConfig.db.pageSizeMax
+		pageSizeMin: config.db.pageSizeMin,
+		pageSizeMax: config.db.pageSizeMax
 	});
 
 	serviceManager.pushService(db, 'close');
 
-	winston.info(`connecting to ${config.mainConfig.db.url} (database:${config.mainConfig.db.name})`);
-	connectToDbWithRetry(db, config.mainConfig.db)
+	winston.info(`connecting to ${config.db.url} (database:${config.db.name})`);
+	connectToDbWithRetry(db, config.db)
 		.then(() => {
 			winston.info('registering routes');
 			const serverAndCodec = createServer(config);
 			const { server } = serverAndCodec;
 			serviceManager.pushService(server, 'close');
 
-			const connectionService = createConnectionService(config.mainConfig, createConnection, catapult.auth.createAuthPromise, winston.verbose);
+			const connectionService = createConnectionService(config, createConnection, catapult.auth.createAuthPromise, winston.verbose);
 			let transactionCache = null;
-			if (config.mainConfig.transactionCache)
-				transactionCache = createTransactionCache(config.mainConfig.transactionCache, connectionService, winston.verbose);
+			if (config.transactionCache)
+				transactionCache = createTransactionCache(config.transactionCache, connectionService, winston.verbose);
 
 			registerRoutes(server, db, {
 				codec: serverAndCodec.codec, config, connectionService, transactionCache
 			});
 
-			winston.info(`listening on port ${config.mainConfig.port}`);
-			server.listen(config.mainConfig.port);
+			winston.info(`listening on port ${config.port}`);
+			server.listen(config.port);
 		})
 		.catch(err => {
 			winston.error('rest server is exiting due to error', err);
