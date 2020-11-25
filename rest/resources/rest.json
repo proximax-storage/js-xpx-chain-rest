@@ -12,9 +12,9 @@
 
   "https": {
     "ca": "",
-		"certificate": "",
-		"key": "",
-		"passphrase": ""
+	"certificate": "",
+	"key": "",
+	"passphrase": ""
   },
 
   "db": {
