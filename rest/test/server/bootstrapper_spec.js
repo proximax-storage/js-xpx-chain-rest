@@ -23,16 +23,20 @@ const catapult = require('catapult-sdk');
 const errors = require('../../src/server/errors');
 const EventEmitter = require('events');
 const formatters = require('../../src/server/formatters');
+const fs = require('fs');
 const hippie = require('hippie');
 const MessageChannelBuilder = require('../../src/connection/MessageChannelBuilder');
 const test = require('../testUtils');
 const restify = require('restify');
 const sinon = require('sinon');
 const winston = require('winston');
+const path = require('path');
 const WebSocket = require('ws');
 const zmq = require('zeromq');
 const { createZmqConnectionService } = require('../../src/connection/zmqService');
 const { expect } = require('chai');
+const { http } = require('winston');
+const { cli } = require('winston/lib/winston/config');
 
 const supportedHttpMethods = ['get', 'post', 'put'];
 
@@ -138,7 +142,7 @@ const serverFormatters = options =>  formatters.create({
 });
 
 const createServer = options => {
-	const server = bootstrapper.createServer((options || {}).crossDomainHttpMethods, serverFormatters(options), (options || {}).cors, (options || {}).throttling, (options || {}).endpoints);
+	const server = bootstrapper.createServer((options || {}).crossDomainHttpMethods, serverFormatters(options), (options || {}).cors, (options || {}).throttling, {}, (options || {}).endpoints);
 	servers.push(server);
 	return server;
 };
@@ -166,7 +170,7 @@ describe('server (bootstrapper)', () => {
 			const spy = sinon.spy(restify.plugins, 'throttle');
 
 			// Act:
-			bootstrapper.createServer([], serverFormatters(), undefined, throttlingConfig);
+			bootstrapper.createServer([], serverFormatters(), undefined, throttlingConfig, {});
 
 			// Assert:
 			expect(spy.calledOnceWith({
@@ -184,7 +188,7 @@ describe('server (bootstrapper)', () => {
 			const spy = sinon.spy(restify.plugins, 'throttle');
 
 			// Act:
-			bootstrapper.createServer([], serverFormatters());
+			bootstrapper.createServer([], serverFormatters(), {}, {}, {});
 
 			// Assert:
 			expect(spy.notCalled).to.equal(true);
@@ -200,7 +204,7 @@ describe('server (bootstrapper)', () => {
 				const logSpy = sinon.spy(winston, 'warn');
 
 				// Act:
-				bootstrapper.createServer([], serverFormatters(), undefined, { burst: 20 });
+				bootstrapper.createServer([], serverFormatters(), undefined, { burst: 20 }, {});
 
 				// Assert:
 				expect(spy.notCalled).to.equal(true);
@@ -782,7 +786,7 @@ describe('server (bootstrapper)', () => {
 			// create web sockets
 			let numRemainingClients = numTotalClients;
 			for (let i = 1; i <= numTotalClients; ++i) {
-				const ws = new WebSocket(`ws://localhost:${ports.server}${route}`);
+				const ws = new WebSocket(`${options.schema ? options.schema : 'ws'}://localhost:${ports.server}${route}`, {rejectUnauthorized: false});
 				sockets.push(ws);
 				ws.on('message', curryMessageCallback(ws, i));
 			}
@@ -811,6 +815,122 @@ describe('server (bootstrapper)', () => {
 				server.close();
 				done();
 			}
+		});
+
+		it('uses http connection', done => {
+	
+			const server = createServer([], serverFormatters(), undefined, {});
+			server.listen(ports.server);
+
+			// Act:
+			hippie()
+			.timeout(1000)
+			.get(`http://127.0.0.1:${ports.server}`)
+
+			// Assert:
+			.expectStatus(404)
+			.end(function(err, res, body) {
+				if (err) throw err;
+			  });
+
+			done();
+		});
+
+		it('uses httpS connection', done => {
+
+			const pathToCert = path.join(__dirname, "../resources/certs/localhost.crt");
+			const pathToKey = path.join(__dirname, "../resources/certs/localhost.key");
+
+			const httpsConfig = {
+				https: {
+					ca: "",
+					certificate: fs.readFileSync(pathToCert),
+					key: fs.readFileSync(pathToKey),
+					passphrase: ""
+				}
+			};
+
+			const server = bootstrapper.createServer([], serverFormatters(), undefined, {}, httpsConfig.https);
+			server.listen(ports.server);
+			servers.push(server);
+
+			// Act:
+			hippie()
+			.timeout(1000)
+			.use(function(options, next) {
+				// Assuming you self-signed the CA
+				options.strictSSL = false;
+				next(options);
+			})
+			.get(`https://127.0.0.1:${ports.server}`)
+
+			// Assert:
+			.expectStatus(404)
+			.end(function(err, res, body) {
+				if (err) throw err;
+			});
+
+			done();
+		});
+
+		it('uses unsecure websocket connection', done => {
+			const server = createWebSocketServer();
+			const emitter = registerRoute(server, '/ping');
+			server.listen(ports.server);
+
+			// - create one client websockets
+			const defaultHandlers = createHandlers(server, done);
+			const defaultOnAllConnected = defaultHandlers.onAllConnected;
+			createClientSockets(
+				'/ping',
+				emitter,
+				{ numClients: 3, messageIds: new Set([1, 3]) }, // messages should only be sent to the first sand last sockets
+				Object.assign(defaultHandlers, {
+					onAllConnected: (zsocket, sockets) => {
+						// Act: close the second websocket
+						test.log('closing second websocket');
+						sockets[1].close();
+						defaultOnAllConnected(zsocket, sockets);
+					}
+				})
+			);
+		});
+
+		it('uses secure websocket connection', done => {
+			const pathToCert = path.join(__dirname, "../resources/certs/localhost.crt");
+			const pathToKey = path.join(__dirname, "../resources/certs/localhost.key");
+
+			const httpsConfig = {
+				https: {
+					ca: "",
+					certificate: fs.readFileSync(pathToCert),
+					key: fs.readFileSync(pathToKey),
+					passphrase: ""
+				}
+			};
+
+			const server = bootstrapper.createServer([], serverFormatters(), undefined, {}, httpsConfig.https);
+			const emitter = registerRoute(server, '/ping');
+			server.listen(ports.server);
+			servers.push(server);
+
+			// - create one client websockets
+			const defaultHandlers = createHandlers(server, done);
+			const defaultOnAllConnected = defaultHandlers.onAllConnected;
+			createClientSockets(
+				'/ping',
+				emitter,
+				{ numClients: 3, messageIds: new Set([1, 3]), schema: 'wss'}, // messages should only be sent to the first sand last sockets
+				Object.assign(defaultHandlers, {
+					onAllConnected: (zsocket, sockets) => {
+						// Act: close the second websocket
+						test.log('closing second websocket');
+						sockets[1].close();
+						defaultOnAllConnected(zsocket, sockets);
+					}
+					
+				})
+			);
 		});
 
 		const runSingleRouteTest = (numClients, done) => {
