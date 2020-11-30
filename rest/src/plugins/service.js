@@ -27,32 +27,34 @@ module.exports = {
 	registerTransactionStates: () => {},
 
 	registerMessageChannels: (builder, services) => {
-		const topic = 'b';
-		builder.add('driveState', topic, (codec, emit, filter) => (topic, buffer) => {
+		const topic = 'd';
+		builder.addResolver(supportedReceipt.driveState, function (receiptTopic, buffer) {
 			const parser = new BinaryParser();
 			parser.push(buffer);
 
 			const size = parser.uint32();
 			const version = parser.uint32();
 			const type = parser.uint16();
+			const driveKey = parser.buffer(catapult.constants.sizes.signer);
+			const driveAddress = address.publicKeyToAddress(driveKey, networkInfo.networks[services.config.network.name].id);
 
-			switch (type) {
-				case supportedReceipt.driveState:
-					const driveKey = parser.buffer(catapult.constants.sizes.signer);
-					const state = parser.uint8();
+			return Buffer.concat([Buffer.of(topic.charCodeAt(0)), Buffer.from(driveAddress)]);
+		});
 
-					const driveAddress = address.publicKeyToAddress(driveKey, networkInfo.networks[services.config.network.name].id);
-					if (Buffer.compare(driveAddress, address.stringToAddress(filter)))
-						return;
+		builder.add('driveState', topic, (codec, emit) => (topic, buffer) => {
+			const parser = new BinaryParser();
+			parser.push(buffer);
 
-					const meta = { channelName: 'driveState', address: driveAddress };
+			const size = parser.uint32();
+			const version = parser.uint32();
+			const type = parser.uint16();
+			const driveKey = parser.buffer(catapult.constants.sizes.signer);
+			const state = parser.uint8();
+			const driveAddress = address.publicKeyToAddress(driveKey, networkInfo.networks[services.config.network.name].id);
 
-					emit({ type: 'service.driveStateWithMetadata', payload: { driveKey, state, meta } });
-			}
-		}, function(address) {
-			return () => {
-				return Buffer.of(topic.charCodeAt(0))
-			}
+			const meta = { channelName: 'driveState', address: driveAddress };
+
+			emit({ type: 'service.driveStateWithMetadata', payload: { driveKey, state, meta } });
 		});
 	},
 

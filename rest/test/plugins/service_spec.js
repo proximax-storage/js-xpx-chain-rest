@@ -23,7 +23,11 @@ describe('service plugin', () => {
 		const registerAndExtractChannelDescriptor = channelDescriptorName => {
 			// Arrange:
 			const channelDescriptors = [];
-			const builder = { add: (name, markerChar, handler, channelFilter) => { channelDescriptors.push({ name, markerChar, handler, channelFilter }); } };
+			const channelResolvers = [];
+			const builder = {
+				add: (name, markerChar, handler, channelFilter) => { channelDescriptors.push({ name, markerChar, handler, channelFilter }); },
+				addResolver: (topic, resolver) => { channelResolvers.push({ topic, resolver }); }
+			};
 			const services = {
 				config: { network: { name: 'mijinTest' } }
 			};
@@ -34,7 +38,9 @@ describe('service plugin', () => {
 
 			// Sanity:
 			expect(channelDescriptors.length).to.equal(1);
+			expect(channelResolvers.length).to.equal(1);
 			expect(channelDescriptor).to.not.equal(undefined);
+			expect(channelResolvers).to.not.equal(undefined);
 			return channelDescriptor;
 		};
 
@@ -44,51 +50,7 @@ describe('service plugin', () => {
 
 			// Assert:
 			expect(descriptor.name).to.equal('driveState');
-			expect(descriptor.markerChar).to.equal('b');
-		});
-
-		it('handler emits nothing when receipt type invalid', () => {
-			// Arrange:
-			const emitted = [];
-			const { handler } = registerAndExtractChannelDescriptor('driveState');
-			const driveKey = test.random.publicKey();
-			const driveAddress = address.publicKeyToAddress(driveKey, networkInfo.networks.mijinTest.id);
-			const filter = addressToString(driveAddress);
-
-			// Act:
-			const buffer = Buffer.concat([
-				Buffer.of(0x5B, 0x0, 0x0, 0x0),
-				Buffer.of(0x5B, 0x0, 0x0, 0x0),
-				Buffer.of(0x0, 0x61),
-				driveKey,
-				Buffer.of(0x02)
-			]);
-			handler({}, eventData => emitted.push(eventData), filter)([0x01, 0x02], buffer, 'ignored data');
-
-			// Assert:
-			expect(emitted.length).to.equal(0);
-		});
-
-		it('handler emits nothing when drive address does not match filter', () => {
-			// Arrange:
-			const emitted = [];
-			const { handler } = registerAndExtractChannelDescriptor('driveState');
-			const driveKey = test.random.publicKey();
-			const driveAddress = test.random.address();
-			const filter = addressToString(driveAddress);
-
-			// Act:
-			const buffer = Buffer.concat([
-				Buffer.of(0x5B, 0x0, 0x0, 0x0),
-				Buffer.of(0x5B, 0x0, 0x0, 0x0),
-				Buffer.of(0x5B, 0x61),
-				driveKey,
-				Buffer.of(0x02)
-			]);
-			handler({}, eventData => emitted.push(eventData), filter)([0x01, 0x02], buffer, 'ignored data');
-
-			// Assert:
-			expect(emitted.length).to.equal(0);
+			expect(descriptor.markerChar).to.equal('d');
 		});
 
 		it('handler emits drive state', () => {
@@ -122,17 +84,6 @@ describe('service plugin', () => {
 					}
 				}
 			});
-		});
-
-		it('channel filter', () => {
-			// Arrange:
-			const { channelFilter } = registerAndExtractChannelDescriptor('driveState');
-
-			// Act:
-			const channelTopic = channelFilter()();
-
-			// Assert:
-			expect(channelTopic).to.deep.equal(Buffer.of(0x62));
 		});
 	});
 
