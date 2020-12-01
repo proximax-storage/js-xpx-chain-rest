@@ -909,7 +909,7 @@ describe('server (bootstrapper)', () => {
 				}
 			};
 
-			const server = bootstrapper.createServer([], serverFormatters(), undefined, {}, httpsConfig.https);
+			const server = bootstrapper.createServer([], serverFormatters({ formatterName: 'ws' }), undefined, {}, httpsConfig.https);
 			const emitter = registerRoute(server, '/ping');
 			server.listen(ports.server);
 			servers.push(server);
