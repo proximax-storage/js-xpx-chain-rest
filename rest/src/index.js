@@ -105,11 +105,11 @@ const registerRoutes = (server, db, services) => {
 	};
 
 	// 2. configure extension routes
-	const { transactionStates, messageChannelDescriptors } = routeSystem.configure(services.config.extensions, server, db, servicesView);
+	const { transactionStates, messageChannelDescriptors, messageChannelResolvers } = routeSystem.configure(services.config.extensions, server, db, servicesView);
 
 	// 3. augment services with extension-dependent config and services
 	servicesView.config.transactionStates = transactionStates;
-	servicesView.zmqService = createZmqConnectionService(services.config.websocket.mq, services.codec, messageChannelDescriptors, winston);
+	servicesView.zmqService = createZmqConnectionService(services.config.websocket.mq, services.codec, messageChannelDescriptors, messageChannelResolvers, winston);
 
 	// 4. configure basic routes
 	allRoutes.register(server, db, servicesView);

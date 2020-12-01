@@ -35,8 +35,8 @@ const findSubscriptionInfo = (key, emitter, codec, channelDescriptors) => {
 		throw new Error(`unknown topic category ${topicCategory}`);
 
 	const descriptor = channelDescriptors[topicCategory];
+	const handler = descriptor.handler(codec, data => { emitter.emit(key, data); });
 	const filter = descriptor.filter(topicParam);
-	const handler = descriptor.handler(codec, data => { emitter.emit(key, data); }, topicParam);
 	return { filter, handler };
 };
 
@@ -45,12 +45,23 @@ const findSubscriptionInfo = (key, emitter, codec, channelDescriptors) => {
  * @param {object} zmqConfig Configuration for configuring sockets.
  * @param {object} codec Codec used to deserialize zmq messages.
  * @param {object} channelDescriptors Registered message channel descriptors.
+ * @param {object} channelResolvers Registered topic channel resolvers.
  * @param {object} logger Level-based logger object.
  * @returns {object} Newly created zmq connection service that is a stripped down EventEmitter.
  */
-module.exports.createZmqConnectionService = (zmqConfig, codec, channelDescriptors, logger) =>
+module.exports.createZmqConnectionService = (zmqConfig, codec, channelDescriptors, channelResolvers, logger) =>
 	zmqUtils.createMultisocketEmitter(
 		() => createZmqSocket(zmqConfig, logger),
 		(key, emitter) => findSubscriptionInfo(key, emitter, codec, channelDescriptors),
-		logger
+		logger,
+		function(topic, buffer) {
+			let resolver = channelResolvers[topic.toString()];
+
+			while (resolver) {
+				topic = resolver(topic, buffer);
+				resolver = channelResolvers[topic.toString()];
+			}
+
+			return topic;
+		}
 	);

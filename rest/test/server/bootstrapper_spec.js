@@ -700,7 +700,7 @@ describe('server (bootstrapper)', () => {
 				host: '127.0.0.1', port: ports.mq, connectTimeout: 1000, monitorInterval: 50
 			};
 			const channelDescriptors = new MessageChannelBuilder().build();
-			const zmqService = createZmqConnectionService(config, modelSystem.codec, channelDescriptors, test.createMockLogger());
+			const zmqService = createZmqConnectionService(config, modelSystem.codec, channelDescriptors, {}, test.createMockLogger());
 
 			// create a custom emitter for raising client connected events
 			const emitter = new EventEmitter();

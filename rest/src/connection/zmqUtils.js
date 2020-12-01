@@ -110,16 +110,18 @@ module.exports = {
 	 * @param {function} zsocketFactory Factory for creating a zmq socket given a key.
 	 * @param {function} subcriptionInfoFactory Factory for creating a subcription info.
 	 * @param {object} logger It is logger=).
+	 * @param {function} resolver Topic's resolver.
 	 * @returns {object} Event emitter with partial interface (on, removeAllListeners, listenerCount).
 	 */
-	createMultisocketEmitter: (zsocketFactory, subcriptionInfoFactory, logger) => {
+	createMultisocketEmitter: (zsocketFactory, subcriptionInfoFactory, logger, resolver) => {
 		const emitter = new EventEmitter();
 		let zsocket = null;
 		const subscriptions = {};
 		const handlers = {};
 
-		function handle(topic) {
-			const handler = handlers[topic.toString()];
+		function handle(unresolvedTopic, buffer) {
+			const resolvedTopic = resolver ? resolver(unresolvedTopic, buffer) : unresolvedTopic;
+			const handler = handlers[resolvedTopic.toString()];
 
 			if (handler)
 				handler(...arguments);
