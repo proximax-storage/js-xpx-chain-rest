@@ -24,6 +24,15 @@ If you already have it, you need to build each module:
 sudo ./yarn_setup.sh
 ```
 
+To enable HTTPS setup the following environment variables or fill the same options in rest.json file:
+```
+
+HTTPS_CA=absolute path to CA certificate (optional)
+HTTPS_CERTIFICATE=absolute path to server certificate (required)
+HTTPS_KEY=absolute path to server private key (required)
+HTTPS_PASSPHRASE=password (optional)
+```
+
 To run a rest server, you need to install mongodb first, or change mongodb address in rest.json:
 ```
 cd ./scripts/mongo/
