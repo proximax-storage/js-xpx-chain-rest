@@ -35,8 +35,6 @@ const WebSocket = require('ws');
 const zmq = require('zeromq');
 const { createZmqConnectionService } = require('../../src/connection/zmqService');
 const { expect } = require('chai');
-const { http } = require('winston');
-const { cli } = require('winston/lib/winston/config');
 
 const supportedHttpMethods = ['get', 'post', 'put'];
 
@@ -928,7 +926,6 @@ describe('server (bootstrapper)', () => {
 						sockets[1].close();
 						defaultOnAllConnected(zsocket, sockets);
 					}
-					
 				})
 			);
 		});
