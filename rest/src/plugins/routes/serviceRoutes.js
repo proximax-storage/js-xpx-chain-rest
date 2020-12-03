@@ -8,11 +8,27 @@ const routeUtils = require('../../routes/routeUtils');
 const errors = require('../../server/errors');
 
 module.exports = {
-	register: (server, db) => {
+	register: (server, db, services) => {
 		server.get('/drive/:accountId', (req, res, next) => {
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
 			return db.getDriveByAccountId(type, accountId)
 				.then(routeUtils.createSender('driveEntry').sendOne(req.params.height, res, next));
+		});
+
+		server.get('/drives', (req, res, next) => {
+			const { params } = req;
+
+			const filters = {
+				start: params.start ? routeUtils.parseArgument(params, 'start', 'uint') : undefined,
+				fromStart: params.fromStart ? routeUtils.parseArgument(params, 'fromStart', 'uint64') : undefined,
+				toStart: params.toStart ? routeUtils.parseArgument(params, 'toStart', 'uint64') : undefined,
+				states: params.states ? routeUtils.parseArgumentAsArray(params, 'states', 'uint') : undefined
+			};
+
+			const options = routeUtils.parsePaginationArguments(params, services.config.pageSize);
+
+			return db.drives(filters, options)
+				.then(routeUtils.createSender('driveEntry').sendArray(req.params.states, res, next));
 		});
 
 		const driveStates = [

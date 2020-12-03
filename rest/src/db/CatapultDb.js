@@ -250,41 +250,6 @@ class CatapultDb {
 		return this.queryDocumentsAndCopyIds(collectionName, { 'meta.aggregateId': { $in: aggregateIds } });
 	}
 
-	queryTransactions(conditions, id, pageSize, options) {
-		// don't expose private meta.addresses field
-		const optionsWithProjection = Object.assign({ projection: { 'meta.addresses': 0 } }, options);
-
-		// filter out dependent documents
-		const collectionName = (options || {}).collectionName || 'transactions';
-		const transactionConditions = { $and: [{ 'meta.aggregateId': { $exists: false } }, conditions] };
-
-		return this.queryPagedDocuments(collectionName, transactionConditions, id, pageSize, optionsWithProjection)
-			.then(this.sanitizer.copyAndDeleteIds)
-			.then(transactions => {
-				const aggregateIds = [];
-				const aggregateIdToTransactionMap = {};
-				transactions
-					.filter(isAggregateType)
-					.forEach(document => {
-						const aggregateId = document.meta.id;
-						aggregateIds.push(aggregateId);
-						aggregateIdToTransactionMap[aggregateId.toString()] = document.transaction;
-					});
-
-				return this.queryDependentDocuments(collectionName, aggregateIds).then(dependentDocuments => {
-					dependentDocuments.forEach(dependentDocument => {
-						const transaction = aggregateIdToTransactionMap[dependentDocument.meta.aggregateId];
-						if (!transaction.transactions)
-							transaction.transactions = [];
-
-						transaction.transactions.push(dependentDocument);
-					});
-
-					return transactions;
-				});
-			});
-	}
-
 	/**
 	 * Makes a paginated query with the provided arguments.
 	 * @param {array<object>} queryConditions The conditions that determine the query results, may be empty.
@@ -363,20 +328,18 @@ class CatapultDb {
 	 * @returns {Promise.<object>} Transactions page.
 	 */
 	transactions(group, filters, options) {
-		const sortingOptions = { id: '_id' };
-
 		const buildAccountConditions = () => {
 			if (filters.address)
 				return { 'meta.addresses': Buffer.from(filters.address) };
 
 			const accountConditions = [];
 			if (filters.signerPublicKey) {
-				const signerPublicKeyCondition = { 'transaction.signerPublicKey': Buffer.from(filters.signerPublicKey) };
+				const signerPublicKeyCondition = { 'transaction.signer': Buffer.from(filters.signerPublicKey) };
 				accountConditions.push(signerPublicKeyCondition);
 			}
 
 			if (filters.recipientAddress) {
-				const recipientAddressCondition = { 'transaction.recipientAddress': Buffer.from(filters.recipientAddress) };
+				const recipientAddressCondition = { 'transaction.recipient': Buffer.from(filters.recipientAddress) };
 				accountConditions.push(recipientAddressCondition);
 			}
 
@@ -391,16 +354,20 @@ class CatapultDb {
 
 			// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
 			// in fact, offset logic should be moved to `queryPagedDocuments`
-			if (options.offset)
+			if (options.offset !== undefined)
 				conditions.push({ [options.sortField]: { [1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset) } });
 
-			if (filters.height)
+			if (filters.height !== undefined)
 				conditions.push({ 'meta.height': convertToLong(filters.height) });
+			else if (filters.fromHeight !== undefined)
+				conditions.push({ 'meta.height': { $gte: convertToLong(filters.fromHeight) } });
+			else if (filters.toHeight !== undefined)
+				conditions.push({ 'meta.height': { $lte: convertToLong(filters.toHeight) } });
 
 			if (!filters.embedded)
 				conditions.push({ 'meta.aggregateId': { $exists: false } });
 
-			if (undefined !== filters.transactionTypes)
+			if (filters.transactionTypes !== undefined)
 				conditions.push({ 'transaction.type': { $in: filters.transactionTypes } });
 
 			const accountConditions = buildAccountConditions();
@@ -483,39 +450,6 @@ class CatapultDb {
 			.toArray()
 			.then(this.sanitizer.deleteIds);
 	}
-
-	// region transaction retrieval for account
-
-	accountTransactionsAll(account, id, pageSize, ordering) {
-		const conditions = createAccountTransactionsAllConditions(account.accountId, this.networkId);
-		return this.queryTransactions(conditions, id, pageSize, { sortOrder: ordering });
-	}
-
-	accountTransactionsIncoming(account, id, pageSize, ordering) {
-		let bufferAddress = null;
-		if ('publicKey' === account.type)
-			bufferAddress = Buffer.from(address.publicKeyToAddress(account.accountId, this.networkId));
-		else
-			bufferAddress = Buffer.from(account.accountId);
-		return this.queryTransactions({ 'transaction.recipient': bufferAddress }, id, pageSize, { sortOrder: ordering });
-	}
-
-	accountTransactionsOutgoing(account, id, pageSize, ordering) {
-		const bufferPublicKey = Buffer.from(account.accountId);
-		return this.queryTransactions({ 'transaction.signer': bufferPublicKey }, id, pageSize, { sortOrder: ordering });
-	}
-
-	accountTransactionsUnconfirmed(account, id, pageSize, ordering) {
-		const conditions = createAccountTransactionsAllConditions(account.accountId, this.networkId);
-		return this.queryTransactions(conditions, id, pageSize, { collectionName: 'unconfirmedTransactions', sortOrder: ordering });
-	}
-
-	accountTransactionsPartial(account, id, pageSize, ordering) {
-		const conditions = createAccountTransactionsAllConditions(account.accountId, this.networkId);
-		return this.queryTransactions(conditions, id, pageSize, { collectionName: 'partialTransactions', sortOrder: ordering });
-	}
-
-	// endregion
 
 	// region account retrieval
 

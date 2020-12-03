@@ -817,6 +817,490 @@ describe('catapult db', () => {
 		});
 	});
 
+
+	describe('transactions', () => {
+		const account1 = { publicKey: test.random.publicKey() };
+		account1.address = keyToAddress(account1.publicKey);
+		const account2 = { publicKey: test.random.publicKey() };
+		account2.address = keyToAddress(account2.publicKey);
+		const account3 = { publicKey: test.random.publicKey() };
+		account3.address = keyToAddress(account3.publicKey);
+
+		const paginationOptions = {
+			pageSize: 10,
+			pageNumber: 1,
+			sortField: 'id',
+			sortDirection: -1
+		};
+
+		const { createObjectId } = test.db;
+
+		const createTransaction = (objectId, addresses, height, signerPublicKey, recipientAddress, type, mosaics) => ({
+			_id: createObjectId(objectId),
+			meta: {
+				height,
+				addresses: addresses.map(a => Buffer.from(a))
+			},
+			transaction: {
+				signer: signerPublicKey ? Buffer.from(signerPublicKey) : undefined,
+				recipient: recipientAddress ? Buffer.from(recipientAddress) : undefined,
+				mosaics,
+				type
+			}
+		});
+
+		const createInnerTransaction = (objectId, aggregateId, signerPublicKey, recipientAddress, type) => ({
+			_id: createObjectId(objectId),
+			meta: { aggregateId: createObjectId(aggregateId) },
+			transaction: {
+				signerPublicKey: signerPublicKey ? Buffer.from(signerPublicKey) : undefined,
+				recipientAddress: recipientAddress ? Buffer.from(recipientAddress) : undefined,
+				type
+			}
+		});
+
+		const runTestAndVerifyIds = (dbTransactions, filters, options, expectedIds) => {
+			const expectedObjectIds = expectedIds.map(id => createObjectId(id));
+
+			return runDbTest(
+				{ transactions: dbTransactions },
+				db => db.transactions(TransactionGroups.confirmed, filters, options),
+				transactionsPage => {
+					const returnedIds = transactionsPage.data.map(t => t.id);
+					expect(transactionsPage.data.length).to.equal(expectedObjectIds.length);
+					expect(returnedIds.sort()).to.deep.equal(expectedObjectIds.sort());
+				}
+			);
+		};
+
+		it('returns expected structure', () => {
+			// Arrange:
+			const dbTransactions = [
+				createTransaction(10, [account1.address], 123, account1.publicKey, account2.address, EntityType.transfer)
+			];
+
+			// Act + Assert:
+			return runDbTest(
+				{ transactions: dbTransactions },
+				db => db.transactions(TransactionGroups.confirmed, {}, paginationOptions),
+				page => {
+					const expected_keys = ['meta', 'transaction', 'id'];
+					expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
+				}
+			);
+		});
+
+		it('does not expose private meta.addresses field', () => {
+			// Arrange:
+			const dbTransactions = [
+				createTransaction(10, [account1.address], 1, 0, 0, 0)
+			];
+
+			// Act + Assert:
+			return runDbTest(
+				{ transactions: dbTransactions },
+				db => db.transactions(TransactionGroups.confirmed, {}, paginationOptions),
+				transactionsPage => {
+					expect(transactionsPage.data[0].meta.addresses).to.equal(undefined);
+				}
+			);
+		});
+
+		it('if address is provided signerPublicKey and recipientAddress are omitted', () => {
+			// Arrange:
+			const dbTransactions = [
+				createTransaction(10, [account1.address], 1),
+				createTransaction(20, [account1.address], 1, account1.publicKey),
+				createTransaction(30, [account1.address], 1, account2.publicKey),
+				createTransaction(40, [account1.address], 1, account1.publicKey, account1.address),
+				createTransaction(50, [account1.address], 1, account2.publicKey, account2.address),
+				createTransaction(60, [account2.address], 1)
+			];
+
+			const filters = {
+				address: account1.address,
+				signerPublicKey: account1.publicKey,
+				recipientAddress: account1.address
+			};
+
+			// Act + Assert:
+			return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [10, 20, 30, 40, 50]);
+		});
+
+		it('ignores inner aggregate transactions in the results', () => {
+			// Arrange:
+			const dbTransactions = [
+				// Aggregate
+				createTransaction(10, [], 1, 0, 0, EntityType.aggregateComplete),
+				createInnerTransaction(100, 30, 0, 0, EntityType.mosaicDefinition),
+				createInnerTransaction(200, 30, 0, 0, EntityType.mosaicSupplyChange),
+
+				createTransaction(20, [], 1, 0, 0, EntityType.aggregateBonded),
+				createInnerTransaction(300, 30, 0, 0, EntityType.transfer),
+				createInnerTransaction(400, 30, 0, 0, EntityType.mosaicDefinition),
+
+				createTransaction(30, [], 1, 0, 0, EntityType.aggregateComplete),
+				createInnerTransaction(500, 30, 0, 0, EntityType.registerNamespace)
+			];
+
+			const filters = {
+				transactionTypes: [EntityType.transfer, EntityType.mosaicDefinition, EntityType.aggregateComplete]
+			};
+
+			// Act + Assert:
+			return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [10, 30]);
+		});
+
+		it('returns correct transactions when no filters are provided', () => {
+			// Arrange:
+			const dbTransactions = [
+				createTransaction(10, [account1.address], 1),
+				createTransaction(20, [account1.address], 1, account1.publicKey),
+				createTransaction(30, [account1.address], 1, account1.publicKey, account1.address),
+				createTransaction(40, [account1.address], 1, account1.publicKey, account1.address, EntityType.transfer)
+			];
+
+			// Act + Assert:
+			return runTestAndVerifyIds(dbTransactions, {}, paginationOptions, [10, 20, 30, 40]);
+		});
+
+		it('all the provided filters are taken into account', () => {
+			// Arrange:
+			const dbTransactions = [
+				createTransaction(10, [account1.address], 1),
+				createTransaction(20, [account1.address], 1),
+				createTransaction(30, [account1.address], 1, account1.publicKey),
+				createTransaction(40, [account1.address], 1, account1.publicKey, account1.address),
+				createTransaction(50, [account1.address], 1, account1.publicKey, account1.address, EntityType.transfer),
+				createTransaction(
+					60, [account1.address], 1, account1.publicKey, account1.address, EntityType.transfer, [{ id: 10, amount: 100 }]
+				),
+				createTransaction(
+					70, [account1.address], 1, account1.publicKey, account1.address, EntityType.transfer, [{ id: 10, amount: 200 }]
+				),
+				createTransaction(
+					80, [account1.address], 1, account1.publicKey, account1.address, EntityType.transfer, [{ id: 10, amount: 300 }]
+				)
+			];
+
+			const filters = {
+				height: 1,
+				signerPublicKey: account1.publicKey,
+				recipientAddress: account1.address,
+				transactionTypes: [EntityType.transfer],
+			};
+
+			// Act + Assert:
+			return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [50, 60, 70, 80]);
+		});
+
+		describe('respects offset', () => {
+			// Arrange:
+			const dbTransactions = () => [
+				createTransaction(10, [], 20),
+				createTransaction(20, [], 30),
+				createTransaction(30, [], 10)
+			];
+			const options = {
+				pageSize: 10,
+				pageNumber: 1,
+				sortField: '_id',
+				sortDirection: 1,
+				offset: createObjectId(20)
+			};
+
+			it('gt', () => {
+				options.sortDirection = 1;
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions(), {}, options, [30]);
+			});
+
+			it('lt', () => {
+				options.sortDirection = -1;
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions(), {}, options, [10]);
+			});
+		});
+
+		describe('respects sort conditions', () => {
+			// Arrange:
+			const dbTransactions = () => [
+				createTransaction(10, [], 20),
+				createTransaction(20, [], 30),
+				createTransaction(30, [], 10)
+			];
+
+			it('direction ascending', () => {
+				const options = {
+					pageSize: 10,
+					pageNumber: 1,
+					sortField: 'id',
+					sortDirection: 1
+				};
+
+				// Act + Assert:
+				return runDbTest(
+					{ transactions: dbTransactions() },
+					db => db.transactions(TransactionGroups.confirmed, [], options),
+					transactionsPage => {
+						expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));
+						expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
+						expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(30));
+					}
+				);
+			});
+
+			it('direction descending', () => {
+				const options = {
+					pageSize: 10,
+					pageNumber: 1,
+					sortField: '_id',
+					sortDirection: -1
+				};
+
+				// Act + Assert:
+				return runDbTest(
+					{ transactions: dbTransactions() },
+					db => db.transactions(TransactionGroups.confirmed, [], options),
+					transactionsPage => {
+						expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(30));
+						expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
+						expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(10));
+					}
+				);
+			});
+
+			it('sort field', () => {
+				const queryPagedDocumentsSpy = sinon.spy(CatapultDb.prototype, 'queryPagedDocuments_2');
+				const options = {
+					pageSize: 10,
+					offset: 1,
+					pageNumber: 1,
+					sortField: '_id',
+					sortDirection: 1
+				};
+
+				// Act + Assert:
+				return runDbTest(
+					{ transactions: dbTransactions() },
+					db => db.transactions(TransactionGroups.confirmed, [], options),
+					() => {
+						expect(queryPagedDocumentsSpy.calledOnce).to.equal(true);
+						expect(Object.keys(queryPagedDocumentsSpy.firstCall.args[2]["$sort"])[0]).to.equal('_id');
+						queryPagedDocumentsSpy.restore();
+					}
+				);
+			});
+		});
+
+		describe('correctly applies each filter:', () => {
+			it('height', () => {
+				// Arrange:
+				const dbTransactions = [
+					createTransaction(10, [], 5),
+					createTransaction(20, [], 10),
+					createTransaction(30, [], 15)
+				];
+
+				const filters = { height: 10 };
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [20]);
+			});
+
+			it('fromHeight', () => {
+				// Arrange:
+				const dbTransactions = [
+					createTransaction(10, [], 5),
+					createTransaction(20, [], 10),
+					createTransaction(30, [], 15)
+				];
+
+				const filters = { fromHeight: 10 };
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [20, 30]);
+			});
+
+			it('toHeight', () => {
+				// Arrange:
+				const dbTransactions = [
+					createTransaction(10, [], 5),
+					createTransaction(20, [], 10),
+					createTransaction(30, [], 15)
+				];
+
+				const filters = { toHeight: 10 };
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [10, 20]);
+			});
+
+			it('address', () => {
+				// Arrange:
+				const dbTransactions = [
+					createTransaction(10, [account1.address], 1),
+					createTransaction(20, [account2.address], 1),
+					createTransaction(30, [account3.address], 1),
+					createTransaction(40, [account2.address, account1.address], 1),
+					createTransaction(50, [account3.address, account1.address], 1)
+				];
+
+				const filters = { address: account1.address };
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [10, 40, 50]);
+			});
+
+			it('signerPublicKey', () => {
+				// Arrange:
+				const dbTransactions = [
+					// Non aggregate
+					createTransaction(10, [], 1, account1.publicKey),
+					createTransaction(20, [], 1, account2.publicKey),
+
+					// Aggregate
+					createTransaction(30, [], 1, account1.publicKey),
+					createInnerTransaction(100, 30, account2.publicKey),
+					createInnerTransaction(200, 30, account2.publicKey),
+
+					createTransaction(40, [], 1, account2.publicKey),
+					createInnerTransaction(300, 40, account1.publicKey),
+					createInnerTransaction(400, 40, account2.publicKey),
+
+					createTransaction(50, [], 1, account2.publicKey),
+					createInnerTransaction(500, 50, account2.publicKey)
+				];
+
+				const filters = { signerPublicKey: account1.publicKey };
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [10, 30]);
+			});
+
+			it('recipientAddress', () => {
+				// Arrange:
+				const dbTransactions = [
+					// Non aggregate
+					createTransaction(10, [], 1, 0, account1.address),
+					createTransaction(20, [], 1, 0, account2.address),
+
+					// Aggregate
+					createTransaction(30, [], 1, 0, account1.address),
+					createInnerTransaction(100, 30, 0, account2.address),
+					createInnerTransaction(200, 30, 0, account2.address),
+
+					createTransaction(40, [], 1, 0, account2.address),
+					createInnerTransaction(300, 40, 0, account1.address),
+					createInnerTransaction(400, 40, 0, account2.address),
+
+					createTransaction(50, [], 1, 0, account2.address),
+					createInnerTransaction(500, 50, 0, account2.address)
+				];
+
+				const filters = { recipientAddress: account1.address };
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [10, 30]);
+			});
+
+			it('transactionTypes', () => {
+				// Arrange:
+				const dbTransactions = [
+					// Non aggregate
+					createTransaction(10, [], 1, 0, 0, EntityType.transfer),
+					createTransaction(20, [], 1, 0, 0, EntityType.accountLink),
+
+					// Aggregate
+					createTransaction(30, [], 1, 0, 0, EntityType.aggregateBonded),
+					createInnerTransaction(100, 30, 0, 0, EntityType.mosaicDefinition),
+					createInnerTransaction(200, 30, 0, 0, EntityType.mosaicSupplyChange),
+
+					createTransaction(40, [], 1, 0, 0, EntityType.aggregateComplete),
+					createInnerTransaction(300, 40, 0, 0, EntityType.transfer),
+					createInnerTransaction(400, 40, 0, 0, EntityType.transfer),
+
+					createTransaction(50, [], 1, 0, 0, EntityType.aggregateBonded),
+					createInnerTransaction(500, 50, 0, 0, EntityType.registerNamespace),
+					createInnerTransaction(600, 50, 0, 0, EntityType.aliasAddress)
+				];
+
+				const filters = {
+					transactionTypes: [EntityType.mosaicDefinition, EntityType.aggregateComplete, EntityType.transfer]
+				};
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [10, 40]);
+			});
+
+			describe('group', () => {
+				// Arrange:
+				const dbTransactions = () => ({
+					transactions: [createTransaction(10, [], 1)],
+					partialTransactions: [createTransaction(20, [], 1)],
+					unconfirmedTransactions: [createTransaction(30, [], 1)]
+				});
+
+				const runGroupTest = (group, expectedIds) => {
+					it(`group: ${group}`, () => {
+						const expectedObjectIds = expectedIds.map(id => createObjectId(id));
+
+						return runDbTest(
+							dbTransactions(),
+							db => db.transactions(group, {}, paginationOptions),
+							transactionsPage => {
+								const returnedIds = transactionsPage.data.map(t => t.id);
+								expect(transactionsPage.data.length).to.equal(expectedObjectIds.length);
+								expect(returnedIds.sort()).to.deep.equal(expectedObjectIds.sort());
+							}
+						);
+					});
+				};
+
+				runGroupTest(TransactionGroups.confirmed, [10]);
+				runGroupTest(TransactionGroups.partial, [20]);
+				runGroupTest(TransactionGroups.unconfirmed, [30]);
+
+				it('defaults to confirmed', () =>
+					// Act + Assert:
+					runDbTest(
+						dbTransactions(),
+						db => db.transactions(TransactionGroups.confirmed, {}, paginationOptions),
+						transactionsPage => {
+							expect(transactionsPage.data.length).to.equal(1);
+							expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));
+						}
+					));
+			});
+
+			describe('embedded', () => {
+				// Arrange:
+				const dbTransactions = () => [
+					// Non aggregate
+					createTransaction(10, [], 1),
+
+					// Aggregate
+					createTransaction(20, [], 1),
+					createInnerTransaction(100, 20)
+				];
+
+				const runEmbeddedTest = (embedded, expectedIds) =>
+					it(`embedded: ${embedded}`, () =>
+						// Act + Assert:
+						runTestAndVerifyIds(dbTransactions(), { embedded }, paginationOptions, expectedIds));
+
+				runEmbeddedTest(true, [10, 20, 100]);
+				runEmbeddedTest(false, [10, 20]);
+
+				it('defaults to false', () =>
+					// Act + Assert:
+					runTestAndVerifyIds(dbTransactions(), {}, paginationOptions, [10, 20]));
+			});
+		});
+	});
+
 	// region failed transactions
 
 	describe('failed transactions by hashes', () => {
