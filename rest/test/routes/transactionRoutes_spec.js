@@ -237,6 +237,8 @@ describe('transaction routes', () => {
 							const expectedResult = {
 								address: undefined,
 								height: undefined,
+								fromHeight: undefined,
+								toHeight: undefined,
 								recipientAddress: undefined,
 								signerPublicKey: undefined,
 								embedded: undefined,
@@ -272,6 +274,8 @@ describe('transaction routes', () => {
 							expect(dbTransactionsFake.firstCall.args[1]).to.deep.equal({
 								address: undefined,
 								height: undefined,
+								fromHeight: undefined,
+								toHeight: undefined,
 								recipientAddress: undefined,
 								signerPublicKey: undefined,
 								embedded: undefined,
@@ -341,6 +345,8 @@ describe('transaction routes', () => {
 								expect(dbTransactionsFake.firstCall.args[1]).to.deep.equal({
 									address: undefined,
 									height: undefined,
+									fromHeight: undefined,
+									toHeight: undefined,
 									recipientAddress: undefined,
 									signerPublicKey: undefined,
 									embedded: undefined,

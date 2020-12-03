@@ -5,6 +5,9 @@
  * */
 
 const AccountType = require('../AccountType');
+const { convertToLong } = require('../../db/dbUtils');
+const MongoDb = require('mongodb');
+const { ObjectId } = MongoDb;
 
 const driveRoles = ['owner', 'replicator'];
 
@@ -51,9 +54,9 @@ class ServiceDb {
 			if (filters.start !== undefined)
 				conditions.push({'drive.start': convertToLong(filters.height)});
 			else if (filters.fromStart !== undefined)
-				conditions.push({'drive.start': {$gte: convertToLong(filters.fromHeight)}});
+				conditions.push({'drive.start': {$gte: convertToLong(filters.fromStart)}});
 			else if (filters.toStart !== undefined)
-				conditions.push({'drive.start': {$lte: convertToLong(filters.toHeight)}});
+				conditions.push({'drive.start': {$lte: convertToLong(filters.toStart)}});
 
 			if (filters.states !== undefined)
 				conditions.push({'drive.state': {$in: filters.states}});

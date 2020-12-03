@@ -148,6 +148,7 @@ describe('service plugin', () => {
 			// Assert:
 			test.assert.assertRoutes(routes, [
 				'/drive/:accountId',
+				'/drives',
 				'/account/:accountId/drive',
 				'/account/:accountId/drive/owner',
 				'/account/:accountId/drive/replicator',
