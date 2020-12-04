@@ -16,12 +16,12 @@ The ProximaX Sirius-Chain REST code is the REST code implementation of ProximaX 
 To start work with it you need to install npm, nodejs, yarn first.
 You can do it by the next command:
 ```
-sudo ./scripts/installDependencies.sh
+./scripts/installDependencies.sh
 ```
 
 If you already have it, you need to build each module:
 ```
-sudo ./yarn_setup.sh
+./yarn_setup.sh
 ```
 
 To enable HTTPS setup the following environment variables or fill the same options in rest.json file:
@@ -36,7 +36,7 @@ HTTPS_PASSPHRASE=password (optional)
 To run a rest server, you need to install mongodb first, or change mongodb address in rest.json:
 ```
 cd ./scripts/mongo/
-sudo ./installMongoDb.sh
+./installMongoDb.sh
 service mongod restart
 cd mongoPrepare/
 ./mongors.sh
@@ -54,7 +54,7 @@ You can change information about mongodb connection and cpp-xpx-chain server con
 If docker, yarn, nodejs and npm are installed, you can easy create an image:
 
 ```
-sudo ./scripts/RestDockerImage/buildRestImage.sh
+docker build -t proximax-sirius-rest -f ./scripts/DockerRelease/Dockerfile .
 ```
 
 ## Spammer
