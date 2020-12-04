@@ -84,18 +84,30 @@ module.exports = {
 	 */
 	createServer: (crossDomainHttpMethods, formatters, cors, throttlingConfig, https, endpointsConfig) => {
 		// create the server using a custom formatter
-		const server = restify.createServer(
-			{
-				name: '', // disable server header in response
-				formatters: {
-					'application/json': formatters.json
-				},
-				ca: https.ca,
-				certificate: https.certificate,
-				key: https.key,
-				passphrase: https.passphrase
-			}
-		);
+		var server
+		if (https) {
+			server = restify.createServer(
+				{
+					name: '', // disable server header in response
+					formatters: {
+						'application/json': formatters.json
+					},
+					ca: https.ca,
+					certificate: https.certificate,
+					key: https.key,
+					passphrase: https.passphrase
+				}
+			)
+		} else {
+			server = restify.createServer(
+				{
+					name: '', // disable server header in response
+					formatters: {
+						'application/json': formatters.json
+					}
+				}
+			);
+		}
 
 		// only allow application/json
 		const addCrossDomainHeaders = createCrossDomainHeaderAdder(crossDomainHttpMethods || [], cors);
