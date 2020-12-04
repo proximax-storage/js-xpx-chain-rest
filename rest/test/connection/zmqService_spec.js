@@ -40,7 +40,7 @@ describe('zmq service', () => {
 			host: '127.0.0.1', port: '3333', connectTimeout: 10, monitorInterval: 50
 		};
 		const channelDescriptors = new MessageChannelBuilder().build();
-		const service = createZmqConnectionService(zmqConfig, {}, channelDescriptors, test.createMockLogger());
+		const service = createZmqConnectionService(zmqConfig, {}, channelDescriptors, {}, test.createMockLogger());
 		cleanupActions.push(() => service.close());
 		return service;
 	};
@@ -161,7 +161,7 @@ describe('zmq service', () => {
 				deserialize: parser => parser.buffer(parser.numUnprocessedBytes())
 			};
 			const channelDescriptors = new MessageChannelBuilder().build();
-			const service = createZmqConnectionService(zmqConfig, codec, channelDescriptors, test.createLogger());
+			const service = createZmqConnectionService(zmqConfig, codec, channelDescriptors, {}, test.createLogger());
 			cleanupActions.push(() => service.close());
 
 			const blockBuffers = generateBlockBuffers();

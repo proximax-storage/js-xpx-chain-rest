@@ -77,6 +77,7 @@ class MessageChannelBuilder {
 	 */
 	constructor(config) {
 		this.descriptors = {};
+		this.resolvers = {};
 		this.channelMarkers = {};
 
 		const emptyAddressHandler = config && config.allowOptionalAddress
@@ -89,6 +90,15 @@ class MessageChannelBuilder {
 		this.add('confirmedAdded', 'a', 'transaction');
 		this.add('unconfirmedAdded', 'u', 'transaction');
 		this.add('unconfirmedRemoved', 'r', 'transactionHash');
+		this.addResolver('b', function (topic, buffer) {
+			const parser = new BinaryParser();
+			parser.push(buffer);
+
+			const size = parser.uint32();
+			const version = parser.uint32();
+
+			return parser.uint16();
+		});
 		this.descriptors.status = {
 			filter: this.createAddressFilter('s'),
 			handler: (codec, emit) => (topic, buffer) => {
@@ -113,7 +123,7 @@ class MessageChannelBuilder {
 	 * @param {function} handler Channel data handler.
 	 * @param {function} filter before handle.
 	 */
-	add(name, markerChar, handler, filter) {
+	add(name, markerChar, handler) {
 		if (name in this.descriptors)
 			throw Error(`'${name}' channel has already been registered`);
 
@@ -131,8 +141,20 @@ class MessageChannelBuilder {
 			channelHandler = handlers[handler](name);
 		}
 
-		this.descriptors[name] = { filter: filter ? filter(markerChar) : this.createAddressFilter(markerChar), handler: channelHandler };
+		this.descriptors[name] = { filter: this.createAddressFilter(markerChar), handler: channelHandler };
 		this.channelMarkers[markerChar] = 1;
+	}
+
+	/**
+	 * Adds resolver for a new topic.
+	 * @param {string} topic which topic we are resolving.
+	 * @param {function} resolver Channel data resolver.
+	 */
+	addResolver(topic, resolver) {
+		if (topic in this.resolvers)
+			throw Error(`'${topic}' resolver has already been registered`);
+
+		this.resolvers[topic.toString()] = resolver
 	}
 
 	/**
@@ -141,6 +163,14 @@ class MessageChannelBuilder {
 	 */
 	build() {
 		return this.descriptors;
+	}
+
+	/**
+	 * Builds and returns an object composed of all configured channel resolvers.
+	 * @returns {object} An object composed of all configured channel resolvers.
+	 */
+	buildResolvers() {
+		return this.resolvers;
 	}
 }
 

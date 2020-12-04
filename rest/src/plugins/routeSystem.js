@@ -71,7 +71,8 @@ module.exports = {
 
 		return {
 			transactionStates,
-			messageChannelDescriptors: messageChannelBuilder.build()
+			messageChannelDescriptors: messageChannelBuilder.build(),
+			messageChannelResolvers: messageChannelBuilder.buildResolvers()
 		};
 	}
 };

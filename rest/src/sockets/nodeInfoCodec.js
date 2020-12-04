@@ -45,4 +45,24 @@ const nodeInfoCodec = {
 	}
 };
 
-module.exports = nodeInfoCodec;
+const nodeInfosCodec = {
+	/**
+	 * Parses a node infos.
+	 * @param {object} parser Parser.
+	 * @returns {object} Parsed node infos.
+	 */
+	deserialize: parser => {
+		const nodeInfos = [];
+
+		while (parser.numUnprocessedBytes() > 0) {
+			nodeInfos.push(nodeInfoCodec.deserialize(parser));
+		}
+
+		return nodeInfos;
+	}
+};
+
+module.exports = {
+	nodeInfoCodec: nodeInfoCodec,
+	nodeInfosCodec: nodeInfosCodec
+};

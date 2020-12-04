@@ -50,7 +50,49 @@ const loadConfig = () => {
 		configFilePath = process.argv[2];
 
 	winston.info(`loading config from ${configFilePath}`);
-	return JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
+	const config = JSON.parse(fs.readFileSync(configFilePath, 'utf8'));
+
+	if (!config.https)
+		config.https = {}
+
+	if ((config.https.certificate && config.https.key) ||
+		(process.env.HTTPS_CERTIFICATE && process.env.HTTPS_KEY)) {
+			
+		const pathToCert = process.env.HTTPS_CERTIFICATE
+						 ? process.env.HTTPS_CERTIFICATE
+						 : path.join(__dirname, config.https.certificate);
+
+		winston.info(`loading server certificate from ${pathToCert}`);
+		const certificate = fs.readFileSync(pathToCert);
+
+		config.https.certificate = certificate;
+
+		const pathToKey = process.env.HTTPS_KEY
+						? process.env.HTTPS_KEY
+						: path.join(__dirname, config.https.key);
+
+		winston.info(`loading server private key from ${pathToKey}`);
+		const key = fs.readFileSync(pathToKey);
+
+		config.https.key = key;
+
+		config.https.passphrase = process.env.HTTPS_PASSPHRASE
+							   ? process.env.HTTPS_PASSPHRASE
+							   : config.https.passphrase
+
+		if (config.https.ca || process.env.HTTPS_CA) {
+			const pathToCa = process.env.HTTPS_CA
+						   ? process.env.HTTPS_CA
+						   : path.join(__dirname, config.https.ca);
+
+			winston.info(`loading CA certificate from ${pathToCa}`);
+			const ca = fs.readFileSync(pathToCa);
+
+			config.https.ca = ca;
+		}
+	}
+
+	return config;
 };
 
 const createServiceManager = () => {
@@ -82,7 +124,7 @@ const createServer = config => {
 		ws: messageFormattingRules
 	});
 	return {
-		server: bootstrapper.createServer(config.crossDomainHttpMethods, formatters.create(modelSystem.formatters), config.cors, config.throttling, config.endpoints),
+		server: bootstrapper.createServer(config.crossDomainHttpMethods, formatters.create(modelSystem.formatters), config.cors, config.throttling, config.https, config.endpoints),
 		codec: modelSystem.codec
 	};
 };
@@ -105,11 +147,11 @@ const registerRoutes = (server, db, services) => {
 	};
 
 	// 2. configure extension routes
-	const { transactionStates, messageChannelDescriptors } = routeSystem.configure(services.config.extensions, server, db, servicesView);
+	const { transactionStates, messageChannelDescriptors, messageChannelResolvers } = routeSystem.configure(services.config.extensions, server, db, servicesView);
 
 	// 3. augment services with extension-dependent config and services
 	servicesView.config.transactionStates = transactionStates;
-	servicesView.zmqService = createZmqConnectionService(services.config.websocket.mq, services.codec, messageChannelDescriptors, winston);
+	servicesView.zmqService = createZmqConnectionService(services.config.websocket.mq, services.codec, messageChannelDescriptors, messageChannelResolvers, winston);
 
 	// 4. configure basic routes
 	allRoutes.register(server, db, servicesView);
