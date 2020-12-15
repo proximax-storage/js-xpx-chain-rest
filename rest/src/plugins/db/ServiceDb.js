@@ -52,7 +52,7 @@ class ServiceDb {
 				conditions.push({[options.sortField]: {[1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset)}});
 
 			if (filters.start !== undefined)
-				conditions.push({'drive.start': convertToLong(filters.height)});
+				conditions.push({'drive.start': convertToLong(filters.start)});
 			else if (filters.fromStart !== undefined)
 				conditions.push({'drive.start': {$gte: convertToLong(filters.fromStart)}});
 			else if (filters.toStart !== undefined)

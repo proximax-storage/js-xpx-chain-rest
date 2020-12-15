@@ -247,7 +247,7 @@ const routeUtils = {
 		 */
 		sendArray(id, res, next) {
 			return array => {
-				if (!Array.isArray(array))
+				if (!Array.isArray(array.data))
 					res.send(errors.createInternalError(`error retrieving data for id: '${id}'`));
 				else
 					res.send({ payload: array, type });
