@@ -27,9 +27,7 @@ const routeUtils = require('./routeUtils');
 const { convert } = catapult.utils;
 
 module.exports = {
-	register: (server, db, services) => {
-		const transactionSender = routeUtils.createSender(routeResultTypes.transaction);
-
+	register: (server, db) => {
 		server.get('/account/:accountId', (req, res, next) => {
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
 			const sender = routeUtils.createSender(routeResultTypes.account);
@@ -52,35 +50,5 @@ module.exports = {
 				.then(sender.sendArray(idOptions.keyName, res, next));
 		});
 
-		const transactionStates = [
-			{ dbPostfix: 'All', routePostfix: '', supportOnlyPublicKey: true },
-			{ dbPostfix: 'Incoming', routePostfix: '/incoming', supportOnlyPublicKey: false },
-			{ dbPostfix: 'Outgoing', routePostfix: '/outgoing', supportOnlyPublicKey: true },
-			{ dbPostfix: 'Unconfirmed', routePostfix: '/unconfirmed', supportOnlyPublicKey: true }
-		];
-
-		transactionStates.concat(services.config.transactionStates).forEach(state => {
-			server.get(`/account/:accountId/transactions${state.routePostfix}`, (req, res, next) => {
-				const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
-
-				if (state.supportOnlyPublicKey && 'publicKey' !== type)
-					throw errors.createInvalidArgumentError('Allowed only publicKey');
-
-				const pagingOptions = routeUtils.parsePagingArguments(req.params);
-				let ordering = -1;
-
-				if (req.params['ordering']) {
-					ordering = routeUtils.parseArgument(req.params, 'ordering', input => {
-						if ('id' === input)
-							return 1;
-						else if ('-id' == input)
-							return -1;
-						else throw errors.createInvalidArgumentError('Invalid id');
-					});
-				}
-				return db[`accountTransactions${state.dbPostfix}`]({ accountId, type }, pagingOptions.id, pagingOptions.pageSize, ordering)
-					.then(transactionSender.sendArray('accountId', res, next));
-			});
-		});
 	}
 };

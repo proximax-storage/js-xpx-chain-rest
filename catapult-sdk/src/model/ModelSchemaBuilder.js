@@ -95,6 +95,7 @@ class ModelSchemaBuilder {
 				merkleComponentHash: ModelType.binary
 			},
 			transactionWithMetadata: {
+				id: ModelType.objectId,
 				meta: { type: ModelType.object, schemaName: 'transactionMetadata' },
 				transaction: {
 					type: ModelType.object,

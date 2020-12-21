@@ -21,7 +21,7 @@
 const lock = require('../../src/plugins/lock');
 const LockDb = require('../../src/plugins/db/LockDb');
 const pluginTest = require('./utils/pluginTestUtils');
-const test = require('../routes/utils/routeTestUtils');
+const { test } = require('../routes/utils/routeTestUtils');
 
 describe('lock plugin', () => {
 	pluginTest.assertThat.pluginCreatesDb(lock, LockDb);

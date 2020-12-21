@@ -7,7 +7,7 @@
 const metadata = require('../../src/plugins/metadata');
 const MetadataDb = require('../../src/plugins/db/MetadataDb');
 const pluginTest = require('./utils/pluginTestUtils');
-const test = require('../routes/utils/routeTestUtils');
+const { test } = require('../routes/utils/routeTestUtils');
 
 describe('metadata plugin', () => {
 	pluginTest.assertThat.pluginCreatesDb(metadata, MetadataDb);

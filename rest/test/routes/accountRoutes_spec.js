@@ -20,7 +20,7 @@
 
 const accountRoutes = require('../../src/routes/accountRoutes');
 const catapult = require('catapult-sdk');
-const test = require('./utils/routeTestUtils');
+const { test } = require('./utils/routeTestUtils');
 const { expect } = require('chai');
 
 const { address } = catapult.model;
@@ -88,107 +88,4 @@ describe('account routes', () => {
 		});
 	});
 
-	describe('account transactions', () => {
-		const addAccountTransactionsPublicKeyTests = (apiPath, dbApiPath) => {
-			describe(dbApiPath, () => {
-				const pagingTestsFactory = test.setup.createPagingTestsFactory(
-					{
-						routes: accountRoutes,
-						routeName: `/account/:accountId/${apiPath}`,
-						createDb: (queriedIdentifiers, transactions) => ({
-							[dbApiPath]: (accountId, pageId, pageSize) => {
-								queriedIdentifiers.push({ accountId, pageId, pageSize });
-								return Promise.resolve(transactions);
-							}
-						}),
-						config: { transactionStates: [{ dbPostfix: 'Partial', routePostfix: '/partial' }] }
-					},
-					{ accountId: publicKeys.valid[0] },
-					{ accountId: { accountId: convert.hexToUint8(publicKeys.valid[0]), type: 'publicKey' } },
-					'transactionWithMetadata'
-				);
-
-				pagingTestsFactory.addDefault();
-				pagingTestsFactory.addNonPagingParamFailureTest('accountId', '12345');
-			});
-		};
-
-		const addAccountTransactionsAddressTests = (apiPath, dbApiPath) => {
-			describe(dbApiPath, () => {
-				const pagingTestsFactory = test.setup.createPagingTestsFactory(
-					{
-						routes: accountRoutes,
-						routeName: `/account/:accountId/${apiPath}`,
-						createDb: (queriedIdentifiers, transactions) => ({
-							[dbApiPath]: (accountId, pageId, pageSize) => {
-								queriedIdentifiers.push({ accountId, pageId, pageSize });
-								return Promise.resolve(transactions);
-							}
-						}),
-						config: { transactionStates: [{ dbPostfix: 'Partial', routePostfix: '/partial' }] }
-					},
-					{ accountId: addresses.valid[0] },
-					{ accountId: { accountId: address.stringToAddress(addresses.valid[0]), type: 'address' } },
-					'transactionWithMetadata'
-				);
-
-				pagingTestsFactory.addDefault();
-				pagingTestsFactory.addNonPagingParamFailureTest('accountId', '12345');
-			});
-		};
-
-		// default transaction states
-		addAccountTransactionsPublicKeyTests('transactions', 'accountTransactionsAll');
-		addAccountTransactionsPublicKeyTests('transactions/incoming', 'accountTransactionsIncoming');
-		addAccountTransactionsPublicKeyTests('transactions/outgoing', 'accountTransactionsOutgoing');
-		addAccountTransactionsPublicKeyTests('transactions/unconfirmed', 'accountTransactionsUnconfirmed');
-
-		// custom transaction states (enabled via custom configuration)
-		addAccountTransactionsPublicKeyTests('transactions/partial', 'accountTransactionsPartial');
-
-		addAccountTransactionsAddressTests('transactions/incoming', 'accountTransactionsIncoming');
-
-		const addOrderingParamTests = (apiPath, dbApiPath) => {
-			describe(dbApiPath, () => {
-				// Arrange:
-				const createDb = (queriedIdentifiers, transactions) => ({
-					[dbApiPath]: (accountId, pageId, pageSize, ordering) => {
-						queriedIdentifiers.push({
-							accountId, pageId, pageSize, ordering
-						});
-						return Promise.resolve(transactions);
-					}
-				});
-				const keyGroups = [];
-				const db = createDb(keyGroups, []);
-
-				// Act:
-				it('queries the database with ordering param', () => test.route.executeSingle(
-					accountRoutes.register,
-					`/account/:accountId/${apiPath}`,
-					'get',
-					Object.assign({}, { accountId: publicKeys.valid[0] }, { ordering: 'id' }),
-					db,
-					{ transactionStates: [{ dbPostfix: 'Partial', routePostfix: '/partial' }] },
-					() => {
-						// Assert:
-						expect(keyGroups).to.deep.equal([Object.assign(
-							{},
-							{ accountId: { accountId: convert.hexToUint8(publicKeys.valid[0]), type: 'publicKey' } },
-							{ pageId: undefined, pageSize: 0, ordering: 1 }
-						)]);
-					}
-				));
-			});
-		};
-
-		// default transaction states
-		addOrderingParamTests('transactions', 'accountTransactionsAll');
-		addOrderingParamTests('transactions/incoming', 'accountTransactionsIncoming');
-		addOrderingParamTests('transactions/outgoing', 'accountTransactionsOutgoing');
-		addOrderingParamTests('transactions/unconfirmed', 'accountTransactionsUnconfirmed');
-
-		// custom transaction states (enabled via custom configuration)
-		addOrderingParamTests('transactions/partial', 'accountTransactionsPartial');
-	});
 });

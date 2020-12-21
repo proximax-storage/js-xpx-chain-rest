@@ -18,14 +18,14 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const catapult = require('catapult-sdk');
-const MongoDb = require('mongodb');
+const { convertToLong } = require('../../../src/db/dbUtils');
 const namespaceRoutes = require('../../../src/plugins/namespace/namespaceRoutes');
 const namespaceUtils = require('../../../src/plugins/namespace/namespaceUtils');
-const sinon = require('sinon');
-const test = require('../../routes/utils/routeTestUtils');
-const { convertToLong } = require('../../../src/db/dbUtils');
+const { test } = require('../../routes/utils/routeTestUtils');
+const catapult = require('catapult-sdk');
 const { expect } = require('chai');
+const MongoDb = require('mongodb');
+const sinon = require('sinon');
 
 const { Binary } = MongoDb;
 const { convert } = catapult.utils;

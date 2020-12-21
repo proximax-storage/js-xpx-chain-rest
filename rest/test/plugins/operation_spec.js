@@ -7,7 +7,7 @@
 const operation = require('../../src/plugins/operation');
 const OperationDb = require('../../src/plugins/db/OperationDb');
 const pluginTest = require('./utils/pluginTestUtils');
-const test = require('../routes/utils/routeTestUtils');
+const { test } = require('../routes/utils/routeTestUtils');
 
 describe('operation plugin', () => {
 	pluginTest.assertThat.pluginCreatesDb(operation, OperationDb);
