@@ -5,6 +5,9 @@
  * */
 
 const AccountType = require('../AccountType');
+const { convertToLong } = require('../../db/dbUtils');
+const MongoDb = require('mongodb');
+const { ObjectId } = MongoDb;
 
 const driveRoles = ['owner', 'replicator'];
 
@@ -29,6 +32,42 @@ class ServiceDb {
 		const buffer = Buffer.from(accountId);
 		const fieldName = (AccountType.publicKey === type) ? 'drive.multisig' : 'drive.multisigAddress';
 		return this.catapultDb.queryDocuments('drives', { [fieldName]: buffer });
+	}
+
+	/**
+	 * Retrieves filtered and paginated drives.
+	 * @param {object} filters Filters to be applied: `states`, 'start'
+	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
+	 * `pageSize`.
+	 * and `pageNumber`.
+	 * @returns {Promise.<object>} Drives page.
+	 */
+	drives(filters, options) {
+		const buildConditions = () => {
+			const conditions = [];
+
+			// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
+			// in fact, offset logic should be moved to `queryPagedDocuments`
+			if (options.offset !== undefined)
+				conditions.push({[options.sortField]: {[1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset)}});
+
+			if (filters.start !== undefined)
+				conditions.push({'drive.start': convertToLong(filters.start)});
+			else if (filters.fromStart !== undefined)
+				conditions.push({'drive.start': {$gte: convertToLong(filters.fromStart)}});
+			else if (filters.toStart !== undefined)
+				conditions.push({'drive.start': {$lte: convertToLong(filters.toStart)}});
+
+			if (filters.states !== undefined)
+				conditions.push({'drive.state': {$in: filters.states}});
+
+			return conditions;
+		};
+
+		const sortConditions = {$sort: {[options.sortField]: options.sortDirection}};
+		const conditions = buildConditions();
+
+		return this.catapultDb.queryPagedDocuments_2(conditions, [], sortConditions, "drives", options);
 	}
 
 	/**

@@ -20,7 +20,7 @@
 
 const catapult = require('catapult-sdk');
 const lockRoutes = require('../../../src/plugins/routes/lockRoutes');
-const test = require('../../routes/utils/routeTestUtils');
+const { test } = require('../../routes/utils/routeTestUtils');
 
 const { addresses, publicKeys } = test.sets;
 const { address } = catapult.model;

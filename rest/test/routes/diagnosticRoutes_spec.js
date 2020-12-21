@@ -19,7 +19,7 @@
  */
 
 const diagnosticRoutes = require('../../src/routes/diagnosticRoutes');
-const test = require('./utils/routeTestUtils');
+const { test } = require('./utils/routeTestUtils');
 const { expect } = require('chai');
 const { version: restVersion } = require('../../package.json');
 const { version: sdkVersion } = require('../../../catapult-sdk/package.json');

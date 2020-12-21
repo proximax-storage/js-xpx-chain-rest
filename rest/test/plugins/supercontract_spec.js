@@ -7,7 +7,7 @@
 const supercontract = require('../../src/plugins/supercontract');
 const SuperContractDb = require('../../src/plugins/db/SuperContractDb');
 const pluginTest = require('./utils/pluginTestUtils');
-const test = require('../routes/utils/routeTestUtils');
+const { test } = require('../routes/utils/routeTestUtils');
 
 describe('supercontract plugin', () => {
 	pluginTest.assertThat.pluginCreatesDb(supercontract, SuperContractDb);

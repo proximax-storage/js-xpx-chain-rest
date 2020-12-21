@@ -19,7 +19,7 @@
  */
 
 const chainRoutes = require('../../src/routes/chainRoutes');
-const test = require('./utils/routeTestUtils');
+const { test } = require('./utils/routeTestUtils');
 const { expect } = require('chai');
 
 describe('chain routes', () => {

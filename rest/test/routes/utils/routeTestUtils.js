@@ -20,8 +20,46 @@
 
 const test = require('../../testUtils');
 const { expect } = require('chai');
+const sinon = require('sinon');
 
 const makeTestName = (base, desc) => (desc ? `${base} ${desc}` : base);
+
+class MockServer {
+	constructor() {
+		this.routes = {};
+		this.server = {};
+		['get', 'put', 'post'].forEach(method => {
+			this.server[method] = (path, handler) => {
+				this.routes[path] = this.routes[path] || {};
+				this.routes[path][method] = () => handler;
+			};
+		});
+
+		this.next = sinon.fake();
+		this.send = sinon.fake();
+		this.redirect = sinon.fake();
+		this.status = sinon.fake();
+		this.res = {
+			send: this.send,
+			redirect: this.redirect,
+			status: this.status
+		};
+	}
+
+	resetStats() {
+		this.next.resetHistory();
+		this.send.resetHistory();
+		this.redirect.resetHistory();
+	}
+
+	getRoute(path) {
+		return this.routes[path];
+	}
+
+	callRoute(route, req) {
+		return route(req, this.res, this.next);
+	}
+}
 
 const routeTestUtils = {
 	setup: {
@@ -606,4 +644,8 @@ const routeTestUtils = {
 };
 Object.assign(routeTestUtils, test);
 
-module.exports = routeTestUtils;
+module.exports = {
+	MockServer,
+	test: routeTestUtils
+};
+

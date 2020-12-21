@@ -135,9 +135,10 @@ const registerRoutes = (server, db, services) => {
 		config: {
 			network: services.config.network,
 			pageSize: {
-				min: services.config.db.pageSizeMin,
-				max: services.config.db.pageSizeMax,
-				step: services.config.db.pageSizeStep
+				min: services.config.db.pageSizeMin || 10,
+				max: services.config.db.pageSizeMax || 100,
+				step: services.config.db.pageSizeStep,
+				default: services.config.db.pageSizeDefault || 20
 			},
 			apiNode: services.config.apiNode,
 			websocket: services.config.websocket
@@ -169,9 +170,12 @@ const registerRoutes = (server, db, services) => {
 
 	const serviceManager = createServiceManager();
 	const db = new CatapultDb({
+
+		// to be removed when old pagination is not used anymore
+		// json settings should also be moved from config.db to config.api or similar
 		networkId: network.id,
 		pageSizeMin: config.db.pageSizeMin,
-		pageSizeMax: config.db.pageSizeMax
+		pageSizeMax: config.db.pageSizeMax,
 	});
 
 	serviceManager.pushService(db, 'close');

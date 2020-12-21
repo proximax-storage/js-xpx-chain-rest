@@ -6,7 +6,7 @@
 
 const supercontractRoutes = require('../../../src/plugins/routes/supercontractRoutes');
 const catapult = require('catapult-sdk');
-const test = require('../../routes/utils/routeTestUtils');
+const { test } = require('../../routes/utils/routeTestUtils');
 const { expect } = require('chai');
 
 const { address } = catapult.model;

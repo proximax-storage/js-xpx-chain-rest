@@ -20,7 +20,7 @@
 
 const aggregate = require('../../src/plugins/aggregate');
 const pluginTest = require('./utils/pluginTestUtils');
-const test = require('../routes/utils/routeTestUtils');
+const { test } = require('../routes/utils/routeTestUtils');
 const { expect } = require('chai');
 
 describe('aggregate plugin', () => {
@@ -124,8 +124,8 @@ describe('aggregate plugin', () => {
 
 			// Assert:
 			test.assert.assertRoutes(routes, [
-				'/transaction/cosignature',
-				'/transaction/partial'
+				'/transactions/cosignature',
+				'/transactions/partial'
 			]);
 		});
 	});

@@ -8,15 +8,18 @@ const dbTestUtils = require('../../../db/utils/dbTestUtils');
 const MongoDb = require('mongodb');
 const ServiceDb = require('../../../../src/plugins/db/ServiceDb');
 const test = require('../../../testUtils');
+const { convertToLong } = require('../../../../src/db/dbUtils');
 
 const { Binary, Long } = MongoDb;
 
-const createDriveEntry = (id, multisig, owner, replicators) => ({
+const createDriveEntry = (id, multisig, owner, replicators, start, state) => ({
 	_id: dbTestUtils.db.createObjectId(id),
 	drive: {
 		multisig: new Binary(multisig.publicKey),
 		multisigAddress: new Binary(multisig.address),
 		owner: owner ? new Binary(owner) : null,
+		start: start ? convertToLong(start) : null,
+		state: state ? state : 0,
 		replicators: replicators && replicators.length ?
 			replicators.map(key => { return { replicator: new Binary(key) }}) : null
 	}
@@ -56,6 +59,7 @@ const createDownloadEntries = (downloadInfos) => {
 
 const driveDbTestUtils = {
 	db: {
+
 		createDriveEntry,
 		createDriveEntries,
 		createDownloadEntry,

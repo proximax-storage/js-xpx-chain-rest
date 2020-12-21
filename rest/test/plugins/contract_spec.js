@@ -7,7 +7,7 @@
 const contract = require('../../src/plugins/contract');
 const ContractDb = require('../../src/plugins/db/ContractDb');
 const pluginTest = require('./utils/pluginTestUtils');
-const test = require('../routes/utils/routeTestUtils');
+const { test } = require('../routes/utils/routeTestUtils');
 
 describe('contract plugin', () => {
 	pluginTest.assertThat.pluginCreatesDb(contract, ContractDb);

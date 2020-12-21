@@ -6,7 +6,7 @@
 
 const catapult = require('catapult-sdk');
 const contractRoutes = require('../../../src/plugins/routes/contractRoutes');
-const test = require('../../routes/utils/routeTestUtils');
+const { test } = require('../../routes/utils/routeTestUtils');
 const { expect } = require('chai');
 
 const Valid_Public_Key = test.sets.publicKeys.valid[0];
