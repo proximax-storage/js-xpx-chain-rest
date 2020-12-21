@@ -28,7 +28,7 @@ module.exports = {
 			const options = routeUtils.parsePaginationArguments(params, services.config.pageSize);
 
 			return db.drives(filters, options)
-				.then(routeUtils.createSender('driveEntry').sendArray(req.params.states, res, next));
+				.then(result => routeUtils.createSender('driveEntry').sendPage(res, next)(result));
 		});
 
 		const driveStates = [
