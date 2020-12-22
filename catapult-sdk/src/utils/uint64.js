@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2016-present,
- * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
+ * Copyright (c) 2016-2019, Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp.
+ * Copyright (c) 2020-present, Jaguar0625, gimre, BloodyRookie.
+ * All rights reserved.
  *
  * This file is part of Catapult.
  *
@@ -21,6 +22,7 @@
 /** @module utils/uint64 */
 
 const convert = require('./convert');
+const Long = require('long');
 
 const readUint32At = (bytes, i) => (bytes[i] + (bytes[i + 1] << 8) + (bytes[i + 2] << 16) + (bytes[i + 3] << 24)) >>> 0;
 
@@ -63,6 +65,18 @@ const uint64Module = {
 	},
 
 	/**
+	 * Compares two UInt64, returning 1 if a is grater, -1 if b is grater, 0 if they are equals
+	 * @param {module:utils/uint64~uint64} a this object
+	 * @param {module:utils/uint64~uint64} b the other
+	 * @returns {number} - -1, 0, 1
+	 */
+	compare(a, b) {
+		const long_a = Long.fromBits(a[0], a[1], true);
+		const long_b = Long.fromBits(b[0], b[1], true);
+		return long_a.compare(long_b);
+	},
+
+	/**
 	 * Converts a (64bit) uint8 array into a uint64.
 	 * @param {Uint8Array} uint8Array A uint8 array.
 	 * @returns {module:utils/uint64~uint64} Uint64 representation of the input.
@@ -72,6 +86,11 @@ const uint64Module = {
 			throw Error(`byte array has unexpected size '${uint8Array.length}'`);
 
 		return [readUint32At(uint8Array, 0), readUint32At(uint8Array, 4)];
+	},
+
+	toBytes: uint64 => {
+		const uint32Array = new Uint32Array(uint64);
+		return convert.uint32ToUint8(uint32Array);
 	},
 
 	/**
@@ -116,7 +135,41 @@ const uint64Module = {
 	 * @param {module:utils/uint64~uint64} uint64 A uint64 value.
 	 * @returns {boolean} true if the value is zero.
 	 */
-	isZero: uint64 => 0 === uint64[0] && 0 === uint64[1]
+	isZero: uint64 => 0 === uint64[0] && 0 === uint64[1],
+
+	/**
+	 * Converts a uint64 into a numeric string.
+	 * @param {module:utils/uint64~uint64} uint64 A uint64 value.
+	 * @returns {string} A numeric string representation of the input.
+	 */
+	toString: uint64 => (new Long(uint64[0], uint64[1], true).toString(10)),
+
+	/**
+	 * Converts a numeric string representing an unsigned integer into uint64.
+	 * @param {string} input A string representing the uint64.
+	 * @returns {module:utils/uint64~uint64} A uint64 value.
+	 */
+	fromString: input => {
+		if (!/^\d+$/.test(input) || ('' === input) || (undefined === input) || (null === input))
+			throw Error(`input string is not a valid numeric string '${input}'`);
+
+		const inputLong = Long.fromString(input, true, 10);
+		return ([inputLong.getLowBitsUnsigned(), inputLong.getHighBitsUnsigned()]);
+	},
+
+	/**
+	 * Multiplies two uint64 values.
+	 * @param {module:utils/uint64~uint64} multiplier A uint64 value.
+	 * @param {module:utils/uint64~uint64} multiplicand A uint64 value.
+	 * @returns {module:utils/uint64~uint64} A uint64 value.
+	 */
+	multiply: (multiplier, multiplicand) => {
+		const factorA = new Long(multiplier[0], multiplier[1], true);
+		const factorB = new Long(multiplicand[0], multiplicand[1], true);
+
+		const result = factorA.multiply(factorB);
+		return ([result.getLowBitsUnsigned(), result.getHighBitsUnsigned()]);
+	}
 };
 
 module.exports = uint64Module;
