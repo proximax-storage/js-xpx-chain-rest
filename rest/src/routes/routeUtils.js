@@ -53,6 +53,7 @@ const namedParserMap = {
 
 		return result;
 	},
+	uint64: str => uint64.fromString(str),
 	address: str => {
 		if (constants.sizes.addressEncoded === str.length)
 			return address.stringToAddress(str);
