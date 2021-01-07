@@ -91,4 +91,26 @@ describe('message formatting rules', () => {
 		// Assert:
 		expect(result).to.deep.equal([1, 2]);
 	});
+
+	it('can format bool type', () => {
+		// Arrange:
+		const object = true;
+
+		// Act:
+		const result = formattingRules[ModelType.bool](object);
+
+		// Assert:
+		expect(result).to.deep.equal(true);
+	});
+
+	it('can format double type', () => {
+		// Arrange:
+		const object = 1.23456;
+
+		// Act:
+		const result = formattingRules[ModelType.double](object);
+
+		// Assert:
+		expect(result).to.deep.equal(1.23456);
+	});
 });

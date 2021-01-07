@@ -151,7 +151,13 @@ const EntityType = {
 	uploadFile: 0x4460,
 
 	/** Deactivate super contract. */
-	deactivate: 0x4560
+	deactivate: 0x4560,
+
+	/** Add harvester. */
+	addHarvester: 0x4161,
+
+	/** Remove harvester. */
+	removeHarvester: 0x4261
 };
 
 module.exports = EntityType;

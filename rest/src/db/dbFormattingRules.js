@@ -44,5 +44,7 @@ module.exports = {
 	[ModelType.string]: value => value.toString(),
 	[ModelType.uint16]: value => (value instanceof Binary ? Buffer.from(value.buffer).readUInt16LE(0) : value >>> 0),
 	[ModelType.uint32]: value => (value instanceof Binary ? Buffer.from(value.buffer).readUInt32LE(0) : value >>> 0),
-	[ModelType.uint64]: value => (value instanceof Binary ? uint64.fromBytes(value.buffer) : longToUint64(value))
+	[ModelType.uint64]: value => (value instanceof Binary ? uint64.fromBytes(value.buffer) : longToUint64(value)),
+	[ModelType.bool]: value => (value instanceof Binary ? Boolean(value.buffer[0]) : value),
+	[ModelType.double]: value => (value instanceof Binary ? Buffer.from(value.buffer).readDoubleLE(0) : value)
 };

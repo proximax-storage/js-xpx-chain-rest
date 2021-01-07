@@ -38,5 +38,7 @@ module.exports = {
 	[ModelType.string]: value => value.toString(),
 	[ModelType.uint16]: value => value,
 	[ModelType.uint32]: value => value,
-	[ModelType.uint64]: value => value
+	[ModelType.uint64]: value => value,
+	[ModelType.bool]: value => value,
+	[ModelType.double]: value => value
 };
