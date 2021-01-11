@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2016-present,
- * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
+ * Copyright (c) 2016-2019, Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp.
+ * Copyright (c) 2020-present, Jaguar0625, gimre, BloodyRookie.
+ * All rights reserved.
  *
  * This file is part of Catapult.
  *
@@ -140,6 +141,13 @@ describe('uint64', () => {
 		});
 	});
 
+	describe('toBytes', () => {
+		it('can parse uint64 to Uint8Array', () => {
+			const result = uint64.toBytes([0x00ABCDEF, 0x000FDFFF]);
+			expect(result).to.deep.equal(new Uint8Array([0xEF, 0xCD, 0xAB, 0x00, 0xFF, 0xDF, 0x0F, 0x00]));
+		});
+	});
+
 	describe('fromBytes32', () => {
 		const fromBytes32TestCases = [
 			{ str: '00000000', value: [0, 0], description: '0' },
@@ -227,6 +235,112 @@ describe('uint64', () => {
 
 				// Assert:
 				expect(isZero).to.equal(testCase.isZero);
+			});
+		});
+	});
+
+	describe('toString', () => {
+		const successTestCases = [
+			{ str: '0', value: [0, 0], description: 'min value' },
+			{ str: '4294967295', value: [4294967295, 0], description: '8 significant digits' },
+			{ str: '18446744069414584320', value: [0, 4294967295], description: '(0, 8) significant digits' },
+			{ str: '193338964773', value: [65436453, 45], description: 'number' },
+			{ str: '12774881867138931535', value: [3127188303, 2974383967], description: 'big number' },
+			{ str: '18446744073709551615', value: [4294967295, 4294967295], description: 'max value' }
+		];
+
+		successTestCases.forEach(testCase => {
+			it(`can parse uint64 values to string (${testCase.description})`, () => {
+				expect(uint64.toString(testCase.value)).to.deep.equal(testCase.str);
+			});
+		});
+	});
+
+	describe('fromString', () => {
+		const failureTestCases = [
+			{ str: '', value: [4294967295, 4294967295], description: 'empty string' },
+			{ str: undefined, value: [4294967295, 4294967295], description: 'undefined string' },
+			{ str: null, value: [4294967295, 4294967295], description: 'null string' },
+			{ str: '3546.5446', value: [4294967295, 4294967295], description: 'decimals' },
+			{ str: '35,44,56\'46.5446', value: [4294967295, 4294967295], description: 'wrong characters' },
+			{ str: 's4565678', value: [4294967295, 4294967295], description: 'wrong string' }
+		];
+
+		failureTestCases.forEach(testCase => {
+			it(`cannot parse numeric strings into uint64 (${testCase.description})`, () => {
+				expect(() => uint64.fromString(testCase.str)).to.throw(`input string is not a valid numeric string '${testCase.str}'`);
+			});
+		});
+
+		const successTestCases = [
+			{ str: '0', value: [0, 0], description: 'min value' },
+			{ str: '5678', value: [5678, 0], description: 'small number' },
+			{ str: '8765873000863846', value: [3663517798, 2040963], description: 'big number' },
+			{ str: '4294967295', value: [4294967295, 0], description: 'max 32 bits' },
+			{ str: '9007199254740993', value: [1, 2097152], description: 'max safe intger + 2' },
+			{ str: '18446744073709551615', value: [4294967295, 4294967295], description: 'max value' }
+		];
+
+		successTestCases.forEach(testCase => {
+			it(`can parse numeric strings into uint64 (${testCase.description})`, () => {
+				expect(uint64.fromString(testCase.str)).to.deep.equal(testCase.value);
+			});
+		});
+	});
+
+	describe('compare', () => {
+		const successTestCases = [
+			{ a: '0', b: '0', value: 0 },
+			{ a: '20', b: '10', value: 1 },
+			{ a: '10', b: '20', value: -1 },
+			{ a: '20', b: '20', value: 0 },
+			{ a: '18446744073709500000', b: '438', value: 1 },
+			{ a: '438', b: '18446744073709500000', value: -1 },
+			{ a: '18446744073709551615', b: '438', value: 1 },
+			{ a: '438', b: '18446744073709551615', value: -1 },
+			{ a: '18446744073709551615', b: '18446744073709551615', value: 0 }
+		];
+
+		successTestCases.forEach(testCase => {
+			it(`compare (${testCase.a}) and (${testCase.b} should be (${testCase.value})`, () => {
+				const a = uint64.fromString(testCase.a);
+				const b = uint64.fromString(testCase.b);
+				expect(uint64.compare(a, b)).to.equal(testCase.value);
+			});
+		});
+	});
+
+	describe('multiply', () => {
+		const successTestCases = [
+			{
+				factorA: [0, 0],
+				factorB: [0, 0],
+				result: [0, 0],
+				description: 'min value'
+			},
+			{
+				factorA: [25, 0],
+				factorB: [4, 0],
+				result: [100, 0],
+				description: 'small value'
+			},
+			{
+				factorA: [4294967295, 0],
+				factorB: [4294967295, 0],
+				result: [1, 4294967294],
+				description: 'big value'
+			},
+			{
+				factorA: [16843009, 16843009],
+				factorB: [255, 0],
+				result: [4294967295, 4294967295],
+				description: 'max value'
+			}
+		];
+
+		successTestCases.forEach(testCase => {
+			it(`can multiply uint64 values (${testCase.description})`, () => {
+				expect(uint64.multiply(testCase.factorA, testCase.factorB)).to.deep.equal(testCase.result);
 			});
 		});
 	});
