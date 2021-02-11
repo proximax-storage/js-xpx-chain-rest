@@ -18,6 +18,13 @@ module.exports = {
 		server.get('/drives', (req, res, next) => {
 			const { params } = req;
 
+			// If array 'states' contains only one item,
+			// then array wil interpreted as 'string'
+			// and exception generated 'not an array'
+			if (typeof params.states === 'string' ) {
+				params.states = Array.of(params.states);
+			}
+
 			const filters = {
 				start: params.start ? routeUtils.parseArgument(params, 'start', 'uint') : undefined,
 				fromStart: params.fromStart ? routeUtils.parseArgument(params, 'fromStart', 'uint64') : undefined,
