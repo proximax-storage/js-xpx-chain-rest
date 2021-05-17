@@ -72,8 +72,20 @@ const EntityType = {
 	/** Prepare Drive transaction. */
 	prepareDrive: 0x415A,
 
+	/** Prepare Drive transaction version 2. */
+	prepareDriveV2: 0x415B,
+
 	/** Join To Drive transaction. */
 	joinToDrive: 0x425A,
+
+	/** Data modification cancel transaction. */
+	dataModificationCancel: 0x4354,
+
+	/** Download approval transaction. */
+	downloadApproval: 0x4355,
+
+	/** Drive closure transaction. */
+	driveClosure: 0x4353,
 
 	/** Drive File System transaction. */
 	driveFileSystem: 0x435A,
@@ -89,6 +101,9 @@ const EntityType = {
 
 	/** Start Drive Verification transaction. */
 	startDriveVerification: 0x475A,
+
+	/** To prepay the Drive for the next Billing Period transaction. */
+	storagePayment: 0x475B,
 
 	/** End Drive Verification transaction. */
 	endDriveVerification: 0x485A,
@@ -122,6 +137,9 @@ const EntityType = {
 
 	/** Remove exchange offer transaction. */
 	removeExchangeOffer: 0x435D,
+
+	/** Prove of the storage size transaction. */
+	replicatorOnboard: 0x4351,
 
 	/** Start file download. */
 	startFileDownload: 0x495A,

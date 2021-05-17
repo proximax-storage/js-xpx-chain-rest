@@ -28,6 +28,41 @@ const servicePlugin = {
 			percentApprovers:	{ type: ModelType.uint16, schemaName: 'prepareDrive.percentApprovers' },
 		});
 
+		builder.addTransactionSupport(EntityType.prepareDriveV2, {
+			owner: 				{ type: ModelType.binary, schemaName: 'prepareDrive.owner' },
+			driveSize:			{ type: ModelType.uint64, schemaName: 'prepareDrive.driveSize' },
+			signer:				{ type: ModelType.binary, schemaName: 'prepareDrive.signer' },
+		});
+
+		builder.addTransactionSupport(EntityType.replicatorOnboard, {
+			storageProviding:	{ type: ModelType.uint64, schemaName: 'replicatorOnboard.storageProviding' },
+			signer:				{ type: ModelType.binary, schemaName: 'replicatorOnboard.signer' },
+		});
+
+		builder.addTransactionSupport(EntityType.driveClosure, {
+			driveKey: 			{ type: ModelType.binary, schemaName: 'driveClosure.driveKey' },
+			signer:				{ type: ModelType.binary, schemaName: 'driveClosure.signer' },
+		});
+
+		builder.addTransactionSupport(EntityType.storagePayment, {
+			driveKey: 			{ type: ModelType.binary, schemaName: 'storagePayment.driveKey' },
+			soAmount:			{ type: ModelType.uint64, schemaName: 'storagePayment.soAmount' },
+			signer:				{ type: ModelType.binary, schemaName: 'storagePayment.signer' },
+		});
+
+		builder.addTransactionSupport(EntityType.downloadApproval, {
+			channelIdentifier: 						{ type: ModelType.binary, schemaName: 'downloadApproval.channelIdentifier' },
+			responseToFinishDownloadTransaction:	{ type: ModelType.binary, schemaName: 'downloadApproval.responseToFinishDownloadTransaction' },
+			replicatorUploadOpnion:					{ type: ModelType.uint64, schemaName: 'downloadApproval.replicatorUploadOpnion' },
+			signer:									{ type: ModelType.binary, schemaName: 'downloadApproval.signer' },
+		});
+
+		builder.addTransactionSupport(EntityType.dataModificationCancel, {
+			driveKey: 						{ type: ModelType.binary, schemaName: 'dataModificationCancel.driveKey' },
+			modificationTransactionHash: 	{ type: ModelType.binary, schemaName: 'dataModificationCancel.modificationTransactionHash' },
+			signer:							{ type: ModelType.binary, schemaName: 'dataModificationCancel.signer' },
+		});
+
 		builder.addTransactionSupport(EntityType.joinToDrive, {
 			driveKey: 			{ type: ModelType.binary, schemaName: 'joinToDrive.driveKey' },
 		});
@@ -191,6 +226,106 @@ const servicePlugin = {
 				serializer.writeUint16(transaction.replicas);
 				serializer.writeUint16(transaction.minReplicators);
 				serializer.writeUint8(transaction.percentApprovers);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.prepareDriveV2, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.owner = parser.buffer(constants.sizes.signer);
+				transaction.driveSize = parser.uint64();
+				transaction.signer = parser.buffer(constants.sizes.signer);
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.owner);
+				serializer.writeUint64(transaction.driveSize);
+				serializer.writeBuffer(transaction.signer);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.replicatorOnboard, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.storageProviding = parser.uint64();
+				transaction.signer = parser.buffer(constants.sizes.signer);
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeUint64(transaction.storageProviding);
+				serializer.writeBuffer(transaction.signer);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.driveClosure, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.driveKey = parser.buffer(constants.sizes.signer);
+				transaction.signer = parser.buffer(constants.sizes.signer);
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.driveKey);
+				serializer.writeBuffer(transaction.signer);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.storagePayment, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.driveKey = parser.buffer(constants.sizes.signer);
+				transaction.soAmount = parser.uint64();
+				transaction.signer = parser.buffer(constants.sizes.signer);
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.driveKey);
+				serializer.writeUint64(transaction.soAmount);
+				serializer.writeBuffer(transaction.signer);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.downloadApproval, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.channelIdentifier = parser.buffer(constants.sizes.signer);
+				transaction.responseToFinishDownloadTransaction = parser.buffer(constants.sizes.signer);
+				transaction.replicatorUploadOpnion = parser.uint64();
+				transaction.signer = parser.buffer(constants.sizes.signer);
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.channelIdentifier);
+				serializer.writeBuffer(transaction.responseToFinishDownloadTransaction);
+				serializer.writeUint64(transaction.replicatorUploadOpnion);
+				serializer.writeBuffer(transaction.signer);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.dataModificationCancel, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.driveKey = parser.buffer(constants.sizes.signer);
+				transaction.modificationTransactionHash = parser.buffer(constants.sizes.signer);
+				transaction.signer = parser.buffer(constants.sizes.signer);
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.driveKey);
+				serializer.writeBuffer(transaction.modificationTransactionHash);
+				serializer.writeBuffer(transaction.signer);
 			}
 		});
 
