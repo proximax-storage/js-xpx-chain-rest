@@ -151,7 +151,16 @@ const EntityType = {
 	uploadFile: 0x4460,
 
 	/** Deactivate super contract. */
-	deactivate: 0x4560
+	deactivate: 0x4560,
+
+	/** Account metadata transaction */
+	accountMetadata: 0x413F,
+
+	/** Mosaic metadata transaction */
+	mosaicMetadata: 0x423F,
+
+	/** Namespace metadata transaction */
+	namespaceMetadata: 0x433F
 };
 
 module.exports = EntityType;

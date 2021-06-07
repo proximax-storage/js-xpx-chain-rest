@@ -49,10 +49,19 @@ const ModelType = {
 	uint32: SchemaType.max + 7,
 
 	/** Schema property type indicating a uint64 value. */
-	uint64: SchemaType.max + 8
+	uint64: SchemaType.max + 8,
+
+	/** Schema property type indicating a uint64 identifier as hexadecimal. */
+	uint64HexIdentifier: SchemaType.max + 9,
+
+	/** Schema property type indicating an int value. */
+	int: SchemaType.max + 10,
+
+	/** Schema property type indicating a boolean value. */
+	boolean: SchemaType.max + 11
 };
 
 Object.assign(ModelType, SchemaType);
-ModelType.max = ModelType.uint64;
+ModelType.max = ModelType.boolean;
 
 module.exports = ModelType;
