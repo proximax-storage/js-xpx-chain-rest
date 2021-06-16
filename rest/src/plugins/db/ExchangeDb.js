@@ -6,6 +6,7 @@
 
 const MongoDb = require('mongodb');
 const AccountType = require('../AccountType');
+const uint64 = require('../../../../catapult-sdk/src/utils/uint64');
 
 const { Long } = MongoDb;
 
@@ -103,6 +104,46 @@ class ExchangeDb {
 
 		return this.catapultDb.queryPagedDocuments('exchanges', conditions, pagingId, pageSize, options).then(extractor);
 	}
+
+	/**
+	 * Retrieves mosaic ids present in buy/sell offers.
+	 * @param {Array.<Long>} mosaics Required mosaics.
+	 * @returns {Promise.<array>} Mosaic ids.
+	 */
+	 mosaicsParticipatingInOffers(mosaics) {
+		 var mosaicIds = [];
+		 const handler = new Promise((resolve) => {
+			 if (Array.isArray(mosaics) && mosaics.length) {
+				 mosaics.forEach((entity, index, array) => {
+					 const id = entity.mosaic.mosaicId;
+					 const buyCondition = { "exchange.buyOffers.mosaicId": id };
+					 const sellCondition = { "exchange.sellOffers.mosaicId": id };
+					 const conditions = { $or: [buyCondition, sellCondition] };
+
+					 this.catapultDb.queryDocument('exchanges', conditions)
+						 .then(exchange => {
+							 if (exchange) {
+								 const id = entity.mosaic.mosaicId.toString();
+								 const hex = uint64.toHex(uint64.fromString(id));
+								 const json = { "mosaicId": hex };
+								 mosaicIds.push(json);
+							 }
+
+							 if (Object.is(array.length - 1, index)) {
+								 resolve(mosaicIds);
+								 return;
+							 }
+						 });
+				 });
+			 } else {
+				 resolve(mosaicIds);
+				 return;
+			 }
+		 });
+
+		 return handler.then(data => { return data; });
+	}
+
 	//
 	// /**
 	//  * Retrieves the exchange entries with the offers of the given type with the given mosaicIds
