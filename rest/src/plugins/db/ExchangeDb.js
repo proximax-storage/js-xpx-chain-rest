@@ -110,38 +110,47 @@ class ExchangeDb {
 	 * @param {Array.<Long>} mosaics Required mosaics.
 	 * @returns {Promise.<array>} Mosaic ids.
 	 */
-	 mosaicsParticipatingInOffers(mosaics) {
-		 var mosaicIds = [];
-		 const handler = new Promise((resolve) => {
-			 if (Array.isArray(mosaics) && mosaics.length) {
-				 mosaics.forEach((entity, index, array) => {
-					 const id = entity.mosaic.mosaicId;
-					 const buyCondition = { "exchange.buyOffers.mosaicId": id };
-					 const sellCondition = { "exchange.sellOffers.mosaicId": id };
-					 const conditions = { $or: [buyCondition, sellCondition] };
+	mosaicsParticipatingInOffers(mosaics) {
+		var promises = [];
+		const mainHndler = new Promise((resolve) => {
+			if (Array.isArray(mosaics) && mosaics.length) {
+				mosaics.forEach((entity) => {
+					const id = entity.mosaic.mosaicId;
+					const buyCondition = { "exchange.buyOffers.mosaicId": id };
+					const sellCondition = { "exchange.sellOffers.mosaicId": id };
+					const conditions = { $or: [buyCondition, sellCondition] };
+					const signleHandler = new Promise(resolve => {
+						this.catapultDb.queryDocument('exchanges', conditions)
+							.then(exchange => {
+								resolve({ 'mosaicId': entity.mosaic.mosaicId.toString(), 'isMatched': exchange ? true : false });
+								return;
+							});
+					});
 
-					 this.catapultDb.queryDocument('exchanges', conditions)
-						 .then(exchange => {
-							 if (exchange) {
-								 const id = entity.mosaic.mosaicId.toString();
-								 const hex = uint64.toHex(uint64.fromString(id));
-								 const json = { "mosaicId": hex };
-								 mosaicIds.push(json);
-							 }
+					promises.push(signleHandler);
+				});
 
-							 if (Object.is(array.length - 1, index)) {
-								 resolve(mosaicIds);
-								 return;
-							 }
-						 });
-				 });
-			 } else {
-				 resolve(mosaicIds);
-				 return;
-			 }
-		 });
+				Promise.all(promises)
+					.then((items) => {
+						var mosaicIds = [];
+						items.forEach((item) => {
+							if (item.isMatched) {
+								const hex = uint64.toHex(uint64.fromString(item.mosaicId));
+								const json = { "mosaicId": hex };
+								mosaicIds.push(json);
+							}
+						});
 
-		 return handler.then(data => { return data; });
+						resolve(mosaicIds);
+						return;
+					});
+			} else {
+				resolve([]);
+				return;
+			}
+		});
+
+		return mainHndler.then(data => { return data; });
 	}
 
 	//
