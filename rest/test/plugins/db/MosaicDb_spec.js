@@ -76,4 +76,29 @@ describe('mosaic db', () => {
 			);
 		});
 	});
+
+	describe('mosaics', () => {
+		it('returns all mosaics', () => {
+			// Arrange: mosaic ids: 10000, 10001, ... 10011
+			const mosaics = createMosaics(3, 4);
+
+			// Assert:
+			return test.db.runDbTest(
+				mosaics,
+				db => db.mosaics(),
+				entities => { expect(entities.length).equal(12); }
+			);
+		});
+
+		it('returns single mosaic', () => {
+			const mosaics = createMosaics(1, 1);
+
+			// Assert:
+			return test.db.runDbTest(
+				mosaics,
+				db => db.mosaics(),
+				entities => { expect(entities.length).equal(1); }
+			);
+		});
+	});
 });

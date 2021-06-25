@@ -8,6 +8,7 @@ const AccountType = require('../../../src/plugins/AccountType');
 const entriesByAccounts = require('./utils/entriesByAccountsTestUtils');
 const test = require('./utils/exchangeDbTestUtils');
 const { expect } = require('chai');
+const mosaicDb = require('./utils/mosaicDbTestUtils');
 
 describe('exchange db', () => {
 	describe('exchanges by public key', () =>
@@ -258,6 +259,42 @@ describe('exchange db', () => {
 					return assertExchangesByMosaicIdsWithPaging('sell', 'sellOffers', 0, -1, 150, 100);
 				});
 			});
+		});
+	});
+
+	describe('get all mosaic ids present in exchange buy/sell offers', () => {
+		it('return zero mosaics', () => {
+			// Arrange:
+			const owner = test.random.publicKey();
+			const mosaics = mosaicDb.db.createMosaics(owner, 3, 4);
+			const accounts = [test.random.account(), test.random.account()];
+			const entries = test.db.createExchangeEntries(accounts);
+
+			// Assert:
+			return test.db.runDbTest(
+				entries,
+				db => db.mosaicsParticipatingInOffers(mosaics),
+				entities => expect(entities.length).equal(0)
+			);
+		});
+
+		it('return multiple mosaics', () => {
+			// Arrange:
+			const owner = test.random.publicKey();
+			const mosaics = mosaicDb.db.createMosaics(owner, 3, 4);
+			const accounts = [test.random.account(), test.random.account()];
+			const entries = test.db.createExchangeEntries(accounts);
+
+			mosaics[0].mosaic.mosaicId = 51;
+			mosaics[5].mosaic.mosaicId = 100;
+			mosaics[8].mosaic.mosaicId = 101;
+
+			// Assert:
+			return test.db.runDbTest(
+				entries,
+				db => db.mosaicsParticipatingInOffers(mosaics),
+				entities => expect(entities.length).equal(3)
+			);
 		});
 	});
 });
