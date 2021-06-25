@@ -54,6 +54,7 @@ const namedParserMap = {
 		return result;
 	},
 	uint64: str => uint64.fromString(str),
+	uint64hex: str => uint64.fromHex(str),
 	address: str => {
 		if (constants.sizes.addressEncoded === str.length)
 			return address.stringToAddress(str);
@@ -104,10 +105,10 @@ const namedParserMap = {
 const getBoundedPageSize = (pageSize, optionsPageSize) =>
 	Math.max(optionsPageSize.min, Math.min(optionsPageSize.max, pageSize || optionsPageSize.default));
 
-const isPage = page => undefined !== page.data && undefined !== page.pagination.totalEntries && undefined !== page.pagination.pageNumber
-	&& undefined !== page.pagination.pageSize && undefined !== page.pagination.totalPages;
+const isPage = page => undefined !== page.data && undefined !== page.pagination.pageNumber && undefined !== page.pagination.pageSize;
 
 const routeUtils = {
+	namedParserMap: namedParserMap,
 	/**
 	 * Parses an argument and throws an invalid argument error if it is invalid.
 	 * @param {object} args Container containing the argument to parse.

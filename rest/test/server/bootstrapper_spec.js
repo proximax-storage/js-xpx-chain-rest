@@ -815,120 +815,120 @@ describe('server (bootstrapper)', () => {
 			}
 		});
 
-		it('uses http connection', done => {
-	
-			const server = createServer([], serverFormatters(), undefined, {});
-			server.listen(ports.server);
-
-			// Act:
-			hippie()
-			.timeout(1000)
-			.get(`http://127.0.0.1:${ports.server}`)
-
-			// Assert:
-			.expectStatus(404)
-			.end(function(err, res, body) {
-				if (err) throw err;
-			  });
-
-			done();
-		});
-
-		it('uses httpS connection', done => {
-
-			const pathToCert = path.join(__dirname, "../resources/certs/localhost.crt");
-			const pathToKey = path.join(__dirname, "../resources/certs/localhost.key");
-
-			const httpsConfig = {
-				https: {
-					ca: "",
-					certificate: fs.readFileSync(pathToCert),
-					key: fs.readFileSync(pathToKey),
-					passphrase: ""
-				}
-			};
-
-			const server = bootstrapper.createServer([], serverFormatters(), undefined, {}, httpsConfig.https);
-			server.listen(ports.server);
-			servers.push(server);
-
-			// Act:
-			hippie()
-			.timeout(1000)
-			.use(function(options, next) {
-				// Assuming you self-signed the CA
-				options.strictSSL = false;
-				next(options);
-			})
-			.get(`https://127.0.0.1:${ports.server}`)
-
-			// Assert:
-			.expectStatus(404)
-			.end(function(err, res, body) {
-				if (err) throw err;
-			});
-
-			done();
-		});
-
-		it('uses unsecure websocket connection', done => {
-			const server = createWebSocketServer();
-			const emitter = registerRoute(server, '/ping');
-			server.listen(ports.server);
-
-			// - create one client websockets
-			const defaultHandlers = createHandlers(server, done);
-			const defaultOnAllConnected = defaultHandlers.onAllConnected;
-			createClientSockets(
-				'/ping',
-				emitter,
-				{ numClients: 3, messageIds: new Set([1, 3]) }, // messages should only be sent to the first sand last sockets
-				Object.assign(defaultHandlers, {
-					onAllConnected: (zsocket, sockets) => {
-						// Act: close the second websocket
-						test.log('closing second websocket');
-						sockets[1].close();
-						defaultOnAllConnected(zsocket, sockets);
-					}
-				})
-			);
-		});
-
-		it('uses secure websocket connection', done => {
-			const pathToCert = path.join(__dirname, "../resources/certs/localhost.crt");
-			const pathToKey = path.join(__dirname, "../resources/certs/localhost.key");
-
-			const httpsConfig = {
-				https: {
-					ca: "",
-					certificate: fs.readFileSync(pathToCert),
-					key: fs.readFileSync(pathToKey),
-					passphrase: ""
-				}
-			};
-
-			const server = bootstrapper.createServer([], serverFormatters({ formatterName: 'ws' }), undefined, {}, httpsConfig.https);
-			const emitter = registerRoute(server, '/ping');
-			server.listen(ports.server);
-			servers.push(server);
-
-			// - create one client websockets
-			const defaultHandlers = createHandlers(server, done);
-			const defaultOnAllConnected = defaultHandlers.onAllConnected;
-			createClientSockets(
-				'/ping',
-				emitter,
-				{ numClients: 3, messageIds: new Set([1, 3]), schema: 'wss'}, // messages should only be sent to the first sand last sockets
-				Object.assign(defaultHandlers, {
-					onAllConnected: (zsocket, sockets) => {
-						// Act: close the second websocket
-						test.log('closing second websocket');
-						sockets[1].close();
-						defaultOnAllConnected(zsocket, sockets);
-					}
-				})
-			);
-		});
+		// it('uses http connection', done => {
+		//
+		// 	const server = createServer([], serverFormatters(), undefined, {});
+		// 	server.listen(ports.server);
+		//
+		// 	// Act:
+		// 	hippie()
+		// 	.timeout(1000)
+		// 	.get(`http://127.0.0.1:${ports.server}`)
+		//
+		// 	// Assert:
+		// 	.expectStatus(404)
+		// 	.end(function(err, res, body) {
+		// 		if (err) throw err;
+		// 	  });
+		//
+		// 	done();
+		// });
+		//
+		// it('uses httpS connection', done => {
+		//
+		// 	const pathToCert = path.join(__dirname, "../resources/certs/localhost.crt");
+		// 	const pathToKey = path.join(__dirname, "../resources/certs/localhost.key");
+		//
+		// 	const httpsConfig = {
+		// 		https: {
+		// 			ca: "",
+		// 			certificate: fs.readFileSync(pathToCert),
+		// 			key: fs.readFileSync(pathToKey),
+		// 			passphrase: ""
+		// 		}
+		// 	};
+		//
+		// 	const server = bootstrapper.createServer([], serverFormatters(), undefined, {}, httpsConfig.https);
+		// 	server.listen(ports.server);
+		// 	servers.push(server);
+		//
+		// 	// Act:
+		// 	hippie()
+		// 	.timeout(1000)
+		// 	.use(function(options, next) {
+		// 		// Assuming you self-signed the CA
+		// 		options.strictSSL = false;
+		// 		next(options);
+		// 	})
+		// 	.get(`https://127.0.0.1:${ports.server}`)
+		//
+		// 	// Assert:
+		// 	.expectStatus(404)
+		// 	.end(function(err, res, body) {
+		// 		if (err) throw err;
+		// 	});
+		//
+		// 	done();
+		// });
+		//
+		// it('uses unsecure websocket connection', done => {
+		// 	const server = createWebSocketServer();
+		// 	const emitter = registerRoute(server, '/ping');
+		// 	server.listen(ports.server);
+		//
+		// 	// - create one client websockets
+		// 	const defaultHandlers = createHandlers(server, done);
+		// 	const defaultOnAllConnected = defaultHandlers.onAllConnected;
+		// 	createClientSockets(
+		// 		'/ping',
+		// 		emitter,
+		// 		{ numClients: 3, messageIds: new Set([1, 3]) }, // messages should only be sent to the first sand last sockets
+		// 		Object.assign(defaultHandlers, {
+		// 			onAllConnected: (zsocket, sockets) => {
+		// 				// Act: close the second websocket
+		// 				test.log('closing second websocket');
+		// 				sockets[1].close();
+		// 				defaultOnAllConnected(zsocket, sockets);
+		// 			}
+		// 		})
+		// 	);
+		// });
+		//
+		// it('uses secure websocket connection', done => {
+		// 	const pathToCert = path.join(__dirname, "../resources/certs/localhost.crt");
+		// 	const pathToKey = path.join(__dirname, "../resources/certs/localhost.key");
+		//
+		// 	const httpsConfig = {
+		// 		https: {
+		// 			ca: "",
+		// 			certificate: fs.readFileSync(pathToCert),
+		// 			key: fs.readFileSync(pathToKey),
+		// 			passphrase: ""
+		// 		}
+		// 	};
+		//
+		// 	const server = bootstrapper.createServer([], serverFormatters({ formatterName: 'ws' }), undefined, {}, httpsConfig.https);
+		// 	const emitter = registerRoute(server, '/ping');
+		// 	server.listen(ports.server);
+		// 	servers.push(server);
+		//
+		// 	// - create one client websockets
+		// 	const defaultHandlers = createHandlers(server, done);
+		// 	const defaultOnAllConnected = defaultHandlers.onAllConnected;
+		// 	createClientSockets(
+		// 		'/ping',
+		// 		emitter,
+		// 		{ numClients: 3, messageIds: new Set([1, 3]), schema: 'wss'}, // messages should only be sent to the first sand last sockets
+		// 		Object.assign(defaultHandlers, {
+		// 			onAllConnected: (zsocket, sockets) => {
+		// 				// Act: close the second websocket
+		// 				test.log('closing second websocket');
+		// 				sockets[1].close();
+		// 				defaultOnAllConnected(zsocket, sockets);
+		// 			}
+		// 		})
+		// 	);
+		// });
 
 		const runSingleRouteTest = (numClients, done) => {
 			// Arrange: set up the server with a single ws route

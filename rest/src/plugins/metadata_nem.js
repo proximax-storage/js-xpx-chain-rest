@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2016-present,
- * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
+ * Copyright (c) 2016-2019, Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp.
+ * Copyright (c) 2020-present, Jaguar0625, gimre, BloodyRookie.
+ * All rights reserved.
  *
  * This file is part of Catapult.
  *
@@ -18,29 +19,22 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const ModelType = require('../../src/model/ModelType');
-const { expect } = require('chai');
+/** @module plugins/metadata */
+const MetadataNemDb = require('./db/MetadataNemDb');
+const metadataRoutes = require('./routes/metadataNemRoutes');
 
-describe('model type enumeration', () => {
-	it('exposes expected types', () => {
-		// Assert:
-		expect(ModelType).to.deep.equal({
-			none: 0,
-			array: 1,
-			dictionary: 2,
-			object: 3,
-			binary: 4,
-			metadataId: 5,
-			objectId: 6,
-			statusCode: 7,
-			string: 8,
-			uint16: 9,
-			uint32: 10,
-			uint64: 11,
-			uint64HexIdentifier: 12,
-			int: 13,
-			boolean: 14,
-			max: 14
-		});
-	});
-});
+/**
+ * Creates a metadata plugin.
+ * @type {module:plugins/CatapultRestPlugin}
+ */
+module.exports = {
+	createDb: db => new MetadataNemDb(db),
+
+	registerTransactionStates: () => {},
+
+	registerMessageChannels: () => {},
+
+	registerRoutes: (...args) => {
+		metadataRoutes.register(...args);
+	}
+};

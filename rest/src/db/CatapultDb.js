@@ -44,10 +44,22 @@ const createAccountTransactionsAllConditions = (publicKey, networkId) => {
 };
 
 const createSanitizer = () => ({
+	sanitizerIds: function(dbObjects) {
+		dbObjects.forEach(dbObject => {
+			dbObject.id = dbObject._id;
+			delete dbObject._id;
+		});
+		return dbObjects;
+	},
+
 	copyAndDeleteId: dbObject => {
-		if (dbObject) {
+		if (dbObject && dbObject._id) {
 			Object.assign(dbObject.meta, { id: dbObject._id });
 			delete dbObject._id;
+		}
+		if (dbObject && dbObject.id) {
+			Object.assign(dbObject.meta, { id: dbObject.id });
+			delete dbObject.id;
 		}
 
 		return dbObject;
@@ -55,16 +67,24 @@ const createSanitizer = () => ({
 
 	copyAndDeleteIds: dbObjects => {
 		dbObjects.forEach(dbObject => {
-			Object.assign(dbObject.meta, { id: dbObject._id });
-			delete dbObject._id;
+			if (dbObject._id) {
+				Object.assign(dbObject.meta, { id: dbObject._id });
+				delete dbObject._id;
+			}
+			if (dbObject.id) {
+				Object.assign(dbObject.meta, { id: dbObject.id });
+				delete dbObject.id;
+			}
 		});
 
 		return dbObjects;
 	},
 
 	deleteId: dbObject => {
-		if (dbObject)
+		if (dbObject) {
+			delete dbObject.id;
 			delete dbObject._id;
+		}
 
 		return dbObject;
 	},
@@ -72,6 +92,7 @@ const createSanitizer = () => ({
 	deleteIds: dbObjects => {
 		dbObjects.forEach(dbObject => {
 			delete dbObject._id;
+			delete dbObject.id;
 		});
 
 		return dbObjects;
@@ -165,6 +186,10 @@ class CatapultDb {
 			.then(this.sanitizer.deleteIds);
 	}
 
+	queryRawDocuments(collectionName, conditions) {
+		return this.database.collection(collectionName).find(conditions).toArray();
+	}
+
 	queryDocumentsAndCopyIds(collectionName, conditions, options = {}) {
 		const collection = this.database.collection(collectionName);
 		return collection.find(conditions)
@@ -174,10 +199,17 @@ class CatapultDb {
 	}
 
 	queryPagedDocuments(collectionName, conditions, id, pageSize, options = {}) {
-		const sortOrder = options.sortOrder || -1;
-		const sortBy = options.sortByField || '_id';
+		const sortOrder = options.sortOrder || options.sortDirection || -1;
+		let sortBy = options.sortByField || '_id';
+		if (sortBy === 'id')
+			sortBy = '_id';
 		const sorter = {};
 		sorter[sortBy] = sortOrder;
+
+		if (undefined !== options.offset) {
+			conditions[sortBy] = { [1 === options.sortDirection ? '$gt' : '$lt']: options.offset };
+		}
+
 		if (id)
 			conditions.$and.push({ _id: { [0 > sortOrder ? '$lt' : '$gt']: new ObjectId(id) } });
 
@@ -186,7 +218,7 @@ class CatapultDb {
 			.project(options.projection)
 			.sort(sorter)
 			.limit(getBoundedPageSize(pageSize, this.pagingOptions))
-			.toArray();
+			.toArray().then(this.sanitizer.sanitizerIds);
 	}
 
 	// endregion
