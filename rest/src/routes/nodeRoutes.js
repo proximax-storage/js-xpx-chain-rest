@@ -63,6 +63,25 @@ module.exports = {
 				});
 		});
 
+		server.get('/node/unlockedaccount', (req, res, next) => {
+			const { convert } = catapult.utils;
+			const headerBuffer = packetHeader.createBuffer(
+				PacketType.unlockedAccount,
+				packetHeader.size
+			);
+			const packetBuffer = headerBuffer;
+			return connections
+				.singleUse()
+				.then(connection => connection.pushPull(packetBuffer, timeout))
+				.then(packet => {
+					const unlockedKeys = convert
+						.uint8ToHex(packet.payload)
+						.match(/.{1,64}/g);
+					res.send({ unlockedAccount: !unlockedKeys ? [] : unlockedKeys });
+					next();
+				});
+		});
+
 		server.get('/node/peers', (req, res, next) => {
 			const packetNodeInfosBuffer = packetHeader.createBuffer(PacketType.nodeDiscoveryPullPeers, packetHeader.size);
 			const packetCurrentNodeBuffer = packetHeader.createBuffer(PacketType.nodeDiscoveryPullPing, packetHeader.size);

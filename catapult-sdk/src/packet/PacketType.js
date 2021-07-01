@@ -50,7 +50,10 @@ const PacketType = {
 	nodeDiscoveryPullPeers: 603,
 
 	/** Node time information has been requested by a peer. */
-	timeSyncNodeTime: 700
+	timeSyncNodeTime: 700,
+	
+	/** Unlocked account */
+	unlockedAccount: 0x304,
 };
 
 module.exports = PacketType;
