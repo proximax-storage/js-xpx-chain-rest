@@ -7,7 +7,7 @@
   "port": 3000,
   "crossDomainHttpMethods": ["GET", "POST", "PUT", "OPTIONS"],
   "cors": "*",
-  "clientPrivateKey": "0100000000000000000000000000000000000000000000000000000000000000",
+  "clientPrivateKey": "659D289A30D436DBBC80A5C1B0A4919FB6626A434FE1DB42DC0461D8015A5DAC",
   "extensions": ["accountLink", "accountProperties", "aggregate", "exchange", "config", "lock", "metadata", "metadata_nem", "mosaic", "multisig", "namespace", "operation", "receipts", "richlist", "service", "supercontract", "transfer", "upgrade"],
 
   "https": {
@@ -31,7 +31,7 @@
   "apiNode": {
     "host": "127.0.0.1",
     "port": 7900,
-    "publicKey": "5D3DE4A2E0C6CCBC38608B00B3E50652E15A7C500E8B1FD066D421602E14A806",
+    "publicKey": "10E8A1CCCFE02C4C22C12D42277520F1FC7D471E570C9FE2A2961ECB020BC596",
     "timeout": 1000
   },
 
