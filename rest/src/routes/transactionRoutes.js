@@ -21,9 +21,11 @@
 const catapult = require('catapult-sdk');
 const routeResultTypes = require('./routeResultTypes');
 const routeUtils = require('./routeUtils');
+const errors = require('../server/errors');
 
 const { convert } = catapult.utils;
 const { PacketType } = catapult.packet;
+const { NotFoundError } = require('restify-errors');
 
 const constants = {
 	sizes: {
@@ -32,12 +34,7 @@ const constants = {
 	}
 };
 
-const parseObjectId = str => {
-	if (!convert.isHexString(str))
-		throw Error('must be 12-byte hex string');
-
-	return str;
-};
+const isValidTransactionGroup = group => ['confirmed', 'unconfirmed', 'partial'].includes(group);
 
 module.exports = {
 	register: (server, db, services) => {
@@ -46,28 +43,79 @@ module.exports = {
 		routeUtils.addPutPacketRoute(
 			server,
 			services.connections,
-			{ routeName: '/transaction', packetType: PacketType.pushTransactions },
+			{ routeName: '/transactions', packetType: PacketType.pushTransactions },
 			params => routeUtils.parseArgument(params, 'payload', convert.hexToUint8),
 			services.transactionCache
 		);
 
-		routeUtils.addGetPostDocumentRoutes(
-			server,
-			sender,
-			{ base: '/transaction', singular: 'transactionId', plural: 'transactionIds' },
-			// params has already been converted by a parser below, so it is: string - in case of objectId, Uint8Array - in case of hash
-			params => (('string' === typeof params[0]) ? db.transactionsByIds(params) : db.transactionsByHashes(params)),
-			(transactionId, index, array) => {
-				if (0 < index && array[0].length !== transactionId.length)
-					throw Error(`all ids must be homogeneous, element ${index}`);
+		server.get('/transactions/:group', (req, res, next) => {
+			const { params } = req;
 
-				if (constants.sizes.objectId === transactionId.length)
-					return parseObjectId(transactionId);
-				else if (constants.sizes.hash === transactionId.length)
-					return convert.hexToUint8(transactionId);
+			if (!isValidTransactionGroup(params.group))
+				return next(new NotFoundError());
 
-				throw Error(`invalid length of transaction id '${transactionId}'`);
+			if (params.address && (params.signerPublicKey || params.recipientAddress)) {
+				throw errors.createInvalidArgumentError(
+					'can\'t filter by address if signerPublicKey or recipientAddress are already provided'
+				);
 			}
-		);
+
+			const filters = {
+				height: params.height ? routeUtils.parseArgument(params, 'height', 'uint') : undefined,
+				fromHeight: params.fromHeight ? routeUtils.parseArgument(params, 'fromHeight', 'uint64') : undefined,
+				toHeight: params.toHeight ? routeUtils.parseArgument(params, 'toHeight', 'uint64') : undefined,
+				address: params.address ? routeUtils.parseArgument(params, 'address', 'address') : undefined,
+				signerPublicKey: params.signerPublicKey ? routeUtils.parseArgument(params, 'signerPublicKey', 'publicKey') : undefined,
+				recipientAddress: params.recipientAddress ? routeUtils.parseArgument(params, 'recipientAddress', 'address') : undefined,
+				transactionTypes: params.type ? routeUtils.parseArgumentAsArray(params, 'type', 'uint') : undefined,
+				embedded: params.embedded ? routeUtils.parseArgument(params, 'embedded', 'boolean') : undefined
+			};
+
+			const options = routeUtils.parsePaginationArguments(params, services.config.pageSize, { id: 'objectId' });
+
+			return db.transactions(params.group, filters, options)
+				.then(result => routeUtils.createSender(routeResultTypes.transaction).sendPage(res, next)(result));
+		});
+
+		server.get('/transactions/:group/:transactionId', (req, res, next) => {
+			const { params } = req;
+
+			if (!isValidTransactionGroup(params.group))
+				return next(new NotFoundError());
+
+			let paramType = constants.sizes.objectId === params.transactionId.length ? 'id' : undefined;
+			paramType = constants.sizes.hash === params.transactionId.length ? 'hash' : paramType;
+			if (!paramType)
+				throw Error(`invalid length of transaction id '${params.transactionId}'`);
+
+			const transactionId = routeUtils.parseArgument(params, 'transactionId', 'id' === paramType ? 'objectId' : 'hash256');
+
+			const dbTransactionsRetriever = 'id' === paramType ? 'transactionsByIds' : 'transactionsByHashes';
+			return db[dbTransactionsRetriever](params.group, [transactionId]).then(sender.sendOne(params.transactionId, res, next));
+		});
+
+		server.post('/transactions/:group', (req, res, next) => {
+			const { params } = req;
+
+			if (!isValidTransactionGroup(params.group))
+				return next(new NotFoundError());
+
+			if ((req.params.transactionIds && req.params.hashes) || (!params.transactionIds && !params.hashes))
+				throw errors.createInvalidArgumentError('either ids or hashes must be provided');
+
+			// normalize ids arg to be either in the transcationIds object or hashes (this is expected to change in the near future)
+			if (params.transactionIds && constants.sizes.hash === params.transactionIds[0].length) {
+				params.hashes = params.transactionIds;
+				delete params.transactionIds;
+			}
+
+			const transactionIds = params.transactionIds
+				? routeUtils.parseArgumentAsArray(params, 'transactionIds', 'objectId')
+				: routeUtils.parseArgumentAsArray(params, 'hashes', 'hash256');
+
+			const dbTransactionsRetriever = params.transactionIds ? 'transactionsByIds' : 'transactionsByHashes';
+			return db[dbTransactionsRetriever](params.group, transactionIds)
+				.then(sender.sendArray(params.transactionIds || params.hashes, res, next));
+		});
 	}
 };

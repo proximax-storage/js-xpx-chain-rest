@@ -83,6 +83,10 @@ const exchangePlugin = {
 			deadline: 		ModelType.uint64,
 			owner: 			ModelType.binary,
 		});
+
+		builder.addSchema('mosaics', {
+			mosaics: { type: ModelType.array },
+		});
 	},
 
 	registerCodecs: codecBuilder => {

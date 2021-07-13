@@ -93,16 +93,16 @@ class NamespaceDb {
 			[catapult.model.namespace.aliasType.address]: () => ({ 'namespace.alias.address': { $in: ids.map(id => Buffer.from(id)) } })
 		};
 
-		return this.catapultDb.database.collection('blocks').countDocuments()
-			.then(numBlocks => {
+		return this.catapultDb.database.collection('blocks').stats()
+			.then(stats => {
 				const conditions = { $and: [] };
-				conditions.$and.push(aliasFilterCondition[aliasType]());
-				conditions.$and.push({ 'namespace.alias.type': aliasType });
 				conditions.$and.push({
 					$or: [
 						{ 'namespace.endHeight': convertToLong(-1) },
-						{ 'namespace.endHeight': { $gt: numBlocks } }]
+						{ 'namespace.endHeight': { $gt: stats.count } }]
 				});
+				conditions.$and.push({ 'namespace.alias.type': aliasType });
+				conditions.$and.push(aliasFilterCondition[aliasType]());
 
 				return this.catapultDb.queryDocuments('namespaces', conditions);
 			});

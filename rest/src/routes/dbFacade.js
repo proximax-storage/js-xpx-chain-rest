@@ -26,6 +26,10 @@ const extractFromMetadata = (group, transaction) => ({
 	height: transaction.meta.height
 });
 
+function getBuffer(value) {
+	return value.buffer instanceof ArrayBuffer ? value : value.buffer
+}
+
 module.exports = {
 
 	/**
@@ -66,12 +70,28 @@ module.exports = {
 		);
 
 		const promises = [];
-		promises.push(db.transactionsByHashesFailed(hashes).then(objs => objs.map(status => Object.assign(status, { group: 'failed' }))));
 		transactionStates.forEach(state => {
-			const dbPromise = db[`transactionsByHashes${state.dbPostfix}`](hashes);
+			const dbPromise = db.transactionsByHashes(state.friendlyName, hashes);
 			promises.push(dbPromise.then(objs => objs.map(transaction => extractFromMetadata(state.friendlyName, transaction))));
 		});
 
-		return Promise.all(promises).then(tuple => [].concat(...tuple));
+		return Promise.all(promises).then(
+			tuple => db.transactionsByHashesFailed(hashes).then(objs => {
+				const fetchedStatuses = [].concat(...tuple)
+				objs.forEach(failureStatus => {
+					let found = false;
+					fetchedStatuses.forEach(status => {
+						if (Buffer.compare(getBuffer(failureStatus.hash), getBuffer(status.hash)) === 0) {
+							found = true;
+						}
+					})
+					if (!found) {
+						fetchedStatuses.push(Object.assign(failureStatus, { group: 'failed' }));
+					}
+				})
+
+				return fetchedStatuses
+			})
+		);
 	}
 };

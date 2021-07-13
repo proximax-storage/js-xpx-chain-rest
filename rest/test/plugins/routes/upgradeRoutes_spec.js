@@ -4,7 +4,7 @@
  *** license that can be found in the LICENSE file.
  * */
 
-const test = require('../../routes/utils/routeTestUtils');
+const { test } = require('../../routes/utils/routeTestUtils');
 const upgradeRoutes = require('../../../src/plugins/routes/upgradeRoutes');
 const { expect } = require('chai');
 

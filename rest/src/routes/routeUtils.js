@@ -53,6 +53,8 @@ const namedParserMap = {
 
 		return result;
 	},
+	uint64: str => uint64.fromString(str),
+	uint64hex: str => uint64.fromHex(str),
 	address: str => {
 		if (constants.sizes.addressEncoded === str.length)
 			return address.stringToAddress(str);
@@ -91,10 +93,22 @@ const namedParserMap = {
 		} catch (err) {
 			throw Error(`invalid mosaic id`);
 		}
+	},
+	boolean: str => {
+		if (('true' !== str) && ('false' !== str))
+			throw Error('must be boolean value \'true\' or \'false\'');
+
+		return 'true' === str;
 	}
 };
 
+const getBoundedPageSize = (pageSize, optionsPageSize) =>
+	Math.max(optionsPageSize.min, Math.min(optionsPageSize.max, pageSize || optionsPageSize.default));
+
+const isPage = page => undefined !== page.data && undefined !== page.pagination.pageNumber && undefined !== page.pagination.pageSize;
+
 const routeUtils = {
+	namedParserMap: namedParserMap,
 	/**
 	 * Parses an argument and throws an invalid argument error if it is invalid.
 	 * @param {object} args Container containing the argument to parse.
@@ -183,6 +197,44 @@ const routeUtils = {
 	},
 
 	/**
+	 * Parses pagination arguments and throws an invalid argument error if any is invalid.
+	 * @param {object} args Arguments to parse.
+	 * @param {object} optionsPageSize Page size options.
+	 * @returns {object} Parsed pagination options.
+	 */
+	parsePaginationArguments: (args, optionsPageSize) => {
+		const parsedArgs = {
+			offset: args.offset,
+			sortField: args.sortField || 'id',
+			sortDirection: 'desc' === args.order ? -1 : 1
+		};
+
+		if (args.pageSize) {
+			const numericPageSize = convert.tryParseUint(args.pageSize);
+			if (undefined === numericPageSize)
+				throw errors.createInvalidArgumentError('pageSize is not a valid unsigned integer');
+
+			parsedArgs.pageSize = getBoundedPageSize(numericPageSize, optionsPageSize);
+		} else {
+			parsedArgs.pageSize = optionsPageSize.default;
+		}
+
+		if (args.pageNumber) {
+			const numericPageNumber = convert.tryParseUint(args.pageNumber);
+			if (undefined === numericPageNumber)
+				throw errors.createInvalidArgumentError('pageNumber is not a valid unsigned integer');
+
+			parsedArgs.pageNumber = numericPageNumber;
+		}
+		parsedArgs.pageNumber = 0 < parsedArgs.pageNumber ? parsedArgs.pageNumber : 1;
+
+		if (args.offset && !isObjectId(args.offset))
+			throw errors.createInvalidArgumentError('offset is not a valid object id');
+
+		return parsedArgs;
+	},
+
+	/**
 	 * Creates a sender for forwarding one or more objects of a given type.
 	 * @param {module:routes/routeResultTypes} type Object type.
 	 * @returns {object} Sender.
@@ -232,6 +284,22 @@ const routeUtils = {
 					sendOneObject(object);
 				}
 
+				next();
+			};
+		},
+
+		/**
+		 * Creates a page handler that forwards a paginated result.
+		 * @param {object} res Restify response object.
+		 * @param {Function} next Restify next callback handler.
+		 * @returns {Function} An appropriate object handler.
+		 */
+		sendPage(res, next) {
+			return page => {
+				if (!isPage(page))
+					res.send(errors.createInternalError('error retrieving data'));
+				else
+					res.send({ payload: page, type, structure: 'page' });
 				next();
 			};
 		}

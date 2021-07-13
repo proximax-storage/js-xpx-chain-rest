@@ -51,6 +51,7 @@ class ModelSchemaBuilder {
 				height: ModelType.uint64,
 				timestamp: ModelType.uint64,
 				difficulty: ModelType.uint64,
+				feeMultiplier: ModelType.uint32,
 				previousBlockHash: ModelType.binary,
 				blockTransactionsHash: ModelType.binary,
 				blockReceiptsHash: ModelType.binary,
@@ -94,6 +95,7 @@ class ModelSchemaBuilder {
 				merkleComponentHash: ModelType.binary
 			},
 			transactionWithMetadata: {
+				id: ModelType.objectId,
 				meta: { type: ModelType.object, schemaName: 'transactionMetadata' },
 				transaction: {
 					type: ModelType.object,
@@ -130,10 +132,10 @@ class ModelSchemaBuilder {
 				id: ModelType.uint64,
 				amount: ModelType.uint64
 			},
-			accountMetadata: {
+			accountMeta: {
 			},
 			accountWithMetadata: {
-				meta: { type: ModelType.object, schemaName: 'accountMetadata' },
+				meta: { type: ModelType.object, schemaName: 'accountMeta' },
 				account: { type: ModelType.object, schemaName: 'account' }
 			},
 

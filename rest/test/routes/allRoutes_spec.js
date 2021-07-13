@@ -19,7 +19,7 @@
  */
 
 const allRoutes = require('../../src/routes/allRoutes');
-const test = require('./utils/routeTestUtils');
+const { test } = require('./utils/routeTestUtils');
 
 describe('all routes', () => {
 	const registerAll = server => {
@@ -42,15 +42,9 @@ describe('all routes', () => {
 		// Assert:
 		test.assert.assertRoutes(routes, [
 			'/account/:accountId',
-			'/account/:accountId/transactions',
-			'/account/:accountId/transactions/incoming',
-			'/account/:accountId/transactions/outgoing',
-			'/account/:accountId/transactions/unconfirmed',
-			// no custom account transactions routes are registered
 
 			'/block/:height',
 			'/block/:height/transaction/:hash/merkle',
-			'/block/:height/transactions',
 			'/blocks/:height/limit/:limit',
 
 			'/chain/height',
@@ -59,9 +53,11 @@ describe('all routes', () => {
 			'/network',
 			'/node/info',
 			'/node/time',
+			'/node/peers',
 
-			'/transaction/:transactionId',
-			'/transaction/:hash/status',
+			'/transactions/:group/:transactionId',
+			'/transactions/:group',
+			'/transactionStatus/:hash',
 
 			'/diagnostic/blocks/:height/limit/:limit',
 			'/diagnostic/server',
@@ -80,8 +76,8 @@ describe('all routes', () => {
 		// Assert:
 		test.assert.assertRoutes(routes, [
 			'/account',
-			'/transaction',
-			'/transaction/statuses'
+			'/transactions/:group',
+			'/transactionStatus'
 		]);
 	});
 
@@ -95,7 +91,7 @@ describe('all routes', () => {
 
 		// Assert:
 		test.assert.assertRoutes(routes, [
-			'/transaction'
+			'/transactions'
 		]);
 	});
 

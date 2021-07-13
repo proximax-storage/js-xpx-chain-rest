@@ -31,6 +31,12 @@ const { Binary, Long, ObjectId } = MongoDb;
 const Default_Height = 34567;
 const Key_Size = 32;
 
+const DefaultPagingOptions = {
+	pageSizeMin: 10,
+	pageSizeMax: 100,
+	pageSizeDefault: 20
+};
+
 const createDbCollection = (db, collectionName) =>
 	// note: db.database.collection() will always return a collection even if it doesn't exist in the database
 	db.database.collection(collectionName)
@@ -121,6 +127,7 @@ const createDbBlock = height => {
 		timestamp: Long.fromNumber(23456),
 		height: Long.fromNumber(height),
 		difficulty: Long.fromNumber(45678),
+		feeMultiplier: 228,
 		previousBlockHash: new Binary(test.random.hash()),
 		blockTransactionsHash: new Binary(test.random.hash())
 	};
@@ -242,7 +249,7 @@ const sanitizeDbEntities = (collectionName, seed) => {
 
 const runDbTest = (dbEntities, collectionName, createDbFacade, issueDbCommand, assertDbCommandResult) => {
 	// Arrange:
-	const db = new CatapultDb({ networkId: testDbOptions.networkId });
+	const db = new CatapultDb(Object.assign({ networkId: testDbOptions.networkId }, DefaultPagingOptions));
 	const dbFacade = createDbFacade(db);
 
 	// Act + Assert:

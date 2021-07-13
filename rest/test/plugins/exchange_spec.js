@@ -7,7 +7,7 @@
 const exchange = require('../../src/plugins/exchange');
 const ExchangeDb = require('../../src/plugins/db/ExchangeDb');
 const pluginTest = require('./utils/pluginTestUtils');
-const test = require('../routes/utils/routeTestUtils');
+const { test } = require('../routes/utils/routeTestUtils');
 
 describe('exchange plugin', () => {
 	pluginTest.assertThat.pluginCreatesDb(exchange, ExchangeDb);
@@ -26,7 +26,8 @@ describe('exchange plugin', () => {
 			// Assert:
 			test.assert.assertRoutes(routes, [
 				'/account/:accountId/exchange',
-				'/exchange/:type/:mosaicId'
+				'/exchange/:type/:mosaicId',
+				'/exchange/mosaics'
 			]);
 		});
 	});

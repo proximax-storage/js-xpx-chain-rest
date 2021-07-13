@@ -23,23 +23,24 @@
     "babel-plugin-transform-inline-environment-variables": "^6.8.0",
     "babel-preset-env": "^1.7.0",
     "chai": "^4.2.0",
-    "coveralls": "^3.0.5",
-    "cross-env": "^5.2.0",
-    "eslint": "^6.0.1",
-    "eslint-config-airbnb": "^17.1.1",
-    "eslint-plugin-import": "^2.18.0",
-    "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-react": "^7.14.2",
-    "mocha": "^6.1.4",
-    "mocha-jenkins-reporter": "^0.4.1",
+    "coveralls": "^3.1.0",
+    "cross-env": "^7.0.2",
+    "eslint": "^7.6.0",
+    "eslint-config-airbnb": "^18.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-react": "^7.20.5",
+    "mocha": "^8.1.1",
+    "mocha-jenkins-reporter": "^0.4.4",
     "ncp": "^2.0.0",
-    "nyc": "^14.1.1",
-    "rimraf": "^2.6.3"
+    "nyc": "^15.1.0",
+    "rimraf": "^3.0.2"
   },
   "dependencies": {
     "js-sha3": "^0.8.0",
+    "long": "^4.0.0",
     "ripemd160": "^2.0.2",
-    "tweetnacl": "^1.0.1"
+    "tweetnacl": "^1.0.3"
   },
   "nyc": {
     "exclude": [

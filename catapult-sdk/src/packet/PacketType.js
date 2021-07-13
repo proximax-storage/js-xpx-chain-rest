@@ -46,6 +46,9 @@ const PacketType = {
 	/** Node information has been requested by a peer. */
 	nodeDiscoveryPullPing: 601,
 
+	/** Peers information has been requested by a peer. */
+	nodeDiscoveryPullPeers: 603,
+
 	/** Node time information has been requested by a peer. */
 	timeSyncNodeTime: 700
 };

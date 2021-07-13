@@ -19,7 +19,7 @@
  */
 
 const routeSystem = require('../../src/plugins/routeSystem');
-const test = require('../routes/utils/routeTestUtils');
+const { test } = require('../routes/utils/routeTestUtils');
 const { expect } = require('chai');
 
 describe('route system', () => {
@@ -46,6 +46,7 @@ describe('route system', () => {
 			'contract',
 			'lock',
 			'metadata',
+			'metadata_nem',
 			'mosaic',
 			'multisig',
 			'namespace',
@@ -107,7 +108,7 @@ describe('route system', () => {
 			routeSystem.configure(['aggregate'], server, {}, servicesTemplate);
 
 			// Assert:
-			expect(routes).to.include('/transaction/partial');
+			expect(routes).to.include('/transactions/partial');
 		});
 	});
 

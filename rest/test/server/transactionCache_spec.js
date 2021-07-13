@@ -84,5 +84,48 @@ describe('transaction cache', () => {
 				}, 1);
 			}, 100);
 		});
+
+		it('should restart after crash on least', () => {
+			const payload1 = Buffer.of(0x1);
+
+			let transactionCache;
+			// Act:
+			const connectionService = {
+				lease: () => new Promise((resolve, reject) => {
+					expect(transactionCache.transactions.length).to.equal(0);
+					reject(errors.createServiceUnavailableError('connection failed'));
+				})
+			};
+
+			const config = {
+				flushFrequency: 1
+			};
+
+			transactionCache = createTransactionCache(config, connectionService, () => {});
+			transactionCache.addTransactionBuffer(payload1);
+
+			expect(transactionCache.transactions.length).to.equal(1);
+			expect(transactionCache.sending).to.equal(true);
+
+			setTimeout(() => {
+				// Assert:
+				expect(transactionCache.transactions.length).to.equal(1);
+				expect(transactionCache.sending).to.equal(true);
+
+				setTimeout(() => {
+					// Assert:
+					expect(transactionCache.transactions.length).to.equal(1);
+					expect(transactionCache.sending).to.equal(true);
+
+					// rejection of connection will cause infinity loop, so break it by cleaning transactions
+					transactionCache.transactions = [];
+					setTimeout(() => {
+						// Assert:
+						expect(transactionCache.transactions.length).to.equal(0);
+						expect(transactionCache.sending).to.equal(false);
+					}, 2);
+				}, 2);
+			}, 2);
+		});
 	});
 });

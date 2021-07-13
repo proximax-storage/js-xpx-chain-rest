@@ -84,7 +84,7 @@ describe('model schema builder', () => {
 
 				'account',
 				'mosaic',
-				'accountMetadata',
+				'accountMeta',
 				'accountWithMetadata',
 
 				'chainInfo',
@@ -251,7 +251,8 @@ describe('model schema builder', () => {
 			// Assert:
 			expect(matchingProperties).to.deep.equal([
 				'transactionMetadata.aggregateId',
-				'transactionMetadata.id'
+				'transactionMetadata.id',
+				'transactionWithMetadata.id'
 			]);
 		});
 

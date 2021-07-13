@@ -18,9 +18,13 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const CatapultDb = require('../../src/db/CatapultDb');
 const dbFacade = require('../../src/routes/dbFacade');
+const testDbOptions = require('../db/utils/testDbOptions');
 const { expect } = require('chai');
+const sinon = require('sinon');
 
+const Mijin_Test_Network = testDbOptions.networkId;
 describe('db facade', () => {
 	describe('run height dependent operation', () => {
 		const runHeightDependentOperationTest = (requestHeight, chainHeight, isRequestValid) => {
@@ -43,50 +47,41 @@ describe('db facade', () => {
 	});
 
 	describe('transaction statuses by hashes', () => {
-		const createHandler = (dbApiName, db, collected, traits) => {
-			collected[dbApiName] = [];
-			db[dbApiName] = hashes => {
-				collected[dbApiName].push(hashes);
-				return Promise.resolve(traits);
-			};
-		};
-
 		const addTransactionStatusesByHashesTest = traits => {
 			// Arrange:
-			const collected = {};
-			const db = {};
-			createHandler('transactionsByHashesFailed', db, collected, traits.failed || []);
-			createHandler('transactionsByHashesUnconfirmed', db, collected, traits.unconfirmed || []);
-			createHandler('transactionsByHashes', db, collected, traits.confirmed || []);
-			createHandler('transactionsByHashesCustom', db, collected, traits.custom || []);
+			const transactionsByHashesFailedStub = sinon.stub(CatapultDb.prototype, 'transactionsByHashesFailed')
+				.returns(Promise.resolve(traits.failed || []));
+			const transactionsByHashesStub = sinon.stub(CatapultDb.prototype, 'transactionsByHashes')
+				.callsFake(group => Promise.resolve(traits[group] || []));
 
 			// Act:
 			const hashes = [1, 2, 3, 4];
 			const transactionStates = [{ dbPostfix: 'Custom', friendlyName: 'custom' }];
+			const db = new CatapultDb({ networkId: Mijin_Test_Network });
 			return dbFacade.transactionStatusesByHashes(db, hashes, transactionStates).then(result => {
-				// Assert:
-				Object.keys(collected).forEach(name => {
-					const capturedHashes = collected[name];
-					expect(capturedHashes.length, `${name} handler collected invalid number of elements`).to.equal(1);
-					// note: copying hashes would be unexpected, so deliberately make a shallow comparison
-					expect(capturedHashes[0], `${name} handler collected invalid hashes`).to.equal(hashes);
-				});
+				expect(transactionsByHashesFailedStub.withArgs(hashes).callCount).to.equal(1);
+				expect(transactionsByHashesStub.withArgs('confirmed', hashes).callCount).to.equal(1);
+				expect(transactionsByHashesStub.withArgs('unconfirmed', hashes).callCount).to.equal(1);
+				expect(transactionsByHashesStub.withArgs('custom', hashes).callCount).to.equal(1);
 
 				expect(result).to.deep.equal(traits.expected);
+
+				transactionsByHashesFailedStub.restore();
+				transactionsByHashesStub.restore();
 			});
 		};
 
-		const createFailed = value => ({ f: value });
-		const createFailedStatus = value => ({ group: 'failed', f: value });
-		const createTransaction = (hash, deadline, height) => ({ meta: { hash, height }, transaction: { deadline } });
+		const createFailed = value => ({ hash: Buffer.of(value) });
+		const createFailedStatus = value => ({ group: 'failed', hash: Buffer.of(value) });
+		const createTransaction = (hash, deadline, height) => ({ meta: { hash: Buffer.of(hash), height }, transaction: { deadline } });
 		const createUnconfirmedStatus = (hash, deadline) => ({
-			group: 'unconfirmed', status: 0, hash, deadline, height: 0
+			group: 'unconfirmed', status: 0, hash: Buffer.of(hash), deadline, height: 0
 		});
 		const createConfirmedStatus = (hash, deadline, height) => ({
-			group: 'confirmed', status: 0, hash, deadline, height
+			group: 'confirmed', status: 0, hash: Buffer.of(hash), deadline, height
 		});
 		const createCustomStatus = (hash, deadline, height) => ({
-			group: 'custom', status: 0, hash, deadline, height
+			group: 'custom', status: 0, hash: Buffer.of(hash), deadline, height
 		});
 
 		it('unknown hashes are properly mapped', () =>
@@ -125,10 +120,23 @@ describe('db facade', () => {
 				confirmed: [createTransaction(55, 66, 77), createTransaction(88, 99, 11)],
 				custom: [createTransaction(87, 98, 43)],
 				expected: [
-					createFailedStatus(123), createFailedStatus(456),
 					createUnconfirmedStatus(111, 222), createUnconfirmedStatus(333, 444),
 					createCustomStatus(87, 98, 43),
-					createConfirmedStatus(55, 66, 77), createConfirmedStatus(88, 99, 11)
+					createConfirmedStatus(55, 66, 77), createConfirmedStatus(88, 99, 11),
+					createFailedStatus(123), createFailedStatus(456),
+				]
+			}));
+
+		it('transaction has two statuses failed + something, then we need return not failure state', () =>
+			addTransactionStatusesByHashesTest({
+				failed: [createFailedStatus(123), createFailedStatus(456), createFailedStatus(87)],
+				unconfirmed: [createTransaction(456, 99, 0)],
+				confirmed: [createTransaction(123, 66, 77) ],
+				custom: [createTransaction(87, 98, 43)],
+				expected: [
+					createUnconfirmedStatus(456, 99, 11),
+					createCustomStatus(87, 98, 43),
+					createConfirmedStatus(123, 66, 77),
 				]
 			}));
 	});

@@ -48,6 +48,17 @@ class MosaicDb {
 			.then(entities => Promise.resolve(this.catapultDb.sanitizer.copyAndDeleteIds(entities)));
 	}
 
+	/**
+	 * Retrieves all mosaics.
+	 * @returns {Promise.<array>} Mosaics.
+	 */
+	 mosaics() {
+		const collection = this.catapultDb.database.collection('mosaics');
+		return collection.find({}, { 'mosaic.mosaicId': 1, 'mosaic.properties': 0, 'meta': 0 })
+			.toArray()
+			.then(entities => Promise.resolve(this.catapultDb.sanitizer.copyAndDeleteIds(entities)));
+	}
+
 	// endregion
 }
 

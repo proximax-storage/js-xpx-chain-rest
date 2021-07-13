@@ -6,7 +6,7 @@
 
 const operationRoutes = require('../../../src/plugins/routes/operationRoutes');
 const catapult = require('catapult-sdk');
-const test = require('../../routes/utils/routeTestUtils');
+const { test } = require('../../routes/utils/routeTestUtils');
 const { expect } = require('chai');
 
 const { address } = catapult.model;

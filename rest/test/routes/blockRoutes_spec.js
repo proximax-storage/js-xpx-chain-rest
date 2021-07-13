@@ -21,7 +21,7 @@
 const blockRoutes = require('../../src/routes/blockRoutes');
 const routeUtils = require('../../src/routes/routeUtils');
 const sinon = require('sinon');
-const test = require('./utils/routeTestUtils');
+const { test } = require('./utils/routeTestUtils');
 
 const { expect } = require('chai');
 
@@ -84,47 +84,6 @@ describe('block routes', () => {
 			{ object: { height: '362', limit: '60' }, redirectUri: '/blocks/361/limit/60' },
 			'{ height: 362, limit: 60 }'
 		);
-	});
-
-	describe('block transactions', () => {
-		const builder = test.route.document.prepareGetDocumentsRouteTests(blockRoutes.register, {
-			route: '/block/:height/transactions',
-			dbApiName: 'transactionsAtHeight',
-			type: 'transactionWithMetadata',
-			extendDb: addChainInfoToDb,
-			config: routeConfig
-		});
-
-		builder.addValidInputTest({ object: { height: '3' }, parsed: [3, undefined, 0], printable: '3' });
-		builder.addEmptyArrayTest({ object: { height: '3' }, parsed: [3, undefined, 0], printable: '3' });
-		builder.addNotFoundInputTest(
-			{ object: { height: '11' }, parsed: [11, undefined, 0], printable: '11' },
-			'chain height is too small'
-		);
-		builder.addInvalidKeyTest({ object: { height: '10A' }, error: 'height has an invalid format' });
-
-		describe('paging', () => {
-			const pagingTestsFactory = test.setup.createPagingTestsFactory(
-				{
-					routes: blockRoutes,
-					routeName: '/block/:height/transactions',
-					createDb: (queriedIdentifiers, transactions) => ({
-						transactionsAtHeight: (height, pageId, pageSize) => {
-							queriedIdentifiers.push({ height, pageId, pageSize });
-							return Promise.resolve(transactions);
-						},
-						chainInfo: () => Promise.resolve({ height: 10 })
-					}),
-					config: routeConfig
-				},
-				{ height: '3' },
-				{ height: 3 },
-				'transactionWithMetadata'
-			);
-
-			pagingTestsFactory.addDefault();
-			pagingTestsFactory.addNonPagingParamFailureTest('height', '-1');
-		});
 	});
 
 	describe('block with merkle tree', () => {

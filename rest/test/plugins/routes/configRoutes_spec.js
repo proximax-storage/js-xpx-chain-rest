@@ -5,7 +5,7 @@
  * */
 
 const configRoutes = require('../../../src/plugins/routes/configRoutes');
-const test = require('../../routes/utils/routeTestUtils');
+const { test } = require('../../routes/utils/routeTestUtils');
 const { expect } = require('chai');
 
 describe('config routes', () => {

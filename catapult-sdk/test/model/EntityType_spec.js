@@ -68,6 +68,9 @@ describe('entity type enumeration', () => {
 			startOperation: 0x425F,
 			transfer: 0x4154,
 			uploadFile: 0x4460,
+			accountMetadata: 0x413F,
+			mosaicMetadata: 0x423F,
+			namespaceMetadata: 0x433F
 		});
 	});
 

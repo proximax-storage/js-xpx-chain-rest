@@ -26,7 +26,7 @@ const { expect } = require('chai');
 const constants = {
 	knownTxType: 0x4123,
 	sizes: {
-		blockHeader: 194,
+		blockHeader: 198,
 		transactionHeader: 122,
 		transaction: 122 + 8 + 1
 	}
@@ -98,6 +98,7 @@ describe('model codec builder', () => {
 			Buffer.of(0x97, 0x87, 0x45, 0x0E, 0xE1, 0x6C, 0xB6, 0x62), // height
 			Buffer.of(0x30, 0x3A, 0x46, 0x8B, 0x15, 0x2D, 0x60, 0x54), // timestamp
 			Buffer.of(0x86, 0x02, 0x75, 0x30, 0xE8, 0x50, 0x78, 0xE8), // difficulty
+			Buffer.of(0x86, 0x02, 0x75, 0x30 ), // feeMultiplier
 			Previous_Block_Hash_Buffer,
 			Block_Transactions_Hash_Buffer
 		]);
@@ -106,6 +107,7 @@ describe('model codec builder', () => {
 			height: [0x0E458797, 0x62B66CE1],
 			timestamp: [0x8B463A30, 0x54602D15],
 			difficulty: [0x30750286, 0xE87850E8],
+			feeMultiplier: 0x30750286,
 			previousBlockHash: Previous_Block_Hash_Buffer,
 			blockTransactionsHash: Block_Transactions_Hash_Buffer
 		});

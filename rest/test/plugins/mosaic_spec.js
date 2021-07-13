@@ -21,7 +21,7 @@
 const mosaic = require('../../src/plugins/mosaic');
 const MosaicDb = require('../../src/plugins/db/MosaicDb');
 const pluginTest = require('./utils/pluginTestUtils');
-const test = require('../routes/utils/routeTestUtils');
+const { test } = require('../routes/utils/routeTestUtils');
 
 describe('mosaic plugin', () => {
 	pluginTest.assertThat.pluginCreatesDb(mosaic, MosaicDb);

@@ -6,8 +6,15 @@
 
 const AccountType = require('../../../src/plugins/AccountType');
 const ServiceDb = require('../../../src/plugins/db/ServiceDb');
+const dbTestUtils = require('../../db/utils/dbTestUtils');
+const CatapultDb = require('../../../src/db/CatapultDb');
 const test = require('./utils/serviceDbTestUtils');
 const { expect } = require('chai');
+const sinon = require('sinon');
+
+const catapult = require('catapult-sdk');
+const { address } = catapult.model;
+const Mijin_Test_Network = catapult.model.networkInfo.networks.mijinTest.id;
 
 describe('drive db', () => {
 	const generateAccount = test.random.account;
@@ -56,6 +63,187 @@ describe('drive db', () => {
 			type: AccountType.address,
 			toDbApiId: account => account.address
 		}));
+	});
+
+	describe('drives', () => {
+		const drive1 = test.random.publicKey();
+		const drive2 = test.random.publicKey();
+		const replicator1 = test.random.publicKey();
+		const replicator2 = test.random.publicKey();
+		const owner = test.random.publicKey();
+
+		const paginationOptions = {
+			pageSize: 10,
+			pageNumber: 1,
+			sortField: 'id',
+			sortDirection: -1
+		};
+
+		const createDrive = (objectId, drive, start, state) => (
+			test.db.createDriveEntry(objectId, drive, owner, [replicator1, replicator2], start, state)
+		);
+
+		const runTestAndVerifyIds = (dbTransactions, filters, options, expectedIds) => {
+			const expectedObjectIds = expectedIds.map(id => dbTestUtils.db.createObjectId(id));
+
+			return test.db.runDbTest(
+				dbTransactions,
+				"drives",
+				db => db.drives(filters, options),
+				transactionsPage => {
+					const returnedIds = transactionsPage.data.map(t => t.id);
+					expect(transactionsPage.data.length).to.equal(expectedObjectIds.length);
+					expect(returnedIds.sort()).to.deep.equal(expectedObjectIds.sort());
+				}
+			);
+		};
+
+		it('returns expected structure', () => {
+			// Arrange:
+			const dbTransactions = [
+				createDrive(10, drive1, 10)
+			];
+
+			// Act + Assert:
+			return test.db.runDbTest(
+				dbTransactions,
+				"drives",
+				db => db.drives({}, paginationOptions),
+				page => {
+					const expected_keys = ['drive', 'id'];
+					expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
+				}
+			);
+		});
+
+		it('if address is provided signerPublicKey and recipientAddress are omitted', () => {
+			// Arrange:
+			const dbTransactions = [
+				createDrive(10, drive1, 10, 0),
+				createDrive(20, drive2, 11, 1),
+				createDrive(30, drive1, 12, 1),
+				createDrive(40, drive2, 13, 1),
+				createDrive(50, drive2, 14, 2),
+				createDrive(60, drive1, 15, 2),
+				createDrive(70, drive2, 16, 2),
+				createDrive(80, drive2, 17, 3),
+				createDrive(90, drive1, 18, 3),
+				createDrive(100, drive2, 19, 3),
+			];
+
+			const filters = {
+				states: [1, 2],
+				fromStart: 12,
+			};
+
+			// Act + Assert:
+			return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [30, 40, 50, 60, 70]);
+		});
+
+		describe('respects offset', () => {
+			// Arrange:
+			const dbTransactions = () => [
+				createDrive(10, drive1, 20),
+				createDrive(20, drive1, 30),
+				createDrive(30, drive1, 10)
+			];
+			const options = {
+				pageSize: 10,
+				pageNumber: 1,
+				sortField: '_id',
+				sortDirection: 1,
+				offset: dbTestUtils.db.createObjectId(20)
+			};
+
+			it('gt', () => {
+				options.sortDirection = 1;
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions(), {}, options, [30]);
+			});
+
+			it('lt', () => {
+				options.sortDirection = -1;
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions(), {}, options, [10]);
+			});
+		});
+
+		describe('respects sort conditions', () => {
+			const { createObjectId } = dbTestUtils.db;
+			// Arrange:
+			const dbTransactions = () => [
+				createDrive(10, drive1, 20),
+				createDrive(20, drive1, 30),
+				createDrive(30, drive1, 10)
+			];
+
+			it('direction ascending', () => {
+				const options = {
+					pageSize: 10,
+					pageNumber: 1,
+					sortField: '_id',
+					sortDirection: 1
+				};
+
+				// Act + Assert:
+				return test.db.runDbTest(
+					dbTransactions(),
+					"drives",
+					db => db.drives({}, options),
+					transactionsPage => {
+						expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));
+						expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
+						expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(30));
+					}
+				);
+			});
+
+			it('direction descending', () => {
+				const options = {
+					pageSize: 10,
+					pageNumber: 1,
+					sortField: '_id',
+					sortDirection: -1
+				};
+
+				// Act + Assert:
+				return test.db.runDbTest(
+					dbTransactions(),
+					"drives",
+					db => db.drives({}, options),
+					transactionsPage => {
+						expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(30));
+						expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
+						expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(10));
+					}
+				);
+			});
+
+			it('sort field', () => {
+				const queryPagedDocumentsSpy = sinon.spy(CatapultDb.prototype, 'queryPagedDocuments_2');
+				const options = {
+					pageSize: 10,
+					offset: 1,
+					pageNumber: 1,
+					sortField: '_id',
+					sortDirection: 1
+				};
+
+				// Act + Assert:
+				return test.db.runDbTest(
+					dbTransactions(),
+					"drives",
+					db => db.drives({}, options),
+					() => {
+						expect(queryPagedDocumentsSpy.calledOnce).to.equal(true);
+						expect(Object.keys(queryPagedDocumentsSpy.firstCall.args[2]["$sort"])[0]).to.equal('_id');
+						queryPagedDocumentsSpy.restore();
+					}
+				);
+			});
+		});
 	});
 
 	describe('drive by public key and role', () => {

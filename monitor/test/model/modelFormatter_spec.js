@@ -80,6 +80,7 @@ describe('model formatter', () => {
 				height: 0xE10E458797D7,
 				timestamp: 0x18B463A306237,
 				difficulty: 0x75028654600A,
+				feeMultiplier: 0x7502,
 
 				previousBlockHash: '5078E8A1E935E361D0812DF8C44951FB04913130663E14298178E3E024DF0DD0',
 				blockTransactionsHash: '85496C45828A76ACD658D8E3FB456D0E2FD2C2DD97D846BA5C192DECC853780E'
@@ -91,7 +92,7 @@ describe('model formatter', () => {
 			assertCanParseAndFormatBlock(Buffer.concat([
 				Buffer.alloc(4), // size
 				buffers.blockHeader
-			]), 194);
+			]), 198);
 		});
 
 		it('can parse and format with transactions', () => {
