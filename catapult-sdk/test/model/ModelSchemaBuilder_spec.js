@@ -83,9 +83,11 @@ describe('model schema builder', () => {
 				'transactionStatus',
 
 				'account',
-				'mosaic',
 				'accountMeta',
 				'accountWithMetadata',
+
+				'mosaicLevy',
+				'mosaic',
 
 				'chainInfo',
 				'nodeInfo',
@@ -148,8 +150,11 @@ describe('model schema builder', () => {
 				'transactionWithMetadata.meta',
 				'transactionWithMetadata.transaction',
 				'transactionStatus.meta',
+
 				'accountWithMetadata.meta',
 				'accountWithMetadata.account',
+
+				'mosaic.levy',
 
 				'nodeTime.communicationTimestamps'
 			]);
@@ -208,7 +213,19 @@ describe('model schema builder', () => {
 				'account.publicKey',
 				'account.linkedAccountKey',
 
-				'nodeInfo.publicKey'
+				'mosaicLevy.recipient',
+
+				'nodeInfo.publicKey',
+			]);
+		});
+
+		it('exposes correct uint8 properties', () => {
+			// Act:
+			const matchingProperties = extractSchemaPropertiesWithType('uint8');
+
+			// Assert:
+			expect(matchingProperties).to.deep.equal([
+				'mosaicLevy',
 			]);
 		});
 
@@ -232,6 +249,9 @@ describe('model schema builder', () => {
 
 				'account.addressHeight',
 				'account.publicKeyHeight',
+
+				'mosaicLevy.fee',
+
 				'mosaic.id',
 				'mosaic.amount',
 

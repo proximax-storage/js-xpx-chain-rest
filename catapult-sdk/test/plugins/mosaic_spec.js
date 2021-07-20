@@ -46,13 +46,16 @@ describe('mosaic plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 5);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 8);
 			expect(modelSchema).to.contain.all.keys(
 				'mosaicDefinition',
 				'mosaicDefinition.mosaicProperty',
+				'mosaicSupplyChange',
 				'mosaicDescriptor',
 				'mosaicDescriptor.mosaic',
-				'mosaicSupplyChange'
+				'mosaicDefinition.mosaicLevy',
+				'mosaicModifyLevy',
+				'mosaicRemoveLevy'
 			);
 
 			// - mosaic definition
@@ -62,6 +65,14 @@ describe('mosaic plugin', () => {
 			// - mosaic property
 			expect(modelSchema['mosaicDefinition.mosaicProperty']).to.deep.equal({
 				value: ModelType.uint64
+			});
+
+			// - mosaic levy
+			expect(modelSchema['mosaicDefinition.mosaicLevy']).to.deep.equal({
+				type: ModelType.uint8,
+				recipient: ModelType.binary,
+				mosaicId: ModelType.uint64,
+				fee: ModelType.uint64
 			});
 
 			// - mosaic descriptor
@@ -94,10 +105,12 @@ describe('mosaic plugin', () => {
 			const codecs = getCodecs();
 
 			// Assert: codecs were registered
-			expect(Object.keys(codecs).length).to.equal(2);
+			expect(Object.keys(codecs).length).to.equal(4);
 			expect(codecs).to.contain.all.keys([
 				EntityType.mosaicDefinition.toString(),
-				EntityType.mosaicSupplyChange.toString()
+				EntityType.mosaicSupplyChange.toString(),
+				EntityType.mosaicModifyLevy.toString(),
+				EntityType.mosaicRemoveLevy.toString()
 			]);
 		});
 
@@ -211,5 +224,24 @@ describe('mosaic plugin', () => {
 			const size = constants.sizes.mosaicSupplyChange;
 			test.binary.test.addAll(getCodec(EntityType.mosaicSupplyChange), size, generateTransaction);
 		});
+
+		// describe('supports mosaic levy', () => {
+		// 	const generateTransaction = () => ({
+		// 		buffer: Buffer.concat([
+		// 			Buffer.of(0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92), // mosaic id
+		// 			Buffer.of(0x01), // direction
+		// 			Buffer.of(0xCA, 0xD0, 0x8E, 0x6E, 0xFF, 0x21, 0x2F, 0x49) // delta
+		// 		]),
+		//
+		// 		object: {
+		// 			direction: 0x01,
+		// 			mosaicId: [0x066C26F2, 0x92B28340],
+		// 			delta: [0x6E8ED0CA, 0x492F21FF]
+		// 		}
+		// 	});
+		//
+		// 	const size = constants.sizes.mosaicSupplyChange;
+		// 	test.binary.test.addAll(getCodec(EntityType.mosaicSupplyChange), size, generateTransaction);
+		// });
 	});
 });

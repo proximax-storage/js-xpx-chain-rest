@@ -128,15 +128,29 @@ class ModelSchemaBuilder {
 				linkedAccountKey: ModelType.binary,
 				mosaics: { type: ModelType.array, schemaName: 'mosaic' },
 			},
-			mosaic: {
-				id: ModelType.uint64,
-				amount: ModelType.uint64
-			},
+
 			accountMeta: {
 			},
+
 			accountWithMetadata: {
 				meta: { type: ModelType.object, schemaName: 'accountMeta' },
 				account: { type: ModelType.object, schemaName: 'account' }
+			},
+
+			// endregion
+
+			// region mosaic
+
+			mosaicLevy: {
+				type: ModelType.uint8,
+				recipient: ModelType.binary,
+				fee: ModelType.uint64
+			},
+
+			mosaic: {
+				id: ModelType.uint64,
+				amount: ModelType.uint64,
+				levy: { type: ModelType.object, schemaName: 'mosaicLevy' }
 			},
 
 			// endregion

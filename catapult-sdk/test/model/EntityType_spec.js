@@ -55,6 +55,8 @@ describe('entity type enumeration', () => {
 			modifyMultisigAccount: 0x4155,
 			mosaicDefinition: 0x414D,
 			mosaicSupplyChange: 0x424D,
+			mosaicModifyLevy: 0x434D,
+			mosaicRemoveLevy: 0x444D,
 			networkConfig: 0x4159,
 			operationIdentify: 0x415F,
 			prepareDrive: 0x415A,

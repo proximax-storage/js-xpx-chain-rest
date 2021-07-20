@@ -62,7 +62,7 @@ const mosaicPlugin = {
 		});
 
 		builder.addSchema('mosaicDefinition.mosaicLevy', {
-			type: ModelType.uint16,
+			type: ModelType.uint8,
 			recipient: ModelType.binary,
 			mosaicId: ModelType.uint64,
 			fee: ModelType.uint64
@@ -161,7 +161,7 @@ const mosaicPlugin = {
 				transaction.mosaicId = parser.uint64();
 
 				transaction.levy = {};
-				transaction.levy.type = parser.uint16();
+				transaction.levy.type = parser.uint8();
 				transaction.levy.recipient = parser.buffer(constants.sizes.addressDecoded);
 				transaction.levy.mosaicId = parser.uint64();
 				transaction.levy.fee = parser.uint64();
@@ -172,7 +172,7 @@ const mosaicPlugin = {
 			serialize: (transaction, serializer) => {
 				serializer.writeUint64(transaction.mosaicId);
 
-				serializer.writeUint16(transaction.levy.type);
+				serializer.writeUint8(transaction.levy.type);
 				serializer.writeBuffer(transaction.levy.recipient);
 				serializer.writeUint64(transaction.levy.mosaicId);
 				serializer.writeUint64(transaction.levy.fee);
