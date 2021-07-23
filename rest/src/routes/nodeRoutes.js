@@ -77,7 +77,7 @@ module.exports = {
 					const unlockedKeys = convert
 						.uint8ToHex(packet.payload)
 						.match(/.{1,64}/g);
-					res.send({ unlockedAccount: !unlockedKeys ? [] : unlockedKeys });
+					res.send(!unlockedKeys ? [] : unlockedKeys.map(x => ({PublicKey : x})));
 					next();
 				});
 		});
