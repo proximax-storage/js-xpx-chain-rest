@@ -61,8 +61,8 @@ const mosaicPlugin = {
 			properties: { type: ModelType.array, schemaName: 'mosaicDefinition.mosaicProperty' }
 		});
 
-		builder.addSchema('mosaicDefinition.mosaicLevy', {
-			type: ModelType.uint8,
+		builder.addSchema('mosaicLevy', {
+			levyType: ModelType.uint8,
 			recipient: ModelType.binary,
 			mosaicId: ModelType.uint64,
 			fee: ModelType.uint64
@@ -72,7 +72,7 @@ const mosaicPlugin = {
 			command : ModelType.uint32,
 			updateFlag : ModelType.uint32,
 			mosaicId: ModelType.uint64,
-			levy: { type: ModelType.object, schemaName: 'mosaicDefinition.mosaicLevy' },
+			levy: { type: ModelType.object, schemaName: 'mosaicLevy' },
 		});
 
 		builder.addTransactionSupport(EntityType.mosaicRemoveLevy, {

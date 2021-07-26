@@ -86,7 +86,7 @@ describe('model schema builder', () => {
 				'accountMeta',
 				'accountWithMetadata',
 
-				'mosaicLevy',
+				'levy',
 				'mosaic',
 
 				'chainInfo',
@@ -154,6 +154,7 @@ describe('model schema builder', () => {
 				'accountWithMetadata.meta',
 				'accountWithMetadata.account',
 
+				'levy.levy',
 				'mosaic.levy',
 
 				'nodeTime.communicationTimestamps'
@@ -168,7 +169,8 @@ describe('model schema builder', () => {
 			expect(matchingProperties).to.deep.equal([
 				'blockHeaderMetadata.subCacheMerkleRoots',
 				'merkleProofInfo.merklePath',
-				'account.mosaics'
+				'account.mosaics',
+				'levy.history'
 			]);
 		});
 
@@ -213,8 +215,6 @@ describe('model schema builder', () => {
 				'account.publicKey',
 				'account.linkedAccountKey',
 
-				'mosaicLevy.recipient',
-
 				'nodeInfo.publicKey',
 			]);
 		});
@@ -225,7 +225,7 @@ describe('model schema builder', () => {
 
 			// Assert:
 			expect(matchingProperties).to.deep.equal([
-				'mosaicLevy',
+				'levy.flag'
 			]);
 		});
 
@@ -250,7 +250,8 @@ describe('model schema builder', () => {
 				'account.addressHeight',
 				'account.publicKeyHeight',
 
-				'mosaicLevy.fee',
+				'levy.mosaicId',
+				'levy.history.schemaName',
 
 				'mosaic.id',
 				'mosaic.amount',

@@ -139,13 +139,18 @@ class ModelSchemaBuilder {
 
 			// endregion
 
-			// region mosaic
+			// region levy
 
-			mosaicLevy: {
-				type: ModelType.uint8,
-				recipient: ModelType.binary,
-				fee: ModelType.uint64
+			levy: {
+				mosaicId: ModelType.uint64,
+				flag: ModelType.uint8,
+				levy: { type: ModelType.object, schemaName: 'mosaicLevy' },
+				history: { type: ModelType.array, schemaName: ModelType.uint64 }
 			},
+
+			// endregion
+
+			// region mosaic
 
 			mosaic: {
 				id: ModelType.uint64,

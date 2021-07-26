@@ -53,7 +53,7 @@ describe('mosaic plugin', () => {
 				'mosaicSupplyChange',
 				'mosaicDescriptor',
 				'mosaicDescriptor.mosaic',
-				'mosaicDefinition.mosaicLevy',
+				'mosaicLevy',
 				'mosaicModifyLevy',
 				'mosaicRemoveLevy'
 			);
@@ -65,14 +65,6 @@ describe('mosaic plugin', () => {
 			// - mosaic property
 			expect(modelSchema['mosaicDefinition.mosaicProperty']).to.deep.equal({
 				value: ModelType.uint64
-			});
-
-			// - mosaic levy
-			expect(modelSchema['mosaicDefinition.mosaicLevy']).to.deep.equal({
-				type: ModelType.uint8,
-				recipient: ModelType.binary,
-				mosaicId: ModelType.uint64,
-				fee: ModelType.uint64
 			});
 
 			// - mosaic descriptor
