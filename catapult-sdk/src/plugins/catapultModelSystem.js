@@ -20,6 +20,7 @@
 
 /** @module plugins/catapultModelSystem */
 const accountLink = require('./accountLink');
+const nodeKeyLink = require('./nodeKeyLink');
 const accountProperties = require('./accountProperties');
 const aggregate = require('./aggregate');
 const config = require('./config');
@@ -43,7 +44,26 @@ const transfer = require('./transfer');
 const upgrade = require('./upgrade');
 
 const plugins = {
-	accountLink, accountProperties, aggregate, exchange, config, contract, lock, metadata, metadata_nem, mosaic, multisig, namespace, operation, receipts, richlist, service, supercontract, transfer, upgrade
+	accountLink, 
+	nodeKeyLink, 
+	accountProperties, 
+	aggregate, 
+	exchange, 
+	config, 
+	contract, 
+	lock, 
+	metadata, 
+	metadata_nem, 
+	mosaic, 
+	multisig, 
+	namespace, 
+	operation, 
+	receipts, 
+	richlist, 
+	service, 
+	supercontract, 
+	transfer, 
+	upgrade
 };
 
 /**

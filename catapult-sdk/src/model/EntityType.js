@@ -115,7 +115,7 @@ const EntityType = {
 	accountLink: 0x414C,
 
 	/** Node link transaction. */
-	nodeKeyLink: 0x414B,
+	nodeKeyLink: 0x424B,
 
 	/** Exchange offer transaction. */
 	exchangeOffer: 0x415D,
