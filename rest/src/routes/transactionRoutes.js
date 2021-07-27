@@ -117,5 +117,11 @@ module.exports = {
 			return db[dbTransactionsRetriever](params.group, transactionIds)
 				.then(sender.sendArray(params.transactionIds || params.hashes, res, next));
 		});
+
+		server.get('/transactions/:type/count', (req, res, next) => {
+			const { params } = req;
+			return db.transactionsCountByType(params.type)
+				.then(routeUtils.createSender('transactionsCount').sendOne('transactionsCount', res, next));
+		});
 	}
 };

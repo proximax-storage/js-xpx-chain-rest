@@ -384,6 +384,13 @@ class CatapultDb {
 		return this.queryPagedDocuments_2(conditions, removedFields, sortConditions, TransactionGroup[group], options);
 	}
 
+	transactionsCountByType(hex) {
+		const type = parseInt(hex, 16);
+		const conditions = { "transaction.type": type };
+		return this.database.collection('transactions').countDocuments(conditions)
+			.then(data => { return { "type": hex, "count": data }; });
+	}
+
 	transactionsByIdsImpl(collectionName, conditions) {
 		return this.queryDocumentsAndCopyIds(collectionName, conditions, { projection: { 'meta.addresses': 0 } })
 			.then(documents => Promise.all(documents.map(document => {
