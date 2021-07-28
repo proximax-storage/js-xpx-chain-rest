@@ -55,6 +55,7 @@ describe('all routes', () => {
 			'/node/time',
 			'/node/peers',
 
+			'/transactions/count',
 			'/transactions/:group/:transactionId',
 			'/transactions/:group',
 			'/transactionStatus/:hash',
