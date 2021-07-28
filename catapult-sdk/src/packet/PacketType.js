@@ -53,7 +53,7 @@ const PacketType = {
 	timeSyncNodeTime: 700,
 	
 	/** Unlocked account */
-	unlockedAccount: 0x304,
+	unlockedAccount: 304,
 };
 
 module.exports = PacketType;
