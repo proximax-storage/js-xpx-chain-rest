@@ -384,11 +384,31 @@ class CatapultDb {
 		return this.queryPagedDocuments_2(conditions, removedFields, sortConditions, TransactionGroup[group], options);
 	}
 
-	transactionsCountByType(hex) {
-		const type = parseInt(hex, 16);
-		const conditions = { "transaction.type": type };
-		return this.database.collection('transactions').countDocuments(conditions)
-			.then(data => { return { "type": hex, "count": data }; });
+	transactionsCountByType(types) {
+		const conjunctionConditions = { $or: [] };
+		types.forEach((type) => {
+			conjunctionConditions.$or.push({ "transaction.type": type });
+		});
+
+		const matching = {
+			$match: conjunctionConditions
+		};
+
+		const grouping = {
+			$group: { "_id": "$transaction.type", count: { $sum: 1 } }
+		};
+
+		const fields = {
+			$addFields: { type: "$_id" }
+		};
+
+		const project = {
+			$project: { _id: 0 }
+		};
+
+		return this.database.collection('transactions').aggregate([matching, grouping, fields, project])
+			.toArray()
+			.then(data => { return data; });
 	}
 
 	transactionsByIdsImpl(collectionName, conditions) {

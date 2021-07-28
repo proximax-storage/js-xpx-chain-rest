@@ -118,10 +118,12 @@ module.exports = {
 				.then(sender.sendArray(params.transactionIds || params.hashes, res, next));
 		});
 
-		server.get('/transactions/:type/count', (req, res, next) => {
+		server.post('/transactions/count', (req, res, next) => {
 			const { params } = req;
-			return db.transactionsCountByType(params.type)
-				.then(routeUtils.createSender('transactionsCount').sendOne('transactionsCount', res, next));
+			params.transactionTypes = routeUtils.parseArgumentAsArray(params, 'transactionTypes', 'uint');
+
+			return db.transactionsCountByType(params.transactionTypes)
+				.then(routeUtils.createSender('transactionsCount').sendArray('transactionTypes', res, next));
 		});
 	}
 };
