@@ -122,6 +122,10 @@ module.exports = {
 			const { params } = req;
 			params.transactionTypes = routeUtils.parseArgumentAsArray(params, 'transactionTypes', 'uint');
 
+			if (!params.transactionTypes.length) {
+				throw errors.createInvalidArgumentError('Array must contain at least one element');
+			}
+
 			return db.transactionsCountByType(params.transactionTypes)
 				.then(routeUtils.createSender('transactionsCount').sendArray('transactionTypes', res, next));
 		});

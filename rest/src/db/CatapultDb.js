@@ -384,6 +384,11 @@ class CatapultDb {
 		return this.queryPagedDocuments_2(conditions, removedFields, sortConditions, TransactionGroup[group], options);
 	}
 
+	/**
+	 * Retrieves count of transactions by transaction type.
+	 * @param {array} types Array of transaction types.
+	 * @returns {Promise.<object>} array of the number of transactions divided by type.
+	 */
 	transactionsCountByType(types) {
 		const conjunctionConditions = { $or: [] };
 		types.forEach((type) => {
