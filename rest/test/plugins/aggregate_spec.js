@@ -36,7 +36,7 @@ describe('aggregate plugin', () => {
 
 			// Assert:
 			expect(states.length).to.equal(1);
-			expect(states[0]).to.deep.equal({ friendlyName: 'partial', dbPostfix: 'Partial', routePostfix: '/partial' });
+			expect(states[0]).to.deep.equal({ priority: 2, friendlyName: 'partial', dbPostfix: 'Partial', routePostfix: '/partial' });
 		});
 	});
 

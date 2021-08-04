@@ -32,7 +32,7 @@ module.exports = {
 	createDb: () => {},
 
 	registerTransactionStates: states => {
-		states.push({ friendlyName: 'partial', dbPostfix: 'Partial', routePostfix: '/partial' });
+		states.push({ priority: 2, friendlyName: 'partial', dbPostfix: 'Partial', routePostfix: '/partial' });
 	},
 
 	registerMessageChannels: builder => {
