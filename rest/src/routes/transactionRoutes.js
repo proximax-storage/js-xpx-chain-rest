@@ -123,7 +123,7 @@ module.exports = {
 			params.transactionTypes = routeUtils.parseArgumentAsArray(params, 'transactionTypes', 'uint');
 
 			if (!params.transactionTypes.length) {
-				throw errors.createInvalidArgumentError('Array must contain at least one element');
+				throw errors.createInvalidArgumentError('At least one transaction type should be specified');
 			}
 
 			return db.transactionsCountByType(params.transactionTypes)
