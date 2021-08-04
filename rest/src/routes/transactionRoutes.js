@@ -117,5 +117,17 @@ module.exports = {
 			return db[dbTransactionsRetriever](params.group, transactionIds)
 				.then(sender.sendArray(params.transactionIds || params.hashes, res, next));
 		});
+
+		server.post('/transactions/count', (req, res, next) => {
+			const { params } = req;
+			params.transactionTypes = routeUtils.parseArgumentAsArray(params, 'transactionTypes', 'uint');
+
+			if (!params.transactionTypes.length) {
+				throw errors.createInvalidArgumentError('At least one transaction type should be specified');
+			}
+
+			return db.transactionsCountByType(params.transactionTypes)
+				.then(routeUtils.createSender('transactionsCount').sendArray('transactionTypes', res, next));
+		});
 	}
 };

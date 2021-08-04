@@ -416,6 +416,38 @@ class CatapultDb {
 		return this.queryPagedDocuments_2(conditions, removedFields, sortConditions, TransactionGroup[group], options);
 	}
 
+	/**
+	 * Retrieves count of transactions by transaction type.
+	 * @param {array} types Array of transaction types.
+	 * @returns {Promise.<object>} array of the number of transactions divided by type.
+	 */
+	transactionsCountByType(types) {
+		const conjunctionConditions = { $or: [] };
+		types.forEach((type) => {
+			conjunctionConditions.$or.push({ "transaction.type": type });
+		});
+
+		const matching = {
+			$match: conjunctionConditions
+		};
+
+		const grouping = {
+			$group: { "_id": "$transaction.type", count: { $sum: 1 } }
+		};
+
+		const fields = {
+			$addFields: { type: "$_id" }
+		};
+
+		const project = {
+			$project: { _id: 0 }
+		};
+
+		return this.database.collection('transactions').aggregate([matching, grouping, fields, project])
+			.toArray()
+			.then(data => { return data; });
+	}
+
 	transactionsByIdsImpl(collectionName, conditions) {
 		return this.queryDocumentsAndCopyIds(collectionName, conditions, { projection: { 'meta.addresses': 0 } })
 			.then(documents => Promise.all(documents.map(document => {
