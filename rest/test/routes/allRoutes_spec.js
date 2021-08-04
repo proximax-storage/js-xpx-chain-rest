@@ -55,7 +55,6 @@ describe('all routes', () => {
 			'/node/time',
 			'/node/peers',
 
-			'/transactions/count',
 			'/transactions/:group/:transactionId',
 			'/transactions/:group',
 			'/transactionStatus/:hash',
@@ -77,6 +76,7 @@ describe('all routes', () => {
 		// Assert:
 		test.assert.assertRoutes(routes, [
 			'/account',
+			'/transactions/count',
 			'/transactions/:group',
 			'/transactionStatus'
 		]);
