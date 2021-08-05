@@ -20,20 +20,28 @@
 
 const catapult = require('catapult-sdk');
 const routeUtils = require('../../routes/routeUtils');
+const LevyDb = require('../db/LevyDb');
 
-
-const { uint64 } = catapult.utils;
+const {uint64} = catapult.utils;
 
 module.exports = {
-	register: (server, db) => {
-		const mosaicSender = routeUtils.createSender('mosaicDescriptor');
+    register: (server, db) => {
+        const mosaicSender = routeUtils.createSender('mosaicDescriptor');
 
-		routeUtils.addGetPostDocumentRoutes(
-			server,
-			mosaicSender,
-			{ base: '/mosaic', singular: 'mosaicId', plural: 'mosaicIds' },
-			params => db.mosaicsByIds(params),
-			uint64.fromHex
-		);
-	}
+        routeUtils.addGetPostDocumentRoutes(
+            server,
+            mosaicSender,
+            { base: '/mosaic', singular: 'mosaicId', plural: 'mosaicIds' },
+            params => db.mosaicsByIds(params),
+            uint64.fromHex
+        );
+
+        server.get(`/mosaic/:mosaicId/levy`, (req, res, next) => {
+            const levyDb = new LevyDb(db.getCatapultDb());
+            const mosaicId = routeUtils.parseArgument(req.params, 'mosaicId', 'mosaicId');
+
+            return levyDb.levyByMosaicId(mosaicId)
+                .then(routeUtils.createSender('mosaicLevy').sendOne(req.params.mosaicId, res, next));
+        });
+    }
 };

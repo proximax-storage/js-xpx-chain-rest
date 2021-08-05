@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2016-present,
- * Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp. All rights reserved.
+ * Copyright (c) 2016-2019, Jaguar0625, gimre, BloodyRookie, Tech Bureau, Corp.
+ * Copyright (c) 2020-present, Jaguar0625, gimre, BloodyRookie.
+ * All rights reserved.
  *
  * This file is part of Catapult.
  *
@@ -18,30 +19,29 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const mosaic = require('../../src/plugins/mosaic');
-const MosaicDb = require('../../src/plugins/db/MosaicDb');
-const pluginTest = require('./utils/pluginTestUtils');
+const MetadataDb = require('../../src/plugins/db/MetadataNemDb');
+const metadata = require('../../src/plugins/metadata_nem');
 const { test } = require('../routes/utils/routeTestUtils');
+const pluginTest = require('./utils/pluginTestUtils');
 
-describe('mosaic plugin', () => {
-	pluginTest.assertThat.pluginCreatesDb(mosaic, MosaicDb);
-	pluginTest.assertThat.pluginDoesNotRegisterAdditionalTransactionStates(mosaic);
-	pluginTest.assertThat.pluginDoesNotRegisterAdditionalMessageChannels(mosaic);
+describe('metadata plugin', () => {
+	pluginTest.assertThat.pluginCreatesDb(metadata, MetadataDb);
+	pluginTest.assertThat.pluginDoesNotRegisterAdditionalTransactionStates(metadata);
+	pluginTest.assertThat.pluginDoesNotRegisterAdditionalMessageChannels(metadata);
 
 	describe('register routes', () => {
 		it('registers GET routes', () => {
 			// Arrange:
 			const routes = [];
 			const server = test.setup.createCapturingMockServer('get', routes);
+			const registeredRoutes = ['/metadata_nem',
+				'/metadata_nem/:compositeHash'];
 
 			// Act:
-			mosaic.registerRoutes(server, {});
+			metadata.registerRoutes(server, {});
 
 			// Assert:
-			test.assert.assertRoutes(routes, [
-				'/mosaic/:mosaicId',
-				'/mosaic/:mosaicId/levy'
-			]);
+			test.assert.assertRoutes(routes, registeredRoutes);
 		});
 
 		it('registers POST routes', () => {
@@ -50,11 +50,11 @@ describe('mosaic plugin', () => {
 			const server = test.setup.createCapturingMockServer('post', routes);
 
 			// Act:
-			mosaic.registerRoutes(server, {});
+			metadata.registerRoutes(server, {});
 
 			// Assert:
 			test.assert.assertRoutes(routes, [
-				'/mosaic'
+				'/metadata_nem'
 			]);
 		});
 	});

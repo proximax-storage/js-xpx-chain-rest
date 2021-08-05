@@ -8,6 +8,7 @@ const catapult = require('catapult-sdk');
 const routeUtils = require('../../routes/routeUtils');
 const errors = require('../../server/errors');
 const NamespaceDb = require('../namespace/NamespaceDb');
+const MosaicDb = require('../db/MosaicDb');
 
 module.exports = {
 	register: (server, db) => {
@@ -43,6 +44,15 @@ module.exports = {
 					return db.exchangesByMosaicIds(offerTypeStr, [assetId], pagingOptions.id, pagingOptions.pageSize, ordering);
 				})
 				.then(routeUtils.createSender('offerInfo').sendArray('mosaicId', res, next));
+		});
+
+		server.get(`/exchange/mosaics`, (req, res, next) => {
+			const mosaicDb = new MosaicDb(db.getCatapultDb());
+			return mosaicDb.mosaics()
+				.then(mosaics => {
+					db.mosaicsParticipatingInOffers(mosaics)
+						.then(routeUtils.createSender('mosaics').sendArray('mosaicId', res, next));
+				});
 		});
 	}
 };

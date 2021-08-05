@@ -109,20 +109,6 @@ describe('connection service', () => {
 		});
 	});
 
-	it('authentication failure is forwarded', () => {
-		// Arrange:
-		const context = createTestContext();
-		const connectionService = createConnectionService(Test_Config, context.mockConnectionFactory, context.createFailureAuthPromise());
-
-		// Act:
-		const promise = connectionService.lease();
-		return promise.catch(err => {
-			// Assert:
-			assertData(context);
-			expect(err.message).to.equal('failure auth promise');
-		});
-	});
-
 	it('connection failure is forwarded', () => {
 		// Arrange:
 		const context = createTestContext();

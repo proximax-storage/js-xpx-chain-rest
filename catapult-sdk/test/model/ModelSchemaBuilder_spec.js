@@ -83,9 +83,11 @@ describe('model schema builder', () => {
 				'transactionStatus',
 
 				'account',
-				'mosaic',
-				'accountMetadata',
+				'accountMeta',
 				'accountWithMetadata',
+
+				'levy',
+				'mosaic',
 
 				'chainInfo',
 				'nodeInfo',
@@ -148,8 +150,12 @@ describe('model schema builder', () => {
 				'transactionWithMetadata.meta',
 				'transactionWithMetadata.transaction',
 				'transactionStatus.meta',
+
 				'accountWithMetadata.meta',
 				'accountWithMetadata.account',
+
+				'levy.levy',
+				'mosaic.levy',
 
 				'nodeTime.communicationTimestamps'
 			]);
@@ -163,7 +169,8 @@ describe('model schema builder', () => {
 			expect(matchingProperties).to.deep.equal([
 				'blockHeaderMetadata.subCacheMerkleRoots',
 				'merkleProofInfo.merklePath',
-				'account.mosaics'
+				'account.mosaics',
+				'levy.history'
 			]);
 		});
 
@@ -208,7 +215,17 @@ describe('model schema builder', () => {
 				'account.publicKey',
 				'account.linkedAccountKey',
 
-				'nodeInfo.publicKey'
+				'nodeInfo.publicKey',
+			]);
+		});
+
+		it('exposes correct uint8 properties', () => {
+			// Act:
+			const matchingProperties = extractSchemaPropertiesWithType('uint8');
+
+			// Assert:
+			expect(matchingProperties).to.deep.equal([
+				'levy.flag'
 			]);
 		});
 
@@ -232,6 +249,10 @@ describe('model schema builder', () => {
 
 				'account.addressHeight',
 				'account.publicKeyHeight',
+
+				'levy.mosaicId',
+				'levy.history.schemaName',
+
 				'mosaic.id',
 				'mosaic.amount',
 

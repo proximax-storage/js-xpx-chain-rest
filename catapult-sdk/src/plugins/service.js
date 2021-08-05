@@ -164,6 +164,10 @@ const servicePlugin = {
 			height:					ModelType.uint64,
 			files: 					{ type: ModelType.array, schemaName: 'driveFileSystem.addfiles' },
 		});
+
+		builder.addSchema('transactionsCount', {
+			transactionsCount: { type: 	ModelType.object }
+		});
 	},
 
 	registerCodecs: codecBuilder => {

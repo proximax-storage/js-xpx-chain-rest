@@ -26,7 +26,8 @@ describe('exchange plugin', () => {
 			// Assert:
 			test.assert.assertRoutes(routes, [
 				'/account/:accountId/exchange',
-				'/exchange/:type/:mosaicId'
+				'/exchange/:type/:mosaicId',
+				'/exchange/mosaics'
 			]);
 		});
 	});

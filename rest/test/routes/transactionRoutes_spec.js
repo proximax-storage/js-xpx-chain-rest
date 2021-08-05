@@ -370,6 +370,49 @@ describe('transaction routes', () => {
 					});
 				});
 			});
+
+			describe('count by type', () => {
+				const fakeTransaction = { meta: { addresses: [] }, transaction: { type: 16718 } };
+				const fakePaginatedTransaction = {
+					data: [fakeTransaction],
+					pagination: {
+						pageNumber: 1,
+						pageSize: 10,
+						totalEntries: 1,
+						totalPages: 1
+					}
+				};
+				const dbTransactionsFake = sinon.fake.resolves(fakePaginatedTransaction);
+
+				const mockServer = new MockServer();
+				const db = { transactions: dbTransactionsFake };
+				const services = {
+					config: {
+						pageSize: {
+							min: 10,
+							max: 100,
+							default: 20
+						}
+					}
+				};
+				transactionRoutes.register(mockServer.server, db, services);
+
+				const route = mockServer.getRoute('/transactions/count').post();
+
+				beforeEach(() => {
+					mockServer.resetStats();
+					dbTransactionsFake.resetHistory();
+				});
+
+				describe('return transactions count', () => {
+					it('throws transaction types are not provided', () => {
+						const req = { params: {}};
+
+						// Act + Assert:
+						expect(() => mockServer.callRoute(route, req)).to.throw('transactionTypes has an invalid format: not an array');
+					});
+				});
+			});
 		});
 
 		describe('post', () => {

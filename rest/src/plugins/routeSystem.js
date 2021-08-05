@@ -27,6 +27,7 @@ const exchange = require('./exchange');
 const lock = require('./lock');
 const MessageChannelBuilder = require('../connection/MessageChannelBuilder');
 const metadata = require('./metadata');
+const metadata_nem = require('./metadata_nem');
 const mosaic = require('./mosaic');
 const multisig = require('./multisig');
 const namespace = require('./namespace');
@@ -38,7 +39,7 @@ const upgrade = require('./upgrade');
 const service = require('./service');
 
 const plugins = {
-	accountLink: empty, accountProperties, aggregate, exchange, config, contract, lock, metadata, mosaic, multisig, namespace, operation, receipts, richlist, service, supercontract, transfer: empty, upgrade
+	accountLink: empty, accountProperties, aggregate, exchange, config, contract, lock, metadata, metadata_nem, mosaic, multisig, namespace, operation, receipts, richlist, service, supercontract, transfer: empty, upgrade
 };
 
 module.exports = {

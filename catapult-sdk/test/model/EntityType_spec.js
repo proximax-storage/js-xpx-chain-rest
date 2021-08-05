@@ -55,6 +55,8 @@ describe('entity type enumeration', () => {
 			modifyMultisigAccount: 0x4155,
 			mosaicDefinition: 0x414D,
 			mosaicSupplyChange: 0x424D,
+			mosaicModifyLevy: 0x434D,
+			mosaicRemoveLevy: 0x444D,
 			networkConfig: 0x4159,
 			operationIdentify: 0x415F,
 			prepareDrive: 0x415A,
@@ -68,6 +70,9 @@ describe('entity type enumeration', () => {
 			startOperation: 0x425F,
 			transfer: 0x4154,
 			uploadFile: 0x4460,
+			accountMetadata: 0x413F,
+			mosaicMetadata: 0x423F,
+			namespaceMetadata: 0x433F
 		});
 	});
 
