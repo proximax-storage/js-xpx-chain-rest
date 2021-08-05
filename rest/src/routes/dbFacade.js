@@ -27,7 +27,8 @@ const extractFromMetadata = (group, transaction) => ({
 });
 
 function getBuffer(value) {
-	return value.buffer instanceof ArrayBuffer ? value : value.buffer
+	const convertedValue = value.buffer instanceof ArrayBuffer ? (value instanceof Buffer ? value : Buffer.from(value)) : value.buffer
+	return convertedValue ? convertedValue.toString() : value.toString()
 }
 
 module.exports = {
@@ -77,17 +78,18 @@ module.exports = {
 			const dbPromise = db.transactionsByHashes(state.friendlyName, hashes);
 			promises.push(dbPromise.then(objs => objs.map(transaction => {
 				let result = extractFromMetadata(state.friendlyName, transaction);
-				let previous = transactions[getBuffer(result.hash)];
+				let tmp = getBuffer(result.hash);
+				let previous = transactions[tmp];
 
 				if (previous) {
 					if (previous.priority < priority) {
-						transactions[getBuffer(result.hash)] = {
+						transactions[tmp] = {
 							transaction: result,
 							priority: priority,
 						}
 					}
 				} else {
-					transactions[getBuffer(result.hash)] = {
+					transactions[tmp] = {
 						transaction: result,
 						priority: priority,
 					}
@@ -98,10 +100,11 @@ module.exports = {
 		return Promise.all(promises).then(
 			() => db.transactionsByHashesFailed(hashes).then(objs => {
 				objs.forEach(failureStatus => {
-					let previous = transactions[getBuffer(failureStatus.hash)];
+					let tmp = getBuffer(failureStatus.hash);
+					let previous = transactions[tmp];
 
 					if (!previous) {
-						transactions[getBuffer(failureStatus.hash)] = {
+						transactions[tmp] = {
 							transaction: Object.assign(failureStatus, { group: 'failed' }),
 							priority: 4,
 						}
@@ -110,10 +113,11 @@ module.exports = {
 
 				const statuses = [];
 				for (let i = 0; i < hashes.length; ++i) {
-					const result = transactions[getBuffer(hashes[i])];
+					let tmp = getBuffer(hashes[i]);
+					const result = transactions[tmp];
 					if (result) {
 						statuses.push(result.transaction);
-						delete transactions[getBuffer(hashes[i])];
+						delete transactions[tmp];
 					}
 				}
 
