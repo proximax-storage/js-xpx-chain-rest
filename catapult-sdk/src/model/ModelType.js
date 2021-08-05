@@ -42,23 +42,26 @@ const ModelType = {
 	/** Schema property type indicating a string value. */
 	string: SchemaType.max + 5,
 
+	/** Schema property type indicating a uint8. */
+	uint8: SchemaType.max + 6,
+
 	/** Schema property type indicating a uint16. */
-	uint16: SchemaType.max + 6,
+	uint16: SchemaType.max + 7,
 
 	/** Schema property type indicating a uint32. */
-	uint32: SchemaType.max + 7,
+	uint32: SchemaType.max + 8,
 
 	/** Schema property type indicating a uint64 value. */
-	uint64: SchemaType.max + 8,
+	uint64: SchemaType.max + 9,
 
 	/** Schema property type indicating a uint64 identifier as hexadecimal. */
-	uint64HexIdentifier: SchemaType.max + 9,
+	uint64HexIdentifier: SchemaType.max + 10,
 
 	/** Schema property type indicating an int value. */
-	int: SchemaType.max + 10,
+	int: SchemaType.max + 11,
 
 	/** Schema property type indicating a boolean value. */
-	boolean: SchemaType.max + 11
+	boolean: SchemaType.max + 12
 };
 
 Object.assign(ModelType, SchemaType);

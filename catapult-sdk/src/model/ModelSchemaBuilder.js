@@ -128,15 +128,34 @@ class ModelSchemaBuilder {
 				linkedAccountKey: ModelType.binary,
 				mosaics: { type: ModelType.array, schemaName: 'mosaic' },
 			},
-			mosaic: {
-				id: ModelType.uint64,
-				amount: ModelType.uint64
-			},
+
 			accountMeta: {
 			},
+
 			accountWithMetadata: {
 				meta: { type: ModelType.object, schemaName: 'accountMeta' },
 				account: { type: ModelType.object, schemaName: 'account' }
+			},
+
+			// endregion
+
+			// region levy
+
+			levy: {
+				mosaicId: ModelType.uint64,
+				flag: ModelType.uint8,
+				levy: { type: ModelType.object, schemaName: 'mosaicLevy' },
+				history: { type: ModelType.array, schemaName: ModelType.uint64 }
+			},
+
+			// endregion
+
+			// region mosaic
+
+			mosaic: {
+				id: ModelType.uint64,
+				amount: ModelType.uint64,
+				levy: { type: ModelType.object, schemaName: 'mosaicLevy' }
 			},
 
 			// endregion
