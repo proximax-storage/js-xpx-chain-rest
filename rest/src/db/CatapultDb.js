@@ -391,6 +391,8 @@ class CatapultDb {
 
 			if (filters.height !== undefined)
 				conditions.push({ 'meta.height': convertToLong(filters.height) });
+			else if (filters.fromHeight !== undefined && filters.toHeight !== undefined)
+				conditions.push({ 'meta.height': { $gte: convertToLong(filters.fromHeight), $lte: convertToLong(filters.toHeight) } });
 			else if (filters.fromHeight !== undefined)
 				conditions.push({ 'meta.height': { $gte: convertToLong(filters.fromHeight) } });
 			else if (filters.toHeight !== undefined)
