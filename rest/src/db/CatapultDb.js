@@ -402,7 +402,7 @@ class CatapultDb {
 				conditions.push({ 'meta.aggregateId': { $exists: false } });
 
 			if (filters.transactionTypes !== undefined)
-				conditions.push({ 'transaction.type': { $eq: filters.transactionTypes } });
+				conditions.push({ 'transaction.type': { $in: filters.transactionTypes } });
 
 			const accountConditions = buildAccountConditions();
 			if (accountConditions)

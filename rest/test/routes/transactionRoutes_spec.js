@@ -259,7 +259,9 @@ describe('transaction routes', () => {
 						{ filter: 'address', param: testAddressString, value: testAddress },
 						{ filter: 'signerPublicKey', param: testPublickeyString, value: testPublickey },
 						{ filter: 'recipientAddress', param: testAddressString, value: testAddress },
-						{ filter: 'embedded', param: 'true', value: true }
+						{ filter: 'embedded', param: 'true', value: true },
+						{ filter: 'fromHeight', param: '1', value: [1,0] },
+						{ filter: 'toHeight', param: '5', value: [5,0] }
 					];
 
 					testCases.forEach(testCase => {
@@ -280,6 +282,28 @@ describe('transaction routes', () => {
 								signerPublicKey: undefined,
 								embedded: undefined,
 								transactionTypes: [1, 5, 25]
+							});
+						});
+					});
+
+					it('fromHeightToHeight', () => {
+						const req = { params: {
+								group: TransactionGroups.confirmed,
+								fromHeight: '1',
+								toHeight: '10'
+							} };
+
+						// Act + Assert
+						return mockServer.callRoute(route, req).then(() => {
+							expect(dbTransactionsFake.firstCall.args[1]).to.deep.equal({
+								address: undefined,
+								height: undefined,
+								fromHeight: [1, 0],
+								toHeight: [10, 0],
+								recipientAddress: undefined,
+								signerPublicKey: undefined,
+								embedded: undefined,
+								transactionTypes: undefined
 							});
 						});
 					});
