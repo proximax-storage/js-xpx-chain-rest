@@ -120,13 +120,22 @@ module.exports = {
 
 		server.post('/transactions/count', (req, res, next) => {
 			const { params } = req;
-			params.transactionTypes = routeUtils.parseArgumentAsArray(params, 'transactionTypes', 'uint');
+			const filter = params.filter ? routeUtils.parseArgument(params, 'filter', input => {
+				if (!input.key) {
+					throw errors.createInvalidArgumentError(`invalid key ${input}`);
+				} else if (!input.value) {
+					throw errors.createInvalidArgumentError(`invalid value ${input}`);
+				} else {
+					return input;
+				}
+			}) : undefined;
 
+			params.transactionTypes = routeUtils.parseArgumentAsArray(params, 'transactionTypes', 'uint');
 			if (!params.transactionTypes.length) {
 				throw errors.createInvalidArgumentError('At least one transaction type should be specified');
 			}
 
-			return db.transactionsCountByType(params.transactionTypes)
+			return db.transactionsCountByType(params.transactionTypes, filter)
 				.then(routeUtils.createSender('transactionsCount').sendArray('transactionTypes', res, next));
 		});
 	}
