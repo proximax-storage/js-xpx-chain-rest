@@ -104,11 +104,11 @@ pipeline {
     }
   }
 
-  // post {
-  //   failure {
-  //       slackSend channel: '#devops',
-  //           color: 'bad',
-  //           message: "Branch *${env.GIT_BRANCH}* of *${currentBuild.fullDisplayName}* FAILED :scream:"
-  //   }
-  // }
+  post {
+    failure {
+        slackSend channel: '#devops',
+            color: 'bad',
+            message: "Branch *${env.GIT_BRANCH}* of *${currentBuild.fullDisplayName}* FAILED :scream:"
+    }
+  }
 }
