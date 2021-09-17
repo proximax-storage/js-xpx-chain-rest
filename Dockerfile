@@ -1,7 +1,7 @@
-FROM node:14-alpine
+FROM node:14-alpine3.14
 
 # Install alpine-sdk (gcc)
-RUN apk add --update alpine-sdk
+RUN apk add --update alpine-sdk python3 python3-dev py3-pip
 
 # copy required libs from ./rest
 COPY ./rest/node_modules /node_modules
