@@ -41,14 +41,16 @@ pipeline {
 
     stage('Unit Test') {
       steps {
-       echo 'Starting Docker Container'
-        docker.image('mongo:4.4').withRun('-p 27017:27017') {
-          docker.image('node:14-alpine').inside('-u root --network=host') {
-            echo 'Testing catapult-sdk'
-            sh '(cd catapult-sdk; yarn run test)'
+        echo 'Starting Docker Container'
+        script {
+          docker.image('mongo:4.4').withRun('-p 27017:27017') {
+            docker.image('node:14-alpine').inside('-u root --network=host') {
+              echo 'Testing catapult-sdk'
+              sh '(cd catapult-sdk; yarn run test)'
 
-            echo 'Testing rest'
-            sh '(cd rest; yarn run test)'
+              echo 'Testing rest'
+              sh '(cd rest; yarn run test)'
+            }
           }
         }
       }
