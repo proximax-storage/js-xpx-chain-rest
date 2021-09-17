@@ -2,7 +2,7 @@ pipeline {
 
   agent {
     node {
-      label 'catapult-rest-build-node'
+      label 'docker-build-node'
     }
   }
 
@@ -12,24 +12,24 @@ pipeline {
   }
 
   environment {
-    DOCKER_REGISTRY = "249767383774.dkr.ecr.ap-southeast-1.amazonaws.com"
-    CREDENTIAL_ID = "ecr:ap-southeast-1:jenkins-ecr"
-    IMAGE = "proximax-catapult-rest"
+    DOCKER_REGISTRY = '249767383774.dkr.ecr.ap-southeast-1.amazonaws.com'
+    CREDENTIAL_ID = 'ecr:ap-southeast-1:jenkins-ecr'
+    IMAGE = 'proximax-catapult-rest'
   }
 
  stages {
     stage('Build') {
       steps {
         echo 'Starting Docker Container'
-        withDockerContainer(image: 'node:10.18.0-alpine', args: '-u root') {
+        withDockerContainer(image: 'node:14-alpine', args: '-u root') {
           echo 'Installing dependencies'
-          sh 'apk add python python-dev py-pip alpine-sdk'
+          sh 'apk add alpine-sdk'
 
-          echo 'Running yarn_setup.sh'
-          sh './yarn_setup.sh'
+          echo 'Build Catapult SDK'
+          sh '(cd catapult-sdk; yarn install; yarn run clean; yarn run build)'
 
-          echo 'Building'
-          sh '(cd rest; npm run build)'
+          echo 'Building REST'
+          sh '(cd rest; yarn install)'
         }
       }
       post {
@@ -42,12 +42,14 @@ pipeline {
     stage('Unit Test') {
       steps {
        echo 'Starting Docker Container'
-        withDockerContainer(image: 'node:10.18.0-alpine', args: '-u root --network="host"') {
-          echo 'Testing catapult-sdk'
-          sh '(cd catapult-sdk; npm run test)'
+        docker.image('mongo:4.4').withRun('-p 27017:27017') {
+          docker.image('node:14-alpine').inside('-u root --network=host') {
+            echo 'Testing catapult-sdk'
+            sh '(cd catapult-sdk; yarn run test)'
 
-          echo 'Testing rest'
-          sh '(cd rest; npm run test)'
+            echo 'Testing rest'
+            sh '(cd rest; yarn run test)'
+          }
         }
       }
     }
@@ -100,11 +102,11 @@ pipeline {
     }
   }
 
-  post {
-    failure {
-        slackSend channel: '#devops',
-            color: 'bad',
-            message: "Branch *${env.GIT_BRANCH}* of *${currentBuild.fullDisplayName}* FAILED :scream:"
-    }
+  // post {
+  //   failure {
+  //       slackSend channel: '#devops',
+  //           color: 'bad',
+  //           message: "Branch *${env.GIT_BRANCH}* of *${currentBuild.fullDisplayName}* FAILED :scream:"
+  //   }
   }
 }
