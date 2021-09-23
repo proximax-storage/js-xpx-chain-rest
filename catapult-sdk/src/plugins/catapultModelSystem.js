@@ -38,12 +38,13 @@ const operation = require('./operation');
 const receipts = require('./receipts');
 const richlist = require('./richlist');
 const service = require('./service');
+const storage = require('./storage');
 const supercontract = require('./supercontract');
 const transfer = require('./transfer');
 const upgrade = require('./upgrade');
 
 const plugins = {
-	accountLink, accountProperties, aggregate, exchange, config, contract, lock, metadata, metadata_nem, mosaic, multisig, namespace, operation, receipts, richlist, service, supercontract, transfer, upgrade
+	accountLink, accountProperties, aggregate, exchange, config, contract, lock, metadata, metadata_nem, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, transfer, upgrade
 };
 
 /**

@@ -73,8 +73,8 @@ class BinarySerializer {
 	 * @param {numeric} size Size of the underlying fixed size buffer.
 	 */
 	constructor(size) {
-		if (!Number.isInteger(size) || 0 >= size)
-			throw Error('BinarySerializer constructor needs integer size > 0');
+		if (!Number.isInteger(size) || 0 > size)
+			throw Error('BinarySerializer constructor needs integer size >= 0');
 
 		this.container = new BufferContainer(size);
 	}

@@ -72,7 +72,21 @@ describe('entity type enumeration', () => {
 			uploadFile: 0x4460,
 			accountMetadata: 0x413F,
 			mosaicMetadata: 0x423F,
-			namespaceMetadata: 0x433F
+			namespaceMetadata: 0x433F,
+			prepareBcDrive: 0x4162,
+			dataModification: 0x4262,
+			download: 0x4362,
+			dataModificationApproval: 0x4462,
+			dataModificationCancel: 0x4562,
+			replicatorOnboarding: 0x4662,
+			replicatorOffboarding: 0x4762,
+			finishDownload: 0x4862,
+			downloadPayment: 0x4962,
+			storagePayment: 0x4A62,
+			dataModificationSingleApproval: 0x4B62,
+			verificationPayment: 0x4C62,
+			downloadApproval: 0x4D62,
+			driveClosure: 0x4E62,
 		});
 	});
 

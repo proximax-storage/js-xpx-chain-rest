@@ -60,6 +60,7 @@ describe('catapult model system', () => {
 				'receipts',
 				'richlist',
 				'service',
+				'storage',
 				'supercontract',
 				'transfer',
 				'upgrade'

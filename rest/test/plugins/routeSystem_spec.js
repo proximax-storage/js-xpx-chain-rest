@@ -54,6 +54,7 @@ describe('route system', () => {
 			'receipts',
 			'richlist',
 			'service',
+			'storage',
 			'supercontract',
 			'transfer',
 			'upgrade'

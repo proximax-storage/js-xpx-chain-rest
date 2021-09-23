@@ -166,7 +166,49 @@ const EntityType = {
 	mosaicMetadata: 0x423F,
 
 	/** Namespace metadata transaction */
-	namespaceMetadata: 0x433F
+	namespaceMetadata: 0x433F,
+
+	/** Prepare drive transaction */
+	prepareBcDrive: 0x4162,
+
+	/** Data modification transaction */
+	dataModification: 0x4262,
+
+	/** Download transaction */
+	download: 0x4362,
+
+	/** Data modification approval transaction */
+	dataModificationApproval: 0x4462,
+
+	/** Data modification cancel transaction */
+	dataModificationCancel: 0x4562,
+
+	/** Replicator onboarding transaction */
+	replicatorOnboarding: 0x4662,
+
+	/** Replicator offboarding transaction */
+	replicatorOffboarding: 0x4762,
+
+	/** Finish download transaction */
+	finishDownload: 0x4862,
+
+	/** Download payment transaction */
+	downloadPayment: 0x4962,
+
+	/** Storage payment transaction */
+	storagePayment: 0x4A62,
+
+	/** Data modification single approval transaction */
+	dataModificationSingleApproval: 0x4B62,
+
+	/** Verification payment transaction */
+	verificationPayment: 0x4C62,
+
+	/** Download approval transaction */
+	downloadApproval: 0x4D62,
+
+	/** Drive closure transaction */
+	driveClosure: 0x4E62,
 };
 
 module.exports = EntityType;
