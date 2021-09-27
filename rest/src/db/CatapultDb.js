@@ -330,7 +330,7 @@ class CatapultDb {
 		});
 
 		return this.database.collection(collectionName)
-			.aggregate(conditions, { promoteLongs: false })
+			.aggregate(conditions, { promoteLongs: false , allowDiskUse: true })
 			.toArray()
 			.then(result => {
 				const formattedResult = result[0];
