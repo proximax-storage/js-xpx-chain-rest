@@ -21,7 +21,7 @@
 
 const CatapultDb = require('../../../src/db/CatapultDb');
 const { convertToLong } = require('../../../src/db/dbUtils');
-const MetadataDb = require('../../../src/plugins/db/MetadataNemDb');
+const MetadataDb = require('../../../src/plugins/db/MetadataV2Db');
 const test = require('../../db/utils/dbTestUtils');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
@@ -33,7 +33,7 @@ describe('metadata db', () => {
 	const { createObjectId } = test.db;
 
 	const runMetadataDbTest = (dbEntities, issueDbCommand, assertDbCommandResult) =>
-		test.db.runDbTest(dbEntities, 'metadata_nem', db => new MetadataDb(db), issueDbCommand, assertDbCommandResult);
+		test.db.runDbTest(dbEntities, 'metadata_v2', db => new MetadataDb(db), issueDbCommand, assertDbCommandResult);
 
 	describe('metadata', () => {
 		const testKey1 = address.stringToAddress('SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXQA');

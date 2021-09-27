@@ -20,15 +20,15 @@
  */
 
 /** @module plugins/metadata */
-const MetadataNemDb = require('./db/MetadataNemDb');
-const metadataRoutes = require('./routes/metadataNemRoutes');
+const MetadataV2Db = require('./db/MetadataV2Db');
+const metadataRoutes = require('./routes/metadataV2Routes');
 
 /**
  * Creates a metadata plugin.
  * @type {module:plugins/CatapultRestPlugin}
  */
 module.exports = {
-	createDb: db => new MetadataNemDb(db),
+	createDb: db => new MetadataV2Db(db),
 
 	registerTransactionStates: () => {},
 

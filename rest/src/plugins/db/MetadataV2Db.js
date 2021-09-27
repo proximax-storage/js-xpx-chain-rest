@@ -21,9 +21,9 @@
 
 const { convertToLong, buildOffsetCondition } = require('../../db/dbUtils');
 
-class MetadataNemDb {
+class MetadataV2Db {
 	/**
-	 * Creates MetadataNemDb around CatapultDb.
+	 * Creates MetadataV2Db around CatapultDb.
 	 * @param {module:db/CatapultDb} db Catapult db instance.
 	 */
 	constructor(db) {
@@ -60,13 +60,13 @@ class MetadataNemDb {
 			conditions['metadataEntry.metadataType'] = metadataType;
 
 		const { pageSize, id } = options;
-		return this.catapultDb.queryPagedDocuments('metadata_nem', conditions, id, pageSize, options);
+		return this.catapultDb.queryPagedDocuments('metadata_v2', conditions, id, pageSize, options);
 	}
 
 	metadatasByCompositeHash(ids) {
 		const compositeHashes = ids.map(id => Buffer.from(id));
 		const conditions = { 'metadataEntry.compositeHash': { $in: compositeHashes } };
-		const collection = this.catapultDb.database.collection('metadata_nem');
+		const collection = this.catapultDb.database.collection('metadata_v2');
 		return collection.find(conditions)
 			.sort({ _id: -1 })
 			.toArray()
@@ -74,4 +74,4 @@ class MetadataNemDb {
 	}
 }
 
-module.exports = MetadataNemDb;
+module.exports = MetadataV2Db;

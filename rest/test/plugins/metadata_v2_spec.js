@@ -19,8 +19,8 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const MetadataDb = require('../../src/plugins/db/MetadataNemDb');
-const metadata = require('../../src/plugins/metadata_nem');
+const MetadataDb = require('../../src/plugins/db/MetadataV2Db');
+const metadata = require('../../src/plugins/metadata_v2');
 const { test } = require('../routes/utils/routeTestUtils');
 const pluginTest = require('./utils/pluginTestUtils');
 
@@ -34,8 +34,8 @@ describe('metadata plugin', () => {
 			// Arrange:
 			const routes = [];
 			const server = test.setup.createCapturingMockServer('get', routes);
-			const registeredRoutes = ['/metadata_nem',
-				'/metadata_nem/:compositeHash'];
+			const registeredRoutes = ['/metadata_v2',
+				'/metadata_v2/:compositeHash'];
 
 			// Act:
 			metadata.registerRoutes(server, {});
@@ -54,7 +54,7 @@ describe('metadata plugin', () => {
 
 			// Assert:
 			test.assert.assertRoutes(routes, [
-				'/metadata_nem'
+				'/metadata_v2'
 			]);
 		});
 	});
