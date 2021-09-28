@@ -308,7 +308,7 @@ class CatapultDb {
 		];
 
 		// rename _id to id
-		facet.push({ $set: { id: '$_id' } });
+		facet.push({ $set: { "meta.id": '$_id' } });
 		removedFields.push('_id');
 
 		if (0 < Object.keys(removedFields).length)
