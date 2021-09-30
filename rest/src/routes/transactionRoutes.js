@@ -130,9 +130,8 @@ module.exports = {
 				}
 			}) : undefined;
 
-			params.transactionTypes = routeUtils.parseArgumentAsArray(params, 'transactionTypes', 'uint');
-			if (!params.transactionTypes.length) {
-				throw errors.createInvalidArgumentError('At least one transaction type should be specified');
+			if (!params.transactionTypes || !params.transactionTypes.length) {
+				throw errors.createInvalidArgumentError('transactionTypes not provided or empty');
 			}
 
 			return db.transactionsCountByType(params.transactionTypes, filter)

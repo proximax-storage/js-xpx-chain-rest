@@ -433,7 +433,7 @@ describe('transaction routes', () => {
 						const req = { params: {}};
 
 						// Act + Assert:
-						expect(() => mockServer.callRoute(route, req)).to.throw('transactionTypes has an invalid format: not an array');
+						expect(() => mockServer.callRoute(route, req)).to.throw('transactionTypes not provided or empty');
 					});
 				});
 			});
