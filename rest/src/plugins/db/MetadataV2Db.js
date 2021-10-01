@@ -42,25 +42,26 @@ class MetadataV2Db {
 	 * @returns {Promise.<object>} Metadata page.
 	 */
 	metadata(sourceAddress, targetKey, scopedMetadataKey, targetId, metadataType, options) {
-		let conditions = {};
+		let conditions = [];
 
 		if (undefined !== sourceAddress)
-			conditions['metadataEntry.sourceAddress'] = Buffer.from(sourceAddress);
+			conditions.push({ 'metadataEntry.sourceAddress': Buffer.from(sourceAddress) });
 
 		if (undefined !== targetKey)
-			conditions['metadataEntry.targetKey'] = Buffer.from(targetKey);
+			conditions.push({ 'metadataEntry.targetKey': Buffer.from(targetKey) });
 
 		if (undefined !== scopedMetadataKey)
-			conditions['metadataEntry.scopedMetadataKey'] = convertToLong(scopedMetadataKey);
+			conditions.push({ 'metadataEntry.scopedMetadataKey': convertToLong(scopedMetadataKey) });
 
 		if (undefined !== targetId)
-			conditions['metadataEntry.targetId'] = convertToLong(targetId);
+			conditions.push({ 'metadataEntry.targetId': convertToLong(targetId) });
 
 		if (undefined !== metadataType)
-			conditions['metadataEntry.metadataType'] = metadataType;
+			conditions.push({ 'metadataEntry.metadataType': metadataType });
 
-		const { pageSize, id } = options;
-		return this.catapultDb.queryPagedDocuments('metadata_v2', conditions, id, pageSize, options);
+		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
+
+		return this.catapultDb.queryPagedDocuments_2(conditions, [], sortConditions, 'metadata_v2', options)
 	}
 
 	metadatasByCompositeHash(ids) {
