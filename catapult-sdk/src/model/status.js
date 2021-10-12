@@ -301,11 +301,11 @@ const toStringInternal = code => {
 		case 0x80FE3005: return 'Failure_Consumer_Remote_Chain_Too_Far_In_Future';
 		case 0x80450101: return 'Failure_Extension_Partial_Transaction_Cache_Prune';
 		case 0x80450102: return 'Failure_Extension_Partial_Transaction_Dependency_Removed';
-		case 0x803F0001: return 'Failure_Metadata_Nem_Value_Too_Small';
-		case 0x803F0002: return 'Failure_Metadata_Nem_Value_Too_Large';
-		case 0x803F0003: return 'Failure_Metadata_Nem_Value_Size_Delta_Too_Large';
-		case 0x803F0004: return 'Failure_Metadata_Nem_Value_Size_Delta_Mismatch';
-		case 0x803F0005: return 'Failure_Metadata_Nem_Value_Change_Irreversible';
+		case 0x803F0001: return 'Failure_Metadata_v2_Value_Too_Small';
+		case 0x803F0002: return 'Failure_Metadata_v2_Value_Too_Large';
+		case 0x803F0003: return 'Failure_Metadata_v2_Value_Size_Delta_Too_Large';
+		case 0x803F0004: return 'Failure_Metadata_v2_Value_Size_Delta_Mismatch';
+		case 0x803F0005: return 'Failure_Metadata_v2_Value_Change_Irreversible';
 		default: return undefined;
 	}
 };
