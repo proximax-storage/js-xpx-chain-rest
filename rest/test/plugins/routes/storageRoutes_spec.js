@@ -48,93 +48,61 @@
 		}));
 	});
 
-    describe('/account/:accountId/drive', () => {
-        const driveStates = [
-            { role: ['owner', 'replicator'], routePostfix: '' },
-            { role: ['owner'], routePostfix: '/owner' },
-            { role: ['replicator'], routePostfix: '/replicator' },
-        ];
-
-		describe('able to get bc drives by public key', () => {
-			const assertGetBcDrivesByPublicKey = state => {
-				// Arrange:
-				const keyGroups = [];
-				const db = test.setup.createCapturingDb('getDrivesByPublicKey', keyGroups, [{value: 'this is nonsense'}]);
-
-				// Act:
-				const registerRoutes = storageRoutes.register;
-				return test.route.executeSingle(
-					registerRoutes,
-					`/account/:accountId/drive${state.routePostfix}`,
-					'get',
-					{accountId: publicKeys.valid[0]},
-					db,
-					null,
-					response => {
-						// Assert:
-						expect(keyGroups).to.deep.equal([convert.hexToUint8(publicKeys.valid[0]), state.role]);
-						expect(response).to.deep.equal({payload: [{value: 'this is nonsense'}], type: 'bcDriveEntry'});
-					}
-				);
-			};
-
-			it('both owner and replicator', () => assertGetBcDrivesByPublicKey(driveStates[0]));
-			it('only owner', () => assertGetDrivesByPublicKeyAndRole(driveStates[1]));
-			it('only replicator', () => assertGetDrivesByPublicKeyAndRole(driveStates[2]));
-		});
-
-        describe('unable to get drives by address', () => {
-			const assertGetDrivesByAddressAndRole = state => {
-				// Arrange:
-				const keyGroups = [];
-				const db = test.setup.createCapturingDb('getDrivesByPublicKeyAndRole', keyGroups, [{value: 'this is nonsense'}]);
-
-				// Act:
-				const registerRoutes = storageRoutes.register;
-				return test.route.executeThrows(
-					registerRoutes,
-					`/account/:accountId/drive${state.routePostfix}`,
-					'get',
-					{ accountId: addresses.valid[0] },
-					db,
-					null,
-					'Allowed only publicKey',
-					409
-				);
-			};
-
-			it('both owner and replicator', () => assertGetDrivesByAddressAndRole(driveStates[0]));
-			it('only owner', () => assertGetDrivesByAddressAndRole(driveStates[1]));
-			it('only replicator', () => assertGetDrivesByAddressAndRole(driveStates[2]));
-		});
-    });
-
-    describe('/downloads/:operationToken', () => {
-		const addGetDownloadsByOperationToken = traits => {
+    describe('/downloads/:downloadChannelId', () => {
+		const addGetDownloadsByDownloadChannelId = traits => {
 			// Arrange:
 			const keyGroups = [];
-			const db = test.setup.createCapturingDb('getDownloadsByOperationToken', keyGroups, [{value: 'this is nonsense'}]);
+			const db = test.setup.createCapturingDb('getDownloadsByDownloadChannelId', keyGroups, [{value: 'this is nonsense'}]);
 
 			// Act:
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/downloads/:operationToken',
+				'/downloads/:downloadChannelId',
 				'get',
-				{operationToken: traits.operationToken},
+				{downloadChannelId: traits.downloadChannelId},
 				db,
 				null,
 				response => {
 					// Assert:
 					expect(keyGroups).to.deep.equal(traits.expected);
-					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'downloadEntry'});
+					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'downloadChannelEntry'});
 				}
 			);
 		};
 
-		it('with operation token', () => addGetDownloadsByOperationToken({
-			operationToken: hashes256.valid[0],
+		it('with download channel id', () => addGetDownloadsByDownloadChannelId({
+			downloadChannelId: hashes256.valid[0],
 			expected: [convert.hexToUint8(hashes256.valid[0])]
+		}));
+	});
+
+	describe('/replicator/:key', () => {
+		const addGetReplicatorByPublicKey = traits => {
+			// Arrange:
+			const keyGroups = [];
+			const db = test.setup.createCapturingDb('getReplicatorByPublicKey', keyGroups, [{value: 'this is nonsense'}]);
+
+			// Act:
+			const registerRoutes = storageRoutes.register;
+			return test.route.executeSingle(
+				registerRoutes,
+				'/replicator/:key',
+				'get',
+				{blsKey: traits.blsKey},
+				db,
+				null,
+				response => {
+					// Assert:
+					expect(keyGroups).to.deep.equal(traits.expected);
+					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'replicatorEntry'});
+				}
+			);
+		};
+
+		it('with public key', () => addGetReplicatorByPublicKey({
+			accountId: publicKeys.valid[0],
+			expected: ['publicKey', convert.hexToUint8(publicKeys.valid[0])]
 		}));
 	});
 
@@ -143,19 +111,18 @@
 			routes: storageRoutes,
 			routeName,
 			createDb: (keyGroups, documents) => ({
-				getDownloadsByFileRecipient: (fileRecipient, pageId, pageSize, options) => {
+				getDownloadsByConsumerPublicKey: (publicKey, pageId, pageSize, options) => {
 					keyGroups.push({
-						fileRecipient,
+						publicKey,
 						pageId,
 						pageSize,
 						options
 					});
 					return Promise.resolve(documents);
 				},
-				getDownloadsByDriveId: (type, driveId, pageId, pageSize, options) => {
+				getDownloadsByDownloadChannelId: (downloadChannelId, pageId, pageSize, options) => {
 					keyGroups.push({
-						type,
-						driveId,
+						downloadChannelId,
 						pageId,
 						pageSize,
 						options
@@ -172,7 +139,7 @@
 			factory.createDownloadsPagingRouteInfo(traits.routeName),
 			traits.valid.params,
 			traits.valid.expected,
-			'downloadEntry'
+			'downloadChannelEntry'
 		);
 
 		pagingTestsFactory.addDefault();
@@ -180,19 +147,24 @@
 			pagingTestsFactory.addFailureTest(traits.invalid.name, traits.invalid.params, traits.invalid.error);
 	};
 
-	describe('/drive/:accountId/downloads', () => addGetTests({
-		routeName: '/drive/:accountId/downloads',
+	describe('/account/:accountId/drive', () => addGetTests({
+		routeName: '/account/:accountId/drive',
 		valid: {
 			params: { accountId: publicKeys.valid[0] },
-			expected: { driveId: convert.hexToUint8(publicKeys.valid[0]), options: undefined, type: "publicKey" }
+			expected: { owner: convert.hexToUint8(publicKeys.valid[0]), options: undefined }
+		},
+		invalid: {
+			name: 'accountId is invalid',
+			params: { ['accountId']: addresses.valid[0] },
+			error: 'Allowed only publicKey'
 		}
-	}));
+    }));
 
-	describe('/account/:accountId/downloads', () => addGetTests({
-		routeName: '/account/:accountId/downloads',
+	describe('/account/:accountId/replicator', () => addGetTests({
+		routeName: '/account/:accountId/replicator',
 		valid: {
 			params: { accountId: publicKeys.valid[0] },
-			expected: { fileRecipient: convert.hexToUint8(publicKeys.valid[0]), options: undefined }
+			expected: { key: convert.hexToUint8(publicKeys.valid[0]), options: undefined }
 		},
 		invalid: {
 			name: 'accountId is invalid',

@@ -73,14 +73,14 @@ class StorageDb {
 	}
 
 	/**
-	 * Retrieves the replicator entry by blskey.
-	 * @param {object} blsKey The account blskey.
+	 * Retrieves the replicator entry by public key.
+	 * @param {object} key The account public key.
 	 * @returns {Promise.<object>} The replicator entry for account.
 	 */
-	getReplicatorByBlsKey(blsKey) {
-		const buffer = Buffer.from(blsKey);
+	getReplicatorByPublicKey(key) {
+		const buffer = Buffer.from(key);
 		
-		let fieldName = "replicator.blsKey";
+		let fieldName = "replicator.key";
 
 		return this.catapultDb.queryDocuments('replicators', { [fieldName]: buffer });
 	}
@@ -154,41 +154,6 @@ class StorageDb {
 		const conditions = { $and: [ { ['downloadChannelInfo.consumer']: key } ] };
 		return this.catapultDb.queryPagedDocuments('downloadChannels', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);;
 	}
-
-	/**
-	 * Retrieves the file download by operation token.
-	 * @param {array<object>} operationToken File download operation token.
-	 * @returns {Promise.<array>} File download info.
-	 */
-	getDownloadsByOperationToken(operationToken) {
-		const buffer = Buffer.from(operationToken);
-		return this.catapultDb.queryDocuments('downloads', { ['downloadInfo.operationToken']: buffer });
-	}
-
-	/**
-	* Retrieves the paginated blskeys.
-	* @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
-	* `pageSize`.
-	* and `pageNumber`.
-    * @returns {Promise.<object>} Blskeys page.
-	*/
-    blskeys(options) {
-		const buildConditions = () => {
-			const conditions = [];
-
-			// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
-			// in fact, offset logic should be moved to `queryPagedDocuments`
-			if (options.offset !== undefined)
-				conditions.push({[options.sortField]: {[1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset)}});
-
-			return conditions;
-		}
-
-		const sortConditions = {$sort: {[options.sortField]: options.sortDirection}};
-		const conditions = buildConditions();
-
-        return this.catapultDb.queryPagedDocuments_2(conditions, [], sortConditions, "blsKeys", options);
-    }
 
 	// endregion
 

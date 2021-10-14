@@ -15,13 +15,45 @@ module.exports = {
 		});
 
         server.get('/drives', (res, next) => {
-			return db.drives(filters, options)
+			return db.bcdrives(options)
 				.then(result => routeUtils.createSender('bcDriveEntry').sendPage(res, next)(result));
 		});
 
-        
+		server.get('/account/:accountId/drive', (req, res, next) => {
+			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
+
+			if ('publicKey' !== type)
+				throw errors.createInvalidArgumentError('Allowed only publicKey');
+
+			return db.getBcDriveByOwnerPublicKey(accountId, state.role)
+				.then(routeUtils.createSender('bcDriveEntry').sendArray('accountId', res, next));
+		});
+
+		server.get('/replicator/:key', (req, res, next) => {
+			const key = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
+			return db.getReplicatorByBlsKey(key)
+				.then(routeUtils.createSender('replicatorEntry').sendOne(req.params.height, res, next));
+		});
+
 		server.get('/replicators', (res, next) => {
-			return routeUtils.createSender('replicatorEntry').sendPage(res, next);
+			return db.replicators(options)
+				.then(result => routeUtils.createSender('replicatorEntry').sendPage(res, next)(result));
+		});
+
+		server.get('/account/:accountId/replicator', (req, res, next) => {
+			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
+
+			if ('publicKey' !== type)
+				throw errors.createInvalidArgumentError('Allowed only publicKey');
+
+			return db.getReplicatorByPublicKey(accountId, state.role)
+				.then(routeUtils.createSender('replicatorEntry').sendArray('accountId', res, next));
+		});
+
+		server.get('/downloads/:downloadChannelId', (req, res, next) => {
+			const downloadChannelId = routeUtils.parseArgument(req.params, 'downloadChannelId', 'hash256');
+			return db.getDownloadsByDownloadChannelId(downloadChannelId)
+				.then(routeUtils.createSender('downloadChannelEntry').sendOne('downloadChannelId', res, next));
 		});
     }
 };

@@ -6,7 +6,7 @@
 
 const dbTestUtils = require('../../../db/utils/dbTestUtils');
 const MongoDb = require('mongodb');
-const ServiceDb = require('../../../../src/plugins/db/StorageDb');
+const StorageDb = require('../../../../src/plugins/db/StorageDb');
 const test = require('../../../testUtils');
 const { convertToLong } = require('../../../../src/db/dbUtils');
 
@@ -27,11 +27,11 @@ const createBcDriveEntries = (bcDriveInfos) => {
     return bcDriveInfos.map(bcDriveInfo => createDriveEntry(++i, bcDriveInfo.multisig, bcDriveInfo.owner, bcDriveInfo.replicatorCount));
 };
 
-const createReplicatorEntry = (id, multisig, drives) => ({
+const createReplicatorEntry = (id, key, blsKey, drives) => ({
     _id: dbTestUtils.db.createObjectId(id),
     replicator: {
-        multisig: new Binary(multisig.publicKey),
-        multisigAddress: new Binary(multisig.address),
+        key: key ? new Binary(key) : null,
+        blsKey: blsKey ? new Binary(blsKey) : null,
         drives: drives && drives.length ? 
             drives.map(lastApprovedDataModificationId => { return { drive: new Binary(lastApprovedDataModificationId) } }) : null,
     }
@@ -39,35 +39,39 @@ const createReplicatorEntry = (id, multisig, drives) => ({
 
 const createReplicatorEntries = (replicatorInfos) => {
     let i = 0;
-    return replicatorInfos.map(replicatorInfo => createReplicatorEntry(++i, replicatorInfo.multisig, replicatorInfo.drives));
+    return replicatorInfos.map(replicatorInfo => createReplicatorEntry(++i, replicatorInfo.key, replicatorInfo.blsKey, replicatorInfo.drives));
 };
 
-const createDownloadEntry = (id, account, operationToken, fileRecipient, files) => ({
+const createDownloadEntry = (id, consumer, listOfPublicKeys) => ({
     _id: dbTestUtils.db.createObjectId(id),
-    downloadInfo: {
-        driveKey: new Binary(account.publicKey),
-        driveAddress: new Binary(account.address),
-        operationToken: new Binary(operationToken),
-        fileRecipient: new Binary(fileRecipient),
-        height: Long.fromNumber(0),
-        files: files && files.length ?
-            files.map(file => { return {
-                fileHash: new Binary(file.fileHash),
-                fileSize: Long.fromNumber(file.fileSize)
-            }}) : null,
+    downloadChannelInfo: {
+        id:  new Binary(id),
+        consumer: new Binary(consumer),
+        downloadSize: Long.fromNumber(0),
+        downloadApprovalCount: Long.fromNumber(0),
+        listOfPublicKeys: listOfPublicKeys.length ? listOfPublicKeys.push(new Binary(publicKey)) : null
     }
 });
 
 const createDownloadEntries = (downloadInfos) => {
     let i = 0;
-    return downloadInfos.map(downloadInfo => createDownloadEntry(
-        ++i,
-        downloadInfo.account,
-        downloadInfo.operationToken,
-        downloadInfo.fileRecipient,
-        downloadInfo.files
-    ));
+    return downloadInfos.map(downloadInfo => createDownloadEntry(++i, downloadInfo.consumer, downloadInfo.downloadSize, downloadInfo.downloadApprovalCount, downloadInfo.listOfPublicKeys));
 };
+
+const createBlsKeyEntry = (id, blsKey, key) => ({
+    _id: dbTestUtils.db.createObjectId(id),
+    blsKeyDoc: {
+        blsKey: new Binary(blsKey),
+        version: Long.fromNumber(0),
+        key: new Binary(key)
+    }
+});
+
+const createBlsKeyEntries = (blsKeyInfos) => {
+    let i = 0;
+    return blsKeyInfos.map(blsKeyInfo => createBlsKeyEntry(++i, blsKeyInfo.blsKey, blsKeyInfo.key));
+};
+
 
 const storageDbTestUtils = {
     db: {
@@ -77,8 +81,10 @@ const storageDbTestUtils = {
         createReplicatorEntries,
         createDownloadEntry,
         createDownloadEntries,
+        createBlsKeyEntry,
+        createBlsKeyEntries,
         runDbTest: (dbEntities, collectionName, issueDbCommand, assertDbCommandResult) =>
-            dbTestUtils.db.runDbTest(dbEntities, collectionName, db => new ServiceDb(db), issueDbCommand, assertDbCommandResult)
+            dbTestUtils.db.runDbTest(dbEntities, collectionName, db => new StorageDb(db), issueDbCommand, assertDbCommandResult)
     }
 };
 Object.assign(storageDbTestUtils, test);

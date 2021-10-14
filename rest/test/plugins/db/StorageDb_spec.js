@@ -10,17 +10,12 @@ const dbTestUtils = require('../../db/utils/dbTestUtils');
 const CatapultDb = require('../../../src/db/CatapultDb');
 const test = require('./utils/storageDbTestUtils');
 const { expect } = require('chai');
-const sinon = require('sinon');
 
-const catapult = require('catapult-sdk');
-const { address } = catapult.model;
-const Mijin_Test_Network = catapult.model.networkInfo.networks.mijinTest.id;
-
-describe('bc drive db', () => {
+describe('bcdrive db', () => {
     const generateAccount = test.random.account;
     const generateHash = test.random.hash;
 
-    describe('bc drive by account id', () => {
+    describe('bcdrive by account id', () => {
         const addBcDriveByAccountIdTests = traits => {
             const assertBcDriveByAccountId = (account, additionalAccounts) => {
                 // Arrange:
@@ -38,7 +33,7 @@ describe('bc drive db', () => {
                 // Assert:
                 return test.db.runDbTest(
                     entries,
-                    'bcDrives',
+                    'bcdrives',
                     db => db.getBcDriveByAccountId(traits.type, traits.toDbApiId(account)),
                     entities => expect(entities).to.deep.equal(expectedEntries)
                 );
@@ -65,7 +60,7 @@ describe('bc drive db', () => {
         }));
     });
 
-    describe('bc drives', () => {
+    describe('bcdrives', () => {
         const drive1 = test.random.publicKey();
         const drive2 = test.random.publicKey();
         const owner = test.random.publicKey();
@@ -81,13 +76,13 @@ describe('bc drive db', () => {
             test.db.createBcDriveEntry(objectId, drive, owner, replicatorCount)
         );
 
-        const runTestAndVerifyIds = (dbTransactions, filters, options, expectedIds) => {
+        const runTestAndVerifyIds = (dbTransactions, options, expectedIds) => {
             const expectedObjectIds = expectedIds.map(id => dbTestUtils.db.createObjectId(id));
 
             return test.db.runDbTest(
                 dbTransactions,
-                "bc drives",
-                db => db.drives(filters, options),
+                "bcdrives",
+                db => db.bcdrives(options),
                 transactionsPage => {
                     const returnedIds = transactionsPage.data.map(t => t.id);
                     expect(transactionsPage.data.length).to.equal(expectedObjectIds.length);
@@ -105,8 +100,8 @@ describe('bc drive db', () => {
             // Act + Assert:
             return test.db.runDbTest(
                 dbTransactions,
-                "bc drives",
-                db => db.drives({}, paginationOptions),
+                "bcdrives",
+                db => db.bcdrives({}, paginationOptions),
                 page => {
                     const expected_keys = ['bcdrive', 'id'];
                     expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
@@ -188,8 +183,8 @@ describe('bc drive db', () => {
                 // Act + Assert:
                 return test.db.runDbTest(
                     dbTransactions(),
-                    "bc drives",
-                    db => db.drives({}, options),
+                    "bcdrives",
+                    db => db.bcdrives({}, options),
                     transactionsPage => {
                         expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));
                         expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
@@ -209,8 +204,8 @@ describe('bc drive db', () => {
                 // Act + Assert:
                 return test.db.runDbTest(
                     dbTransactions(),
-                    "bc drives",
-                    db => db.drives({}, options),
+                    "bcdrives",
+                    db => db.bcdrives({}, options),
                     transactionsPage => {
                         expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(30));
                         expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
@@ -221,14 +216,10 @@ describe('bc drive db', () => {
         });
     });
 
-    describe('bc drive by public key', () => {
+    describe('bcdrive by owner public key', () => {
 
-        const generateBcDriveInfo = (additionalParticipant) => {
-            const drives = [ generateAccount().publicKey, generateAccount().publicKey ];
-            if (additionalParticipant && 'bc drive' === additionalParticipant.role)
-                drives.push(additionalParticipant.key);
-            const additionalParticipantHasOwnerRole = (additionalParticipant && 'owner' === additionalParticipant.role);
-            return { multisig: generateAccount(), owner: additionalParticipantHasOwnerRole ? additionalParticipant.key: generateAccount().publicKey, drives };
+        const generateBcDriveInfo = () => {
+            return { multisig: generateAccount(), owner: 'bcdrive.owner' ? owner: generateAccount().publicKey, replicatorCount: 2 };
         };
 
         const generateBcDriveInfos = (count) => {
@@ -240,7 +231,7 @@ describe('bc drive db', () => {
             return bcDriveInfos;
         };
 
-        const assertDrivesByPublicKey = (publicKey, additionalBcDriveInfos) => {
+        const assertBcDrivesByOwnerPublicKey = (publicKey, additionalBcDriveInfos) => {
             // Arrange:
             const bcDriveInfos = generateBcDriveInfos(5);
             const expectedEntries = [];
@@ -254,95 +245,42 @@ describe('bc drive db', () => {
             // Assert:
             return test.db.runDbTest(
                 entries,
-                'bc drives',
-                db => db.getBcDriveByAccountId(publicKey),
+                'bcdrives',
+                db => db.getBcDriveByOwnerPublicKey(publicKey),
                 entities => expect(entities).to.deep.equal(expectedEntries)
             );
         };
 
         describe('returns empty array for unknown key', () => {
-            it('both owner and replicator', () => {
-                return assertBcDrivesByPublicKeyAndRole(generateAccount().publicKey, ['owner', 'replicator'], []);
-            });
-
-            it('only owner', () => {
-                return assertBcDrivesByPublicKeyAndRole(generateAccount().publicKey, ['owner'], []);
-            });
-
-            it('only replicator', () => {
-                return assertBcDrivesByPublicKeyAndRole(generateAccount().publicKey, ['replicator'], []);
-            });
-        });
-
-        const assertBcDrivesByRoles = (roles) => {
-            const key = generateAccount().publicKey;
-            return assertBcDrivesByPublicKeyAndRole(key, roles, [
-                generateBcDriveInfo({ role: 'owner', key }),
-                generateBcDriveInfo({ role: 'owner', key }),
-                generateBcDriveInfo({ role: 'replicator', key }),
-                generateBcDriveInfo({ role: 'replicator', key })
-            ]);
-        };
-
-        describe('returns entries with matching owner and replicator', () => {
-            it('roles set', () => {
-                return assertBcDrivesByRoles(['owner', 'replicator']);
-            });
-
-            it('roles not set', () => {
-                return assertBcDrivesByRoles([]);
-            });
-        });
-
-        it('returns entries with matching owner', () => {
-            const key = generateAccount().publicKey;
-            return assertBcDrivesByPublicKeyAndRole(key, ['owner'], [
-                generateBcDriveInfo({ role: 'owner', key }),
-                generateBcDriveInfo({ role: 'owner', key })
-            ]);
-        });
-
-        it('returns entries with matching replicator', () => {
-            const key = generateAccount().publicKey;
-            return assertBcDrivesByPublicKeyAndRole(key, ['replicator'], [
-                generateBcDriveInfo({ role: 'replicator', key }),
-                generateBcDriveInfo({ role: 'replicator', key })
-            ]);
+            return assertBcDrivesByOwnerPublicKey(generateAccount().publicKey);
         });
     });
 
     describe('file downloads', () => {
-        const generateDownloadInfo = (account, fileRecipient, operationToken) => { return {
-            account: account ? account : generateAccount(),
-            fileRecipient,
-            operationToken,
-            files: [
-                {
-                    fileHash:	generateHash(),
-                    fileSize:	1,
-                },
-                {
-                    fileHash:	generateHash(),
-                    fileSize:	2,
-                }
-            ]
+        const generateDownloadInfo = (consumer) => { return {
+            id: id ? id : generateHash(),
+            consumer: consumer ? consumer : generateAccount().publicKey,
+            downloadSize: 1,
+            downloadApprovalCount: 3,
+            listOfPublicKeys: [generateAccount().publicKey, generateAccount().publicKey]
         }};
 
-        const assertDownloadsByOperationToken = (operationToken, additionalOperationToken) => {
+        const assertDownloadsByDownloadChannelId = (downloadChannelId, additionalDownloadChannelId) => {
             // Arrange:
             const downloadInfos = [];
             for (let i = 0; i < 5; ++i)
-                downloadInfos.push({account: generateAccount(), operationToken: generateHash()});
+                downloadInfos.push({id: generateHash(), consumer: generateAccount().publicKey});
             const expectedEntries = [];
-            additionalOperationToken.forEach(operationToken => {
-                const downloadInfo = generateDownloadInfo(generateAccount(), generateHash(), operationToken);
+            additionalDownloadChannelId.forEach(downloadChannelId => {
+                const downloadInfo = generateDownloadInfo(downloadChannelId);
                 downloadInfos.push(downloadInfo);
                 expectedEntries.push(test.db.createDownloadEntry(
                     downloadInfos.length,
-                    downloadInfo.account,
-                    downloadInfo.operationToken,
-                    downloadInfo.fileRecipient,
-                    downloadInfo.files
+                    downloadInfo.id,
+                    downloadInfo.consumer,
+                    downloadInfo.downloadSize,
+                    downloadInfo.downloadApprovalCount,
+                    downloadInfo.listOfPublicKeys
                 ));
             });
             expectedEntries.forEach(entry => {
@@ -353,27 +291,27 @@ describe('bc drive db', () => {
             // Assert:
             return test.db.runDbTest(
                 entries,
-                'downloads',
-                db => db.getDownloadsByOperationToken(operationToken),
+                'downloadChannels',
+                db => db.getDownloadsByDownloadChannelId(downloadChannelId),
                 entities =>
                     expect(entities).to.deep.equal(expectedEntries)
             );
         };
 
         it('returns empty array for unknown id', () => {
-            return assertDownloadsByOperationToken(generateHash(), []);
+            return assertDownloadsByDownloadChannelId(generateHash(), []);
         });
 
         it('returns matching entry', () => {
-            const operationToken = generateHash();
-            return assertDownloadsByOperationToken(operationToken, [operationToken]);
+            const id = generateHash();
+            return assertDownloadsByDownloadChannelId(id, [id]);
         });
 
         const addGetDownloadsByKeyTests = traits => {
-            const generateDownloadInfos = (count, key) => {
+            const generateDownloadInfos = (count, consumer) => {
                 const downloadInfos = [];
                 for (let i = 0; i < count; ++i) {
-                    downloadInfos.push(traits.generateDownloadInfo(key ? key : traits.generateKey()));
+                    downloadInfos.push(traits.generateDownloadInfo(consumer ? consumer : traits.generateKey()));
                 }
 
                 return downloadInfos;
@@ -386,8 +324,8 @@ describe('bc drive db', () => {
                 // Assert:
                 return test.db.runDbTest(
                     entries,
-                    'downloads',
-                    db => traits.getDownloads(db, traits.generateKey()),
+                    'downloadChannels',
+                    db => traits.getDownloadsByConsumerPublicKey(db, traits.generateKey()),
                     entities => expect(entities.length).to.equal(0)
                 );
             });
@@ -401,17 +339,18 @@ describe('bc drive db', () => {
                 const entries = test.db.createDownloadEntries(downloadInfos);
                 const expectedEntry = test.db.createDownloadEntry(
                     downloadInfos.length,
-                    additionalDownloadInfo.account,
-                    additionalDownloadInfo.operationToken,
-                    additionalDownloadInfo.fileRecipient,
-                    additionalDownloadInfo.files
+                    additionalDownloadInfo.id,
+                    additionalDownloadInfo.consumer,
+                    additionalDownloadInfo.downloadSize,
+                    additionalDownloadInfo.downloadApprovalCount,
+                    additionalDownloadInfo.listOfPublicKeys
                 );
                 delete expectedEntry._id;
 
                 // Assert:
                 return test.db.runDbTest(
                     entries,
-                    'downloads',
+                    'downloadChannels',
                     db => traits.getDownloads(db, key),
                     entities =>
                         expect(entities).to.deep.equal([expectedEntry])
@@ -433,7 +372,7 @@ describe('bc drive db', () => {
                     // Assert:
                     return test.db.runDbTest(
                         entries,
-                        'downloads',
+                        'downloadChannels',
                         db => traits.getDownloads(db, key, id, 100, sortOrder),
                         entities =>
                             expect(entities).to.deep.equal(expectedEntries)
@@ -459,7 +398,7 @@ describe('bc drive db', () => {
                     // Assert:
                     return test.db.runDbTest(
                         entries,
-                        'downloads',
+                        'downloadChannels',
                         db => traits.getDownloads(db, key, undefined, pageSize, sortOrder),
                         entities => expect(entities.length).to.equal(expectedSize)
                     );
@@ -497,27 +436,11 @@ describe('bc drive db', () => {
             });
         };
 
-        describe('by file recipient key', () => addGetDownloadsByKeyTests({
+        describe('by consumer public key', () => addGetDownloadsByKeyTests({
             generateKey: () => generateAccount().publicKey,
-            generateDownloadInfo: (fileRecipient) => generateDownloadInfo(undefined, fileRecipient, generateHash()),
-            getDownloads: (db, fileRecipient, pagingId, pageSize, sortOrder) => {
-                return db.getDownloadsByFileRecipient(fileRecipient, pagingId, pageSize, { sortOrder });
-            }
-        }));
-
-        describe('by drive id with public key', () => addGetDownloadsByKeyTests({
-            generateKey: () => generateAccount(),
-            generateDownloadInfo: (account) => generateDownloadInfo(account, generateHash(), generateHash()),
-            getDownloads: (db, account, pagingId, pageSize, sortOrder) => {
-                return db.getDownloadsByDriveId(AccountType.publicKey, account.publicKey, pagingId, pageSize, { sortOrder });
-            }
-        }));
-
-        describe('by drive id with address', () => addGetDownloadsByKeyTests({
-            generateKey: () => generateAccount(),
-            generateDownloadInfo: (account) => generateDownloadInfo(account, generateHash(), generateHash()),
-            getDownloads: (db, account, pagingId, pageSize, sortOrder) => {
-                return db.getDownloadsByDriveId(AccountType.address, account.address, pagingId, pageSize, { sortOrder });
+            generateDownloadInfo: (consumer) => generateDownloadInfo(consumer),
+            getDownloads: (db, consumer, pagingId, pageSize, sortOrder) => {
+                return db.getDownloadsByConsumerPublicKey(consumer, pagingId, pageSize, { sortOrder });
             }
         }));
     });
@@ -538,13 +461,13 @@ describe('bc drive db', () => {
             test.db.createReplicatorEntry(objectId, replicator, [drive1, drive2])
         );
 
-        const runTestAndVerifyIds = (dbTransactions, filters, options, expectedIds) => {
+        const runTestAndVerifyIds = (dbTransactions, options, expectedIds) => {
             const expectedObjectIds = expectedIds.map(id => dbTestUtils.db.createObjectId(id));
 
             return test.db.runDbTest(
                 dbTransactions,
                 "replicators",
-                db => db.replicators(filters, options),
+                db => db.replicators(options),
                 transactionsPage => {
                     const returnedIds = transactionsPage.data.map(t => t.id);
                     expect(transactionsPage.data.length).to.equal(expectedObjectIds.length);
