@@ -5,11 +5,6 @@
  * */
 
 const AccountType = require('../AccountType');
-const { convertToLong } = require('../../db/dbUtils');
-const MongoDb = require('mongodb');
-const { ObjectId } = MongoDb;
-
-const driveRoles = ['owner', 'replicator'];
 
 class StorageDb {
     /**
@@ -20,33 +15,51 @@ class StorageDb {
 		this.catapultDb = db;
 	}
 
+	// region storage retrieval
+
     /**
 	 * Retrieves the bcdrive entry by account id.
 	 * @param {module:db/AccountType} type Type of account id.
 	 * @param {array<object>} accountId Account id.
-	 * @returns {Promise.<object>} The drive entry.
+	 * @returns {Promise.<object>} The bcdrive entry.
 	 */
 	getBcDriveByAccountId(type, accountId) {
 		const buffer = Buffer.from(accountId);
-		const fieldName = (AccountType.publicKey === type) ? 'bcdrive.multisig' : 'bcdrive.multisigAddress';
+		const fieldName = (AccountType.publicKey === type) ? 'drive.multisig' : 'drive.multisigAddress';
 		return this.catapultDb.queryDocuments('bcdrives', { [fieldName]: buffer });
 	}
 
     /**
-	* Retrieves all the paginated bc drives.
-    * @param {string} bcDrivesCollection bc drives collection.
+	* Retrieves the paginated bcdrives.
+	* @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
+	* `pageSize`.
+	* and `pageNumber`.
+    * @returns {Promise.<object>} Bcdrives page.
 	*/
-    drives() {
-        return this.catapultDb.queryDocuments(bcDrivessCollection);
+    bcdrives(options) {
+		const buildConditions = () => {
+			const conditions = [];
+
+			// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
+			// in fact, offset logic should be moved to `queryPagedDocuments`
+			if (options.offset !== undefined)
+				conditions.push({[options.sortField]: {[1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset)}});
+
+			return conditions;
+		}
+
+		const sortConditions = {$sort: {[options.sortField]: options.sortDirection}};
+		const conditions = buildConditions();
+
+        return this.catapultDb.queryPagedDocuments_2(conditions, [], sortConditions, "bcdrives", options);
     }
 
     /**
-	 * Retrieves the bc drive entries by account.
+	 * Retrieves the bcdrive entries by account.
 	 * @param {object} publicKey The account public key.
-	 * If filter is null or empty, returns all bc drives which contains public key of account.
-	 * @returns {Promise.<array>} The bc drive entries for account.
+	 * @returns {Promise.<array>} The bcdrive entries for account.
 	 */
-	getBcDriveByPublicKey(publicKey) {
+	getBcDriveByOwnerPublicKey(publicKey) {
 		const buffer = Buffer.from(publicKey);
 
 		const query = [];
@@ -59,24 +72,42 @@ class StorageDb {
 		});
 	}
 
-     /**
-	 * Retrieves the replicator entry by account id.
-	 * @param {module:db/AccountType} type Type of account id.
-	 * @param {array<object>} accountId Account id.
-	 * @returns {Promise.<object>} The replicator entry.
+	/**
+	 * Retrieves the replicator entry by blskey.
+	 * @param {object} blsKey The account blskey.
+	 * @returns {Promise.<object>} The replicator entry for account.
 	 */
-	getReplicatorByAccountId(type, accountId) {
-		const buffer = Buffer.from(accountId);
-		const fieldName = (AccountType.publicKey === type) ? 'replicator.multisig' : 'replicator.multisigAddress';
+	getReplicatorByBlsKey(blsKey) {
+		const buffer = Buffer.from(blsKey);
+		
+		let fieldName = "replicator.blsKey";
+
 		return this.catapultDb.queryDocuments('replicators', { [fieldName]: buffer });
 	}
 
     /**
-	* Retrieves all the paginated replicators.
-    * @param {string} replicatorsCollection replicators collection.
+	* Retrieves the paginated replicators.
+	* @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
+	* `pageSize`.
+	* and `pageNumber`.
+    * @returns {Promise.<object>} Replicators page.
 	*/
-    replicators() {
-        return this.catapultDb.queryDocuments(replicatorsCollection);
+    replicators(options) {
+		const buildConditions = () => {
+			const conditions = [];
+
+			// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
+			// in fact, offset logic should be moved to `queryPagedDocuments`
+			if (options.offset !== undefined)
+				conditions.push({[options.sortField]: {[1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset)}});
+
+			return conditions;
+		}
+
+		const sortConditions = {$sort: {[options.sortField]: options.sortDirection}};
+		const conditions = buildConditions();
+
+        return this.catapultDb.queryPagedDocuments_2(conditions, [], sortConditions, "bcdrives", options);
     }
 
     /**
@@ -88,7 +119,7 @@ class StorageDb {
         const buffer = Buffer.from(publicKey);
 
         const query = [];
-        let field = "replicator.replicator";
+        let field = "replicator.key";
 
         query.push({ [field]: buffer });
 
@@ -96,6 +127,70 @@ class StorageDb {
             $or: query
         });
     }
+
+	/**
+	 * Retrieves the file downloads by download channel id.
+	 * @param {array<object>} downloadChannelId Download channel id.
+	 * @param {string} pagingId Paging id.
+	 * @param {int} pageSize Page size.
+	 * @returns {Promise.<array>} File download info.
+	 */
+	 getDownloadsByDownloadChannelId(downloadChannelId, pagingId, pageSize, options) {
+		const buffer = Buffer.from(downloadChannelId);
+		const fieldName = "downloadChannelInfo.id";
+		const conditions = { $and: [ { [fieldName]: buffer } ] };
+		return this.catapultDb.queryPagedDocuments('downloadChannels', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);
+	}
+
+	/**
+	 * Retrieves the file downloads by file recipient.
+	 * @param {array<object>} publicKey Public key of file recipient.
+	 * @param {string} pagingId Paging id.
+	 * @param {int} pageSize Page size.
+	 * @returns {Promise.<array>} File download info.
+	 */
+	getDownloadsByConsumerPublicKey(publicKey, pagingId, pageSize, options) {
+		const key = Buffer.from(publicKey);
+		const conditions = { $and: [ { ['downloadChannelInfo.consumer']: key } ] };
+		return this.catapultDb.queryPagedDocuments('downloadChannels', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);;
+	}
+
+	/**
+	 * Retrieves the file download by operation token.
+	 * @param {array<object>} operationToken File download operation token.
+	 * @returns {Promise.<array>} File download info.
+	 */
+	getDownloadsByOperationToken(operationToken) {
+		const buffer = Buffer.from(operationToken);
+		return this.catapultDb.queryDocuments('downloads', { ['downloadInfo.operationToken']: buffer });
+	}
+
+	/**
+	* Retrieves the paginated blskeys.
+	* @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
+	* `pageSize`.
+	* and `pageNumber`.
+    * @returns {Promise.<object>} Blskeys page.
+	*/
+    blskeys(options) {
+		const buildConditions = () => {
+			const conditions = [];
+
+			// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
+			// in fact, offset logic should be moved to `queryPagedDocuments`
+			if (options.offset !== undefined)
+				conditions.push({[options.sortField]: {[1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset)}});
+
+			return conditions;
+		}
+
+		const sortConditions = {$sort: {[options.sortField]: options.sortDirection}};
+		const conditions = buildConditions();
+
+        return this.catapultDb.queryPagedDocuments_2(conditions, [], sortConditions, "blsKeys", options);
+    }
+
+	// endregion
 
 }
 
