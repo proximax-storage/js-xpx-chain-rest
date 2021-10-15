@@ -99,6 +99,24 @@ const storagePlugin = {
 		builder.addTransactionSupport(EntityType.driveClosure, {
 			driveKey: 				{ type: ModelType.binary, schemaName: 'driveClosure.driveKey' },
 		});
+
+		builder.addTransactionSupport(EntityType.endDriveVerificationV2, {
+            driveKey:               {type: ModelType.binary,    schemaName: 'endDriveVerification.driveKey'},
+            verificationTrigger:    {type: ModelType.binary,    schemaName: 'endDriveVerification.verificationTrigger'},
+            provers:                {type: ModelType.array,     schemaName: ModelType.binary},
+            verificationOpinions:   {type: ModelType.array,     schemaName: ModelType.binary},
+        });
+
+        builder.addSchema('endDriveVerification.verificationOpinions', {
+            verifier:       ModelType.binary,
+            blsSignature:	ModelType.binary,
+            opinions:       ModelType.array
+        });
+
+        builder.addSchema('endDriveVerification.verificationOpinions.opinions', {
+            prover: ModelType.binary,
+            result: ModelType.uint8,
+        });
 	},
 
 	registerCodecs: codecBuilder => {
@@ -406,6 +424,60 @@ const storagePlugin = {
 				serializer.writeBuffer(transaction.driveKey);
 			}
 		});
+
+        codecBuilder.addTransactionSupport(EntityType.endDriveVerificationV2, {
+            deserialize: parser => {
+                const transaction = {};
+                transaction.driveKey = parser.buffer(constants.sizes.signer);
+                transaction.verificationTrigger = parser.buffer(constants.sizes.hash256);
+				transaction.proversCount = parser.uint16();
+				transaction.provers = [];
+				transaction.verificationOpinionsCount = parser.uint16();
+				transaction.verificationOpinions = [];
+
+				let count = transaction.proversCount;
+				while (count-- > 0) {
+					transaction.provers.push(parser.buffer(constants.sizes.signer));
+				}
+
+				count = transaction.verificationOpinionsCount;
+				while (count-- > 0) {
+					let verificationOpinion = {}
+					verificationOpinion.verifier = parser.buffer(constants.sizes.signer);
+					verificationOpinion.blsSignature = parser.buffer(constants.sizes.blsSignature);
+					verificationOpinion.opinions = [];
+
+					let count = transaction.proversCount-1;
+					while (count-- > 0) {
+						let opinion = {};
+						opinion.prover = parser.buffer(constants.sizes.signer);
+						opinion.result = parser.uint8();
+					}
+
+					transaction.verificationOpinions.push(verificationOpinion);
+				}
+
+                return transaction;
+            },
+
+            serialize: (transaction, serializer) => {
+                serializer.writeBuffer(transaction.driveKey);
+                serializer.writeBuffer(transaction.verificationTrigger);
+
+                for (let i = 0; i < transaction.proversCount; ++i) {
+					serializer.writeBuffer(transaction.provers[i]);
+				}
+
+				for (let i = 0; i < transaction.verificationOpinionsCount; ++i) {
+					serializer.writeBuffer(transaction.verificationOpinions[i].verifier);
+					serializer.writeBuffer(transaction.verificationOpinions[i].blsSignature);
+					for (let j = 0; j < transaction.proversCount-1; ++j) {
+						serializer.writeBuffer(transaction.verificationOpinions[i].opinions[j].prover);
+						serializer.writeUint8(transaction.verificationOpinions[i].opinions[j].result);
+					}
+				}
+            }
+        });
 	}
 };
 

@@ -87,6 +87,7 @@ describe('entity type enumeration', () => {
 			verificationPayment: 0x4C62,
 			downloadApproval: 0x4D62,
 			driveClosure: 0x4E62,
+			endDriveVerificationV2: 0x4F62,
 		});
 	});
 

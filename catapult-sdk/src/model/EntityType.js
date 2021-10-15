@@ -209,6 +209,9 @@ const EntityType = {
 
 	/** Drive closure transaction */
 	driveClosure: 0x4E62,
+
+	/** Dnd drive verification transaction */
+	endDriveVerificationV2: 0x4F62,
 };
 
 module.exports = EntityType;
