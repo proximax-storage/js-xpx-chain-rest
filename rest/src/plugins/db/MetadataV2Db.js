@@ -20,6 +20,8 @@
  */
 
 const { convertToLong, buildOffsetCondition } = require('../../db/dbUtils');
+const MongoDb = require('mongodb');
+const { ObjectId } = MongoDb;
 
 class MetadataV2Db {
 	/**
@@ -43,6 +45,11 @@ class MetadataV2Db {
 	 */
 	metadata(sourceAddress, targetKey, scopedMetadataKey, targetId, metadataType, options) {
 		let conditions = [];
+
+		// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
+		// in fact, offset logic should be moved to `queryPagedDocuments`
+		if (options.offset !== undefined)
+			conditions.push({[options.sortField]: {[1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset)}});
 
 		if (undefined !== sourceAddress)
 			conditions.push({ 'metadataEntry.sourceAddress': Buffer.from(sourceAddress) });
