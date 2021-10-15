@@ -9,6 +9,7 @@ const dbTestUtils = require('../../db/utils/dbTestUtils');
 const CatapultDb = require('../../../src/db/CatapultDb');
 const test = require('./utils/storageDbTestUtils');
 const { expect } = require('chai');
+const sinon = require('sinon');
 
 describe('bcdrive db', () => {
     const generateAccount = test.random.account;
@@ -143,8 +144,9 @@ describe('bcdrive db', () => {
             const { createObjectId } = dbTestUtils.db;
             // Arrange:
             const dbTransactions = () => [
-                createBcDrive(10, drive1, 7),
-                createBcDrive(20, drive2, 5)
+                createBcDrive(10, drive2, 7),
+                createBcDrive(20, drive2, 8),
+                createBcDrive(30, drive2, 9)
             ];
 
             it('direction ascending', () => {
@@ -163,6 +165,7 @@ describe('bcdrive db', () => {
                     transactionsPage => {
                         expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));
                         expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
+                        expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(30));
                     }
                 );
             });
@@ -181,18 +184,42 @@ describe('bcdrive db', () => {
                     "bcdrives",
                     db => db.bcdrives(options),
                     transactionsPage => {
-                        expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(20));
-                        expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(10));
+                        expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(30));
+                        expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
+                        expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(10));
                     }
                 );
             });
+
+            it('sort field', () => {
+				const queryPagedDocumentsSpy = sinon.spy(CatapultDb.prototype, 'queryPagedDocuments_2');
+				const options = {
+					pageSize: 10,
+					offset: 1,
+					pageNumber: 1,
+					sortField: '_id',
+					sortDirection: 1
+				};
+
+				// Act + Assert:
+				return test.db.runDbTest(
+					dbTransactions(),
+					"bcdrives",
+					db => db.bcdrives(options),
+					() => {
+						expect(queryPagedDocumentsSpy.calledOnce).to.equal(true);
+						expect(Object.keys(queryPagedDocumentsSpy.firstCall.args[2]["$sort"])[0]).to.equal('_id');
+						queryPagedDocumentsSpy.restore();
+					}
+				);
+			});
         });
     });
 
     describe('bcdrive by owner public key', () => {
 
         const generateBcDriveInfo = () => {
-            return { multisig: generateAccount(), owner: generateAccount().publicKey, replicatorCount: 2 };
+            return { multisig: generateAccount(), owner: generateAccount().publicKey, replicatorCount: 5 };
         };
 
         const generateBcDriveInfos = (count) => {
@@ -224,7 +251,7 @@ describe('bcdrive db', () => {
             );
         };
 
-        describe('returns empty array for unknown key', () => {
+        it('returns empty array for unknown key', () => {
             return assertBcDrivesByOwnerPublicKey(generateAccount().publicKey, []);
         });
     });
