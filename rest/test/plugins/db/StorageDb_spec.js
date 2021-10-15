@@ -218,8 +218,8 @@ describe('bcdrive db', () => {
 
     describe('bcdrive by owner public key', () => {
 
-        const generateBcDriveInfo = () => {
-            return { multisig: generateAccount(), owner: generateAccount().publicKey, replicatorCount: 5 };
+        const generateBcDriveInfo = (additionalOwner) => {
+            return { multisig: generateAccount(), owner: additionalOwner ? additionalOwner.owner : generateAccount().publicKey, replicatorCount: 5 };
         };
 
         const generateBcDriveInfos = (count) => {
@@ -253,6 +253,13 @@ describe('bcdrive db', () => {
 
         it('returns empty array for unknown key', () => {
             return assertBcDrivesByOwnerPublicKey(generateAccount().publicKey, []);
+        });
+
+        it('returns matching entry', () => {
+            const owner = generateAccount().publicKey;
+            return assertBcDrivesByOwnerPublicKey(owner, [
+                generateBcDriveInfo({ owner: owner })
+            ]);
         });
     });
 

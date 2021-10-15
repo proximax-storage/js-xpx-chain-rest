@@ -63,7 +63,7 @@ class StorageDb {
 	 */
 	getBcDriveByOwnerPublicKey(publicKey) {
 		const buffer = Buffer.from(publicKey);
-		const fieldName = "bcdrive.owner";
+		const fieldName = "drive.owner";
 		return this.catapultDb.queryDocuments('bcdrives', { [fieldName]: buffer });
 	}
 
