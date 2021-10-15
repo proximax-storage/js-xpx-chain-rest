@@ -5,6 +5,8 @@
  * */
 
 const AccountType = require('../AccountType');
+const MongoDb = require('mongodb');
+const { ObjectId } = MongoDb;
 
 class StorageDb {
     /**

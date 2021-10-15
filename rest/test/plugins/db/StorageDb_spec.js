@@ -20,7 +20,7 @@ describe('bcdrive db', () => {
                 // Arrange:
                 const bcDriveInfos = [];
                 for (let i = 0; i < 5; ++i)
-                    bcDriveInfos.push({ multisig: generateAccount()});
+                    bcDriveInfos.push({ multisig: generateAccount() });
                 const expectedEntries = [];
                 additionalAccounts.forEach(account => {
                     bcDriveInfos.push({ multisig: account });
@@ -93,52 +93,29 @@ describe('bcdrive db', () => {
         it('returns expected structure', () => {
             // Arrange:
             const dbTransactions = [
-                createBcDrive(10, drive1, 5)
+                createBcDrive(10, drive1, 2)
             ];
 
             // Act + Assert:
             return test.db.runDbTest(
                 dbTransactions,
                 "bcdrives",
-                db => db.bcdrives({}, paginationOptions),
+                db => db.bcdrives(paginationOptions),
                 page => {
-                    const expected_keys = ['bcdrive', 'id'];
+                    const expected_keys = ['drive', 'id'];
                     expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
                 }
             );
         });
 
-        it('if address is provided signerPublicKey and recipientAddress are omitted', () => {
-            // Arrange:
-            const dbTransactions = [
-                createBcDrive(10, drive1, 10, 0),
-                createBcDrive(20, drive2, 11, 1),
-                createBcDrive(30, drive1, 12, 1),
-                createBcDrive(40, drive2, 13, 1),
-                createBcDrive(50, drive2, 14, 2),
-                createBcDrive(60, drive1, 15, 2),
-                createBcDrive(70, drive2, 16, 2),
-                createBcDrive(80, drive2, 17, 3),
-                createBcDrive(90, drive1, 18, 3),
-                createBcDrive(100, drive2, 19, 3),
-            ];
-
-            const filters = {
-                states: [1, 2],
-                fromStart: 12,
-            };
-
-            // Act + Assert:
-            return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [30, 40, 50, 60, 70]);
-        });
-
         describe('respects offset', () => {
             // Arrange:
             const dbTransactions = () => [
-                createBcDrive(10, drive1, 20),
-                createBcDrive(20, drive1, 30),
-                createBcDrive(30, drive1, 10)
+                createBcDrive(10, drive1, 5),
+                createBcDrive(20, drive1, 5),
+                createBcDrive(30, drive1, 7)
             ];
+
             const options = {
                 pageSize: 10,
                 pageNumber: 1,
@@ -151,14 +128,14 @@ describe('bcdrive db', () => {
                 options.sortDirection = 1;
 
                 // Act + Assert:
-                return runTestAndVerifyIds(dbTransactions(), {}, options, [30]);
+                return runTestAndVerifyIds(dbTransactions(), options, [30]);
             });
 
             it('lt', () => {
                 options.sortDirection = -1;
 
                 // Act + Assert:
-                return runTestAndVerifyIds(dbTransactions(), {}, options, [10]);
+                return runTestAndVerifyIds(dbTransactions(), options, [10]);
             });
         });
 
@@ -166,9 +143,8 @@ describe('bcdrive db', () => {
             const { createObjectId } = dbTestUtils.db;
             // Arrange:
             const dbTransactions = () => [
-                createBcDrive(10, drive1, 20),
-                createBcDrive(20, drive1, 30),
-                createBcDrive(30, drive1, 10)
+                createBcDrive(10, drive1, 7),
+                createBcDrive(20, drive2, 5)
             ];
 
             it('direction ascending', () => {
@@ -183,11 +159,10 @@ describe('bcdrive db', () => {
                 return test.db.runDbTest(
                     dbTransactions(),
                     "bcdrives",
-                    db => db.bcdrives({}, options),
+                    db => db.bcdrives(options),
                     transactionsPage => {
                         expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));
                         expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
-                        expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(30));
                     }
                 );
             });
@@ -204,11 +179,10 @@ describe('bcdrive db', () => {
                 return test.db.runDbTest(
                     dbTransactions(),
                     "bcdrives",
-                    db => db.bcdrives({}, options),
+                    db => db.bcdrives(options),
                     transactionsPage => {
-                        expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(30));
-                        expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
-                        expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(10));
+                        expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(20));
+                        expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(10));
                     }
                 );
             });
