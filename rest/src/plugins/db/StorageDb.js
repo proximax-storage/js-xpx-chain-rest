@@ -61,27 +61,18 @@ class StorageDb {
 	 */
 	getBcDriveByOwnerPublicKey(publicKey) {
 		const buffer = Buffer.from(publicKey);
-
-		const query = [];
-		let field = "bcdrive.owner";
-
-		query.push({ [field]: buffer });
-
-		return this.catapultDb.queryDocuments('bcdrives', {
-			$or: query
-		});
+		const fieldName = "bcdrive.owner";
+		return this.catapultDb.queryDocuments('bcdrives', { [fieldName]: buffer });
 	}
 
 	/**
-	 * Retrieves the replicator entry by public key.
-	 * @param {object} key The account public key.
+	 * Retrieves the replicator entry by replicator id.
+	 * @param {object} replicatorId Replicator id.
 	 * @returns {Promise.<object>} The replicator entry for account.
 	 */
-	getReplicatorByPublicKey(key) {
-		const buffer = Buffer.from(key);
-		
-		let fieldName = "replicator.key";
-
+	getReplicatorById(replicatorId) {
+		const buffer = Buffer.from(replicatorId);
+		const fieldName = "replicator.id";
 		return this.catapultDb.queryDocuments('replicators', { [fieldName]: buffer });
 	}
 
@@ -112,20 +103,13 @@ class StorageDb {
 
     /**
 	 * Retrieves the replicator entries by account.
-	 * @param {object} publicKey The account public key.
-	 * @returns {Promise.<array>} The replicator entries for account.
+	 * @param {object} publicKey The replicator public key.
+	 * @returns {Promise.<object>} The replicator entry.
 	 */
     getReplicatorByPublicKey(publicKey) {
         const buffer = Buffer.from(publicKey);
-
-        const query = [];
-        let field = "replicator.key";
-
-        query.push({ [field]: buffer });
-
-        return this.catapultDb.queryDocuments('replicators', {
-            $or: query
-        });
+        const fieldName = "replicator.key";
+        return this.catapultDb.queryDocuments('replicators', { [fieldName]: buffer });
     }
 
 	/**
@@ -150,9 +134,10 @@ class StorageDb {
 	 * @returns {Promise.<array>} File download info.
 	 */
 	getDownloadsByConsumerPublicKey(publicKey, pagingId, pageSize, options) {
-		const key = Buffer.from(publicKey);
-		const conditions = { $and: [ { ['downloadChannelInfo.consumer']: key } ] };
-		return this.catapultDb.queryPagedDocuments('downloadChannels', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);;
+		const buffer = Buffer.from(publicKey);
+		const fieldName = "downloadChannelInfo.consumer";
+		const conditions = { $and: [ { [fieldName]: buffer } ] };
+		return this.catapultDb.queryPagedDocuments('downloadChannels', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);
 	}
 
 	// endregion

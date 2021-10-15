@@ -5,7 +5,6 @@
  **/
 
 const AccountType = require('../../../src/plugins/AccountType');
-const StorageDb = require('../../../src/plugins/db/StorageDb');
 const dbTestUtils = require('../../db/utils/dbTestUtils');
 const CatapultDb = require('../../../src/db/CatapultDb');
 const test = require('./utils/storageDbTestUtils');
@@ -219,7 +218,7 @@ describe('bcdrive db', () => {
     describe('bcdrive by owner public key', () => {
 
         const generateBcDriveInfo = () => {
-            return { multisig: generateAccount(), owner: 'bcdrive.owner' ? owner: generateAccount().publicKey, replicatorCount: 2 };
+            return { multisig: generateAccount(), owner: generateAccount().publicKey, replicatorCount: 2 };
         };
 
         const generateBcDriveInfos = (count) => {
@@ -252,7 +251,7 @@ describe('bcdrive db', () => {
         };
 
         describe('returns empty array for unknown key', () => {
-            return assertBcDrivesByOwnerPublicKey(generateAccount().publicKey);
+            return assertBcDrivesByOwnerPublicKey(generateAccount().publicKey, []);
         });
     });
 

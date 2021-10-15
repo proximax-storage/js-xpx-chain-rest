@@ -24,12 +24,13 @@ const createBcDriveEntry = (id, multisig, owner, replicatorCount) => ({
 
 const createBcDriveEntries = (bcDriveInfos) => {
     let i = 0;
-    return bcDriveInfos.map(bcDriveInfo => createDriveEntry(++i, bcDriveInfo.multisig, bcDriveInfo.owner, bcDriveInfo.replicatorCount));
+    return bcDriveInfos.map(bcDriveInfo => createBcDriveEntry(++i, bcDriveInfo.multisig, bcDriveInfo.owner, bcDriveInfo.replicatorCount));
 };
 
 const createReplicatorEntry = (id, key, blsKey, drives) => ({
     _id: dbTestUtils.db.createObjectId(id),
     replicator: {
+        id: id ? new Binary(id) : null,
         key: key ? new Binary(key) : null,
         blsKey: blsKey ? new Binary(blsKey) : null,
         drives: drives && drives.length ? 
@@ -39,7 +40,7 @@ const createReplicatorEntry = (id, key, blsKey, drives) => ({
 
 const createReplicatorEntries = (replicatorInfos) => {
     let i = 0;
-    return replicatorInfos.map(replicatorInfo => createReplicatorEntry(++i, replicatorInfo.key, replicatorInfo.blsKey, replicatorInfo.drives));
+    return replicatorInfos.map(replicatorInfo => createReplicatorEntry(++i, replicatorInfo.id, replicatorInfo.key, replicatorInfo.blsKey, replicatorInfo.drives));
 };
 
 const createDownloadEntry = (id, consumer, listOfPublicKeys) => ({
