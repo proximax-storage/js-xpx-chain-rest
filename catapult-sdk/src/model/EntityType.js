@@ -209,6 +209,9 @@ const EntityType = {
 
 	/** Drive closure transaction */
 	driveClosure: 0x4E62,
+
+	/** Stream start transaction */
+	streamStart: 0x4167,
 };
 
 module.exports = EntityType;
