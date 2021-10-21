@@ -431,8 +431,8 @@ const storagePlugin = {
                 transaction.driveKey = parser.buffer(constants.sizes.signer);
                 transaction.verificationTrigger = parser.buffer(constants.sizes.hash256);
 				transaction.proversCount = parser.uint16();
-				transaction.provers = [];
 				transaction.verificationOpinionsCount = parser.uint16();
+				transaction.provers = [];
 				transaction.verificationOpinions = [];
 
 				let count = transaction.proversCount;
@@ -447,11 +447,12 @@ const storagePlugin = {
 					verificationOpinion.blsSignature = parser.buffer(constants.sizes.blsSignature);
 					verificationOpinion.opinions = [];
 
-					let count = transaction.proversCount-1;
+					let count = transaction.proversCount;
 					while (count-- > 0) {
 						let opinion = {};
 						opinion.prover = parser.buffer(constants.sizes.signer);
 						opinion.result = parser.uint8();
+						verificationOpinion.opinions.push(opinion);
 					}
 
 					transaction.verificationOpinions.push(verificationOpinion);
@@ -471,7 +472,7 @@ const storagePlugin = {
 				for (let i = 0; i < transaction.verificationOpinionsCount; ++i) {
 					serializer.writeBuffer(transaction.verificationOpinions[i].verifier);
 					serializer.writeBuffer(transaction.verificationOpinions[i].blsSignature);
-					for (let j = 0; j < transaction.proversCount-1; ++j) {
+					for (let j = 0; j < transaction.proversCount; ++j) {
 						serializer.writeBuffer(transaction.verificationOpinions[i].opinions[j].prover);
 						serializer.writeUint8(transaction.verificationOpinions[i].opinions[j].result);
 					}
