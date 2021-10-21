@@ -20,7 +20,7 @@ const streamingPlugin = {
         builder.addTransactionSupport(EntityType.streamStart, {
             driveKey:				{ type: ModelType.binary, schemaName: 'streamStart.driveKey' },
             expectedUploadSize:		{ type: ModelType.uint64, schemaName: 'streamStart.expectedUploadSize' },
-            folder:                 { type: ModelType.binary, schemaName: 'streamStart.folder' },
+            folder:                 { type: ModelType.string, schemaName: 'streamStart.folder' },
             feedbackFeeAmount:		{ type: ModelType.uint64, schemaName: 'streamStart.feedbackFeeAmount' },
         });
     },

@@ -72,7 +72,7 @@ describe('streaming plugin', () => {
             const driveKey = createByteArray(0x01);
             const expectedUploadSize = Buffer.of(0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
             const feedbackFeeAmount = Buffer.of(0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-            const folder = Buffer.of(0x41, 0x42, 0x43, 0x44, 0x44);
+            const folder = Buffer.from("abcde");
             const folderSize = Buffer.of(0x05, 0x00)
 
 
