@@ -87,9 +87,7 @@ describe('streaming plugin', () => {
                 object: {
                     driveKey,
                     expectedUploadSize: [0x03, 0x0],
-                    folder: {
-                        payload: folder,
-                    },
+                    folder: folder,
                     feedbackFeeAmount: [0x04, 0x0],
                 }
             }));

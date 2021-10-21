@@ -343,6 +343,7 @@ const toStringInternal = code => {
 		case 0x80620023: return 'Failure_Storage_Verification_Wrong_Namber_Of_Provers'
 		case 0x80620024: return 'Failure_Storage_Verification_Some_Provers_Are_Illegal'
 		case 0x80620025: return 'Failure_Storage_Verification_Not_In_Pending'
+		case 0x80670001: return 'Failure_Streaming_Folder_Too_Large'
 		default: return undefined;
 	}
 };
