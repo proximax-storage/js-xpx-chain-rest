@@ -264,61 +264,19 @@ describe('bcdrive db', () => {
     });
 
     describe('file downloads', () => {
-        const generateDownloadInfo = (consumer) => { return {
-            id: id ? id : generateHash(),
+        const generateDownloadChannelInfo = (downloadChannelId, consumer) => { return {
+            id: downloadChannelId ? downloadChannelId : generateHash(),
             consumer: consumer ? consumer : generateAccount().publicKey,
-            downloadSize: 1,
-            downloadApprovalCount: 3,
-            listOfPublicKeys: [generateAccount().publicKey, generateAccount().publicKey]
+            downloadSize: 10,
+            downloadApprovalCount: 5,
+            listOfPublicKeys: [generateAccount().publicKey, generateAccount().publicKey, generateAccount().publicKey]
         }};
 
-        const assertDownloadsByDownloadChannelId = (downloadChannelId, additionalDownloadChannelId) => {
-            // Arrange:
-            const downloadInfos = [];
-            for (let i = 0; i < 5; ++i)
-                downloadInfos.push({id: generateHash(), consumer: generateAccount().publicKey});
-            const expectedEntries = [];
-            additionalDownloadChannelId.forEach(downloadChannelId => {
-                const downloadInfo = generateDownloadInfo(downloadChannelId);
-                downloadInfos.push(downloadInfo);
-                expectedEntries.push(test.db.createDownloadEntry(
-                    downloadInfos.length,
-                    downloadInfo.id,
-                    downloadInfo.consumer,
-                    downloadInfo.downloadSize,
-                    downloadInfo.downloadApprovalCount,
-                    downloadInfo.listOfPublicKeys
-                ));
-            });
-            expectedEntries.forEach(entry => {
-                delete entry._id;
-            });
-            const entries = test.db.createDownloadEntries(downloadInfos);
-
-            // Assert:
-            return test.db.runDbTest(
-                entries,
-                'downloadChannels',
-                db => db.getDownloadsByDownloadChannelId(downloadChannelId),
-                entities =>
-                    expect(entities).to.deep.equal(expectedEntries)
-            );
-        };
-
-        it('returns empty array for unknown id', () => {
-            return assertDownloadsByDownloadChannelId(generateHash(), []);
-        });
-
-        it('returns matching entry', () => {
-            const id = generateHash();
-            return assertDownloadsByDownloadChannelId(id, [id]);
-        });
-
         const addGetDownloadsByKeyTests = traits => {
-            const generateDownloadInfos = (count, consumer) => {
+            const generateDownloadChannelInfos = (count, key) => {
                 const downloadInfos = [];
                 for (let i = 0; i < count; ++i) {
-                    downloadInfos.push(traits.generateDownloadInfo(consumer ? consumer : traits.generateKey()));
+                    downloadInfos.push(traits.generateDownloadChannelInfo(key ? key : traits.generateKey()));
                 }
 
                 return downloadInfos;
@@ -326,13 +284,13 @@ describe('bcdrive db', () => {
 
             it('returns empty array for unknown key', () => {
                 // Arrange:
-                const entries = test.db.createDownloadEntries(generateDownloadInfos(5));
+                const entries = test.db.createDownloadEntries(generateDownloadChannelInfos(5));
 
                 // Assert:
                 return test.db.runDbTest(
                     entries,
                     'downloadChannels',
-                    db => traits.getDownloadsByConsumerPublicKey(db, traits.generateKey()),
+                    db => traits.getDownloads(db, traits.generateKey()),
                     entities => expect(entities.length).to.equal(0)
                 );
             });
@@ -340,17 +298,17 @@ describe('bcdrive db', () => {
             it('returns download info from matching entries', () => {
                 // Arrange:
                 const key = traits.generateKey();
-                const downloadInfos = generateDownloadInfos(5);
-                const additionalDownloadInfo = traits.generateDownloadInfo(key);
-                downloadInfos.push(additionalDownloadInfo);
-                const entries = test.db.createDownloadEntries(downloadInfos);
+                const downloadChannelInfos = generateDownloadChannelInfos(5);
+                const additionalDownloadChannelInfo = traits.generateDownloadChannelInfo(key);
+                downloadChannelInfos.push(additionalDownloadChannelInfo);
+                const entries = test.db.createDownloadEntries(downloadChannelInfos);
                 const expectedEntry = test.db.createDownloadEntry(
-                    downloadInfos.length,
-                    additionalDownloadInfo.id,
-                    additionalDownloadInfo.consumer,
-                    additionalDownloadInfo.downloadSize,
-                    additionalDownloadInfo.downloadApprovalCount,
-                    additionalDownloadInfo.listOfPublicKeys
+                    downloadChannelInfos.length,
+                    additionalDownloadChannelInfo.id,
+                    additionalDownloadChannelInfo.consumer,
+                    additionalDownloadChannelInfo.downloadSize,
+                    additionalDownloadChannelInfo.downloadApprovalCount,
+                    additionalDownloadChannelInfo.listOfPublicKeys
                 );
                 delete expectedEntry._id;
 
@@ -368,12 +326,12 @@ describe('bcdrive db', () => {
                 const assertDownloadsWithDocumentId = (sortOrder) => {
                     // Arrange:
                     const key = traits.generateKey();
-                    const downloadInfos = generateDownloadInfos(100, key);
-                    const entries = test.db.createDownloadEntries(downloadInfos);
+                    const downloadChannelInfos = generateDownloadChannelInfos(100, key);
+                    const entries = test.db.createDownloadEntries(downloadChannelInfos);
                     const id = entries[9]._id.toString();
                     let expectedEntries = sortOrder > 0 ?
-                        test.db.createDownloadEntries(downloadInfos.slice(10)) :
-                        test.db.createDownloadEntries(downloadInfos.slice(0, 9).reverse());
+                        test.db.createDownloadEntries(downloadChannelInfos.slice(10)) :
+                        test.db.createDownloadEntries(downloadChannelInfos.slice(0, 9).reverse());
                     expectedEntries.map(entry => delete entry._id);
 
                     // Assert:
@@ -399,8 +357,8 @@ describe('bcdrive db', () => {
                 const assertDownloadsWithPaging = (sortOrder, pageSize, expectedSize) => {
                     // Arrange:
                     const key = traits.generateKey();
-                    const downloadInfos = generateDownloadInfos(200, key);
-                    const entries = test.db.createDownloadEntries(downloadInfos);
+                    const downloadChannelInfos = generateDownloadChannelInfos(200, key);
+                    const entries = test.db.createDownloadEntries(downloadChannelInfos);
 
                     // Assert:
                     return test.db.runDbTest(
@@ -443,9 +401,17 @@ describe('bcdrive db', () => {
             });
         };
 
+        describe('by download channel id', () => addGetDownloadsByKeyTests({
+            generateKey: () => generateHash(),
+            generateDownloadChannelInfo: (downloadChannelId) => generateDownloadChannelInfo(downloadChannelId, generateAccount().publicKey),
+            getDownloads: (db, downloadChannelId, pagingId, pageSize, sortOrder) => {
+                return db.getDownloadsByDownloadChannelId(downloadChannelId, pagingId, pageSize, { sortOrder });
+            }
+        }));
+
         describe('by consumer public key', () => addGetDownloadsByKeyTests({
             generateKey: () => generateAccount().publicKey,
-            generateDownloadInfo: (consumer) => generateDownloadInfo(consumer),
+            generateDownloadChannelInfo: (consumer) => generateDownloadChannelInfo(generateHash(), consumer),
             getDownloads: (db, consumer, pagingId, pageSize, sortOrder) => {
                 return db.getDownloadsByConsumerPublicKey(consumer, pagingId, pageSize, { sortOrder });
             }
@@ -493,7 +459,7 @@ describe('bcdrive db', () => {
             return test.db.runDbTest(
                 dbTransactions,
                 "replicators",
-                db => db.replicators({}, paginationOptions),
+                db => db.replicators(paginationOptions),
                 page => {
                     const expected_keys = ['replicator', 'id'];
                     expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
@@ -552,7 +518,7 @@ describe('bcdrive db', () => {
                 return test.db.runDbTest(
                     dbTransactions(),
                     "replicators",
-                    db => db.replicators({}, options),
+                    db => db.replicators(options),
                     transactionsPage => {
                         expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));
                         expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
@@ -573,7 +539,7 @@ describe('bcdrive db', () => {
                 return test.db.runDbTest(
                     dbTransactions(),
                     "replicators",
-                    db => db.replicators({}, options),
+                    db => db.replicators(options),
                     transactionsPage => {
                         expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(30));
                         expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
@@ -596,7 +562,7 @@ describe('bcdrive db', () => {
                 return test.db.runDbTest(
                     dbTransactions(),
                     "replicators",
-                    db => db.replicators({}, options),
+                    db => db.replicators(options),
                     () => {
                         expect(queryPagedDocumentsSpy.calledOnce).to.equal(true);
                         expect(Object.keys(queryPagedDocumentsSpy.firstCall.args[2]["$sort"])[0]).to.equal('_id');

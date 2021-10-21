@@ -27,12 +27,12 @@ const createBcDriveEntries = (bcDriveInfos) => {
     return bcDriveInfos.map(bcDriveInfo => createBcDriveEntry(++i, bcDriveInfo.multisig, bcDriveInfo.owner, bcDriveInfo.replicatorCount));
 };
 
-const createReplicatorEntry = (id, key, blsKey, drives) => ({
+const createReplicatorEntry = (id, replicatorId, key, blsKey, drives) => ({
     _id: dbTestUtils.db.createObjectId(id),
     replicator: {
-        id: id ? new Binary(id) : null,
-        key: key ? new Binary(key) : null,
-        blsKey: blsKey ? new Binary(blsKey) : null,
+        id: replicatorId ? new Binary(replicatorId) : null,
+        key: new Binary(key),
+        blsKey: new Binary(blsKey),
         drives: drives && drives.length ? 
             drives.map(lastApprovedDataModificationId => { return { drive: new Binary(lastApprovedDataModificationId) } }) : null,
     }
@@ -40,23 +40,24 @@ const createReplicatorEntry = (id, key, blsKey, drives) => ({
 
 const createReplicatorEntries = (replicatorInfos) => {
     let i = 0;
-    return replicatorInfos.map(replicatorInfo => createReplicatorEntry(++i, replicatorInfo.id, replicatorInfo.key, replicatorInfo.blsKey, replicatorInfo.drives));
+    return replicatorInfos.map(replicatorInfo => createReplicatorEntry(++i, replicatorInfo.replicatorId, replicatorInfo.key, replicatorInfo.blsKey, replicatorInfo.drives));
 };
 
-const createDownloadEntry = (id, consumer, listOfPublicKeys) => ({
+const createDownloadEntry = (id, downloadChannelId, consumer, downloadSize, downloadApprovalCount, listOfPublicKeys) => ({
     _id: dbTestUtils.db.createObjectId(id),
     downloadChannelInfo: {
-        id:  new Binary(id),
+        id: downloadChannelId ? new Binary(downloadChannelId) : null,
         consumer: new Binary(consumer),
-        downloadSize: Long.fromNumber(0),
-        downloadApprovalCount: Long.fromNumber(0),
-        listOfPublicKeys: listOfPublicKeys.length ? listOfPublicKeys.push(new Binary(publicKey)) : null
+        downloadSize: downloadSize ? convertToLong(downloadSize) : null,
+        downloadApprovalCount: downloadApprovalCount ? convertToLong(downloadApprovalCount) : null,
+        listOfPublicKeys: listOfPublicKeys && listOfPublicKeys.length ? 
+            listOfPublicKeys.map(publicKey => { return new Binary(publicKey) }) : null
     }
 });
 
 const createDownloadEntries = (downloadInfos) => {
     let i = 0;
-    return downloadInfos.map(downloadInfo => createDownloadEntry(++i, downloadInfo.consumer, downloadInfo.downloadSize, downloadInfo.downloadApprovalCount, downloadInfo.listOfPublicKeys));
+    return downloadInfos.map(downloadInfo => createDownloadEntry(++i, downloadInfo.id, downloadInfo.consumer, downloadInfo.downloadSize, downloadInfo.downloadApprovalCount, downloadInfo.listOfPublicKeys));
 };
 
 const createBlsKeyEntry = (id, blsKey, key) => ({
