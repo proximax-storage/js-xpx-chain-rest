@@ -589,4 +589,70 @@ describe('bcdrive db', () => {
             });
         });
     });
+
+    describe('replicator by public key', () => {
+
+        const generateReplicatorInfo = (additionalReplicator) => {
+            return {
+                key: additionalReplicator ? additionalReplicator.key : generateAccount().publicKey,
+                version: 1,
+                capacity: 250,
+                blsKey: generateBlsPublicKey(),
+                drives: [
+                    {
+                        drive: generateAccount().publicKey,
+                        lastApprovedDataModificationId: generateHash(),
+                        dataModificationIdIsValid: 1,
+                        initialDownloadWork: 0
+                    },
+                    {
+                        drive: generateAccount().publicKey,
+                        lastApprovedDataModificationId: generateHash(),
+                        dataModificationIdIsValid: 1,
+                        initialDownloadWork: 0
+                    }
+                ]
+            }
+        };
+
+        const generateReplicatorInfos = (count) => {
+            const replicatorInfos = [];
+            for (let i = 0; i < count; ++i) {
+                replicatorInfos.push(generateReplicatorInfo());
+            }
+
+            return replicatorInfos;
+        };
+
+        const assertReplicatorByPublicKey = (publicKey, additionalReplicatorInfos) => {
+            // Arrange:
+            const replicatorInfos = generateReplicatorInfos(5);
+            const expectedEntries = [];
+            additionalReplicatorInfos.forEach(replicatorInfo => {
+                replicatorInfos.push(replicatorInfo);
+                expectedEntries.push(test.db.createReplicatorEntry(replicatorInfos.length, replicatorInfo.key, replicatorInfo.version, replicatorInfo.capacity, replicatorInfo.blsKey, replicatorInfo.drives));
+            });
+            expectedEntries.forEach(entry => { delete entry._id; });
+            const entries = test.db.createReplicatorEntries(replicatorInfos);
+
+            // Assert:
+            return test.db.runDbTest(
+                entries,
+                'replicators',
+                db => db.getReplicatorByPublicKey(publicKey),
+                entities => expect(entities).to.deep.equal(expectedEntries)
+            );
+        };
+
+        it('returns empty array for unknown key', () => {
+            return assertReplicatorByPublicKey(generateAccount().publicKey, []);
+        });
+
+        it('returns matching entry', () => {
+            const key = generateAccount().publicKey;
+            return assertReplicatorByPublicKey(key, [
+                generateReplicatorInfo({ key: key })
+            ]);
+        });
+    });
 });
