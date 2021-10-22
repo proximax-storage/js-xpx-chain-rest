@@ -100,7 +100,7 @@ class StorageDb {
 		const sortConditions = {$sort: {[options.sortField]: options.sortDirection}};
 		const conditions = buildConditions();
 
-        return this.catapultDb.queryPagedDocuments_2(conditions, [], sortConditions, "bcdrives", options);
+        return this.catapultDb.queryPagedDocuments_2(conditions, [], sortConditions, "replicators", options);
     }
 
     /**

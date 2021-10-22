@@ -27,20 +27,26 @@ const createBcDriveEntries = (bcDriveInfos) => {
     return bcDriveInfos.map(bcDriveInfo => createBcDriveEntry(++i, bcDriveInfo.multisig, bcDriveInfo.owner, bcDriveInfo.replicatorCount));
 };
 
-const createReplicatorEntry = (id, replicatorId, key, blsKey, drives) => ({
+const createReplicatorEntry = (id, key, version, capacity, blsKey, drives) => ({
     _id: dbTestUtils.db.createObjectId(id),
     replicator: {
-        id: replicatorId ? new Binary(replicatorId) : null,
         key: new Binary(key),
+        version: version ? convertToLong(version) : null,
+        capacity: capacity ? convertToLong(capacity) : null,
         blsKey: new Binary(blsKey),
         drives: drives && drives.length ? 
-            drives.map(lastApprovedDataModificationId => { return { drive: new Binary(lastApprovedDataModificationId) } }) : null,
+            drives.map(drive => { return { 
+                drive: new Binary(drive.drive),
+                lastApprovedDataModificationId: new Binary(drive.lastApprovedDataModificationId),
+                dataModificationIdIsValid: drive.dataModificationIdIsValid ? drive.dataModificationIdIsValid : 0,
+                initialDownloadWork: convertToLong(drive.initialDownloadWork)
+            }}) : null,
     }
 });
 
 const createReplicatorEntries = (replicatorInfos) => {
     let i = 0;
-    return replicatorInfos.map(replicatorInfo => createReplicatorEntry(++i, replicatorInfo.replicatorId, replicatorInfo.key, replicatorInfo.blsKey, replicatorInfo.drives));
+    return replicatorInfos.map(replicatorInfo => createReplicatorEntry(++i, replicatorInfo.key, replicatorInfo.version, replicatorInfo.capacity, replicatorInfo.blsKey, replicatorInfo.drives));
 };
 
 const createDownloadEntry = (id, downloadChannelId, consumer, downloadSize, downloadApprovalCount, listOfPublicKeys) => ({

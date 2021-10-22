@@ -14,6 +14,7 @@ const sinon = require('sinon');
 describe('bcdrive db', () => {
     const generateAccount = test.random.account;
     const generateHash = test.random.hash;
+    const generateBlsPublicKey = test.random.blsPublicKey;
 
     describe('bcdrive by account id', () => {
         const addBcDriveByAccountIdTests = traits => {
@@ -419,7 +420,8 @@ describe('bcdrive db', () => {
     });
 
     describe('replicators', () => {
-        const replicator1 = test.random.publicKey();
+        const replicator = test.random.publicKey();
+        const blsKey = generateBlsPublicKey();
         const drive1 = generateHash();
         const drive2 = generateHash();
 
@@ -430,8 +432,23 @@ describe('bcdrive db', () => {
             sortDirection: -1
         };
 
-        const createReplicator = (objectId, replicator) => (
-            test.db.createReplicatorEntry(objectId, replicator, [drive1, drive2])
+        const driveInfo = [
+            {
+                drive: drive1,
+                lastApprovedDataModificationId: generateHash(),
+                dataModificationIdIsValid: 1,
+                initialDownloadWork: 20,
+            },
+            {
+                drive: drive2,
+                lastApprovedDataModificationId: generateHash(),
+                dataModificationIdIsValid: 1,
+                initialDownloadWork: 20,
+            }
+        ];
+
+        const createReplicator = (objectId, version, capacity) => (
+            test.db.createReplicatorEntry(objectId, replicator, version, capacity, blsKey, driveInfo)
         );
 
         const runTestAndVerifyIds = (dbTransactions, options, expectedIds) => {
@@ -452,7 +469,7 @@ describe('bcdrive db', () => {
         it('returns expected structure', () => {
             // Arrange:
             const dbTransactions = [
-                createReplicator(10, replicator1)
+                createReplicator(10, 1, 50) // id, version, capacity
             ];
 
             // Act + Assert:
@@ -470,9 +487,9 @@ describe('bcdrive db', () => {
         describe('respects offset', () => {
             // Arrange:
             const dbTransactions = () => [
-                createReplicator(10, replicator1),
-                createReplicator(20, replicator1),
-                createReplicator(30, replicator1)
+                createReplicator(10, 1, 100), // id, version, capacity
+                createReplicator(20, 1, 60),
+                createReplicator(30, 1, 120)
             ];
             const options = {
                 pageSize: 10,
@@ -486,14 +503,14 @@ describe('bcdrive db', () => {
                 options.sortDirection = 1;
 
                 // Act + Assert:
-                return runTestAndVerifyIds(dbTransactions(), {}, options, [30]);
+                return runTestAndVerifyIds(dbTransactions(), options, [30]);
             });
 
             it('lt', () => {
                 options.sortDirection = -1;
 
                 // Act + Assert:
-                return runTestAndVerifyIds(dbTransactions(), {}, options, [10]);
+                return runTestAndVerifyIds(dbTransactions(), options, [10]);
             });
         });
 
@@ -501,9 +518,9 @@ describe('bcdrive db', () => {
             const { createObjectId } = dbTestUtils.db;
             // Arrange:
             const dbTransactions = () => [
-                createReplicator(10, replicator1),
-                createReplicator(20, replicator1),
-                createReplicator(30, replicator1)
+                createReplicator(10, 1, 500), // id, version, capacity
+                createReplicator(20, 1, 500),
+                createReplicator(30, 1, 500)
             ];
 
             it('direction ascending', () => {
