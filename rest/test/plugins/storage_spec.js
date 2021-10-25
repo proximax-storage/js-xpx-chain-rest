@@ -24,13 +24,12 @@
  
              // Assert:
              test.assert.assertRoutes(routes, [
-                 '/drive/:accountId',
-                 '/drives',
-                 '/account/:accountId/drive',
-                 '/replicator/:key',
-                 '/replicators',
-                 '/account/:accountId/replicator',
-                 '/downloads/:downloadChannelId'
+                '/drives',
+                '/drive/:accountId',
+                '/replicators',
+                '/replicator/:key',
+                '/downloads/:downloadChannelId',
+                '/account/:owner/drive',
              ]);
          });
      });

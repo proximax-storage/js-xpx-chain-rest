@@ -48,7 +48,36 @@
 		}));
 	});
 
-    describe('/downloads/:downloadChannelId', () => {
+	describe('/replicator/:key', () => {
+		const addGetReplicatorByPublicKey = traits => {
+			// Arrange:
+			const keyGroups = [];
+			const db = test.setup.createCapturingDb('getReplicatorByPublicKey', keyGroups, [{value: 'this is nonsense'}]);
+
+			// Act:
+			const registerRoutes = storageRoutes.register;
+			return test.route.executeSingle(
+				registerRoutes,
+				'/replicator/:key',
+				'get',
+				{key: traits.key},
+				db,
+				null,
+				response => {
+					// Assert:
+					expect(keyGroups).to.deep.equal(traits.expected);
+					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'replicatorEntry'});
+				}
+			);
+		};
+
+		it('with public key', () => addGetReplicatorByPublicKey({
+			key: publicKeys.valid[0],
+			expected: [convert.hexToUint8(publicKeys.valid[0])]
+		}));
+	});
+
+	describe('/downloads/:downloadChannelId', () => {
 		const addGetDownloadsByDownloadChannelId = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -77,99 +106,32 @@
 		}));
 	});
 
-	describe('/replicator/:key', () => {
-		const addGetReplicatorByPublicKey = traits => {
+	describe('/account/:owner/drive', () => {
+		const addGetBcDriveByOwnerPublicKey = traits => {
 			// Arrange:
 			const keyGroups = [];
-			const db = test.setup.createCapturingDb('getReplicatorByPublicKey', keyGroups, [{value: 'this is nonsense'}]);
-
+			const db = test.setup.createCapturingDb('getBcDriveByOwnerPublicKey', keyGroups, [{value: 'this is nonsense'}]);
+			
 			// Act:
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/replicator/:key',
+				'/account/:owner/drive',
 				'get',
-				{blsKey: traits.blsKey},
+				{owner: traits.owner},
 				db,
 				null,
 				response => {
 					// Assert:
 					expect(keyGroups).to.deep.equal(traits.expected);
-					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'replicatorEntry'});
+					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'bcDriveEntry'});
 				}
 			);
 		};
 
-		it('with public key', () => addGetReplicatorByPublicKey({
-			accountId: publicKeys.valid[0],
-			expected: ['publicKey', convert.hexToUint8(publicKeys.valid[0])]
+		it('with owner public key', () => addGetBcDriveByOwnerPublicKey({
+			owner: publicKeys.valid[0],
+			expected: [convert.hexToUint8(publicKeys.valid[0])]
 		}));
-	});
-
-	const factory = {
-		createDownloadsPagingRouteInfo: (routeName) => ({
-			routes: storageRoutes,
-			routeName,
-			createDb: (keyGroups, documents) => ({
-				getDownloadsByConsumerPublicKey: (publicKey, pageId, pageSize, options) => {
-					keyGroups.push({
-						publicKey,
-						pageId,
-						pageSize,
-						options
-					});
-					return Promise.resolve(documents);
-				},
-				getDownloadsByDownloadChannelId: (downloadChannelId, pageId, pageSize, options) => {
-					keyGroups.push({
-						downloadChannelId,
-						pageId,
-						pageSize,
-						options
-					});
-					return Promise.resolve(documents);
-				}
-			}),
-			routeCaptureMethod: 'get'
-		})
-	};
-
-	const addGetTests = traits => {
-		const pagingTestsFactory = test.setup.createPagingTestsFactory(
-			factory.createDownloadsPagingRouteInfo(traits.routeName),
-			traits.valid.params,
-			traits.valid.expected,
-			'downloadChannelEntry'
-		);
-
-		pagingTestsFactory.addDefault();
-		if (traits.invalid)
-			pagingTestsFactory.addFailureTest(traits.invalid.name, traits.invalid.params, traits.invalid.error);
-	};
-
-	describe('/account/:accountId/drive', () => addGetTests({
-		routeName: '/account/:accountId/drive',
-		valid: {
-			params: { accountId: publicKeys.valid[0] },
-			expected: { owner: convert.hexToUint8(publicKeys.valid[0]), options: undefined }
-		},
-		invalid: {
-			name: 'accountId is invalid',
-			params: { ['accountId']: addresses.valid[0] },
-			error: 'Allowed only publicKey'
-		}
-    }));
-
-	describe('/account/:accountId/replicator', () => addGetTests({
-		routeName: '/account/:accountId/replicator',
-		valid: {
-			params: { accountId: publicKeys.valid[0] },
-			expected: { key: convert.hexToUint8(publicKeys.valid[0]), options: undefined }
-		},
-		invalid: {
-			name: 'accountId is invalid',
-			params: { ['accountId']: addresses.valid[0] },
-			error: 'Allowed only publicKey'
-		}
-    }));
+    });
  });
