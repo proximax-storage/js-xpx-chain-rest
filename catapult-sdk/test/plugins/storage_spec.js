@@ -23,7 +23,7 @@ describe('storage plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 14);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 17);
 			expect(modelSchema).to.contain.all.keys([
 				'prepareBcDrive',
 				'dataModification',
@@ -39,6 +39,9 @@ describe('storage plugin', () => {
 				'verificationPayment',
 				'downloadApproval',
 				'driveClosure',
+				'endDriveVerificationV2',
+				'endDriveVerification.verificationOpinions',
+				'endDriveVerification.verificationOpinions.results'
 			]);
 
 			expect(Object.keys(modelSchema.prepareBcDrive).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
@@ -135,6 +138,27 @@ describe('storage plugin', () => {
 			expect(modelSchema.driveClosure).to.contain.all.keys([
 				'driveKey',
 			]);
+
+			expect(Object.keys(modelSchema.endDriveVerificationV2).length).to.equal(Object.keys(modelSchema.transaction).length + 4);
+			expect(modelSchema.endDriveVerificationV2).to.contain.all.keys([
+				'driveKey',
+				'verificationTrigger',
+				'provers',
+				'verificationOpinions',
+			]);
+
+			expect(Object.keys(modelSchema['endDriveVerification.verificationOpinions']).length).to.equal(3);
+			expect(modelSchema['endDriveVerification.verificationOpinions']).to.contain.all.keys([
+				'verifier',
+				'blsSignature',
+				'results'
+			]);
+
+			expect(Object.keys(modelSchema['endDriveVerification.verificationOpinions.results']).length).to.equal(2);
+			expect(modelSchema['endDriveVerification.verificationOpinions.results']).to.contain.all.keys([
+				'prover',
+				'result'
+			]);
 		});
 	});
 
@@ -153,7 +177,7 @@ describe('storage plugin', () => {
 			const codecs = getCodecs();
 
 			// Assert: codec was registered
-			expect(Object.keys(codecs).length).to.equal(14);
+			expect(Object.keys(codecs).length).to.equal(15);
 			expect(codecs).to.contain.all.keys([
 				EntityType.prepareBcDrive.toString(),
 				EntityType.dataModification.toString(),
@@ -169,6 +193,7 @@ describe('storage plugin', () => {
 				EntityType.verificationPayment.toString(),
 				EntityType.downloadApproval.toString(),
 				EntityType.driveClosure.toString(),
+				EntityType.endDriveVerificationV2.toString(),
 			]);
 		});
 
@@ -490,6 +515,68 @@ describe('storage plugin', () => {
 				]),
 				object: {
 					driveKey,
+				}
+			}));
+		});
+
+		describe('supports end drive verification transaction', () => {
+			const codec = getCodecs()[EntityType.endDriveVerificationV2];
+			const driveKey = createByteArray(0x01);
+			const trigger = createByteArray(0x02);
+			const proversCount = Buffer.of(0x02, 0x0);
+			const verificationOpinionsCount = Buffer.of(0x02, 0x0);
+			const proverOne = createByteArray(0x11);
+			const proverTwo = createByteArray(0x20);
+			const blsSignatureOne = createByteArray(0x11, 96);
+			const blsSignatureTwo = createByteArray(0x21, 96);
+			const resultOne = Buffer.of(0x01);
+			const resultTwo = Buffer.of(0x01);
+
+			test.binary.test.addAll(codec, 32 + 32 + (2 + 32 * 2) + (2 + (32 + 96 + (32 + 1) * 2) * 2), () => ({
+				buffer: Buffer.concat([
+					driveKey,
+					trigger,
+					proversCount,
+					verificationOpinionsCount,
+					proverOne,
+					proverTwo,
+					proverOne,
+					blsSignatureOne,
+					proverOne,
+					resultOne,
+					proverTwo,
+					resultTwo,
+					proverTwo,
+					blsSignatureTwo,
+					proverOne,
+					resultOne,
+					proverTwo,
+					resultTwo,
+				]),
+				object: {
+					driveKey: driveKey,
+					verificationTrigger: trigger,
+					proversCount: 0x02,
+					verificationOpinionsCount: 0x02,
+					provers: [proverOne, proverTwo],
+					verificationOpinions: [
+						{
+							verifier: proverOne,
+							blsSignature: blsSignatureOne,
+							results: [
+								{prover: proverOne, result: 0x01},
+								{prover: proverTwo, result: 0x01}
+							]
+						},
+						{
+							verifier: proverTwo,
+							blsSignature: blsSignatureTwo,
+							results: [
+								{prover: proverOne, result: 0x01},
+								{prover: proverTwo, result: 0x01}
+							]
+						},
+					]
 				}
 			}));
 		});

@@ -110,10 +110,10 @@ const storagePlugin = {
         builder.addSchema('endDriveVerification.verificationOpinions', {
             verifier:       ModelType.binary,
             blsSignature:	ModelType.binary,
-            opinions:       ModelType.array
+			results:       ModelType.array
         });
 
-        builder.addSchema('endDriveVerification.verificationOpinions.opinions', {
+        builder.addSchema('endDriveVerification.verificationOpinions.results', {
             prover: ModelType.binary,
             result: ModelType.uint8,
         });
@@ -436,23 +436,23 @@ const storagePlugin = {
 				transaction.verificationOpinions = [];
 
 				let count = transaction.proversCount;
-				while (count-- > 0) {
+				while (count--) {
 					transaction.provers.push(parser.buffer(constants.sizes.signer));
 				}
 
 				count = transaction.verificationOpinionsCount;
-				while (count-- > 0) {
+				while (count--) {
 					let verificationOpinion = {}
 					verificationOpinion.verifier = parser.buffer(constants.sizes.signer);
 					verificationOpinion.blsSignature = parser.buffer(constants.sizes.blsSignature);
-					verificationOpinion.opinions = [];
+					verificationOpinion.results = [];
 
 					let count = transaction.proversCount;
-					while (count-- > 0) {
-						let opinion = {};
-						opinion.prover = parser.buffer(constants.sizes.signer);
-						opinion.result = parser.uint8();
-						verificationOpinion.opinions.push(opinion);
+					while (count--) {
+						let res = {};
+						res.prover = parser.buffer(constants.sizes.signer);
+						res.result = parser.uint8();
+						verificationOpinion.results.push(res);
 					}
 
 					transaction.verificationOpinions.push(verificationOpinion);
@@ -465,16 +465,19 @@ const storagePlugin = {
                 serializer.writeBuffer(transaction.driveKey);
                 serializer.writeBuffer(transaction.verificationTrigger);
 
-                for (let i = 0; i < transaction.proversCount; ++i) {
+				serializer.writeUint16(transaction.provers.length);
+				serializer.writeUint16(transaction.verificationOpinions.length);
+
+                for (let i = 0; i < transaction.provers.length; ++i) {
 					serializer.writeBuffer(transaction.provers[i]);
 				}
 
-				for (let i = 0; i < transaction.verificationOpinionsCount; ++i) {
+				for (let i = 0; i < transaction.verificationOpinions.length; ++i) {
 					serializer.writeBuffer(transaction.verificationOpinions[i].verifier);
 					serializer.writeBuffer(transaction.verificationOpinions[i].blsSignature);
-					for (let j = 0; j < transaction.proversCount; ++j) {
-						serializer.writeBuffer(transaction.verificationOpinions[i].opinions[j].prover);
-						serializer.writeUint8(transaction.verificationOpinions[i].opinions[j].result);
+					for (let j = 0; j < transaction.provers.length; ++j) {
+						serializer.writeBuffer(transaction.verificationOpinions[i].results[j].prover);
+						serializer.writeUint8(transaction.verificationOpinions[i].results[j].result);
 					}
 				}
             }
