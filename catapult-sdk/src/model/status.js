@@ -343,7 +343,11 @@ const toStringInternal = code => {
 		case 0x80620023: return 'Failure_Storage_Verification_Wrong_Namber_Of_Provers'
 		case 0x80620024: return 'Failure_Storage_Verification_Some_Provers_Are_Illegal'
 		case 0x80620025: return 'Failure_Storage_Verification_Not_In_Pending'
-		case 0x80670001: return 'Failure_Streaming_Folder_Too_Large'
+		case 0x80620026: return 'Failure_Storage_Stream_Already_Exists'
+		case 0x80620027: return 'Failure_Storage_Invalid_Stream_Id'
+		case 0x80620028: return 'Failure_Storage_Stream_Already_Finished'
+		case 0x80620029: return 'Failure_Storage_Expected_Upload_Size_Exceeded'
+		case 0x80670001: return 'Failure_Streaming_Folder_Name_Too_Large'
 		default: return undefined;
 	}
 };

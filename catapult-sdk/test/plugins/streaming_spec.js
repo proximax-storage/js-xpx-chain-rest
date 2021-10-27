@@ -24,17 +24,26 @@ describe('streaming plugin', () => {
             const modelSchema = builder.build();
 
             // Assert:
-            expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 1);
+            expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 2);
             expect(modelSchema).to.contain.all.keys([
                 'streamStart',
+                'streamFinish'
             ]);
 
             expect(Object.keys(modelSchema.streamStart).length).to.equal(Object.keys(modelSchema.transaction).length + 4);
             expect(modelSchema.streamStart).to.contain.all.keys([
                 'driveKey',
                 'expectedUploadSize',
-                'folder',
+                'folderName',
                 'feedbackFeeAmount',
+            ]);
+
+            expect(Object.keys(modelSchema.streamFinish).length).to.equal(Object.keys(modelSchema.transaction).length + 4);
+            expect(modelSchema.streamFinish).to.contain.all.keys([
+                'driveKey',
+                'streamId',
+                'actualUploadSize',
+                'streamStructureCdi',
             ]);
         });
     });
@@ -54,9 +63,10 @@ describe('streaming plugin', () => {
             const codecs = getCodecs();
 
             // Assert: codec was registered
-            expect(Object.keys(codecs).length).to.equal(1);
+            expect(Object.keys(codecs).length).to.equal(2);
             expect(codecs).to.contain.all.keys([
                 EntityType.streamStart.toString(),
+                EntityType.streamFinish.toString(),
             ]);
         });
 
@@ -72,23 +82,73 @@ describe('streaming plugin', () => {
             const driveKey = createByteArray(0x01);
             const expectedUploadSize = Buffer.of(0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
             const feedbackFeeAmount = Buffer.of(0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-            const folder = Buffer.from("abcde");
-            const folderSize = Buffer.of(0x05, 0x00)
+            const folderName = Buffer.from("abcde");
+            const folderNameSize = Buffer.of(0x05, 0x00)
 
 
             test.binary.test.addAll(codec, 32 + 8 + 2 + 8 + 5, () => ({
                 buffer: Buffer.concat([
                     driveKey,
                     expectedUploadSize,
-                    folderSize,
+                    folderNameSize,
                     feedbackFeeAmount,
-                    folder
+                    folderName
                 ]),
                 object: {
                     driveKey,
                     expectedUploadSize: [0x03, 0x0],
-                    folder: folder,
+                    folderName: folderName,
                     feedbackFeeAmount: [0x04, 0x0],
+                }
+            }));
+        });
+
+        describe('supports stream start transaction with empty folder', () => {
+            const codec = getCodecs()[EntityType.streamStart];
+            const driveKey = createByteArray(0x01);
+            const expectedUploadSize = Buffer.of(0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+            const feedbackFeeAmount = Buffer.of(0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+            const folderName = Buffer.from("");
+            const folderNameSize = Buffer.of(0x00, 0x00)
+
+
+            test.binary.test.addAll(codec, 32 + 8 + 2 + 8, () => ({
+                buffer: Buffer.concat([
+                    driveKey,
+                    expectedUploadSize,
+                    folderNameSize,
+                    feedbackFeeAmount,
+                    folderName
+                ]),
+                object: {
+                    driveKey,
+                    expectedUploadSize: [0x03, 0x0],
+                    folderName: folderName,
+                    feedbackFeeAmount: [0x04, 0x0],
+                }
+            }));
+        });
+
+        describe('supports stream finish transaction', () => {
+            const codec = getCodecs()[EntityType.streamFinish];
+            const driveKey = createByteArray(0x01);
+            const streamId = createByteArray(0x02);
+            const actualUploadSize = Buffer.of(0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+            const streamStructureCdi = createByteArray(0x03);
+
+
+            test.binary.test.addAll(codec, 32 + 32 + 8 + 32, () => ({
+                buffer: Buffer.concat([
+                    driveKey,
+                    streamId,
+                    actualUploadSize,
+                    streamStructureCdi,
+                ]),
+                object: {
+                    driveKey,
+                    streamId,
+                    actualUploadSize: [0x03, 0x0],
+                    streamStructureCdi,
                 }
             }));
         });

@@ -212,6 +212,9 @@ const EntityType = {
 
 	/** Stream start transaction */
 	streamStart: 0x4167,
+
+	/** Stream finish transaction */
+	streamFinish: 0x4267,
 };
 
 module.exports = EntityType;

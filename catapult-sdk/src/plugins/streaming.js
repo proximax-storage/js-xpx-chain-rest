@@ -20,8 +20,15 @@ const streamingPlugin = {
         builder.addTransactionSupport(EntityType.streamStart, {
             driveKey:				{ type: ModelType.binary, schemaName: 'streamStart.driveKey' },
             expectedUploadSize:		{ type: ModelType.uint64, schemaName: 'streamStart.expectedUploadSize' },
-            folder:                 { type: ModelType.string, schemaName: 'streamStart.folder' },
+            folderName:             { type: ModelType.string, schemaName: 'streamStart.folderName' },
             feedbackFeeAmount:		{ type: ModelType.uint64, schemaName: 'streamStart.feedbackFeeAmount' },
+        });
+
+        builder.addTransactionSupport(EntityType.streamFinish, {
+            driveKey:				{ type: ModelType.binary, schemaName: 'streamFinish.driveKey' },
+            streamId:               { type: ModelType.binary, schemaName: 'streamFinish.streamId' },
+            actualUploadSize:		{ type: ModelType.uint64, schemaName: 'streamFinish.actualUploadSize' },
+            streamStructureCdi:	    { type: ModelType.binary, schemaName: 'streamFinish.streamStructureCdi' },
         });
     },
     registerCodecs: codecBuilder => {
@@ -30,11 +37,9 @@ const streamingPlugin = {
                 const transaction = {};
                 transaction.driveKey = parser.buffer(constants.sizes.signer);
                 transaction.expectedUploadSize = parser.uint64();
-                const folderSize = parser.uint16();
+                const folderNameSize = parser.uint16();
                 transaction.feedbackFeeAmount = parser.uint64();
-                if (0 < folderSize) {
-                    transaction.folder = parser.buffer(folderSize);
-                }
+                transaction.folderName = parser.buffer(folderNameSize);
 
                 return transaction;
             },
@@ -42,19 +47,29 @@ const streamingPlugin = {
             serialize: (transaction, serializer) => {
                 serializer.writeBuffer(transaction.driveKey);
                 serializer.writeUint64(transaction.expectedUploadSize);
-
-                if (transaction.folder) {
-                    const payloadSize = transaction.folder.length;
-                    serializer.writeUint16(payloadSize);
-                } else {
-                    serializer.writeUint16(0);
-                }
-
+                const payloadSize = transaction.folderName.length;
+                serializer.writeUint16(payloadSize);
                 serializer.writeUint64(transaction.feedbackFeeAmount);
+                serializer.writeBuffer(transaction.folderName);
+            }
+        });
 
-                if (transaction.folder) {
-                    serializer.writeBuffer(transaction.folder);
-                }
+        codecBuilder.addTransactionSupport(EntityType.streamFinish, {
+            deserialize: parser => {
+                const transaction = {};
+                transaction.driveKey = parser.buffer(constants.sizes.signer);
+                transaction.streamId = parser.buffer(constants.sizes.hash256)
+                transaction.actualUploadSize = parser.uint64();
+                transaction.streamStructureCdi = parser.buffer(constants.sizes.hash256)
+
+                return transaction;
+            },
+
+            serialize: (transaction, serializer) => {
+                serializer.writeBuffer(transaction.driveKey);
+                serializer.writeBuffer(transaction.streamId);
+                serializer.writeUint64(transaction.actualUploadSize);
+                serializer.writeBuffer(transaction.streamStructureCdi)
             }
         });
     }
