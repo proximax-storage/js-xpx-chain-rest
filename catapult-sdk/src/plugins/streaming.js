@@ -30,6 +30,12 @@ const streamingPlugin = {
             actualUploadSize:		{ type: ModelType.uint64, schemaName: 'streamFinish.actualUploadSize' },
             streamStructureCdi:	    { type: ModelType.binary, schemaName: 'streamFinish.streamStructureCdi' },
         });
+
+        builder.addTransactionSupport(EntityType.streamPayment, {
+            driveKey:				{ type: ModelType.binary, schemaName: 'streamFinish.driveKey' },
+            streamId:               { type: ModelType.binary, schemaName: 'streamFinish.streamId' },
+            additionalUploadSize:	{ type: ModelType.uint64, schemaName: 'streamFinish.additionalUploadSize' },
+        });
     },
     registerCodecs: codecBuilder => {
         codecBuilder.addTransactionSupport(EntityType.streamStart, {
@@ -70,6 +76,23 @@ const streamingPlugin = {
                 serializer.writeBuffer(transaction.streamId);
                 serializer.writeUint64(transaction.actualUploadSize);
                 serializer.writeBuffer(transaction.streamStructureCdi)
+            }
+        });
+
+        codecBuilder.addTransactionSupport(EntityType.streamPayment, {
+            deserialize: parser => {
+                const transaction = {};
+                transaction.driveKey = parser.buffer(constants.sizes.signer);
+                transaction.streamId = parser.buffer(constants.sizes.hash256)
+                transaction.additionalUploadSize = parser.uint64();
+
+                return transaction;
+            },
+
+            serialize: (transaction, serializer) => {
+                serializer.writeBuffer(transaction.driveKey);
+                serializer.writeBuffer(transaction.streamId);
+                serializer.writeUint64(transaction.additionalUploadSize);
             }
         });
     }

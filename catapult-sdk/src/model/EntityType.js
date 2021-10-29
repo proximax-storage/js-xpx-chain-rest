@@ -215,6 +215,9 @@ const EntityType = {
 
 	/** Stream finish transaction */
 	streamFinish: 0x4267,
+
+	/** Stream payment transaction */
+	streamPayment: 0x4367,
 };
 
 module.exports = EntityType;

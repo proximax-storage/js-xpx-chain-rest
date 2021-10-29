@@ -24,10 +24,11 @@ describe('streaming plugin', () => {
             const modelSchema = builder.build();
 
             // Assert:
-            expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 2);
+            expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 3);
             expect(modelSchema).to.contain.all.keys([
                 'streamStart',
-                'streamFinish'
+                'streamFinish',
+                'streamPayment',
             ]);
 
             expect(Object.keys(modelSchema.streamStart).length).to.equal(Object.keys(modelSchema.transaction).length + 4);
@@ -44,6 +45,13 @@ describe('streaming plugin', () => {
                 'streamId',
                 'actualUploadSize',
                 'streamStructureCdi',
+            ]);
+
+            expect(Object.keys(modelSchema.streamPayment).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
+            expect(modelSchema.streamPayment).to.contain.all.keys([
+                'driveKey',
+                'streamId',
+                'additionalUploadSize',
             ]);
         });
     });
@@ -149,6 +157,27 @@ describe('streaming plugin', () => {
                     streamId,
                     actualUploadSize: [0x03, 0x0],
                     streamStructureCdi,
+                }
+            }));
+        });
+
+        describe('supports stream payment transaction', () => {
+            const codec = getCodecs()[EntityType.streamPayment];
+            const driveKey = createByteArray(0x01);
+            const streamId = createByteArray(0x02);
+            const additionalUploadSize = Buffer.of(0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+
+
+            test.binary.test.addAll(codec, 32 + 32 + 8, () => ({
+                buffer: Buffer.concat([
+                    driveKey,
+                    streamId,
+                    additionalUploadSize,
+                ]),
+                object: {
+                    driveKey,
+                    streamId,
+                    additionalUploadSize: [0x03, 0x0],
                 }
             }));
         });
