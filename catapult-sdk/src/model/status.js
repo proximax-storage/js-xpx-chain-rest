@@ -347,6 +347,9 @@ const toStringInternal = code => {
 		case 0x80620027: return 'Failure_Storage_Invalid_Stream_Id'
 		case 0x80620028: return 'Failure_Storage_Stream_Already_Finished'
 		case 0x80620029: return 'Failure_Storage_Expected_Upload_Size_Exceeded'
+		case 0x8062002A: return 'Failure_Storage_Drive_Size_Excessive'
+		case 0x8062002B: return 'Failure_Storage_Upload_Size_Excessive'
+		case 0x8062002C: return 'Failure_Storage_Download_Size_Excessive'
 		case 0x80670001: return 'Failure_Streaming_Folder_Name_Too_Large'
 		default: return undefined;
 	}
