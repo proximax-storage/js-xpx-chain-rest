@@ -78,18 +78,60 @@
 	});
 
 	describe('/downloadsV2/:downloadChannelId', () => {
-		const addGetDownloadsByDownloadChannelId = traits => {
+		const factory = {
+			createDownloadChannelsPagingRouteInfo: (routeName) => ({
+				routes: storageRoutes,
+				routeName,
+				createDb: (keyGroups, documents) => ({
+					getDownloadsByDownloadChannelId: (downloadChannelId, pageId, pageSize, options) => {
+						keyGroups.push({
+							downloadChannelId,
+							pageId,
+							pageSize,
+							options
+						});
+						return Promise.resolve(documents);
+					}
+				}),
+				routeCaptureMethod: 'get'
+			})
+		};
+	
+		const addGetTests = traits => {
+			const pagingTestsFactory = test.setup.createPagingTestsFactory(
+				factory.createDownloadChannelsPagingRouteInfo(traits.routeName),
+				traits.valid.params,
+				traits.valid.expected,
+				'downloadChannelEntry'
+			);
+	
+			pagingTestsFactory.addDefault();
+			if (traits.invalid)
+				pagingTestsFactory.addFailureTest(traits.invalid.name, traits.invalid.params, traits.invalid.error);
+		};
+
+		it('with download channel id', () => addGetTests({
+			routeName: '/downloadsV2/:downloadChannelId',
+			valid: {
+				params: { downloadChannelId: hashes256.valid[0] },
+				expected: { downloadChannelId: convert.hexToUint8(hashes256.valid[0]), options: undefined}
+			}
+		}));
+	});
+
+	describe('/downloadsV2/:consumerKey', () => {
+		const addGetDownloadsByConsumerPublicKey = traits => {
 			// Arrange:
 			const keyGroups = [];
-			const db = test.setup.createCapturingDb('getDownloadsByDownloadChannelId', keyGroups, [{value: 'this is nonsense'}]);
+			const db = test.setup.createCapturingDb('getDownloadsByConsumerPublicKey', keyGroups, [{value: 'this is nonsense'}]);
 
 			// Act:
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/downloadsV2/:downloadChannelId',
+				'/downloadsV2/:consumerKey',
 				'get',
-				{downloadChannelId: traits.downloadChannelId},
+				{consumer: traits.consumer},
 				db,
 				null,
 				response => {
@@ -100,9 +142,9 @@
 			);
 		};
 
-		it('with download channel id', () => addGetDownloadsByDownloadChannelId({
-			downloadChannelId: hashes256.valid[0],
-			expected: [convert.hexToUint8(hashes256.valid[0])]
+		it('with consumer key', () => addGetDownloadsByConsumerPublicKey({
+			consumer: publicKeys.valid[0],
+			expected: [convert.hexToUint8(publicKeys.valid[0])]
 		}));
 	});
 

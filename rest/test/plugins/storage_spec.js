@@ -30,6 +30,7 @@
                 '/replicatorV2/:publicKey',
                 '/downloadsV2',
                 '/downloadsV2/:downloadChannelId',
+                '/downloadsV2/:consumerKey',
                 '/accountV2/:owner/drive',
                 '/accountV2/:blsKey/replicator',
              ]);

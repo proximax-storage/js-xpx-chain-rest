@@ -153,15 +153,12 @@ class StorageDb {
 	/**
 	 * Retrieves the file downloads by file recipient.
 	 * @param {array<object>} publicKey Public key of file recipient.
-	 * @param {string} pagingId Paging id.
-	 * @param {int} pageSize Page size.
 	 * @returns {Promise.<array>} File download info.
 	 */
-	getDownloadsByConsumerPublicKey(publicKey, pagingId, pageSize, options) {
+	getDownloadsByConsumerPublicKey(publicKey) {
 		const buffer = Buffer.from(publicKey);
 		const fieldName = "downloadChannelInfo.consumer";
-		const conditions = { $and: [ { [fieldName]: buffer } ] };
-		return this.catapultDb.queryPagedDocuments('downloadChannels', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);
+		return this.catapultDb.queryDocuments('downloadChannels', { [fieldName]: buffer });
 	}
 
 	/**

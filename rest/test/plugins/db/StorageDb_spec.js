@@ -307,7 +307,7 @@ describe('storage db', () => {
             listOfPublicKeys: [generateAccount().publicKey, generateAccount().publicKey, generateAccount().publicKey]
         }};
 
-        const addGetDownloadsByKeyTests = traits => {
+        const addGetDownloadChannelsByDownloadChannelId = traits => {
             const generateDownloadChannelInfos = (count, key) => {
                 const downloadInfos = [];
                 for (let i = 0; i < count; ++i) {
@@ -436,7 +436,7 @@ describe('storage db', () => {
             });
         };
 
-        describe('by download channel id', () => addGetDownloadsByKeyTests({
+        describe('by download channel id', () => addGetDownloadChannelsByDownloadChannelId({
             generateKey: () => generateHash(),
             generateDownloadChannelInfo: (downloadChannelId) => generateDownloadChannelInfo(downloadChannelId, generateAccount().publicKey),
             getDownloads: (db, downloadChannelId, pagingId, pageSize, sortOrder) => {
@@ -444,13 +444,47 @@ describe('storage db', () => {
             }
         }));
 
-        describe('by consumer public key', () => addGetDownloadsByKeyTests({
-            generateKey: () => generateAccount().publicKey,
-            generateDownloadChannelInfo: (consumer) => generateDownloadChannelInfo(generateHash(), consumer),
-            getDownloads: (db, consumer, pagingId, pageSize, sortOrder) => {
-                return db.getDownloadsByConsumerPublicKey(consumer, pagingId, pageSize, { sortOrder });
-            }
-        }));
+        const assertDownloadChannelsByConsumerPublicKey = (consumer, additionalConsumer) => {
+			// Arrange:
+			const downloadChannelInfos = [];
+			for (let i = 0; i < 5; ++i)
+                downloadChannelInfos.push({downloadChannelId: generateHash(), consumer: generateAccount().publicKey});
+			const expectedEntries = [];
+			additionalConsumer.forEach(consumer => {
+				const downloadChannelInfo = generateDownloadChannelInfo(generateHash(), consumer);
+				downloadChannelInfos.push(downloadChannelInfo);
+				expectedEntries.push(test.db.createDownloadChannelEntry(
+					downloadChannelInfos.length,
+					downloadChannelInfo.id,
+					downloadChannelInfo.consumer,
+					downloadChannelInfo.downloadSize,
+					downloadChannelInfo.downloadApprovalCount,
+                    downloadChannelInfo.listOfPublicKeys
+				));
+			});
+			expectedEntries.forEach(entry => {
+				delete entry._id;
+			});
+			const entries = test.db.createDownloadChannelEntries(downloadChannelInfos);
+
+			// Assert:
+			return test.db.runDbTest(
+				entries,
+				'downloadChannels',
+				db => db.getDownloadsByConsumerPublicKey(consumer),
+				entities =>
+					expect(entities).to.deep.equal(expectedEntries)
+			);
+		};
+
+        it('returns empty array for unknown id', () => {
+			return assertDownloadChannelsByConsumerPublicKey(generateAccount().publicKey, []);
+		});
+
+		it('returns matching entry', () => {
+			const consumer = generateAccount().publicKey;
+			return assertDownloadChannelsByConsumerPublicKey(consumer, [consumer]);
+		});
     });
 
     describe('download channels', () => {

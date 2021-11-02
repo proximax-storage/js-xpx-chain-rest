@@ -65,9 +65,16 @@ module.exports = {
 		});
 
 		server.get('/downloadsV2/:downloadChannelId', (req, res, next) => {
+			const pagingOptions = routeUtils.parsePagingArguments(req.params);
 			const downloadChannelId = routeUtils.parseArgument(req.params, 'downloadChannelId', 'hash256');
-			return db.getDownloadsByDownloadChannelId(downloadChannelId)
-				.then(routeUtils.createSender('downloadChannelEntry').sendOne('downloadChannelId', res, next));
+			return db.getDownloadsByDownloadChannelId(downloadChannelId, pagingOptions.id, pagingOptions.pageSize)
+				.then(routeUtils.createSender('downloadChannelEntry').sendArray('downloadChannelId', res, next));
+		});
+
+		server.get('/downloadsV2/:consumerKey', (req, res, next) => {
+			const consumer = routeUtils.parseArgument(req.params, 'consumer', 'publicKey');
+			return db.getDownloadsByConsumerPublicKey(consumer)
+				.then(routeUtils.createSender('downloadChannelEntry').sendOne('consumer', res, next));
 		});
 
 		server.get('/accountV2/:owner/drive', (req, res, next) => {
