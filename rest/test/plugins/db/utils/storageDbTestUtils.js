@@ -12,28 +12,40 @@ const { convertToLong } = require('../../../../src/db/dbUtils');
 
 const { Binary, Long } = MongoDb;
 
-const createBcDriveEntry = (id, multisig, owner, replicatorCount) => ({
+const createBcDriveEntry = (id, multisig, owner, rootHash, size, usedSize, metaFilesSize, replicatorCount) => ({
     _id: dbTestUtils.db.createObjectId(id),
     drive: {
         multisig: new Binary(multisig.publicKey),
         multisigAddress: new Binary(multisig.address),
         owner: owner ? new Binary(owner) : null,
-        replicatorCount: replicatorCount ? convertToLong(replicatorCount) : null
+        rootHash: rootHash ? new Binary(rootHash) : null,
+        size: size ? convertToLong(size) : null,
+        usedSize: usedSize ? convertToLong(usedSize) : null,
+        metaFilesSize: metaFilesSize ? convertToLong(metaFilesSize) : null,
+        replicatorCount: replicatorCount ? convertToLong(replicatorCount) : null,
     }
 });
 
 const createBcDriveEntries = (bcDriveInfos) => {
     let i = 0;
-    return bcDriveInfos.map(bcDriveInfo => createBcDriveEntry(++i, bcDriveInfo.multisig, bcDriveInfo.owner, bcDriveInfo.replicatorCount));
+    return bcDriveInfos.map(bcDriveInfo => createBcDriveEntry(
+        ++i, 
+        bcDriveInfo.multisig, 
+        bcDriveInfo.owner, 
+        bcDriveInfo.rootHash,
+        bcDriveInfo.size,
+        bcDriveInfo.usedSize,
+        bcDriveInfo.metaFilesSize,
+        bcDriveInfo.replicatorCount));
 };
 
 const createReplicatorEntry = (id, key, version, capacity, blsKey, drives) => ({
     _id: dbTestUtils.db.createObjectId(id),
     replicator: {
-        key: new Binary(key),
+        key: key ? new Binary(key) : null,
         version: version ? convertToLong(version) : null,
         capacity: capacity ? convertToLong(capacity) : null,
-        blsKey: new Binary(blsKey),
+        blsKey: blsKey ? new Binary(blsKey) : null,
         drives: drives && drives.length ? 
             drives.map(drive => { return { 
                 drive: new Binary(drive.drive),
@@ -49,7 +61,7 @@ const createReplicatorEntries = (replicatorInfos) => {
     return replicatorInfos.map(replicatorInfo => createReplicatorEntry(++i, replicatorInfo.key, replicatorInfo.version, replicatorInfo.capacity, replicatorInfo.blsKey, replicatorInfo.drives));
 };
 
-const createDownloadEntry = (id, downloadChannelId, consumer, downloadSize, downloadApprovalCount, listOfPublicKeys) => ({
+const createDownloadChannelEntry = (id, downloadChannelId, consumer, downloadSize, downloadApprovalCount, listOfPublicKeys) => ({
     _id: dbTestUtils.db.createObjectId(id),
     downloadChannelInfo: {
         id: downloadChannelId ? new Binary(downloadChannelId) : null,
@@ -61,9 +73,9 @@ const createDownloadEntry = (id, downloadChannelId, consumer, downloadSize, down
     }
 });
 
-const createDownloadEntries = (downloadInfos) => {
+const createDownloadChannelEntries = (downloadInfos) => {
     let i = 0;
-    return downloadInfos.map(downloadInfo => createDownloadEntry(++i, downloadInfo.id, downloadInfo.consumer, downloadInfo.downloadSize, downloadInfo.downloadApprovalCount, downloadInfo.listOfPublicKeys));
+    return downloadInfos.map(downloadInfo => createDownloadChannelEntry(++i, downloadInfo.id, downloadInfo.consumer, downloadInfo.downloadSize, downloadInfo.downloadApprovalCount, downloadInfo.listOfPublicKeys));
 };
 
 const createBlsKeyEntry = (id, blsKey, key) => ({
@@ -87,8 +99,8 @@ const storageDbTestUtils = {
         createBcDriveEntries,
         createReplicatorEntry,
         createReplicatorEntries,
-        createDownloadEntry,
-        createDownloadEntries,
+        createDownloadChannelEntry,
+        createDownloadChannelEntries,
         createBlsKeyEntry,
         createBlsKeyEntries,
         runDbTest: (dbEntities, collectionName, issueDbCommand, assertDbCommandResult) =>

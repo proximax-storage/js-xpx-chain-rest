@@ -10,11 +10,11 @@
  const { expect } = require('chai');
  
  const { address } = catapult.model;
- const { addresses, publicKeys, hashes256 } = test.sets;
+ const { addresses, publicKeys, hashes256, blsPublicKey } = test.sets;
  const { convert } = catapult.utils;
 
  describe('storage routes', () => {
-    describe('/drive/:accountId', () => {
+    describe('/driveV2/:accountId', () => {
 		const assertGetBcDriveByAccountId = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -24,7 +24,7 @@
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/drive/:accountId',
+				'/driveV2/:accountId',
 				'get',
 				{accountId: traits.accountId},
 				db,
@@ -48,7 +48,7 @@
 		}));
 	});
 
-	describe('/replicator/:key', () => {
+	describe('/replicatorV2/:publicKey', () => {
 		const addGetReplicatorByPublicKey = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -58,7 +58,7 @@
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/replicator/:key',
+				'/replicatorV2/:publicKey',
 				'get',
 				{key: traits.key},
 				db,
@@ -71,13 +71,13 @@
 			);
 		};
 
-		it('with public key', () => addGetReplicatorByPublicKey({
+		it('with replicator key', () => addGetReplicatorByPublicKey({
 			key: publicKeys.valid[0],
 			expected: [convert.hexToUint8(publicKeys.valid[0])]
 		}));
 	});
 
-	describe('/downloads/:downloadChannelId', () => {
+	describe('/downloadsV2/:downloadChannelId', () => {
 		const addGetDownloadsByDownloadChannelId = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -87,7 +87,7 @@
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/downloads/:downloadChannelId',
+				'/downloadsV2/:downloadChannelId',
 				'get',
 				{downloadChannelId: traits.downloadChannelId},
 				db,
@@ -106,7 +106,7 @@
 		}));
 	});
 
-	describe('/account/:owner/drive', () => {
+	describe('/accountV2/:owner/drive', () => {
 		const addGetBcDriveByOwnerPublicKey = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -116,7 +116,7 @@
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/account/:owner/drive',
+				'/accountV2/:owner/drive',
 				'get',
 				{owner: traits.owner},
 				db,
@@ -134,4 +134,33 @@
 			expected: [convert.hexToUint8(publicKeys.valid[0])]
 		}));
     });
+
+	describe('/accountV2/:blsKey/replicator', () => {
+		const addGetReplicatorByBlsKey = traits => {
+			// Arrange:
+			const keyGroups = [];
+			const db = test.setup.createCapturingDb('getReplicatorByBlsKey', keyGroups, [{value: 'this is nonsense'}]);
+			
+			// Act:
+			const registerRoutes = storageRoutes.register;
+			return test.route.executeSingle(
+				registerRoutes,
+				'/accountV2/:blsKey/replicator',
+				'get',
+				{blsKey: traits.blsKey},
+				db,
+				null,
+				response => {
+					// Assert:
+					expect(keyGroups).to.deep.equal(traits.expected);
+					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'replicatorEntry'});
+				}
+			);
+		};
+
+		it('with replicator bls key', () => addGetReplicatorByBlsKey({
+			blsKey: blsPublicKey.valid[0],
+			expected: [convert.hexToUint8(blsPublicKey.valid[0])]
+		}));
+	});
  });
