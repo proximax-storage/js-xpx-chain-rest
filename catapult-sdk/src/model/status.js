@@ -340,9 +340,8 @@ const toStringInternal = code => {
 		case 0x80620020: return 'Failure_Storage_Sender_State_Not_Found'
 		case 0x80620021: return 'Failure_Storage_Recipient_State_Not_Found'
 		case 0x80620022: return 'Failure_Storage_Verification_Bad_Verification_Trigger'
-		case 0x80620023: return 'Failure_Storage_Verification_Wrong_Namber_Of_Provers'
+		case 0x80620023: return 'Failure_Storage_Verification_Wrong_Number_Of_Provers'
 		case 0x80620024: return 'Failure_Storage_Verification_Some_Provers_Are_Illegal'
-		case 0x80620025: return 'Failure_Storage_Verification_Not_In_Pending'
 		default: return undefined;
 	}
 };
