@@ -99,6 +99,85 @@ const storagePlugin = {
 		builder.addTransactionSupport(EntityType.driveClosure, {
 			driveKey: 				{ type: ModelType.binary, schemaName: 'driveClosure.driveKey' },
 		});
+
+		builder.addSchema('replicatorEntry', {
+			replicator: { type: ModelType.object, schemaName: 'replicators' }
+		});
+
+		builder.addSchema('driveInfo', {
+			drive: ModelType.binary,
+			lastApprovedDataModificationId: ModelType.binary,
+			dataModificationIdIsValid: ModelType.uint8,
+			initialDownloadWork: ModelType.uint64,
+		});
+
+		builder.addSchema('replicators', {
+			key:			ModelType.binary,
+			version:		ModelType.uint32,
+			capacity:		ModelType.uint64,
+			blsKey:			ModelType.binary,
+			drives: 		{ type: ModelType.array, schemaName: 'driveInfo' },
+		});
+
+		builder.addSchema('bcDriveEntry', {
+			bcdrive: { type: ModelType.object, schemaName: 'bcdrives' }
+		});
+
+		builder.addSchema('activeDataModification', {
+			id: 				ModelType.binary,
+			owner: 				ModelType.binary,
+			downloadDataCdi:	ModelType.binary,
+			uploadSize:			ModelType.uint64,
+		});
+
+		builder.addSchema('completedDataModification', {
+			id:					ModelType.binary,
+			owner:				ModelType.binary,
+			downloadDataCdi:	ModelType.binary,
+			uploadSize:			ModelType.uint64,
+			state:				ModelType.uint8,
+		});
+
+		builder.addSchema('bcdrives', {
+			multisig:						ModelType.binary,
+			multisigAddress:				ModelType.binary,
+			owner:							ModelType.binary,
+			rootHash:						ModelType.binary,
+			size: 							ModelType.uint64,
+			usedSize: 						ModelType.uint64,
+			metaFilesSize:					ModelType.uint64,
+			replicatorCount:				ModelType.uint16,
+			activeDataModifications: 		{ type: ModelType.array, schemaName: 'activeDataModification' },
+			completedDataModifications: 	{ type: ModelType.array, schemaName: 'completedDataModification' },
+		});
+
+		builder.addSchema('downloadChannelEntry', {
+			downloadChannelInfo: { type: ModelType.object, schemaName: 'downloadChannelInfo' }
+		});
+
+		builder.addSchema('cumulativePayments', {
+			replicator:		ModelType.binary,
+			payment:		ModelType.uint64,
+		});
+
+		builder.addSchema('downloadChannelInfo', {
+			id:						ModelType.binary,
+			consumer:				ModelType.binary,
+			downloadSize:			ModelType.uint64,
+			downloadApprovalCount:	ModelType.uint16,
+			listOfPublicKeys: 		{ type: ModelType.array, schemaName: ModelType.binary },
+			cumulativePayments: 	{ type: ModelType.array, schemaName: 'cumulativePayments' },
+		});
+
+		builder.addSchema('blsKeysEntry', {
+			blsKeyDoc: { type: ModelType.object, schemaName: 'blsKeyDoc' }
+		});
+
+		builder.addSchema('blsKeyDoc', {
+			blsKey:			ModelType.binary,
+			version:		ModelType.uint32,
+			key:			ModelType.binary,
+		});
 	},
 
 	registerCodecs: codecBuilder => {

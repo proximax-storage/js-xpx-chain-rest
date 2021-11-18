@@ -23,7 +23,7 @@ describe('storage plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 14);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 26);
 			expect(modelSchema).to.contain.all.keys([
 				'prepareBcDrive',
 				'dataModification',
@@ -39,6 +39,18 @@ describe('storage plugin', () => {
 				'verificationPayment',
 				'downloadApproval',
 				'driveClosure',
+				'replicatorEntry',
+				'driveInfo',
+				'replicators',
+				'bcDriveEntry',
+				'activeDataModification',
+				'completedDataModification',
+				'bcdrives',
+				'downloadChannelEntry',
+				'cumulativePayments',
+				'downloadChannelInfo',
+				'blsKeysEntry',
+				'blsKeyDoc'
 			]);
 
 			expect(Object.keys(modelSchema.prepareBcDrive).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
@@ -134,6 +146,89 @@ describe('storage plugin', () => {
 			expect(Object.keys(modelSchema.driveClosure).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
 			expect(modelSchema.driveClosure).to.contain.all.keys([
 				'driveKey',
+			]);
+
+			expect(Object.keys(modelSchema['replicatorEntry']).length).to.equal(1);
+			expect(modelSchema['replicatorEntry']).to.contain.all.keys(['replicator']);
+
+			expect(Object.keys(modelSchema['driveInfo']).length).to.equal(4);
+			expect(modelSchema['driveInfo']).to.contain.all.keys([
+				'drive', 
+				'lastApprovedDataModificationId', 
+				'dataModificationIdIsValid', 
+				'initialDownloadWork'
+			]);
+
+			expect(Object.keys(modelSchema['replicators']).length).to.equal(5);
+			expect(modelSchema['replicators']).to.contain.all.keys([
+				'key',
+				'version',
+				'capacity',
+				'blsKey',
+				'drives'
+			]);
+
+			expect(Object.keys(modelSchema['bcDriveEntry']).length).to.equal(1);
+			expect(modelSchema['bcDriveEntry']).to.contain.all.keys(['bcdrive']);
+
+			expect(Object.keys(modelSchema['activeDataModification']).length).to.equal(4);
+			expect(modelSchema['activeDataModification']).to.contain.all.keys([
+				'id',
+				'owner',
+				'downloadDataCdi',
+				'uploadSize'
+			]);
+
+			expect(Object.keys(modelSchema['completedDataModification']).length).to.equal(5);
+			expect(modelSchema['completedDataModification']).to.contain.all.keys([
+				'id',
+				'owner',
+				'downloadDataCdi',
+				'uploadSize',
+				'state'
+			]);
+
+			expect(Object.keys(modelSchema['bcdrives']).length).to.equal(10);
+			expect(modelSchema['bcdrives']).to.contain.all.keys([
+				'multisig',
+				'multisigAddress',
+				'owner',
+				'rootHash',
+				'size',
+				'usedSize',
+				'metaFilesSize',
+				'replicatorCount',
+				'activeDataModifications',
+				'completedDataModifications'
+			]);
+
+			expect(Object.keys(modelSchema['downloadChannelEntry']).length).to.equal(1);
+			expect(modelSchema['downloadChannelEntry']).to.contain.all.keys(['downloadChannelInfo']);
+
+			expect(Object.keys(modelSchema['cumulativePayments']).length).to.equal(2);
+			expect(modelSchema['cumulativePayments']).to.contain.all.keys([
+				'replicator',
+				'payment'
+			]);
+
+			expect(Object.keys(modelSchema['downloadChannelInfo']).length).to.equal(6);
+			expect(modelSchema['downloadChannelInfo']).to.contain.all.keys([
+				'id',
+				'consumer',
+				'downloadSize',
+				'downloadApprovalCount',
+				'listOfPublicKeys',
+				'cumulativePayments'
+			]);
+
+			expect(Object.keys(modelSchema['blsKeysEntry']).length).to.equal(1);
+			expect(modelSchema['blsKeysEntry']).to.contain.all.keys(['blsKeyDoc']);
+
+			expect(Object.keys(modelSchema['blsKeyDoc']).length).to.equal(3);
+			expect(modelSchema['blsKeyDoc']).to.contain.all.keys([
+				'blsKey',
+				'version',
+				'key'
 			]);
 		});
 	});
