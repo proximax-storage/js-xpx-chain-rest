@@ -30,9 +30,9 @@
                 '/replicator_v2/:publicKey',
                 '/downloads_v2',
                 '/downloads_v2/:downloadChannelId',
-                '/account_v2/:owner/drive',
-                '/account_v2/:blsKey/replicator',
-                '/account_v2/:consumerKey/download'
+                '/account/:owner/drive_v2',
+                '/account/:blsKey/replicator_v2',
+                '/account/:consumerKey/download_v2'
              ]);
          });
      });

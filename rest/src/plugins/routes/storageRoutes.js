@@ -93,19 +93,19 @@ module.exports = {
 				.then(routeUtils.createSender('downloadChannelEntry').sendArray('downloadChannelId', res, next));
 		});
 
-		server.get('/account_v2/:owner/drive', (req, res, next) => {
+		server.get('/account/:owner/drive_v2', (req, res, next) => {
 			const owner = routeUtils.parseArgument(req.params, 'owner', 'publicKey');
 			return db.getBcDriveByOwnerPublicKey(owner)
 				.then(routeUtils.createSender('bcDriveEntry').sendOne('owner', res, next));
 		});
 
-		server.get('/account_v2/:blsKey/replicator', (req, res, next) => {
+		server.get('/account/:blsKey/replicator_v2', (req, res, next) => {
 			const blsKey = routeUtils.parseArgument(req.params, 'blsKey', 'blsPublicKey');
 			return db.getReplicatorByBlsKey(blsKey)
 				.then(routeUtils.createSender('replicatorEntry').sendOne('blsKey', res, next));
 		});
 
-		server.get('/account_v2/:consumerKey/download', (req, res, next) => {
+		server.get('/account/:consumerKey/download_v2', (req, res, next) => {
 			const pagingOptions = routeUtils.parsePagingArguments(req.params);
 			const consumer = routeUtils.parseArgument(req.params, 'consumerKey', 'publicKey');
 			return db.getDownloadsByConsumerPublicKey(consumer, pagingOptions.id, pagingOptions.pageSize)

@@ -77,7 +77,7 @@
 		}));
 	});
 
-	describe('/account_v2/:owner/drive', () => {
+	describe('/account/:owner/drive_v2', () => {
 		const addGetBcDriveByOwnerPublicKey = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -87,7 +87,7 @@
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/account_v2/:owner/drive',
+				'/account/:owner/drive_v2',
 				'get',
 				{owner: traits.owner},
 				db,
@@ -106,7 +106,7 @@
 		}));
     });
 
-	describe('/account_v2/:blsKey/replicator', () => {
+	describe('/account/:blsKey/replicator_v2', () => {
 		const addGetReplicatorByBlsKey = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -116,7 +116,7 @@
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/account_v2/:blsKey/replicator',
+				'/account/:blsKey/replicator_v2',
 				'get',
 				{blsKey: traits.blsKey},
 				db,
@@ -184,8 +184,8 @@
 		}
 	}));
 
-	describe('/account_v2/:consumerKey/download', () => addGetTests({
-		routeName: '/account_v2/:consumerKey/download',
+	describe('/account/:consumerKey/download_v2', () => addGetTests({
+		routeName: '/account/:consumerKey/download_v2',
 		valid: {
 			params: { consumerKey: publicKeys.valid[0] },
 			expected: { consumerKey: convert.hexToUint8(publicKeys.valid[0]), options: undefined }
