@@ -14,7 +14,7 @@
  const { convert } = catapult.utils;
 
  describe('storage routes', () => {
-    describe('/driveV2/:accountId', () => {
+    describe('/drive_v2/:accountId', () => {
 		const assertGetBcDriveByAccountId = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -24,7 +24,7 @@
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/driveV2/:accountId',
+				'/drive_v2/:accountId',
 				'get',
 				{accountId: traits.accountId},
 				db,
@@ -48,7 +48,7 @@
 		}));
 	});
 
-	describe('/replicatorV2/:publicKey', () => {
+	describe('/replicator_v2/:publicKey', () => {
 		const addGetReplicatorByPublicKey = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -58,9 +58,9 @@
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/replicatorV2/:publicKey',
+				'/replicator_v2/:publicKey',
 				'get',
-				{key: traits.key},
+				{publicKey: traits.publicKey},
 				db,
 				null,
 				response => {
@@ -72,83 +72,12 @@
 		};
 
 		it('with replicator key', () => addGetReplicatorByPublicKey({
-			key: publicKeys.valid[0],
+			publicKey: publicKeys.valid[0],
 			expected: [convert.hexToUint8(publicKeys.valid[0])]
 		}));
 	});
 
-	describe('/downloadsV2/:downloadChannelId', () => {
-		const factory = {
-			createDownloadChannelsPagingRouteInfo: (routeName) => ({
-				routes: storageRoutes,
-				routeName,
-				createDb: (keyGroups, documents) => ({
-					getDownloadsByDownloadChannelId: (downloadChannelId, pageId, pageSize, options) => {
-						keyGroups.push({
-							downloadChannelId,
-							pageId,
-							pageSize,
-							options
-						});
-						return Promise.resolve(documents);
-					}
-				}),
-				routeCaptureMethod: 'get'
-			})
-		};
-	
-		const addGetTests = traits => {
-			const pagingTestsFactory = test.setup.createPagingTestsFactory(
-				factory.createDownloadChannelsPagingRouteInfo(traits.routeName),
-				traits.valid.params,
-				traits.valid.expected,
-				'downloadChannelEntry'
-			);
-	
-			pagingTestsFactory.addDefault();
-			if (traits.invalid)
-				pagingTestsFactory.addFailureTest(traits.invalid.name, traits.invalid.params, traits.invalid.error);
-		};
-
-		it('with download channel id', () => addGetTests({
-			routeName: '/downloadsV2/:downloadChannelId',
-			valid: {
-				params: { downloadChannelId: hashes256.valid[0] },
-				expected: { downloadChannelId: convert.hexToUint8(hashes256.valid[0]), options: undefined}
-			}
-		}));
-	});
-
-	describe('/downloadsV2/:consumerKey', () => {
-		const addGetDownloadsByConsumerPublicKey = traits => {
-			// Arrange:
-			const keyGroups = [];
-			const db = test.setup.createCapturingDb('getDownloadsByConsumerPublicKey', keyGroups, [{value: 'this is nonsense'}]);
-
-			// Act:
-			const registerRoutes = storageRoutes.register;
-			return test.route.executeSingle(
-				registerRoutes,
-				'/downloadsV2/:consumerKey',
-				'get',
-				{consumer: traits.consumer},
-				db,
-				null,
-				response => {
-					// Assert:
-					expect(keyGroups).to.deep.equal(traits.expected);
-					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'downloadChannelEntry'});
-				}
-			);
-		};
-
-		it('with consumer key', () => addGetDownloadsByConsumerPublicKey({
-			consumer: publicKeys.valid[0],
-			expected: [convert.hexToUint8(publicKeys.valid[0])]
-		}));
-	});
-
-	describe('/accountV2/:owner/drive', () => {
+	describe('/account_v2/:owner/drive', () => {
 		const addGetBcDriveByOwnerPublicKey = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -158,7 +87,7 @@
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/accountV2/:owner/drive',
+				'/account_v2/:owner/drive',
 				'get',
 				{owner: traits.owner},
 				db,
@@ -177,7 +106,7 @@
 		}));
     });
 
-	describe('/accountV2/:blsKey/replicator', () => {
+	describe('/account_v2/:blsKey/replicator', () => {
 		const addGetReplicatorByBlsKey = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -187,7 +116,7 @@
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/accountV2/:blsKey/replicator',
+				'/account_v2/:blsKey/replicator',
 				'get',
 				{blsKey: traits.blsKey},
 				db,
@@ -205,4 +134,61 @@
 			expected: [convert.hexToUint8(blsPublicKey.valid[0])]
 		}));
 	});
- });
+
+	const factory = {
+		createDownloadChannelsPagingRouteInfo: (routeName) => ({
+			routes: storageRoutes,
+			routeName,
+			createDb: (keyGroups, documents) => ({
+				getDownloadsByDownloadChannelId: (downloadChannelId, pageId, pageSize, options) => {
+					keyGroups.push({
+						downloadChannelId,
+						pageId,
+						pageSize,
+						options
+					});
+					return Promise.resolve(documents);
+				},
+				getDownloadsByConsumerPublicKey: (consumerKey, pageId, pageSize, options) => {
+					keyGroups.push({
+						consumerKey,
+						pageId,
+						pageSize,
+						options
+					});
+					return Promise.resolve(documents);
+				}
+			}),
+			routeCaptureMethod: 'get'
+		})
+	};
+
+	const addGetTests = traits => {
+		const pagingTestsFactory = test.setup.createPagingTestsFactory(
+			factory.createDownloadChannelsPagingRouteInfo(traits.routeName),
+			traits.valid.params,
+			traits.valid.expected,
+			'downloadChannelEntry'
+		);
+
+		pagingTestsFactory.addDefault();
+		if (traits.invalid)
+			pagingTestsFactory.addFailureTest(traits.invalid.name, traits.invalid.params, traits.invalid.error);
+	};
+
+	describe('/downloads_v2/:downloadChannelId', () => addGetTests({
+		routeName: '/downloads_v2/:downloadChannelId',
+		valid: {
+			params: { downloadChannelId: hashes256.valid[0] },
+			expected: { downloadChannelId: convert.hexToUint8(hashes256.valid[0]), options: undefined }
+		}
+	}));
+
+	describe('/account_v2/:consumerKey/download', () => addGetTests({
+		routeName: '/account_v2/:consumerKey/download',
+		valid: {
+			params: { consumerKey: publicKeys.valid[0] },
+			expected: { consumerKey: convert.hexToUint8(publicKeys.valid[0]), options: undefined }
+		}
+	}));
+});

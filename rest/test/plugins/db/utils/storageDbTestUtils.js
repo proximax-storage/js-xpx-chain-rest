@@ -78,7 +78,7 @@ const createDownloadChannelEntries = (downloadInfos) => {
     return downloadInfos.map(downloadInfo => createDownloadChannelEntry(++i, downloadInfo.id, downloadInfo.consumer, downloadInfo.downloadSize, downloadInfo.downloadApprovalCount, downloadInfo.listOfPublicKeys));
 };
 
-const createBlsKeyEntry = (id, blsKey, key) => ({
+const createBlsKeysEntry = (id, blsKey, key) => ({
     _id: dbTestUtils.db.createObjectId(id),
     blsKeyDoc: {
         blsKey: new Binary(blsKey),
@@ -87,9 +87,9 @@ const createBlsKeyEntry = (id, blsKey, key) => ({
     }
 });
 
-const createBlsKeyEntries = (blsKeyInfos) => {
+const createBlsKeysEntries = (blsKeyInfos) => {
     let i = 0;
-    return blsKeyInfos.map(blsKeyInfo => createBlsKeyEntry(++i, blsKeyInfo.blsKey, blsKeyInfo.key));
+    return blsKeyInfos.map(blsKeyInfo => createBlsKeysEntry(++i, blsKeyInfo.blsKey, blsKeyInfo.key));
 };
 
 
@@ -101,8 +101,8 @@ const storageDbTestUtils = {
         createReplicatorEntries,
         createDownloadChannelEntry,
         createDownloadChannelEntries,
-        createBlsKeyEntry,
-        createBlsKeyEntries,
+        createBlsKeysEntry,
+        createBlsKeysEntries,
         runDbTest: (dbEntities, collectionName, issueDbCommand, assertDbCommandResult) =>
             dbTestUtils.db.runDbTest(dbEntities, collectionName, db => new StorageDb(db), issueDbCommand, assertDbCommandResult)
     }

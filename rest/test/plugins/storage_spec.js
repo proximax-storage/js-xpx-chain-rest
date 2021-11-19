@@ -24,15 +24,15 @@
  
              // Assert:
              test.assert.assertRoutes(routes, [
-                '/drivesV2',
-                '/driveV2/:accountId',
-                '/replicatorsV2',
-                '/replicatorV2/:publicKey',
-                '/downloadsV2',
-                '/downloadsV2/:downloadChannelId',
-                '/downloadsV2/:consumerKey',
-                '/accountV2/:owner/drive',
-                '/accountV2/:blsKey/replicator',
+                '/drives_v2',
+                '/drive_v2/:accountId',
+                '/replicators_v2',
+                '/replicator_v2/:publicKey',
+                '/downloads_v2',
+                '/downloads_v2/:downloadChannelId',
+                '/account_v2/:owner/drive',
+                '/account_v2/:blsKey/replicator',
+                '/account_v2/:consumerKey/download'
              ]);
          });
      });

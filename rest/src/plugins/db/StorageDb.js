@@ -60,17 +60,33 @@ class StorageDb {
 			if (options.offset !== undefined)
 				conditions.push({[options.sortField]: {[1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset)}});
 
-			if (filters.fromSize !== undefined)
+			if (filters.size !== undefined)
+				conditions.push({'drive.size': convertToLong(filters.size)});
+			else if (filters.fromSize !== undefined)
 				conditions.push({'drive.size': {$gte: convertToLong(filters.fromSize)}});
+			else if (filters.toSize !== undefined)
+				conditions.push({'drive.size': {$lte: convertToLong(filters.toSize)}});
 			
-			if (filters.fromUsedSize !== undefined)
+			if (filters.usedSize !== undefined)
+				conditions.push({'drive.usedSize': convertToLong(filters.usedSize)});
+			else if (filters.fromUsedSize !== undefined)
 				conditions.push({'drive.usedSize': {$gte: convertToLong(filters.fromUsedSize)}});
+			else if (filters.toUsedSize !== undefined)
+				conditions.push({'drive.usedSize': {$lte: convertToLong(filters.toUsedSize)}});
 			
-			if (filters.fromMetaFilesSize !== undefined)
+			if (filters.metaFilesSize !== undefined)
+				conditions.push({'drive.metaFilesSize': convertToLong(filters.metaFilesSize)});
+			else if (filters.fromMetaFilesSize !== undefined)
 				conditions.push({'drive.metaFilesSize': {$gte: convertToLong(filters.fromMetaFilesSize)}});
+			else if (filters.toMetaFilesSize !== undefined)
+				conditions.push({'drive.metaFilesSize': {$lte: convertToLong(filters.toMetaFilesSize)}});
 			
-			if (filters.fromReplicatorCount !== undefined)
+			if (filters.replicatorCount !== undefined)
+				conditions.push({'drive.replicatorCount': convertToLong(filters.replicatorCount)});
+			else if (filters.fromReplicatorCount !== undefined)
 				conditions.push({'drive.replicatorCount': {$gte: convertToLong(filters.fromReplicatorCount)}});
+			else if (filters.toReplicatorCount !== undefined)
+				conditions.push({'drive.replicatorCount': {$lte: convertToLong(filters.toReplicatorCount)}});
 
 			return conditions;
 		}
@@ -121,11 +137,20 @@ class StorageDb {
 			if (options.offset !== undefined)
 				conditions.push({[options.sortField]: {[1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset)}});
 			
-			if (filters.fromVersion !== undefined)
+			if (filters.version !== undefined)
+				conditions.push({'replicator.version': convertToLong(filters.version)});
+			else if (filters.fromVersion !== undefined)
 				conditions.push({'replicator.version': {$gte: convertToLong(filters.fromVersion)}});
+			else if (filters.toVersion !== undefined)
+				conditions.push({'replicator.version': {$lte: convertToLong(filters.toVersion)}});
 
-			if (filters.fromCapacity !== undefined)
+
+			if (filters.capacity !== undefined)
+				conditions.push({'replicator.capacity': convertToLong(filters.capacity)});
+			else if (filters.fromCapacity !== undefined)
 				conditions.push({'replicator.capacity': {$gte: convertToLong(filters.fromCapacity)}});
+			else if (filters.toCapacity !== undefined)
+				conditions.push({'replicator.capacity': {$lte: convertToLong(filters.toCapacity)}});
 
 			return conditions;
 		}
@@ -153,12 +178,15 @@ class StorageDb {
 	/**
 	 * Retrieves the file downloads by file recipient.
 	 * @param {array<object>} publicKey Public key of file recipient.
+	 * @param {string} id Paging id.
+	 * @param {int} pageSize Page size.
 	 * @returns {Promise.<array>} File download info.
 	 */
-	getDownloadsByConsumerPublicKey(publicKey) {
+	getDownloadsByConsumerPublicKey(publicKey, pagingId, pageSize, options) {
 		const buffer = Buffer.from(publicKey);
 		const fieldName = "downloadChannelInfo.consumer";
-		return this.catapultDb.queryDocuments('downloadChannels', { [fieldName]: buffer });
+		const conditions = { $and: [ { [fieldName]: buffer } ] };
+		return this.catapultDb.queryDocuments('downloadChannels', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);
 	}
 
 	/**
@@ -178,11 +206,19 @@ class StorageDb {
 			if (options.offset !== undefined)
 				conditions.push({[options.sortField]: {[1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset)}});
 
-			if (filters.fromDownloadSize !== undefined)
+			if (filters.downloadSize !== undefined)
+				conditions.push({'downloadChannelInfo.downloadSize': convertToLong(filters.downloadSize)});
+			else if (filters.fromDownloadSize !== undefined)
 				conditions.push({'downloadChannelInfo.downloadSize': {$gte: convertToLong(filters.fromDownloadSize)}});
+			else if (filters.toDownloadSize !== undefined)
+				conditions.push({'downloadChannelInfo.downloadSize': {$lte: convertToLong(filters.toDownloadSize)}});
 			
-			if (filters.fromDownloadApprovalCount !== undefined)
+			if (filters.downloadApprovalCount !== undefined)
+				conditions.push({'downloadChannelInfo.downloadApprovalCount': convertToLong(filters.downloadApprovalCount)});
+			else if (filters.fromDownloadApprovalCount !== undefined)
 				conditions.push({'downloadChannelInfo.downloadApprovalCount': {$gte: convertToLong(filters.fromDownloadApprovalCount)}});
+			else if (filters.toDownloadApprovalCount !== undefined)
+				conditions.push({'downloadChannelInfo.downloadApprovalCount': {$lte: convertToLong(filters.toDownloadApprovalCount)}});
 
 			return conditions;
 		}
