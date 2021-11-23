@@ -25,14 +25,14 @@
              // Assert:
              test.assert.assertRoutes(routes, [
                 '/drives_v2',
-                '/drive_v2/:accountId',
+                '/drives_v2/:accountId',
                 '/replicators_v2',
-                '/replicator_v2/:publicKey',
+                '/replicators_v2/:publicKey',
                 '/downloads_v2',
                 '/downloads_v2/:downloadChannelId',
-                '/account/:owner/drive_v2',
-                '/account/:blsKey/replicator_v2',
-                '/account/:consumerKey/download_v2'
+                '/account/:owner/drives_v2',
+                '/account/:blsKey/replicators_v2',
+                '/account/:consumerKey/downloads_v2'
              ]);
          });
      });

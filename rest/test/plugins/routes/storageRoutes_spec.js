@@ -14,7 +14,7 @@
  const { convert } = catapult.utils;
 
  describe('storage routes', () => {
-    describe('/drive_v2/:accountId', () => {
+    describe('/drives_v2/:accountId', () => {
 		const assertGetBcDriveByAccountId = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -24,7 +24,7 @@
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/drive_v2/:accountId',
+				'/drives_v2/:accountId',
 				'get',
 				{accountId: traits.accountId},
 				db,
@@ -48,7 +48,7 @@
 		}));
 	});
 
-	describe('/replicator_v2/:publicKey', () => {
+	describe('/replicators_v2/:publicKey', () => {
 		const addGetReplicatorByPublicKey = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -58,7 +58,7 @@
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/replicator_v2/:publicKey',
+				'/replicators_v2/:publicKey',
 				'get',
 				{publicKey: traits.publicKey},
 				db,
@@ -77,7 +77,7 @@
 		}));
 	});
 
-	describe('/account/:owner/drive_v2', () => {
+	describe('/account/:owner/drives_v2', () => {
 		const addGetBcDriveByOwnerPublicKey = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -87,7 +87,7 @@
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/account/:owner/drive_v2',
+				'/account/:owner/drives_v2',
 				'get',
 				{owner: traits.owner},
 				db,
@@ -106,7 +106,7 @@
 		}));
     });
 
-	describe('/account/:blsKey/replicator_v2', () => {
+	describe('/account/:blsKey/replicators_v2', () => {
 		const addGetReplicatorByBlsKey = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -116,7 +116,7 @@
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/account/:blsKey/replicator_v2',
+				'/account/:blsKey/replicators_v2',
 				'get',
 				{blsKey: traits.blsKey},
 				db,
@@ -184,8 +184,8 @@
 		}
 	}));
 
-	describe('/account/:consumerKey/download_v2', () => addGetTests({
-		routeName: '/account/:consumerKey/download_v2',
+	describe('/account/:consumerKey/downloads_v2', () => addGetTests({
+		routeName: '/account/:consumerKey/downloads_v2',
 		valid: {
 			params: { consumerKey: publicKeys.valid[0] },
 			expected: { consumerKey: convert.hexToUint8(publicKeys.valid[0]), options: undefined }
