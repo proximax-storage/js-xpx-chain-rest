@@ -61,51 +61,155 @@ describe('storage db', () => {
         }));
     });
 
-    describe('bcdrive by owner public key', () => {
+    describe('bcdrive entries', () => {
+        const generateBcDriveInfo = (additionalOwner) => { return { 
+            multisig: generateAccount(), 
+            owner: additionalOwner ? additionalOwner : generateAccount().publicKey, 
+            rootHash: generateHash(),
+            size: 1000,
+            usedSize: 150,
+            metaFilesSize: 20,
+            replicatorCount: 3
+        }};
 
-        const generateBcDriveInfo = (additionalOwner) => {
-            return { multisig: generateAccount(), owner: additionalOwner ? additionalOwner.owner : generateAccount().publicKey, rootHash: generateHash(), replicatorCount: 5 };
-        };
+        const addGetBcDrivesByOwnerPublicKey = traits => {
+            const generateBcDriveInfos = (count, key) => {
+                const bcDriveInfos = [];
+                for (let i = 0; i < count; ++i) {
+                    bcDriveInfos.push(traits.generateBcDriveInfo(key ? key : traits.generateKey()));
+                }
+    
+                return bcDriveInfos;
+            };
 
-        const generateBcDriveInfos = (count) => {
-            const bcDriveInfos = [];
-            for (let i = 0; i < count; ++i) {
-                bcDriveInfos.push(generateBcDriveInfo());
-            }
+            it('returns empty array for unknown key', () => {
+                // Arrange:
+                const entries = test.db.createBcDriveEntries(generateBcDriveInfos(5));
 
-            return bcDriveInfos;
-        };
-
-        const assertBcDrivesByOwnerPublicKey = (publicKey, additionalBcDriveInfos) => {
-            // Arrange:
-            const bcDriveInfos = generateBcDriveInfos(5);
-            const expectedEntries = [];
-            additionalBcDriveInfos.forEach(bcDriveInfo => {
-                bcDriveInfos.push(bcDriveInfo);
-                expectedEntries.push(test.db.createBcDriveEntry(bcDriveInfos.length, bcDriveInfo.multisig, bcDriveInfo.owner, bcDriveInfo.rootHash, 0, 0, 0, bcDriveInfo.replicatorCount));
+                // Assert:
+                return test.db.runDbTest(
+                    entries,
+                    'bcdrives',
+                    db => traits.getBcDrives(db, traits.generateKey()),
+                    entities => expect(entities.length).to.equal(0)
+                );
             });
-            expectedEntries.forEach(entry => { delete entry._id; });
-            const entries = test.db.createBcDriveEntries(bcDriveInfos);
 
-            // Assert:
-            return test.db.runDbTest(
-                entries,
-                'bcdrives',
-                db => db.getBcDriveByOwnerPublicKey(publicKey),
-                entities => expect(entities).to.deep.equal(expectedEntries)
-            );
+            it('returns bcdrives from matching entries', () => {
+                // Arrange:
+                const key = traits.generateKey();
+                const bcDriveInfos = generateBcDriveInfos(5);
+                const additionalBcDrivesInfo = traits.generateBcDriveInfo(key);
+                bcDriveInfos.push(additionalBcDrivesInfo);
+                const entries = test.db.createBcDriveEntries(bcDriveInfos);
+                const expectedEntry = test.db.createBcDriveEntry(
+                    bcDriveInfos.length,
+                    additionalBcDrivesInfo.multisig,
+                    additionalBcDrivesInfo.owner,
+                    additionalBcDrivesInfo.rootHash,
+                    additionalBcDrivesInfo.size,
+                    additionalBcDrivesInfo.usedSize,
+                    additionalBcDrivesInfo.metaFilesSize,
+                    additionalBcDrivesInfo.replicatorCount
+                );
+                delete expectedEntry._id;
+
+                // Assert:
+                return test.db.runDbTest(
+                    entries,
+                    'bcdrives',
+                    db => traits.getBcDrives(db, key),
+                    entities =>
+                        expect(entities).to.deep.equal([expectedEntry])
+                );
+            });
+
+            describe('query respects supplied document id', () => {
+                const assertBcDrivesWithDocumentId = (sortOrder) => {
+                    // Arrange:
+                    const key = traits.generateKey();
+                    const bcDriveInfos = generateBcDriveInfos(100, key);
+                    const entries = test.db.createBcDriveEntries(bcDriveInfos);
+                    const id = entries[9]._id.toString();
+                    let expectedEntries = sortOrder > 0 ?
+                        test.db.createBcDriveEntries(bcDriveInfos.slice(10)) :
+                        test.db.createBcDriveEntries(bcDriveInfos.slice(0, 9).reverse());
+                    expectedEntries.map(entry => delete entry._id);
+
+                    // Assert:
+                    return test.db.runDbTest(
+                        entries,
+                        'bcdrives',
+                        db => traits.getBcDrives(db, key, id, 100, sortOrder),
+                        entities =>
+                            expect(entities).to.deep.equal(expectedEntries)
+                    );
+                };
+
+                it('ascending order', () => {
+                    return assertBcDrivesWithDocumentId(1);
+                });
+
+                it('descending order', () => {
+                    return assertBcDrivesWithDocumentId(-1);
+                });
+            });
+
+            describe('paging', () => {
+                const assertBcDrivesWithPaging = (sortOrder, pageSize, expectedSize) => {
+                    // Arrange:
+                    const key = traits.generateKey();
+                    const bcDriveInfos = generateBcDriveInfos(200, key);
+                    const entries = test.db.createBcDriveEntries(bcDriveInfos);
+
+                    // Assert:
+                    return test.db.runDbTest(
+                        entries,
+                        'bcdrives',
+                        db => traits.getBcDrives(db, key, undefined, pageSize, sortOrder),
+                        entities => expect(entities.length).to.equal(expectedSize)
+                    );
+                };
+
+                describe('query respects page size', () => {
+                    it('ascending order', () => {
+                        return assertBcDrivesWithPaging(1, 50, 50);
+                    });
+
+                    it('descending order', () => {
+                        return assertBcDrivesWithPaging(-1, 50, 50);
+                    });
+                });
+
+                describe('query ensures minimum page size', () => {
+                    it('ascending order', () => {
+                        return assertBcDrivesWithPaging(1, 5, 10);
+                    });
+
+                    it('descending order', () => {
+                        return assertBcDrivesWithPaging(-1, 5, 10);
+                    });
+                });
+
+                describe('query ensures maximum page size', () => {
+                    it('ascending order', () => {
+                        return assertBcDrivesWithPaging(1, 150, 100);
+                    });
+
+                    it('descending order', () => {
+                        return assertBcDrivesWithPaging(-1, 150, 100);
+                    });
+                });
+            });
         };
 
-        it('returns empty array for unknown key', () => {
-            return assertBcDrivesByOwnerPublicKey(generateAccount().publicKey, []);
-        });
-
-        it('returns matching entry', () => {
-            const owner = generateAccount().publicKey;
-            return assertBcDrivesByOwnerPublicKey(owner, [
-                generateBcDriveInfo({ owner: owner })
-            ]);
-        });
+        describe('by owner public key', () => addGetBcDrivesByOwnerPublicKey({
+            generateKey: () => generateAccount().publicKey,
+            generateBcDriveInfo: (owner) => generateBcDriveInfo(owner),
+            getBcDrives: (db, owner, pagingId, pageSize, sortOrder) => {
+                return db.getBcDrivesByOwnerPublicKey(owner, pagingId, pageSize, { sortOrder });
+            }
+        }));
     });
 
     describe('bcdrives', () => {
@@ -443,48 +547,6 @@ describe('storage db', () => {
                 return db.getDownloadsByDownloadChannelId(downloadChannelId, pagingId, pageSize, { sortOrder });
             }
         }));
-
-        const assertDownloadChannelsByConsumerPublicKey = (consumer, additionalConsumer) => {
-			// Arrange:
-			const downloadChannelInfos = [];
-			for (let i = 0; i < 5; ++i)
-                downloadChannelInfos.push({downloadChannelId: generateHash(), consumer: generateAccount().publicKey});
-			const expectedEntries = [];
-			additionalConsumer.forEach(consumer => {
-				const downloadChannelInfo = generateDownloadChannelInfo(generateHash(), consumer);
-				downloadChannelInfos.push(downloadChannelInfo);
-				expectedEntries.push(test.db.createDownloadChannelEntry(
-					downloadChannelInfos.length,
-					downloadChannelInfo.id,
-					downloadChannelInfo.consumer,
-					downloadChannelInfo.downloadSize,
-					downloadChannelInfo.downloadApprovalCount,
-                    downloadChannelInfo.listOfPublicKeys
-				));
-			});
-			expectedEntries.forEach(entry => {
-				delete entry._id;
-			});
-			const entries = test.db.createDownloadChannelEntries(downloadChannelInfos);
-
-			// Assert:
-			return test.db.runDbTest(
-				entries,
-				'downloadChannels',
-				db => db.getDownloadsByConsumerPublicKey(consumer),
-				entities =>
-					expect(entities).to.deep.equal(expectedEntries)
-			);
-		};
-
-        it('returns empty array for unknown id', () => {
-			return assertDownloadChannelsByConsumerPublicKey(generateAccount().publicKey, []);
-		});
-
-		it('returns matching entry', () => {
-			const consumer = generateAccount().publicKey;
-			return assertDownloadChannelsByConsumerPublicKey(consumer, [consumer]);
-		});
     });
 
     describe('download channels', () => {

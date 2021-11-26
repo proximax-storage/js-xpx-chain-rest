@@ -34,13 +34,16 @@ class StorageDb {
 
 	/**
 	 * Retrieves the bcdrive entries by account.
-	 * @param {object} publicKey The account public key.
+	 * @param {object} publicKey The owner's public key.
+	 * @param {string} id Paging id.
+	 * @param {int} pageSize Page size.
 	 * @returns {Promise.<array>} The bcdrive entries for account.
 	 */
-	getBcDriveByOwnerPublicKey(publicKey) {
+	getBcDrivesByOwnerPublicKey(publicKey, pagingId, pageSize, options) {
 		const buffer = Buffer.from(publicKey);
 		const fieldName = "drive.owner";
-		return this.catapultDb.queryDocuments('bcdrives', { [fieldName]: buffer });
+		const conditions = { $and: [ { [fieldName]: buffer } ] };
+		return this.catapultDb.queryDocuments('bcdrives', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);
 	}
 
     /**
@@ -176,20 +179,6 @@ class StorageDb {
 	}
 
 	/**
-	 * Retrieves the file downloads by file recipient.
-	 * @param {array<object>} publicKey Public key of file recipient.
-	 * @param {string} id Paging id.
-	 * @param {int} pageSize Page size.
-	 * @returns {Promise.<array>} File download info.
-	 */
-	getDownloadsByConsumerPublicKey(publicKey, pagingId, pageSize, options) {
-		const buffer = Buffer.from(publicKey);
-		const fieldName = "downloadChannelInfo.consumer";
-		const conditions = { $and: [ { [fieldName]: buffer } ] };
-		return this.catapultDb.queryDocuments('downloadChannels', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);
-	}
-
-	/**
 	* Retrieves filtered and paginated download channels.
 	* @param {object} filters Filters to be applied: 'download size', 'download approval count'
 	* @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
@@ -219,6 +208,9 @@ class StorageDb {
 				conditions.push({'downloadChannelInfo.downloadApprovalCount': {$gte: convertToLong(filters.fromDownloadApprovalCount)}});
 			else if (filters.toDownloadApprovalCount !== undefined)
 				conditions.push({'downloadChannelInfo.downloadApprovalCount': {$lte: convertToLong(filters.toDownloadApprovalCount)}});
+
+			if (filters.consumerKey !== undefined)
+				conditions.push({'downloadChannelInfo.consumer': filters.consumerKey});
 
 			return conditions;
 		}

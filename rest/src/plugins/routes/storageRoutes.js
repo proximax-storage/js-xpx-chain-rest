@@ -77,7 +77,9 @@ module.exports = {
 
 				downloadApprovalCount: params.downloadApprovalCount ? routeUtils.parseArgument(params, 'downloadApprovalCount', 'uint16') : undefined,
 				fromDownloadApprovalCount: params.fromDownloadApprovalCount ? routeUtils.parseArgument(params, 'fromDownloadApprovalCount', 'uint16') : undefined,
-				toDownloadApprovalCount: params.toDownloadApprovalCount ? routeUtils.parseArgument(params, 'toDownloadApprovalCount', 'uint16') : undefined
+				toDownloadApprovalCount: params.toDownloadApprovalCount ? routeUtils.parseArgument(params, 'toDownloadApprovalCount', 'uint16') : undefined,
+
+				consumerKey: params.consumerKey ? routeUtils.parseArgument(req.params, 'consumerKey', 'publicKey') : undefined
 			};
 
 			const options = routeUtils.parsePaginationArguments(params, service.config.pageSize);
@@ -94,22 +96,16 @@ module.exports = {
 		});
 
 		server.get('/account/:owner/drives_v2', (req, res, next) => {
+			const pagingOptions = routeUtils.parsePagingArguments(req.params);
 			const owner = routeUtils.parseArgument(req.params, 'owner', 'publicKey');
-			return db.getBcDriveByOwnerPublicKey(owner)
-				.then(routeUtils.createSender('bcDriveEntry').sendOne('owner', res, next));
+			return db.getBcDrivesByOwnerPublicKey(owner, pagingOptions.id, pagingOptions.pageSize)
+				.then(routeUtils.createSender('bcDriveEntry').sendArray('owner', res, next));
 		});
 
 		server.get('/account/:blsKey/replicators_v2', (req, res, next) => {
 			const blsKey = routeUtils.parseArgument(req.params, 'blsKey', 'blsPublicKey');
 			return db.getReplicatorByBlsKey(blsKey)
 				.then(routeUtils.createSender('replicatorEntry').sendOne('blsKey', res, next));
-		});
-
-		server.get('/account/:consumerKey/downloads_v2', (req, res, next) => {
-			const pagingOptions = routeUtils.parsePagingArguments(req.params);
-			const consumer = routeUtils.parseArgument(req.params, 'consumerKey', 'publicKey');
-			return db.getDownloadsByConsumerPublicKey(consumer, pagingOptions.id, pagingOptions.pageSize)
-				.then(routeUtils.createSender('downloadChannelEntry').sendArray('consumerKey', res, next));
 		});
     }
 };

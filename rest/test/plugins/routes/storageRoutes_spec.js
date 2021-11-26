@@ -77,35 +77,6 @@
 		}));
 	});
 
-	describe('/account/:owner/drives_v2', () => {
-		const addGetBcDriveByOwnerPublicKey = traits => {
-			// Arrange:
-			const keyGroups = [];
-			const db = test.setup.createCapturingDb('getBcDriveByOwnerPublicKey', keyGroups, [{value: 'this is nonsense'}]);
-			
-			// Act:
-			const registerRoutes = storageRoutes.register;
-			return test.route.executeSingle(
-				registerRoutes,
-				'/account/:owner/drives_v2',
-				'get',
-				{owner: traits.owner},
-				db,
-				null,
-				response => {
-					// Assert:
-					expect(keyGroups).to.deep.equal(traits.expected);
-					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'bcDriveEntry'});
-				}
-			);
-		};
-
-		it('with owner public key', () => addGetBcDriveByOwnerPublicKey({
-			owner: publicKeys.valid[0],
-			expected: [convert.hexToUint8(publicKeys.valid[0])]
-		}));
-    });
-
 	describe('/account/:blsKey/replicators_v2', () => {
 		const addGetReplicatorByBlsKey = traits => {
 			// Arrange:
@@ -136,22 +107,22 @@
 	});
 
 	const factory = {
-		createDownloadChannelsPagingRouteInfo: (routeName) => ({
+		createPagingRouteInfo: (routeName) => ({
 			routes: storageRoutes,
 			routeName,
 			createDb: (keyGroups, documents) => ({
-				getDownloadsByDownloadChannelId: (downloadChannelId, pageId, pageSize, options) => {
+				getBcDrivesByOwnerPublicKey: (owner, pageId, pageSize, options) => {
 					keyGroups.push({
-						downloadChannelId,
+						owner,
 						pageId,
 						pageSize,
 						options
 					});
 					return Promise.resolve(documents);
 				},
-				getDownloadsByConsumerPublicKey: (consumerKey, pageId, pageSize, options) => {
+				getDownloadsByDownloadChannelId: (downloadChannelId, pageId, pageSize, options) => {
 					keyGroups.push({
-						consumerKey,
+						downloadChannelId,
 						pageId,
 						pageSize,
 						options
@@ -163,9 +134,30 @@
 		})
 	};
 
-	const addGetTests = traits => {
+	const addGetBcDriveTests = traits => {
 		const pagingTestsFactory = test.setup.createPagingTestsFactory(
-			factory.createDownloadChannelsPagingRouteInfo(traits.routeName),
+			factory.createPagingRouteInfo(traits.routeName),
+			traits.valid.params,
+			traits.valid.expected,
+			'bcDriveEntry'
+		);
+
+		pagingTestsFactory.addDefault();
+		if (traits.invalid)
+			pagingTestsFactory.addFailureTest(traits.invalid.name, traits.invalid.params, traits.invalid.error);
+	};
+
+	describe('/account/:owner/drives_v2', () => addGetBcDriveTests({
+		routeName: '/account/:owner/drives_v2',
+		valid: {
+			params: { owner: publicKeys.valid[0] },
+			expected: { owner: convert.hexToUint8(publicKeys.valid[0]), options: undefined }
+		}
+	}));
+
+	const addGetDownloadChannelTests = traits => {
+		const pagingTestsFactory = test.setup.createPagingTestsFactory(
+			factory.createPagingRouteInfo(traits.routeName),
 			traits.valid.params,
 			traits.valid.expected,
 			'downloadChannelEntry'
@@ -176,19 +168,11 @@
 			pagingTestsFactory.addFailureTest(traits.invalid.name, traits.invalid.params, traits.invalid.error);
 	};
 
-	describe('/downloads_v2/:downloadChannelId', () => addGetTests({
+	describe('/downloads_v2/:downloadChannelId', () => addGetDownloadChannelTests({
 		routeName: '/downloads_v2/:downloadChannelId',
 		valid: {
 			params: { downloadChannelId: hashes256.valid[0] },
 			expected: { downloadChannelId: convert.hexToUint8(hashes256.valid[0]), options: undefined }
-		}
-	}));
-
-	describe('/account/:consumerKey/downloads_v2', () => addGetTests({
-		routeName: '/account/:consumerKey/downloads_v2',
-		valid: {
-			params: { consumerKey: publicKeys.valid[0] },
-			expected: { consumerKey: convert.hexToUint8(publicKeys.valid[0]), options: undefined }
 		}
 	}));
 });
