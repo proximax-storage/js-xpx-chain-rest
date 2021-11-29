@@ -44,7 +44,7 @@ const transfer = require('./transfer');
 const upgrade = require('./upgrade');
 
 const plugins = {
-	accountLink, accountProperties, aggregate, exchange, config, contract, lock, metadata, metadata_nem, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, transfer, upgrade
+	accountLink, accountProperties, aggregate, exchange, config, contract, lock, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, transfer, upgrade
 };
 
 /**

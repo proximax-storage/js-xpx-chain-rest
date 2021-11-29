@@ -235,7 +235,7 @@ describe('storage db', () => {
                 "bcdrives",
                 db => db.bcdrives(filters, options),
                 transactionsPage => {
-                    const returnedIds = transactionsPage.data.map(t => t.id);
+                    const returnedIds = transactionsPage.data.map(t => t.meta.id);
                     expect(transactionsPage.data.length).to.equal(expectedObjectIds.length);
                     expect(returnedIds.sort()).to.deep.equal(expectedObjectIds.sort());
                 }
@@ -255,7 +255,7 @@ describe('storage db', () => {
                 "bcdrives",
                 db => db.bcdrives({}, paginationOptions),
                 page => {
-                    const expected_keys = ['drive', 'id'];
+                    const expected_keys = ['drive', 'meta'];
                     expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
                 }
             );
@@ -347,9 +347,9 @@ describe('storage db', () => {
                     "bcdrives",
                     db => db.bcdrives({}, options),
                     transactionsPage => {
-                        expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));
-						expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
-						expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(30));
+                        expect(transactionsPage.data[0].meta.id).to.deep.equal(createObjectId(10));
+						expect(transactionsPage.data[1].meta.id).to.deep.equal(createObjectId(20));
+						expect(transactionsPage.data[2].meta.id).to.deep.equal(createObjectId(30));
                     }
                 );
             });
@@ -369,9 +369,9 @@ describe('storage db', () => {
                     "bcdrives",
                     db => db.bcdrives({}, options),
                     transactionsPage => {
-                        expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(30));
-                        expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
-                        expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(10));
+                        expect(transactionsPage.data[0].meta.id).to.deep.equal(createObjectId(30));
+                        expect(transactionsPage.data[1].meta.id).to.deep.equal(createObjectId(20));
+                        expect(transactionsPage.data[2].meta.id).to.deep.equal(createObjectId(10));
                     }
                 );
             });
@@ -572,7 +572,7 @@ describe('storage db', () => {
                 "downloadChannels",
                 db => db.downloadChannels(filters, options),
                 transactionsPage => {
-                    const returnedIds = transactionsPage.data.map(t => t.id);
+                    const returnedIds = transactionsPage.data.map(t => t.meta.id);
                     expect(transactionsPage.data.length).to.equal(expectedObjectIds.length);
                     expect(returnedIds.sort()).to.deep.equal(expectedObjectIds.sort());
                 }
@@ -592,7 +592,7 @@ describe('storage db', () => {
                 "downloadChannels",
                 db => db.downloadChannels({}, paginationOptions),
                 page => {
-                    const expected_keys = ['downloadChannelInfo', 'id'];
+                    const expected_keys = ['downloadChannelInfo', 'meta'];
                     expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
                 }
             );
@@ -675,9 +675,9 @@ describe('storage db', () => {
                     "downloadChannels",
                     db => db.downloadChannels({}, options),
                     transactionsPage => {
-                        expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));
-						expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
-						expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(30));
+                        expect(transactionsPage.data[0].meta.id).to.deep.equal(createObjectId(10));
+						expect(transactionsPage.data[1].meta.id).to.deep.equal(createObjectId(20));
+						expect(transactionsPage.data[2].meta.id).to.deep.equal(createObjectId(30));
                     }
                 );
             });
@@ -697,9 +697,9 @@ describe('storage db', () => {
                     "downloadChannels",
                     db => db.downloadChannels({}, options),
                     transactionsPage => {
-                        expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(30));
-                        expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
-                        expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(10));
+                        expect(transactionsPage.data[0].meta.id).to.deep.equal(createObjectId(30));
+                        expect(transactionsPage.data[1].meta.id).to.deep.equal(createObjectId(20));
+                        expect(transactionsPage.data[2].meta.id).to.deep.equal(createObjectId(10));
                     }
                 );
             });
@@ -870,7 +870,7 @@ describe('storage db', () => {
                 "replicators",
                 db => db.replicators(filters, options),
                 transactionsPage => {
-                    const returnedIds = transactionsPage.data.map(t => t.id);
+                    const returnedIds = transactionsPage.data.map(t => t.meta.id);
                     expect(transactionsPage.data.length).to.equal(expectedObjectIds.length);
                     expect(returnedIds.sort()).to.deep.equal(expectedObjectIds.sort());
                 }
@@ -889,7 +889,7 @@ describe('storage db', () => {
                 "replicators",
                 db => db.replicators({}, paginationOptions),
                 page => {
-                    const expected_keys = ['replicator', 'id'];
+                    const expected_keys = ['replicator', 'meta'];
                     expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
                 }
             );
@@ -965,9 +965,9 @@ describe('storage db', () => {
                     "replicators",
                     db => db.replicators({}, options),
                     transactionsPage => {
-                        expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));
-                        expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
-                        expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(30));
+                        expect(transactionsPage.data[0].meta.id).to.deep.equal(createObjectId(10));
+                        expect(transactionsPage.data[1].meta.id).to.deep.equal(createObjectId(20));
+                        expect(transactionsPage.data[2].meta.id).to.deep.equal(createObjectId(30));
                     }
                 );
             });
@@ -986,9 +986,9 @@ describe('storage db', () => {
                     "replicators",
                     db => db.replicators({}, options),
                     transactionsPage => {
-                        expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(30));
-                        expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
-                        expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(10));
+                        expect(transactionsPage.data[0].meta.id).to.deep.equal(createObjectId(30));
+                        expect(transactionsPage.data[1].meta.id).to.deep.equal(createObjectId(20));
+                        expect(transactionsPage.data[2].meta.id).to.deep.equal(createObjectId(10));
                     }
                 );
             });
