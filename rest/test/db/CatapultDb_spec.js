@@ -866,7 +866,7 @@ describe('catapult db', () => {
 				{ transactions: dbTransactions },
 				db => db.transactions(TransactionGroups.confirmed, filters, options),
 				transactionsPage => {
-					const returnedIds = transactionsPage.data.map(t => t.id);
+					const returnedIds = transactionsPage.data.map(t => t.meta.id);
 					expect(transactionsPage.data.length).to.equal(expectedObjectIds.length);
 					expect(returnedIds.sort()).to.deep.equal(expectedObjectIds.sort());
 				}
@@ -884,7 +884,7 @@ describe('catapult db', () => {
 				{ transactions: dbTransactions },
 				db => db.transactions(TransactionGroups.confirmed, {}, paginationOptions),
 				page => {
-					const expected_keys = ['meta', 'transaction', 'id'];
+					const expected_keys = ['meta', 'transaction'];
 					expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
 				}
 			);
@@ -1036,7 +1036,7 @@ describe('catapult db', () => {
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
-					sortField: 'id',
+					sortField: '_id',
 					sortDirection: 1
 				};
 
@@ -1045,9 +1045,9 @@ describe('catapult db', () => {
 					{ transactions: dbTransactions() },
 					db => db.transactions(TransactionGroups.confirmed, [], options),
 					transactionsPage => {
-						expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));
-						expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
-						expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(30));
+						expect(transactionsPage.data[0].meta.id).to.deep.equal(createObjectId(10));
+						expect(transactionsPage.data[1].meta.id).to.deep.equal(createObjectId(20));
+						expect(transactionsPage.data[2].meta.id).to.deep.equal(createObjectId(30));
 					}
 				);
 			});
@@ -1065,9 +1065,9 @@ describe('catapult db', () => {
 					{ transactions: dbTransactions() },
 					db => db.transactions(TransactionGroups.confirmed, [], options),
 					transactionsPage => {
-						expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(30));
-						expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
-						expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(10));
+						expect(transactionsPage.data[0].meta.id).to.deep.equal(createObjectId(30));
+						expect(transactionsPage.data[1].meta.id).to.deep.equal(createObjectId(20));
+						expect(transactionsPage.data[2].meta.id).to.deep.equal(createObjectId(10));
 					}
 				);
 			});
@@ -1251,7 +1251,7 @@ describe('catapult db', () => {
 							dbTransactions(),
 							db => db.transactions(group, {}, paginationOptions),
 							transactionsPage => {
-								const returnedIds = transactionsPage.data.map(t => t.id);
+								const returnedIds = transactionsPage.data.map(t => t.meta.id);
 								expect(transactionsPage.data.length).to.equal(expectedObjectIds.length);
 								expect(returnedIds.sort()).to.deep.equal(expectedObjectIds.sort());
 							}
@@ -1270,7 +1270,7 @@ describe('catapult db', () => {
 						db => db.transactions(TransactionGroups.confirmed, {}, paginationOptions),
 						transactionsPage => {
 							expect(transactionsPage.data.length).to.equal(1);
-							expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));
+							expect(transactionsPage.data[0].meta.id).to.deep.equal(createObjectId(10));
 						}
 					));
 			});

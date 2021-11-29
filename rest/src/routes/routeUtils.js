@@ -210,9 +210,13 @@ const routeUtils = {
 	 * @returns {object} Parsed pagination options.
 	 */
 	parsePaginationArguments: (args, optionsPageSize) => {
+		let sortBy = args.sortField || '_id';
+		if (sortBy === 'id')
+			sortBy = '_id';
+
 		const parsedArgs = {
 			offset: args.offset,
-			sortField: args.sortField || 'id',
+			sortField: sortBy,
 			sortDirection: 'desc' === args.order ? -1 : 1
 		};
 
