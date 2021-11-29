@@ -35,7 +35,7 @@ class StorageDb {
 	/**
 	 * Retrieves the bcdrive entries by account.
 	 * @param {object} publicKey The owner's public key.
-	 * @param {string} id Paging id.
+	 * @param {string} pagingId Paging id.
 	 * @param {int} pageSize Page size.
 	 * @returns {Promise.<array>} The bcdrive entries for account.
 	 */
@@ -43,7 +43,7 @@ class StorageDb {
 		const buffer = Buffer.from(publicKey);
 		const fieldName = "drive.owner";
 		const conditions = { $and: [ { [fieldName]: buffer } ] };
-		return this.catapultDb.queryDocuments('bcdrives', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);
+		return this.catapultDb.queryPagedDocuments('bcdrives', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);
 	}
 
     /**

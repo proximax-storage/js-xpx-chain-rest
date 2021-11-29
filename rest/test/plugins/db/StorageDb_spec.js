@@ -62,9 +62,9 @@ describe('storage db', () => {
     });
 
     describe('bcdrive entries', () => {
-        const generateBcDriveInfo = (additionalOwner) => { return { 
+        const generateBcDriveInfo = (owner) => { return { 
             multisig: generateAccount(), 
-            owner: additionalOwner ? additionalOwner : generateAccount().publicKey, 
+            owner: owner ? owner : generateAccount().publicKey, 
             rootHash: generateHash(),
             size: 1000,
             usedSize: 150,
@@ -141,8 +141,7 @@ describe('storage db', () => {
                         entries,
                         'bcdrives',
                         db => traits.getBcDrives(db, key, id, 100, sortOrder),
-                        entities =>
-                            expect(entities).to.deep.equal(expectedEntries)
+                        entities => expect(entities).to.deep.equal(expectedEntries)
                     );
                 };
 
