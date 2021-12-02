@@ -127,15 +127,37 @@ const storagePlugin = {
 			id: 				ModelType.binary,
 			owner: 				ModelType.binary,
 			downloadDataCdi:	ModelType.binary,
-			uploadSize:			ModelType.uint64,
+			expectedUploadSize: ModelType.uint64,
+			actualUploadSize: 	ModelType.uint64,
+			folderName: 		ModelType.binary,
+			readyForApproval: 	ModelType.uint8,
 		});
 
 		builder.addSchema('completedDataModification', {
 			id:					ModelType.binary,
 			owner:				ModelType.binary,
 			downloadDataCdi:	ModelType.binary,
-			uploadSize:			ModelType.uint64,
+			expectedUploadSize: ModelType.uint64,
+			actualUploadSize: 	ModelType.uint64,
+			folderName: 		ModelType.binary,
+			readyForApproval: 	ModelType.uint8,
 			state:				ModelType.uint8,
+		});
+
+		builder.addSchema('confirmedUsedSizes', {
+			replicator: ModelType.binary,
+			size: ModelType.uint64,
+		});
+
+		builder.addSchema('verifications.opinions', {
+			prover: ModelType.binary,
+			result: ModelType.uint8,
+		});
+
+		builder.addSchema('verifications', {
+			verificationTrigger: ModelType.binary,
+			state: ModelType.binary,
+			results: { type: ModelType.array, schemaName: 'verifications.opinions' },
 		});
 
 		builder.addSchema('bcdrives', {
@@ -149,6 +171,9 @@ const storagePlugin = {
 			replicatorCount:				ModelType.uint16,
 			activeDataModifications: 		{ type: ModelType.array, schemaName: 'activeDataModification' },
 			completedDataModifications: 	{ type: ModelType.array, schemaName: 'completedDataModification' },
+			confirmedUsedSizes:				{ type: ModelType.array, schemaName: 'confirmedUsedSizes' },
+			replicators: 					{ type: ModelType.array, schemaName: ModelType.binary },
+			verifications: 					{ type: ModelType.array, schemaName: 'verifications' },
 		});
 
 		builder.addSchema('downloadChannelEntry', {

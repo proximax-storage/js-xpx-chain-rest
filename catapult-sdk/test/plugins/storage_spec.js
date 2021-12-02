@@ -23,7 +23,7 @@ describe('storage plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 26);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 29);
 			expect(modelSchema).to.contain.all.keys([
 				'prepareBcDrive',
 				'dataModification',
@@ -45,6 +45,9 @@ describe('storage plugin', () => {
 				'bcDriveEntry',
 				'activeDataModification',
 				'completedDataModification',
+				'confirmedUsedSizes',
+				'verifications.opinions',
+				'verifications',
 				'bcdrives',
 				'downloadChannelEntry',
 				'cumulativePayments',
@@ -188,7 +191,26 @@ describe('storage plugin', () => {
 				'state'
 			]);
 
-			expect(Object.keys(modelSchema['bcdrives']).length).to.equal(10);
+			expect(Object.keys(modelSchema['confirmedUsedSizes']).length).to.equal(2);
+			expect(modelSchema['confirmedUsedSizes']).to.contain.all.keys([
+				'replicator',
+				'size'
+			]);
+
+			expect(Object.keys(modelSchema['verifications.opinions']).length).to.equal(2);
+			expect(modelSchema['verifications.opinions']).to.contain.all.keys([
+				'prover',
+				'result'
+			]);
+
+			expect(Object.keys(modelSchema['verifications']).length).to.equal(3);
+			expect(modelSchema['verifications']).to.contain.all.keys([
+				'verificationTrigger',
+				'state',
+				'results'
+			]);
+
+			expect(Object.keys(modelSchema['bcdrives']).length).to.equal(13);
 			expect(modelSchema['bcdrives']).to.contain.all.keys([
 				'multisig',
 				'multisigAddress',
@@ -199,7 +221,10 @@ describe('storage plugin', () => {
 				'metaFilesSize',
 				'replicatorCount',
 				'activeDataModifications',
-				'completedDataModifications'
+				'completedDataModifications',
+				'confirmedUsedSizes',
+				'replicators',
+				'verifications'
 			]);
 
 			expect(Object.keys(modelSchema['downloadChannelEntry']).length).to.equal(1);
