@@ -120,7 +120,7 @@ const storagePlugin = {
 		});
 
 		builder.addSchema('bcDriveEntry', {
-			bcdrive: { type: ModelType.object, schemaName: 'bcdrives' }
+			drive: { type: ModelType.object, schemaName: 'bcdrives' }
 		});
 
 		builder.addSchema('activeDataModification', {
