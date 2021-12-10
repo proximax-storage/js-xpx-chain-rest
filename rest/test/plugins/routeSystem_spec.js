@@ -46,7 +46,7 @@ describe('route system', () => {
 			'contract',
 			'lock',
 			'metadata',
-			'metadata_nem',
+			'metadata_v2',
 			'mosaic',
 			'multisig',
 			'namespace',

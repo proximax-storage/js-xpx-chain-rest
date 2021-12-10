@@ -27,7 +27,8 @@ const extractFromMetadata = (group, transaction) => ({
 });
 
 function getBuffer(value) {
-	return value.buffer instanceof ArrayBuffer ? value : value.buffer
+	const convertedValue = value.buffer instanceof ArrayBuffer ? (value instanceof Buffer ? value : Buffer.from(value)) : value.buffer
+	return convertedValue ? convertedValue.toString() : value.toString()
 }
 
 module.exports = {
@@ -64,33 +65,63 @@ module.exports = {
 	 */
 	transactionStatusesByHashes: (db, hashes, additionalTransactionStates) => {
 		const transactionStates = [].concat(
-			[{ dbPostfix: 'Unconfirmed', friendlyName: 'unconfirmed' }],
+			[{ dbPostfix: 'Unconfirmed', friendlyName: 'unconfirmed', priority: 3 }],
 			additionalTransactionStates,
-			[{ dbPostfix: '', friendlyName: 'confirmed' }]
+			[{ dbPostfix: '', friendlyName: 'confirmed', priority: 4 }]
 		);
+
+		const transactions = {};
 
 		const promises = [];
 		transactionStates.forEach(state => {
+			const priority = state.priority;
 			const dbPromise = db.transactionsByHashes(state.friendlyName, hashes);
-			promises.push(dbPromise.then(objs => objs.map(transaction => extractFromMetadata(state.friendlyName, transaction))));
+			promises.push(dbPromise.then(objs => objs.map(transaction => {
+				let result = extractFromMetadata(state.friendlyName, transaction);
+				let tmp = getBuffer(result.hash);
+				let previous = transactions[tmp];
+
+				if (previous) {
+					if (previous.priority < priority) {
+						transactions[tmp] = {
+							transaction: result,
+							priority: priority,
+						}
+					}
+				} else {
+					transactions[tmp] = {
+						transaction: result,
+						priority: priority,
+					}
+				}
+			})));
 		});
 
 		return Promise.all(promises).then(
-			tuple => db.transactionsByHashesFailed(hashes).then(objs => {
-				const fetchedStatuses = [].concat(...tuple)
+			() => db.transactionsByHashesFailed(hashes).then(objs => {
 				objs.forEach(failureStatus => {
-					let found = false;
-					fetchedStatuses.forEach(status => {
-						if (Buffer.compare(getBuffer(failureStatus.hash), getBuffer(status.hash)) === 0) {
-							found = true;
+					let tmp = getBuffer(failureStatus.hash);
+					let previous = transactions[tmp];
+
+					if (!previous) {
+						transactions[tmp] = {
+							transaction: Object.assign(failureStatus, { group: 'failed' }),
+							priority: 4,
 						}
-					})
-					if (!found) {
-						fetchedStatuses.push(Object.assign(failureStatus, { group: 'failed' }));
 					}
 				})
 
-				return fetchedStatuses
+				const statuses = [];
+				for (let i = 0; i < hashes.length; ++i) {
+					let tmp = getBuffer(hashes[i]);
+					const result = transactions[tmp];
+					if (result) {
+						statuses.push(result.transaction);
+						delete transactions[tmp];
+					}
+				}
+
+				return statuses;
 			})
 		);
 	}

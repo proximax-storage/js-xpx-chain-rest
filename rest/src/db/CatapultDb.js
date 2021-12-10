@@ -44,7 +44,7 @@ const createAccountTransactionsAllConditions = (publicKey, networkId) => {
 };
 
 const createSanitizer = () => ({
-	sanitizerIds: function(dbObjects) {
+	sanitizerIds: function (dbObjects) {
 		dbObjects.forEach(dbObject => {
 			dbObject.id = dbObject._id;
 			delete dbObject._id;
@@ -308,7 +308,7 @@ class CatapultDb {
 		];
 
 		// rename _id to id
-		facet.push({ $set: { id: '$_id' } });
+		facet.push({ $set: { "meta.id": '$_id' } });
 		removedFields.push('_id');
 
 		if (0 < Object.keys(removedFields).length)
@@ -330,7 +330,7 @@ class CatapultDb {
 		});
 
 		return this.database.collection(collectionName)
-			.aggregate(conditions, { promoteLongs: false })
+			.aggregate(conditions, { promoteLongs: false , allowDiskUse: true })
 			.toArray()
 			.then(result => {
 				const formattedResult = result[0];
@@ -391,6 +391,8 @@ class CatapultDb {
 
 			if (filters.height !== undefined)
 				conditions.push({ 'meta.height': convertToLong(filters.height) });
+			else if (filters.fromHeight !== undefined && filters.toHeight !== undefined)
+				conditions.push({ 'meta.height': { $gte: convertToLong(filters.fromHeight), $lte: convertToLong(filters.toHeight) } });
 			else if (filters.fromHeight !== undefined)
 				conditions.push({ 'meta.height': { $gte: convertToLong(filters.fromHeight) } });
 			else if (filters.toHeight !== undefined)
@@ -414,6 +416,130 @@ class CatapultDb {
 		const conditions = buildConditions();
 
 		return this.queryPagedDocuments_2(conditions, removedFields, sortConditions, TransactionGroup[group], options);
+	}
+
+	/**
+	 * Retrieves count of transactions by transaction type.
+	 * @param {array} types Array of transaction types.
+	 * @param {object} filter Filter for payload(only JSON) of a transaction. 
+	 * Only applicable for JSON. Optional. (Example: { key : k1, value : v1 }).
+	 * @returns {Promise.<object>} array of the number of transactions divided by type.
+	 */
+	transactionsCountByType(types, filter) {
+		const matching = {
+			$match: { "transaction.message.payload": { $exists: true, $ne: null } }
+		};
+
+		const grouping = {
+			$group: { "_id": { type: "$transaction.type" }, transactions: { $push: '$$ROOT' } }
+		};
+
+		const payloadDecoding = {
+			$addFields: {
+				transactions:
+				{
+					$function:
+					{
+						body: `function (transactions) {
+							var base64Decoder = function (value) {
+								try {
+									value = JSON.stringify(value)
+									value = JSON.parse(value)
+									value = value["$binary"]
+									
+									var base64chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+									value = value.replace(new RegExp('[^'+base64chars.split("")+'=]', 'g'), "");
+									 
+									var p = (value.charAt(value.length-1) == '=' ? 
+											(value.charAt(value.length-2) == '=' ? 'AA' : 'A') : ""); 
+									var r = ""; 
+									value = value.substr(0, value.length - p.length) + p;
+									
+									var base64inv = {};
+									for (var i = 0; i < base64chars.length; i++) 
+									{ 
+									   base64inv[base64chars[i]] = i; 
+									}
+									 
+									for (var c = 0; c < value.length; c += 4) {
+									   var n = (base64inv[value.charAt(c)] << 18) + (base64inv[value.charAt(c+1)] << 12) +
+											   (base64inv[value.charAt(c+2)] << 6) + base64inv[value.charAt(c+3)];
+										
+									   r += String.fromCharCode((n >>> 16) & 255, (n >>> 8) & 255, n & 255);
+									}
+									
+									return JSON.parse(r.substring(0, r.length - p.length));
+							   } catch (e) {
+									return {}
+							   }
+							}
+
+							transactions.forEach(function (value, index, array) {
+								array[index].transaction.message.payload = base64Decoder(value.transaction.message.payload);
+							});
+
+							return transactions;
+						}`,
+						args: ["$transactions"],
+						lang: "js"
+					}
+				},
+			}
+		};
+
+		const projectFiltering = {
+			$project: {
+				transactions: {
+					$filter: {
+						input: "$transactions.transaction",
+						as: "transaction",
+						cond: {}
+					}
+				},
+			}
+		}
+
+		if (filter) {
+			projectFiltering.$project.transactions.$filter.cond = { $eq: ["$$transaction.message.payload." + filter.key, filter.value] }
+		} else {
+			projectFiltering.$project.transactions.$filter.cond = { $in: ["$$transaction.type", types] }
+		}
+
+		const project = {
+			$project: {
+				_id: 0, item: 1, count: {
+					$cond: {
+						if: { $isArray: "$transactions" },
+						then: { $size: "$transactions" },
+						else: 0
+					}
+				}, type: { $first: "$transactions.type" }
+			}
+		};
+
+		const zeroMatching = {
+			$match: { "count": { $ne: 0 } }
+		};
+
+		const aggregateExpressions = [];
+		if (filter) {
+			aggregateExpressions.push(matching);
+		}
+
+		aggregateExpressions.push(grouping);
+
+		if (filter) {
+			aggregateExpressions.push(payloadDecoding);
+		}
+
+		aggregateExpressions.push(projectFiltering);
+		aggregateExpressions.push(project);
+		aggregateExpressions.push(zeroMatching);
+
+		return this.database.collection('transactions')
+			.aggregate(aggregateExpressions)
+			.toArray()
+			.then(data => { return data; });
 	}
 
 	transactionsByIdsImpl(collectionName, conditions) {

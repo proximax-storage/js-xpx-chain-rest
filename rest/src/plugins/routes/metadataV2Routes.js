@@ -25,7 +25,7 @@ module.exports = {
 	register: (server, db, services) => {
 		const metadataSender = routeUtils.createSender('metadata');
 
-		server.get('/metadata_nem', (req, res, next) => {
+		server.get('/metadata_v2', (req, res, next) => {
 			const { params } = req;
 			const sourceAddress = params.sourceAddress ? routeUtils.parseArgument(params, 'sourceAddress', 'address') : undefined;
 			const targetKey = params.targetKey ? routeUtils.parseArgument(params, 'targetKey', 'publicKey') : undefined;
@@ -43,7 +43,7 @@ module.exports = {
 		routeUtils.addGetPostDocumentRoutes(
 			server,
 			metadataSender,
-			{ base: '/metadata_nem', singular: 'compositeHash', plural: 'compositeHashes' },
+			{ base: '/metadata_v2', singular: 'compositeHash', plural: 'compositeHashes' },
 			params => db.metadatasByCompositeHash(params),
 			routeUtils.namedParserMap.hash256
 		);

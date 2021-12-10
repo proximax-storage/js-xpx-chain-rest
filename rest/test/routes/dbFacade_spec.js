@@ -55,7 +55,18 @@ describe('db facade', () => {
 				.callsFake(group => Promise.resolve(traits[group] || []));
 
 			// Act:
-			const hashes = [1, 2, 3, 4];
+			const hashes = [];
+			for (let key in traits) {
+				if (key === "expected") continue;
+				const arr = traits[key];
+				for (let i = 0; i < arr.length; ++i) {
+					if (arr[i].hash) {
+						hashes.push(arr[i].hash);
+					} else if (arr[i].meta.hash) {
+						hashes.push(arr[i].meta.hash);
+					}
+				}
+			}
 			const transactionStates = [{ dbPostfix: 'Custom', friendlyName: 'custom' }];
 			const db = new CatapultDb({ networkId: Mijin_Test_Network });
 			return dbFacade.transactionStatusesByHashes(db, hashes, transactionStates).then(result => {
@@ -120,23 +131,23 @@ describe('db facade', () => {
 				confirmed: [createTransaction(55, 66, 77), createTransaction(88, 99, 11)],
 				custom: [createTransaction(87, 98, 43)],
 				expected: [
-					createUnconfirmedStatus(111, 222), createUnconfirmedStatus(333, 444),
-					createCustomStatus(87, 98, 43),
-					createConfirmedStatus(55, 66, 77), createConfirmedStatus(88, 99, 11),
 					createFailedStatus(123), createFailedStatus(456),
+					createUnconfirmedStatus(111, 222), createUnconfirmedStatus(333, 444),
+					createConfirmedStatus(55, 66, 77), createConfirmedStatus(88, 99, 11),
+					createCustomStatus(87, 98, 43),
 				]
 			}));
 
-		it('transaction has two statuses failed + something, then we need return not failure state', () =>
+		it('transaction has two statuses, then we need return state based on priority', () =>
 			addTransactionStatusesByHashesTest({
 				failed: [createFailedStatus(123), createFailedStatus(456), createFailedStatus(87)],
-				unconfirmed: [createTransaction(456, 99, 0)],
 				confirmed: [createTransaction(123, 66, 77) ],
+				unconfirmed: [createTransaction(456, 99, 0), createTransaction(123, 99, 0)],
 				custom: [createTransaction(87, 98, 43)],
 				expected: [
+					createConfirmedStatus(123, 66, 77),
 					createUnconfirmedStatus(456, 99, 11),
 					createCustomStatus(87, 98, 43),
-					createConfirmedStatus(123, 66, 77),
 				]
 			}));
 	});

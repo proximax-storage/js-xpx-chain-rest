@@ -76,6 +76,7 @@ describe('all routes', () => {
 		// Assert:
 		test.assert.assertRoutes(routes, [
 			'/account',
+			'/transactions/count',
 			'/transactions/:group',
 			'/transactionStatus'
 		]);

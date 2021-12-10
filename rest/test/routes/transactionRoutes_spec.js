@@ -259,7 +259,9 @@ describe('transaction routes', () => {
 						{ filter: 'address', param: testAddressString, value: testAddress },
 						{ filter: 'signerPublicKey', param: testPublickeyString, value: testPublickey },
 						{ filter: 'recipientAddress', param: testAddressString, value: testAddress },
-						{ filter: 'embedded', param: 'true', value: true }
+						{ filter: 'embedded', param: 'true', value: true },
+						{ filter: 'fromHeight', param: '1', value: [1,0] },
+						{ filter: 'toHeight', param: '5', value: [5,0] }
 					];
 
 					testCases.forEach(testCase => {
@@ -280,6 +282,28 @@ describe('transaction routes', () => {
 								signerPublicKey: undefined,
 								embedded: undefined,
 								transactionTypes: [1, 5, 25]
+							});
+						});
+					});
+
+					it('fromHeightToHeight', () => {
+						const req = { params: {
+								group: TransactionGroups.confirmed,
+								fromHeight: '1',
+								toHeight: '10'
+							} };
+
+						// Act + Assert
+						return mockServer.callRoute(route, req).then(() => {
+							expect(dbTransactionsFake.firstCall.args[1]).to.deep.equal({
+								address: undefined,
+								height: undefined,
+								fromHeight: [1, 0],
+								toHeight: [10, 0],
+								recipientAddress: undefined,
+								signerPublicKey: undefined,
+								embedded: undefined,
+								transactionTypes: undefined
 							});
 						});
 					});
@@ -367,6 +391,49 @@ describe('transaction routes', () => {
 						// Assert:
 						expect(mockServer.next.calledOnce).to.equal(true);
 						expect(mockServer.next.firstCall.args[0].statusCode).to.equal(404);
+					});
+				});
+			});
+
+			describe('count by type', () => {
+				const fakeTransaction = { meta: { addresses: [] }, transaction: { type: 16718 } };
+				const fakePaginatedTransaction = {
+					data: [fakeTransaction],
+					pagination: {
+						pageNumber: 1,
+						pageSize: 10,
+						totalEntries: 1,
+						totalPages: 1
+					}
+				};
+				const dbTransactionsFake = sinon.fake.resolves(fakePaginatedTransaction);
+
+				const mockServer = new MockServer();
+				const db = { transactions: dbTransactionsFake };
+				const services = {
+					config: {
+						pageSize: {
+							min: 10,
+							max: 100,
+							default: 20
+						}
+					}
+				};
+				transactionRoutes.register(mockServer.server, db, services);
+
+				const route = mockServer.getRoute('/transactions/count').post();
+
+				beforeEach(() => {
+					mockServer.resetStats();
+					dbTransactionsFake.resetHistory();
+				});
+
+				describe('return transactions count', () => {
+					it('throws transaction types are not provided', () => {
+						const req = { params: {}};
+
+						// Act + Assert:
+						expect(() => mockServer.callRoute(route, req)).to.throw('transactionTypes not provided or empty');
 					});
 				});
 			});

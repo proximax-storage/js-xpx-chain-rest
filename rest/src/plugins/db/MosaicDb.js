@@ -31,6 +31,10 @@ class MosaicDb {
 		this.catapultDb = db;
 	}
 
+	getCatapultDb() {
+		return this.catapultDb;
+	}
+
 	// region mosaic retrieval
 
 	/**

@@ -23,7 +23,7 @@ describe('exchange plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 11);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 12);
 			expect(modelSchema).to.contain.all.keys([
 				'exchangeOffer',
 				'offerWithDuration',

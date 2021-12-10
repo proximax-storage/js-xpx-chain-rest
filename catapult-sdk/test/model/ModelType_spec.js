@@ -34,13 +34,14 @@ describe('model type enumeration', () => {
 			objectId: 6,
 			statusCode: 7,
 			string: 8,
-			uint16: 9,
-			uint32: 10,
-			uint64: 11,
-			uint64HexIdentifier: 12,
-			int: 13,
-			boolean: 14,
-			max: 14
+			uint8: 9,
+			uint16: 10,
+			uint32: 11,
+			uint64: 12,
+			uint64HexIdentifier: 13,
+			int: 14,
+			boolean: 15,
+			max: 15
 		});
 	});
 });

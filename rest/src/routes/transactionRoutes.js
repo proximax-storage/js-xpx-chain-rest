@@ -117,5 +117,25 @@ module.exports = {
 			return db[dbTransactionsRetriever](params.group, transactionIds)
 				.then(sender.sendArray(params.transactionIds || params.hashes, res, next));
 		});
+
+		server.post('/transactions/count', (req, res, next) => {
+			const { params } = req;
+			const filter = params.filter ? routeUtils.parseArgument(params, 'filter', input => {
+				if (!input.key) {
+					throw errors.createInvalidArgumentError(`invalid key ${input}`);
+				} else if (!input.value) {
+					throw errors.createInvalidArgumentError(`invalid value ${input}`);
+				} else {
+					return input;
+				}
+			}) : undefined;
+
+			if (!params.transactionTypes || !params.transactionTypes.length) {
+				throw errors.createInvalidArgumentError('transactionTypes not provided or empty');
+			}
+
+			return db.transactionsCountByType(params.transactionTypes, filter)
+				.then(routeUtils.createSender('transactionsCount').sendArray('transactionTypes', res, next));
+		});
 	}
 };

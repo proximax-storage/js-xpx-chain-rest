@@ -23,7 +23,7 @@ describe('service plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 24);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 25);
 			expect(modelSchema).to.contain.all.keys([
 				'prepareDrive',
 				'joinToDrive',
