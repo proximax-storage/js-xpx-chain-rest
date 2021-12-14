@@ -77,35 +77,6 @@
 		}));
 	});
 
-	describe('/account/:blsKey/replicators_v2', () => {
-		const addGetReplicatorByBlsKey = traits => {
-			// Arrange:
-			const keyGroups = [];
-			const db = test.setup.createCapturingDb('getReplicatorByBlsKey', keyGroups, [{value: 'this is nonsense'}]);
-			
-			// Act:
-			const registerRoutes = storageRoutes.register;
-			return test.route.executeSingle(
-				registerRoutes,
-				'/account/:blsKey/replicators_v2',
-				'get',
-				{blsKey: traits.blsKey},
-				db,
-				null,
-				response => {
-					// Assert:
-					expect(keyGroups).to.deep.equal(traits.expected);
-					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'replicatorEntry'});
-				}
-			);
-		};
-
-		it('with replicator bls key', () => addGetReplicatorByBlsKey({
-			blsKey: blsPublicKey.valid[0],
-			expected: [convert.hexToUint8(blsPublicKey.valid[0])]
-		}));
-	});
-
 	const factory = {
 		createPagingRouteInfo: (routeName) => ({
 			routes: storageRoutes,
@@ -114,6 +85,15 @@
 				getBcDrivesByOwnerPublicKey: (owner, pageId, pageSize, options) => {
 					keyGroups.push({
 						owner,
+						pageId,
+						pageSize,
+						options
+					});
+					return Promise.resolve(documents);
+				},
+				getReplicatorByBlsKey: (blsKey, pageId, pageSize, options) => {
+					keyGroups.push({
+						blsKey,
 						pageId,
 						pageSize,
 						options
@@ -152,6 +132,27 @@
 		valid: {
 			params: { owner: publicKeys.valid[0] },
 			expected: { owner: convert.hexToUint8(publicKeys.valid[0]), options: undefined }
+		}
+	}));
+
+	const addGetReplicatorByBlsKey = traits => {
+		const pagingTestsFactory = test.setup.createPagingTestsFactory(
+			factory.createPagingRouteInfo(traits.routeName),
+			traits.valid.params,
+			traits.valid.expected,
+			'replicatorEntry'
+		);
+
+		pagingTestsFactory.addDefault();
+		if (traits.invalid)
+			pagingTestsFactory.addFailureTest(traits.invalid.name, traits.invalid.params, traits.invalid.error);
+	};
+
+	describe('/account/:blsKey/replicators_v2', () => addGetReplicatorByBlsKey({
+		routeName: '/account/:blsKey/replicators_v2',
+		valid: {
+			params: { blsKey: blsPublicKey.valid[0] },
+			expected: { blsKey: convert.hexToUint8(blsPublicKey.valid[0]), options: undefined }
 		}
 	}));
 

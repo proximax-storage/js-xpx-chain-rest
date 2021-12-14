@@ -114,12 +114,15 @@ class StorageDb {
 	/**
 	 * Retrieves the replicator entries by account.
 	 * @param {object} blsKey The replicator bls key.
-	 * @returns {Promise.<object>} The replicator entry.
+	 * @param {string} pagingId Paging id.
+	 * @param {int} pageSize Page size.
+	 * @returns {Promise.<array>} The replicator entries for account.
 	 */
-	getReplicatorByBlsKey(blsKey) {
+	getReplicatorsByBlsKey(blsKey, pagingId, pageSize, options) {
 		const buffer = Buffer.from(blsKey);
 		const fieldName = "replicator.blsKey";
-		return this.catapultDb.queryDocuments('replicators', { [fieldName]: buffer });
+		const conditions = { $and: [ { [fieldName]: buffer } ] };
+		return this.catapultDb.queryPagedDocuments('replicators', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);
 	}
 	
 

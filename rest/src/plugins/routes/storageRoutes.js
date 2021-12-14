@@ -103,9 +103,10 @@ module.exports = {
 		});
 
 		server.get('/account/:blsKey/replicators_v2', (req, res, next) => {
+			const pagingOptions = routeUtils.parsePagingArguments(req.params);
 			const blsKey = routeUtils.parseArgument(req.params, 'blsKey', 'blsPublicKey');
-			return db.getReplicatorByBlsKey(blsKey)
-				.then(routeUtils.createSender('replicatorEntry').sendOne('blsKey', res, next));
+			return db.getReplicatorsByBlsKey(blsKey, pagingOptions.id, pagingOptions.pageSize)
+				.then(routeUtils.createSender('replicatorEntry').sendArray('blsKey', res, next));
 		});
     }
 };
