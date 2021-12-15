@@ -531,8 +531,10 @@ describe('storage plugin', () => {
 			const blsSignatureTwo = createByteArray(0x21, 96);
 			const resultOne = Buffer.of(0x01);
 			const resultTwo = Buffer.of(0x01);
+			const indexOfProverOne = Buffer.of(0x00, 0x0);
+			const indexOfProverTwo = Buffer.of(0x01, 0x0);
 
-			test.binary.test.addAll(codec, 32 + 32 + (2 + 32 * 2) + (2 + (32 + 96 + (32 + 1) * 2) * 2), () => ({
+			test.binary.test.addAll(codec, 32 + 32 + (2 /* proversCount */ + 32 * 2) + (2 /* verificationOpinionsCount */ + (2 + 96 + (2 + 1) * 2) * 2), () => ({
 				buffer: Buffer.concat([
 					driveKey,
 					trigger,
@@ -540,17 +542,23 @@ describe('storage plugin', () => {
 					verificationOpinionsCount,
 					proverOne,
 					proverTwo,
-					proverOne,
+					// opinion of proverOne
+					indexOfProverOne,
 					blsSignatureOne,
-					proverOne,
+						// result one of opinion of proverOne
+					indexOfProverOne,
 					resultOne,
-					proverTwo,
+						// result two of opinion of proverOne
+					indexOfProverTwo,
 					resultTwo,
-					proverTwo,
+					// opinion of proverOne
+					indexOfProverTwo,
 					blsSignatureTwo,
-					proverOne,
+						// result one of opinion of proverTwo
+					indexOfProverOne,
 					resultOne,
-					proverTwo,
+						// result two of opinion of proverTwo
+					indexOfProverTwo,
 					resultTwo,
 				]),
 				object: {
@@ -561,19 +569,19 @@ describe('storage plugin', () => {
 					provers: [proverOne, proverTwo],
 					verificationOpinions: [
 						{
-							verifier: proverOne,
+							verifier: 0x00,
 							blsSignature: blsSignatureOne,
 							results: [
-								{prover: proverOne, result: 0x01},
-								{prover: proverTwo, result: 0x01}
+								{prover: 0x00, result: 0x01},
+								{prover: 0x01, result: 0x01}
 							]
 						},
 						{
-							verifier: proverTwo,
+							verifier: 0x01,
 							blsSignature: blsSignatureTwo,
 							results: [
-								{prover: proverOne, result: 0x01},
-								{prover: proverTwo, result: 0x01}
+								{prover: 0x00, result: 0x01},
+								{prover: 0x01, result: 0x01}
 							]
 						},
 					]
