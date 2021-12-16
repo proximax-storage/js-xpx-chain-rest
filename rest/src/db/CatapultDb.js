@@ -378,6 +378,16 @@ class CatapultDb {
 			if (Object.keys(accountConditions).length)
 				return 1 < Object.keys(accountConditions).length ? { $and: accountConditions } : accountConditions[0];
 
+			if (filters.publicKey) {
+				accountConditions.push({ 'transaction.signer': Buffer.from(filters.publicKey) });
+
+				const address = catapult.model.address.publicKeyToAddress(filters.publicKey, this.networkId);
+				accountConditions.push({ 'transaction.recipient': Buffer.from(address) });
+				accountConditions.push({ 'meta.addresses': Buffer.from(address) });
+
+				return { $or: accountConditions }
+			}
+
 			return undefined;
 		};
 
