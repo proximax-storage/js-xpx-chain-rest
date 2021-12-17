@@ -39,7 +39,7 @@ describe('entity type enumeration', () => {
 			driveFilesReward: 0x465A,
 			driveFileSystem: 0x435A,
 			endDrive: 0x455A,
-			endDriveVerification: 0x485A,
+			EndDriveVerification: 0x485A,
 			endExecute: 0x4360,
 			endOperation: 0x435F,
 			exchange: 0x425D,
@@ -87,6 +87,10 @@ describe('entity type enumeration', () => {
 			verificationPayment: 0x4C62,
 			downloadApproval: 0x4D62,
 			driveClosure: 0x4E62,
+			endDriveVerification: 0x4F62,
+			streamStart: 0x4167,
+			streamFinish: 0x4267,
+			streamPayment: 0x4367,
 		});
 	});
 

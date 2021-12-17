@@ -97,7 +97,7 @@ const EntityType = {
 	startDriveVerification: 0x475A,
 
 	/** End Drive Verification transaction. */
-	endDriveVerification: 0x485A,
+	EndDriveVerification: 0x485A,
 
 	/** Hash lock transaction. */
 	hashLock: 0x4148,
@@ -209,6 +209,18 @@ const EntityType = {
 
 	/** Drive closure transaction */
 	driveClosure: 0x4E62,
+
+	/** End drive verification transaction. */
+	endDriveVerification: 0x4F62,
+
+	/** Stream start transaction. */
+	streamStart: 0x4167,
+
+	/** Stream finish transaction. */
+	streamFinish: 0x4267,
+
+	/** Stream payment transaction. */
+	streamPayment: 0x4367,
 };
 
 module.exports = EntityType;
