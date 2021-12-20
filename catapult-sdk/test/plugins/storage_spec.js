@@ -39,6 +39,8 @@ describe('storage plugin', () => {
 				'verificationPayment',
 				'downloadApproval',
 				'driveClosure',
+				'endDriveVerification',
+				'endDriveVerification.verificationOpinions',
 				'replicatorEntry',
 				'driveInfo',
 				'replicators',
@@ -46,14 +48,12 @@ describe('storage plugin', () => {
 				'activeDataModification',
 				'completedDataModification',
 				'confirmedUsedSizes',
-				'verifications.opinions',
+				'verificationOpinions',
 				'verifications',
 				'bcdrives',
 				'downloadChannelEntry',
 				'cumulativePayments',
-				'downloadChannelInfo',
-				'blsKeysEntry',
-				'blsKeyDoc'
+				'downloadChannelInfo'
 			]);
 
 			expect(Object.keys(modelSchema.prepareBcDrive).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
@@ -78,25 +78,30 @@ describe('storage plugin', () => {
 				'listOfPublicKeys',
 			]);
 
-			expect(Object.keys(modelSchema.dataModificationApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 5);
+			expect(Object.keys(modelSchema.dataModificationApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 10);
 			expect(modelSchema.dataModificationApproval).to.contain.all.keys([
 				'driveKey',
 				'dataModificationId',
 				'fileStructureCdi',
 				'fileStructureSize',
+				'metaFilesSize',
 				'usedDriveSize',
+				'publicKeys',
+				'signatures',
+				'presentOpinions',
+				'opinions',
 			]);
 
 			expect(Object.keys(modelSchema.dataModificationCancel).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
 			expect(modelSchema.dataModificationCancel).to.contain.all.keys([
-				'driveKey',
+				'drive',
 				'dataModificationId',
 			]);
 
 			expect(Object.keys(modelSchema.replicatorOnboarding).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
 			expect(modelSchema.replicatorOnboarding).to.contain.all.keys([
+				'publicKey',
 				'capacity',
-				'blsKey',
 			]);
 
 			expect(Object.keys(modelSchema.replicatorOffboarding).length).to.equal(Object.keys(modelSchema.transaction).length);
@@ -120,12 +125,13 @@ describe('storage plugin', () => {
 				'storageUnits',
 			]);
 
-			expect(Object.keys(modelSchema.dataModificationSingleApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 4);
+			expect(Object.keys(modelSchema.dataModificationSingleApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 5);
 			expect(modelSchema.dataModificationSingleApproval).to.contain.all.keys([
 				'driveKey',
 				'dataModificationId',
-				'uploaderKeys',
-				'uploadOpinion',
+				'publicKeysCount',
+				'publicKeys',
+				'opinions',
 			]);
 
 			expect(Object.keys(modelSchema.verificationPayment).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
@@ -134,21 +140,35 @@ describe('storage plugin', () => {
 				'verificationFeeAmount',
 			]);
 
-			expect(Object.keys(modelSchema.downloadApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 8);
+			expect(Object.keys(modelSchema.downloadApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 7);
 			expect(modelSchema.downloadApproval).to.contain.all.keys([
 				'downloadChannelId',
 				'sequenceNumber',
 				'responseToFinishDownloadTransaction',
 				'publicKeys',
-				'opinionIndices',
-				'blsSignatures',
+				'signatures',
 				'presentOpinions',
 				'opinions',
 			]);
 
 			expect(Object.keys(modelSchema.driveClosure).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
 			expect(modelSchema.driveClosure).to.contain.all.keys([
-				'driveKey',
+				'drive',
+			]);
+
+			expect(Object.keys(modelSchema.endDriveVerification).length).to.equal(Object.keys(modelSchema.transaction).length + 4);
+			expect(modelSchema.endDriveVerification).to.contain.all.keys([
+				'drive',
+				'verificationTrigger',
+				'provers',
+				'verificationOpinions',
+			]);
+
+			expect(Object.keys(modelSchema['endDriveVerification.verificationOpinions']).length).to.equal(3);
+			expect(modelSchema['endDriveVerification.verificationOpinions']).to.contain.all.keys([
+				'verifier',
+				'signature',
+				'results'
 			]);
 
 			expect(Object.keys(modelSchema['replicatorEntry']).length).to.equal(1);
@@ -162,32 +182,37 @@ describe('storage plugin', () => {
 				'initialDownloadWork'
 			]);
 
-			expect(Object.keys(modelSchema['replicators']).length).to.equal(5);
+			expect(Object.keys(modelSchema['replicators']).length).to.equal(4);
 			expect(modelSchema['replicators']).to.contain.all.keys([
 				'key',
 				'version',
 				'capacity',
-				'blsKey',
 				'drives'
 			]);
 
 			expect(Object.keys(modelSchema['bcDriveEntry']).length).to.equal(1);
-			expect(modelSchema['bcDriveEntry']).to.contain.all.keys(['bcdrive']);
+			expect(modelSchema['bcDriveEntry']).to.contain.all.keys(['drive']);
 
-			expect(Object.keys(modelSchema['activeDataModification']).length).to.equal(4);
+			expect(Object.keys(modelSchema['activeDataModification']).length).to.equal(7);
 			expect(modelSchema['activeDataModification']).to.contain.all.keys([
 				'id',
 				'owner',
 				'downloadDataCdi',
-				'uploadSize'
+				'expectedUploadSize',
+				'actualUploadSize',
+				'folderName',
+				'readyForApproval'
 			]);
 
-			expect(Object.keys(modelSchema['completedDataModification']).length).to.equal(5);
+			expect(Object.keys(modelSchema['completedDataModification']).length).to.equal(8);
 			expect(modelSchema['completedDataModification']).to.contain.all.keys([
 				'id',
 				'owner',
 				'downloadDataCdi',
-				'uploadSize',
+				'expectedUploadSize',
+				'actualUploadSize',
+				'folderName',
+				'readyForApproval',
 				'state'
 			]);
 
@@ -197,8 +222,8 @@ describe('storage plugin', () => {
 				'size'
 			]);
 
-			expect(Object.keys(modelSchema['verifications.opinions']).length).to.equal(2);
-			expect(modelSchema['verifications.opinions']).to.contain.all.keys([
+			expect(Object.keys(modelSchema['verificationOpinions']).length).to.equal(2);
+			expect(modelSchema['verificationOpinions']).to.contain.all.keys([
 				'prover',
 				'result'
 			]);
@@ -210,7 +235,7 @@ describe('storage plugin', () => {
 				'results'
 			]);
 
-			expect(Object.keys(modelSchema['bcdrives']).length).to.equal(13);
+			expect(Object.keys(modelSchema['bcdrives']).length).to.equal(14);
 			expect(modelSchema['bcdrives']).to.contain.all.keys([
 				'multisig',
 				'multisigAddress',
@@ -220,6 +245,7 @@ describe('storage plugin', () => {
 				'usedSize',
 				'metaFilesSize',
 				'replicatorCount',
+				'ownerCumulativeUploadSize',
 				'activeDataModifications',
 				'completedDataModifications',
 				'confirmedUsedSizes',
@@ -245,16 +271,6 @@ describe('storage plugin', () => {
 				'listOfPublicKeys',
 				'cumulativePayments'
 			]);
-
-			expect(Object.keys(modelSchema['blsKeysEntry']).length).to.equal(1);
-			expect(modelSchema['blsKeysEntry']).to.contain.all.keys(['blsKeyDoc']);
-
-			expect(Object.keys(modelSchema['blsKeyDoc']).length).to.equal(3);
-			expect(modelSchema['blsKeyDoc']).to.contain.all.keys([
-				'blsKey',
-				'version',
-				'key'
-			]);
 		});
 	});
 
@@ -273,7 +289,7 @@ describe('storage plugin', () => {
 			const codecs = getCodecs();
 
 			// Assert: codec was registered
-			expect(Object.keys(codecs).length).to.equal(14);
+			expect(Object.keys(codecs).length).to.equal(15);
 			expect(codecs).to.contain.all.keys([
 				EntityType.prepareBcDrive.toString(),
 				EntityType.dataModification.toString(),
@@ -289,6 +305,7 @@ describe('storage plugin', () => {
 				EntityType.verificationPayment.toString(),
 				EntityType.downloadApproval.toString(),
 				EntityType.driveClosure.toString(),
+				EntityType.endDriveVerification.toString(),
 			]);
 		});
 
@@ -375,38 +392,75 @@ describe('storage plugin', () => {
 			const dataModificationId = createByteArray(0x02);
 			const fileStructureCdi = createByteArray(0x03);
 			const fileStructureSize = Buffer.of(0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-			const usedDriveSize = Buffer.of(0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+			const metaFilesSize = Buffer.of(0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+			const usedDriveSize = Buffer.of(0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+			const judgingKeysCount = Buffer.of(0x02);
+			const overlappingKeysCount = Buffer.of(0x00);
+			const judgedKeysCount = Buffer.of(0x01);
+			const opinionElementCount = Buffer.of(0x03);
+			const publicKey1 = createByteArray(0x0B);
+			const publicKey2 = createByteArray(0x0C);
+			const publicKey3 = createByteArray(0x0D);
+			const signature1 = createByteArray(0x0E, 64);
+			const signature2 = createByteArray(0x0F, 64);
+			const presentOpinions = Buffer.of(0x11);
+			const opinions = Buffer.of(
+				0x12, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+				0x13, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+				0x14, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+			);
 
-			test.binary.test.addAll(codec, 3 * 32 + 2 * 8, () => ({
+			test.binary.test.addAll(codec, 3 * 32 + 3 * 8 + 4 + 3 * 32 + 2 * 64 + 1 + 3 * 8, () => ({
 				buffer: Buffer.concat([
 					driveKey,
 					dataModificationId,
 					fileStructureCdi,
 					fileStructureSize,
+					metaFilesSize,
 					usedDriveSize,
+					judgingKeysCount,
+					overlappingKeysCount,
+					judgedKeysCount,
+					opinionElementCount,
+					publicKey1,
+					publicKey2,
+					publicKey3,
+					signature1,
+					signature2,
+					presentOpinions,
+					opinions,
 				]),
 				object: {
 					driveKey,
 					dataModificationId,
 					fileStructureCdi,
-					fileStructureSize: [0x04, 0x0],
-					usedDriveSize: [0x05, 0x0],
+					fileStructureSize: [ 0x04, 0x0 ],
+					metaFilesSize: [ 0x05, 0x0 ],
+					usedDriveSize: [ 0x06, 0x0 ],
+					judgingKeysCount: 0x02,
+					overlappingKeysCount: 0x00,
+					judgedKeysCount: 0x01,
+					opinionElementCount: 0x03,
+					publicKeys: [ publicKey1, publicKey2, publicKey3 ],
+					signatures: [ signature1, signature2 ],
+					presentOpinions: [ 0x11 ],
+					opinions: [ [ 0x12, 0x0 ], [ 0x13, 0x0 ] , [ 0x14, 0x0 ] ],
 				}
 			}));
 		});
 
 		describe('supports data modification cancel transaction', () => {
 			const codec = getCodecs()[EntityType.dataModificationCancel];
-			const driveKey = createByteArray(0x01);
+			const drive = createByteArray(0x01);
 			const dataModificationId = createByteArray(0x02);
 
 			test.binary.test.addAll(codec, 2 * 32, () => ({
 				buffer: Buffer.concat([
-					driveKey,
+					drive,
 					dataModificationId,
 				]),
 				object: {
-					driveKey,
+					drive,
 					dataModificationId,
 				}
 			}));
@@ -414,17 +468,17 @@ describe('storage plugin', () => {
 
 		describe('supports replicator onboarding transaction', () => {
 			const codec = getCodecs()[EntityType.replicatorOnboarding];
-			const capacity = Buffer.of(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-			const blsKey = createByteArray(0x02, 48);
+			const publicKey = createByteArray(0x01);
+			const capacity = Buffer.of(0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 
-			test.binary.test.addAll(codec, 8 + 48, () => ({
+			test.binary.test.addAll(codec, 32 + 8, () => ({
 				buffer: Buffer.concat([
+					publicKey,
 					capacity,
-					blsKey,
 				]),
 				object: {
-					capacity: [0x01, 0x0],
-					blsKey,
+					publicKey,
+					capacity: [ 0x02, 0x0 ],
 				}
 			}));
 		});
@@ -496,31 +550,32 @@ describe('storage plugin', () => {
 			const codec = getCodecs()[EntityType.dataModificationSingleApproval];
 			const driveKey = createByteArray(0x01);
 			const dataModificationId = createByteArray(0x02);
-			const uploadOpinionPairCount = Buffer.of(0x03, 0x00);
-			const usedDriveSize = Buffer.of(0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+			const publicKeyCount = Buffer.of(0x03);
 			const key1 = createByteArray(0x05);
 			const key2 = createByteArray(0x06);
 			const key3 = createByteArray(0x07);
-			const uploadOpinion = Buffer.of(0x08, 0x09, 0x0A);
+			const opinions = Buffer.of(
+				0x08, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+				0x09, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+				0x0A, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+			);
 
-			test.binary.test.addAll(codec, 2 * 32 + 2 + 8 + 3 * 32 + 3, () => ({
+			test.binary.test.addAll(codec, 2 * 32 + 1 + 3 * 32 + 3 * 8, () => ({
 				buffer: Buffer.concat([
 					driveKey,
 					dataModificationId,
-					uploadOpinionPairCount,
-					usedDriveSize,
+					publicKeyCount,
 					key1,
 					key2,
 					key3,
-					uploadOpinion,
+					opinions,
 				]),
 				object: {
 					driveKey,
 					dataModificationId,
-					uploadOpinionPairCount: 0x03,
-					usedDriveSize: [0x04, 0x0],
-					uploaderKeys: [ key1, key2, key3 ],
-					uploadOpinion: [ 0x08, 0x09, 0x0A ],
+					publicKeyCount: 0x03,
+					publicKeys: [ key1, key2, key3 ],
+					opinions: [ [ 0x08, 0x0 ], [ 0x09, 0x0 ], [ 0x0A, 0x0 ] ],
 				}
 			}));
 		});
@@ -547,39 +602,41 @@ describe('storage plugin', () => {
 			const downloadChannelId = createByteArray(0x01);
 			const sequenceNumber = Buffer.of(0x02, 0x00);
 			const responseToFinishDownloadTransaction = Buffer.of(0x03);
-			const opinionCount = Buffer.of(0x02);
-			const judgingCount = Buffer.of(0x05);
-			const judgedCount = Buffer.of(0x03);
+			const judgingKeysCount = Buffer.of(0x01);
+			const overlappingKeysCount = Buffer.of(0x02);
+			const judgedKeysCount = Buffer.of(0x01);
 			const opinionElementCount = Buffer.of(0x04);
 			const key1 = createByteArray(0x08);
 			const key2 = createByteArray(0x09);
 			const key3 = createByteArray(0x0A);
-			const opinionIndices = Buffer.of(0x0B, 0x0C, 0x0D, 0x0E, 0x0F);
-			const blsSignature1 = createByteArray(0x10, 96);
-			const blsSignature2 = createByteArray(0x11, 96);
-			const presentOpinions = Buffer.of(0x12);
+			const key4 = createByteArray(0x0B);
+			const signature1 = createByteArray(0x0C, 64);
+			const signature2 = createByteArray(0x0D, 64);
+			const signature3 = createByteArray(0x0E, 64);
+			const presentOpinions = Buffer.of(0x0F, 0x10);
 			const opinions = Buffer.of(
+				0x11, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+				0x12, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
 				0x13, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
 				0x14, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-				0x15, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-				0x16, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
 			);
 
-			test.binary.test.addAll(codec, 32 + 2 + 5 + 3 * 32 + 5 + 2 * 96 + 1 + 4 * 8, () => ({
+			test.binary.test.addAll(codec, 32 + 2 + 5 + 4 * 32 + 3 * 64 + 2 + 4 * 8, () => ({
 				buffer: Buffer.concat([
 					downloadChannelId,
 					sequenceNumber,
 					responseToFinishDownloadTransaction,
-					opinionCount,
-					judgingCount,
-					judgedCount,
+					judgingKeysCount,
+					overlappingKeysCount,
+					judgedKeysCount,
 					opinionElementCount,
 					key1,
 					key2,
 					key3,
-					opinionIndices,
-					blsSignature1,
-					blsSignature2,
+					key4,
+					signature1,
+					signature2,
+					signature3,
 					presentOpinions,
 					opinions,
 				]),
@@ -587,29 +644,106 @@ describe('storage plugin', () => {
 					downloadChannelId,
 					sequenceNumber: 0x02,
 					responseToFinishDownloadTransaction: 0x03,
-					opinionCount: 0x02,
-					judgingCount: 0x05,
-					judgedCount: 0x03,
+					judgingKeysCount: 0x01,
+					overlappingKeysCount: 0x02,
+					judgedKeysCount: 0x01,
 					opinionElementCount: 0x04,
-					publicKeys: [ key1, key2, key3 ],
-					opinionIndices: [ 0x0B, 0x0C, 0x0D, 0x0E, 0x0F ],
-					blsSignatures: [ blsSignature1, blsSignature2 ],
-					presentOpinions: [ 0x12 ],
-					opinions: [ [ 0x13, 0x0 ], [ 0x14, 0x0 ], [ 0x15, 0x0 ], [ 0x16, 0x0 ] ],
+					publicKeys: [ key1, key2, key3, key4 ],
+					signatures: [ signature1, signature2, signature3 ],
+					presentOpinions: [ 0x0F, 0x10 ],
+					opinions: [ [ 0x11, 0x0 ], [ 0x12, 0x0 ], [ 0x13, 0x0 ], [ 0x14, 0x0 ] ],
 				}
 			}));
 		});
 
 		describe('supports drive closure transaction', () => {
 			const codec = getCodecs()[EntityType.driveClosure];
-			const driveKey = createByteArray(0x01);
+			const drive = createByteArray(0x01);
 
 			test.binary.test.addAll(codec, 32, () => ({
 				buffer: Buffer.concat([
-					driveKey,
+					drive,
 				]),
 				object: {
-					driveKey,
+					drive,
+				}
+			}));
+		});
+
+		describe('supports end drive verification transaction', () => {
+			const codec = getCodecs()[EntityType.endDriveVerification];
+			const drive = createByteArray(0x01);
+			const verificationTrigger = createByteArray(0x02);
+			const proversCount = Buffer.of(0x03, 0x00);
+			const verificationOpinionsCount = Buffer.of(0x02, 0x00);
+			const prover1 = createByteArray(0x05);
+			const prover2 = createByteArray(0x06);
+			const prover3 = createByteArray(0x07);
+			const verifier1 = createByteArray(0x08);
+			const signature1 = createByteArray(0x09, 64);
+			const result1 = Buffer.of(0x0A);
+			const verifier2 = createByteArray(0x0B);
+			const signature2 = createByteArray(0x0C, 64);
+			const result2 = Buffer.of(0x0D);
+
+			test.binary.test.addAll(codec, 2 * 32 + 2 + 2 + 3 * 32 + 2 * (32 + 64 + 2 * (32 + 1)), () => ({
+				buffer: Buffer.concat([
+					drive,
+					verificationTrigger,
+					proversCount,
+					verificationOpinionsCount,
+					prover1,
+					prover2,
+					prover3,
+					verifier1,
+					signature1,
+					prover1,
+					result1,
+					prover2,
+					result2,
+					verifier2,
+					signature2,
+					prover1,
+					result1,
+					prover2,
+					result2,
+				]),
+				object: {
+					drive,
+					verificationTrigger,
+					proversCount: 0x03,
+					verificationOpinionsCount: 0x02,
+					provers: [ prover1, prover2, prover3 ],
+					verificationOpinions: [
+						{
+							verifier: verifier1,
+							signature: signature1,
+							results: [
+								{
+									prover: prover1,
+									result: 0x0A,
+								},
+								{
+									prover: prover2,
+									result: 0x0D,
+								}
+							]
+						},
+						{
+							verifier: verifier2,
+							signature: signature2,
+							results: [
+								{
+									prover: prover1,
+									result: 0x0A,
+								},
+								{
+									prover: prover2,
+									result: 0x0D,
+								}
+							]
+						} 
+					],
 				}
 			}));
 		});
