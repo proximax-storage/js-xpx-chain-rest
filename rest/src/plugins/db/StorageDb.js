@@ -77,8 +77,10 @@ class StorageDb {
 			else if (filters.toReplicatorCount !== undefined)
 				conditions.push({'drive.replicatorCount': {$lte: convertToLong(filters.toReplicatorCount)}});
 
-			if (filters.owner !== undefined)
-				conditions.push({'drive.owner': filters.owner});
+			if (filters.owner !== undefined) {
+				const buffer = Buffer.from(filters.owner);
+				conditions.push({'drive.owner': buffer});
+			}
 
 			return conditions;
 		}
@@ -186,8 +188,10 @@ class StorageDb {
 			else if (filters.toDownloadApprovalCount !== undefined)
 				conditions.push({'downloadChannelInfo.downloadApprovalCount': {$lte: convertToLong(filters.toDownloadApprovalCount)}});
 
-			if (filters.consumerKey !== undefined)
-				conditions.push({'downloadChannelInfo.consumer': filters.consumerKey});
+			if (filters.consumerKey !== undefined) {
+				const buffer = Buffer.from(filters.consumerKey);
+				conditions.push({'downloadChannelInfo.consumer': buffer});
+			}
 
 			return conditions;
 		}
