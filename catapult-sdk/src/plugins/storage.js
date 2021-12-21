@@ -55,7 +55,6 @@ const storagePlugin = {
 		});
 
 		builder.addTransactionSupport(EntityType.replicatorOnboarding, {
-			publicKey: 				{ type: ModelType.binary, schemaName: 'replicatorOnboarding.publicKey' },
 			capacity:				{ type: ModelType.uint64, schemaName: 'replicatorOnboarding.capacity' },
 		});
 
@@ -367,14 +366,12 @@ const storagePlugin = {
 		codecBuilder.addTransactionSupport(EntityType.replicatorOnboarding, {
 			deserialize: parser => {
 				const transaction = {};
-				transaction.publicKey = parser.buffer(constants.sizes.signer);
 				transaction.capacity = parser.uint64();
 
 				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
-				serializer.writeBuffer(transaction.publicKey);
 				serializer.writeUint64(transaction.capacity);
 			}
 		});

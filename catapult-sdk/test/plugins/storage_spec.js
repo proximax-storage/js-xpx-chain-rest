@@ -98,9 +98,8 @@ describe('storage plugin', () => {
 				'dataModificationId',
 			]);
 
-			expect(Object.keys(modelSchema.replicatorOnboarding).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
+			expect(Object.keys(modelSchema.replicatorOnboarding).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
 			expect(modelSchema.replicatorOnboarding).to.contain.all.keys([
-				'publicKey',
 				'capacity',
 			]);
 
@@ -468,16 +467,13 @@ describe('storage plugin', () => {
 
 		describe('supports replicator onboarding transaction', () => {
 			const codec = getCodecs()[EntityType.replicatorOnboarding];
-			const publicKey = createByteArray(0x01);
 			const capacity = Buffer.of(0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 
-			test.binary.test.addAll(codec, 32 + 8, () => ({
+			test.binary.test.addAll(codec, 8, () => ({
 				buffer: Buffer.concat([
-					publicKey,
 					capacity,
 				]),
 				object: {
-					publicKey,
 					capacity: [ 0x02, 0x0 ],
 				}
 			}));
