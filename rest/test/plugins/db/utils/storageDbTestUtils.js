@@ -39,13 +39,12 @@ const createBcDriveEntries = (bcDriveInfos) => {
         bcDriveInfo.replicatorCount));
 };
 
-const createReplicatorEntry = (id, key, version, capacity, blsKey, drives) => ({
+const createReplicatorEntry = (id, key, version, capacity, drives) => ({
     _id: dbTestUtils.db.createObjectId(id),
     replicator: {
         key: key ? new Binary(key) : null,
         version: version ? convertToLong(version) : null,
         capacity: capacity ? convertToLong(capacity) : null,
-        blsKey: blsKey ? new Binary(blsKey) : null,
         drives: drives && drives.length ? 
             drives.map(drive => { return { 
                 drive: new Binary(drive.drive),
@@ -58,7 +57,7 @@ const createReplicatorEntry = (id, key, version, capacity, blsKey, drives) => ({
 
 const createReplicatorEntries = (replicatorInfos) => {
     let i = 0;
-    return replicatorInfos.map(replicatorInfo => createReplicatorEntry(++i, replicatorInfo.key, replicatorInfo.version, replicatorInfo.capacity, replicatorInfo.blsKey, replicatorInfo.drives));
+    return replicatorInfos.map(replicatorInfo => createReplicatorEntry(++i, replicatorInfo.key, replicatorInfo.version, replicatorInfo.capacity, replicatorInfo.drives));
 };
 
 const createDownloadChannelEntry = (id, downloadChannelId, consumer, downloadSize, downloadApprovalCount, listOfPublicKeys) => ({
@@ -78,21 +77,6 @@ const createDownloadChannelEntries = (downloadInfos) => {
     return downloadInfos.map(downloadInfo => createDownloadChannelEntry(++i, downloadInfo.id, downloadInfo.consumer, downloadInfo.downloadSize, downloadInfo.downloadApprovalCount, downloadInfo.listOfPublicKeys));
 };
 
-const createBlsKeysEntry = (id, blsKey, key) => ({
-    _id: dbTestUtils.db.createObjectId(id),
-    blsKeyDoc: {
-        blsKey: new Binary(blsKey),
-        version: Long.fromNumber(0),
-        key: new Binary(key)
-    }
-});
-
-const createBlsKeysEntries = (blsKeyInfos) => {
-    let i = 0;
-    return blsKeyInfos.map(blsKeyInfo => createBlsKeysEntry(++i, blsKeyInfo.blsKey, blsKeyInfo.key));
-};
-
-
 const storageDbTestUtils = {
     db: {
         createBcDriveEntry,
@@ -101,8 +85,6 @@ const storageDbTestUtils = {
         createReplicatorEntries,
         createDownloadChannelEntry,
         createDownloadChannelEntries,
-        createBlsKeysEntry,
-        createBlsKeysEntries,
         runDbTest: (dbEntities, collectionName, issueDbCommand, assertDbCommandResult) =>
             dbTestUtils.db.runDbTest(dbEntities, collectionName, db => new StorageDb(db), issueDbCommand, assertDbCommandResult)
     }

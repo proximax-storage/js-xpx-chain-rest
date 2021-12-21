@@ -32,20 +32,6 @@ class StorageDb {
 		return this.catapultDb.queryDocuments('bcdrives', { [fieldName]: buffer });
 	}
 
-	/**
-	 * Retrieves the bcdrive entries by account.
-	 * @param {object} publicKey The owner's public key.
-	 * @param {string} pagingId Paging id.
-	 * @param {int} pageSize Page size.
-	 * @returns {Promise.<array>} The bcdrive entries for account.
-	 */
-	getBcDrivesByOwnerPublicKey(publicKey, pagingId, pageSize, options) {
-		const buffer = Buffer.from(publicKey);
-		const fieldName = "drive.owner";
-		const conditions = { $and: [ { [fieldName]: buffer } ] };
-		return this.catapultDb.queryPagedDocuments('bcdrives', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);
-	}
-
     /**
 	* Retrieves filtered and paginated bcdrives.
 	* @param {object} filters Filters to be applied: 'size', 'used size', 'metafiles size', 'replicator count' 
@@ -91,6 +77,9 @@ class StorageDb {
 			else if (filters.toReplicatorCount !== undefined)
 				conditions.push({'drive.replicatorCount': {$lte: convertToLong(filters.toReplicatorCount)}});
 
+			if (filters.owner !== undefined)
+				conditions.push({'drive.owner': filters.owner});
+
 			return conditions;
 		}
 
@@ -110,21 +99,6 @@ class StorageDb {
         const fieldName = "replicator.key";
         return this.catapultDb.queryDocuments('replicators', { [fieldName]: buffer });
     }
-
-	/**
-	 * Retrieves the replicator entries by account.
-	 * @param {object} blsKey The replicator bls key.
-	 * @param {string} pagingId Paging id.
-	 * @param {int} pageSize Page size.
-	 * @returns {Promise.<array>} The replicator entries for account.
-	 */
-	getReplicatorsByBlsKey(blsKey, pagingId, pageSize, options) {
-		const buffer = Buffer.from(blsKey);
-		const fieldName = "replicator.blsKey";
-		const conditions = { $and: [ { [fieldName]: buffer } ] };
-		return this.catapultDb.queryPagedDocuments('replicators', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);
-	}
-	
 
     /**
 	* Retrieves filtered and paginated replicators.

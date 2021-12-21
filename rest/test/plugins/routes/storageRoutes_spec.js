@@ -10,7 +10,7 @@
  const { expect } = require('chai');
  
  const { address } = catapult.model;
- const { addresses, publicKeys, hashes256, blsPublicKey } = test.sets;
+ const { addresses, publicKeys, hashes256 } = test.sets;
  const { convert } = catapult.utils;
 
  describe('storage routes', () => {
@@ -82,24 +82,6 @@
 			routes: storageRoutes,
 			routeName,
 			createDb: (keyGroups, documents) => ({
-				getBcDrivesByOwnerPublicKey: (owner, pageId, pageSize, options) => {
-					keyGroups.push({
-						owner,
-						pageId,
-						pageSize,
-						options
-					});
-					return Promise.resolve(documents);
-				},
-				getReplicatorByBlsKey: (blsKey, pageId, pageSize, options) => {
-					keyGroups.push({
-						blsKey,
-						pageId,
-						pageSize,
-						options
-					});
-					return Promise.resolve(documents);
-				},
 				getDownloadsByDownloadChannelId: (downloadChannelId, pageId, pageSize, options) => {
 					keyGroups.push({
 						downloadChannelId,
@@ -113,48 +95,6 @@
 			routeCaptureMethod: 'get'
 		})
 	};
-
-	const addGetBcDriveTests = traits => {
-		const pagingTestsFactory = test.setup.createPagingTestsFactory(
-			factory.createPagingRouteInfo(traits.routeName),
-			traits.valid.params,
-			traits.valid.expected,
-			'bcDriveEntry'
-		);
-
-		pagingTestsFactory.addDefault();
-		if (traits.invalid)
-			pagingTestsFactory.addFailureTest(traits.invalid.name, traits.invalid.params, traits.invalid.error);
-	};
-
-	describe('/account/:owner/drives_v2', () => addGetBcDriveTests({
-		routeName: '/account/:owner/drives_v2',
-		valid: {
-			params: { owner: publicKeys.valid[0] },
-			expected: { owner: convert.hexToUint8(publicKeys.valid[0]), options: undefined }
-		}
-	}));
-
-	const addGetReplicatorByBlsKey = traits => {
-		const pagingTestsFactory = test.setup.createPagingTestsFactory(
-			factory.createPagingRouteInfo(traits.routeName),
-			traits.valid.params,
-			traits.valid.expected,
-			'replicatorEntry'
-		);
-
-		pagingTestsFactory.addDefault();
-		if (traits.invalid)
-			pagingTestsFactory.addFailureTest(traits.invalid.name, traits.invalid.params, traits.invalid.error);
-	};
-
-	describe('/account/:blsKey/replicators_v2', () => addGetReplicatorByBlsKey({
-		routeName: '/account/:blsKey/replicators_v2',
-		valid: {
-			params: { blsKey: blsPublicKey.valid[0] },
-			expected: { blsKey: convert.hexToUint8(blsPublicKey.valid[0]), options: undefined }
-		}
-	}));
 
 	const addGetDownloadChannelTests = traits => {
 		const pagingTestsFactory = test.setup.createPagingTestsFactory(

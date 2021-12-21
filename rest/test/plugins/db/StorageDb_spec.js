@@ -14,7 +14,6 @@ const sinon = require('sinon');
 describe('storage db', () => {
     const generateAccount = test.random.account;
     const generateHash = test.random.hash;
-    const generateBlsPublicKey = test.random.blsPublicKey;
 
     describe('bcdrive by account id', () => {
         const addBcDriveByAccountIdTests = traits => {
@@ -58,156 +57,6 @@ describe('storage db', () => {
         describe('by address', () => addBcDriveByAccountIdTests({
             type: AccountType.address,
             toDbApiId: account => account.address
-        }));
-    });
-
-    describe('bcdrive entries', () => {
-        const generateBcDriveInfo = (owner) => { return { 
-            multisig: generateAccount(), 
-            owner: owner ? owner : generateAccount().publicKey, 
-            rootHash: generateHash(),
-            size: 1000,
-            usedSize: 150,
-            metaFilesSize: 20,
-            replicatorCount: 3
-        }};
-
-        const addGetBcDrivesByOwnerPublicKey = traits => {
-            const generateBcDriveInfos = (count, key) => {
-                const bcDriveInfos = [];
-                for (let i = 0; i < count; ++i) {
-                    bcDriveInfos.push(traits.generateBcDriveInfo(key ? key : traits.generateKey()));
-                }
-    
-                return bcDriveInfos;
-            };
-
-            it('returns empty array for unknown key', () => {
-                // Arrange:
-                const entries = test.db.createBcDriveEntries(generateBcDriveInfos(5));
-
-                // Assert:
-                return test.db.runDbTest(
-                    entries,
-                    'bcdrives',
-                    db => traits.getBcDrives(db, traits.generateKey()),
-                    entities => expect(entities.length).to.equal(0)
-                );
-            });
-
-            it('returns bcdrives from matching entries', () => {
-                // Arrange:
-                const key = traits.generateKey();
-                const bcDriveInfos = generateBcDriveInfos(5);
-                const additionalBcDrivesInfo = traits.generateBcDriveInfo(key);
-                bcDriveInfos.push(additionalBcDrivesInfo);
-                const entries = test.db.createBcDriveEntries(bcDriveInfos);
-                const expectedEntry = test.db.createBcDriveEntry(
-                    bcDriveInfos.length,
-                    additionalBcDrivesInfo.multisig,
-                    additionalBcDrivesInfo.owner,
-                    additionalBcDrivesInfo.rootHash,
-                    additionalBcDrivesInfo.size,
-                    additionalBcDrivesInfo.usedSize,
-                    additionalBcDrivesInfo.metaFilesSize,
-                    additionalBcDrivesInfo.replicatorCount
-                );
-                delete expectedEntry._id;
-
-                // Assert:
-                return test.db.runDbTest(
-                    entries,
-                    'bcdrives',
-                    db => traits.getBcDrives(db, key),
-                    entities =>
-                        expect(entities).to.deep.equal([expectedEntry])
-                );
-            });
-
-            describe('query respects supplied document id', () => {
-                const assertBcDrivesWithDocumentId = (sortOrder) => {
-                    // Arrange:
-                    const key = traits.generateKey();
-                    const bcDriveInfos = generateBcDriveInfos(100, key);
-                    const entries = test.db.createBcDriveEntries(bcDriveInfos);
-                    const id = entries[9]._id.toString();
-                    let expectedEntries = sortOrder > 0 ?
-                        test.db.createBcDriveEntries(bcDriveInfos.slice(10)) :
-                        test.db.createBcDriveEntries(bcDriveInfos.slice(0, 9).reverse());
-                    expectedEntries.map(entry => delete entry._id);
-
-                    // Assert:
-                    return test.db.runDbTest(
-                        entries,
-                        'bcdrives',
-                        db => traits.getBcDrives(db, key, id, 100, sortOrder),
-                        entities => expect(entities).to.deep.equal(expectedEntries)
-                    );
-                };
-
-                it('ascending order', () => {
-                    return assertBcDrivesWithDocumentId(1);
-                });
-
-                it('descending order', () => {
-                    return assertBcDrivesWithDocumentId(-1);
-                });
-            });
-
-            describe('paging', () => {
-                const assertBcDrivesWithPaging = (sortOrder, pageSize, expectedSize) => {
-                    // Arrange:
-                    const key = traits.generateKey();
-                    const bcDriveInfos = generateBcDriveInfos(200, key);
-                    const entries = test.db.createBcDriveEntries(bcDriveInfos);
-
-                    // Assert:
-                    return test.db.runDbTest(
-                        entries,
-                        'bcdrives',
-                        db => traits.getBcDrives(db, key, undefined, pageSize, sortOrder),
-                        entities => expect(entities.length).to.equal(expectedSize)
-                    );
-                };
-
-                describe('query respects page size', () => {
-                    it('ascending order', () => {
-                        return assertBcDrivesWithPaging(1, 50, 50);
-                    });
-
-                    it('descending order', () => {
-                        return assertBcDrivesWithPaging(-1, 50, 50);
-                    });
-                });
-
-                describe('query ensures minimum page size', () => {
-                    it('ascending order', () => {
-                        return assertBcDrivesWithPaging(1, 5, 10);
-                    });
-
-                    it('descending order', () => {
-                        return assertBcDrivesWithPaging(-1, 5, 10);
-                    });
-                });
-
-                describe('query ensures maximum page size', () => {
-                    it('ascending order', () => {
-                        return assertBcDrivesWithPaging(1, 150, 100);
-                    });
-
-                    it('descending order', () => {
-                        return assertBcDrivesWithPaging(-1, 150, 100);
-                    });
-                });
-            });
-        };
-
-        describe('by owner public key', () => addGetBcDrivesByOwnerPublicKey({
-            generateKey: () => generateAccount().publicKey,
-            generateBcDriveInfo: (owner) => generateBcDriveInfo(owner),
-            getBcDrives: (db, owner, pagingId, pageSize, sortOrder) => {
-                return db.getBcDrivesByOwnerPublicKey(owner, pagingId, pageSize, { sortOrder });
-            }
         }));
     });
 
@@ -735,7 +584,6 @@ describe('storage db', () => {
                 key: additionalReplicator ? additionalReplicator.key : generateAccount().publicKey,
                 version: 1,
                 capacity: 250,
-                blsKey: generateBlsPublicKey(),
                 drives: [
                     {
                         drive: generateAccount().publicKey,
@@ -768,7 +616,7 @@ describe('storage db', () => {
             const expectedEntries = [];
             additionalReplicatorInfos.forEach(replicatorInfo => {
                 replicatorInfos.push(replicatorInfo);
-                expectedEntries.push(test.db.createReplicatorEntry(replicatorInfos.length, replicatorInfo.key, replicatorInfo.version, replicatorInfo.capacity, replicatorInfo.blsKey, replicatorInfo.drives));
+                expectedEntries.push(test.db.createReplicatorEntry(replicatorInfos.length, replicatorInfo.key, replicatorInfo.version, replicatorInfo.capacity, replicatorInfo.drives));
             });
             expectedEntries.forEach(entry => { delete entry._id; });
             const entries = test.db.createReplicatorEntries(replicatorInfos);
@@ -794,168 +642,8 @@ describe('storage db', () => {
         });
     });
 
-    describe('replicator entries', () => {
-        const generateReplicatorInfo = (blsKey) => { return {
-            key: generateAccount().publicKey,
-            version: 1,
-            capacity: 250,
-            blsKey: blsKey ? blsKey : generateBlsPublicKey(),
-            drives: [
-                {
-                    drive: generateAccount().publicKey,
-                    lastApprovedDataModificationId: generateHash(),
-                    dataModificationIdIsValid: 1,
-                    initialDownloadWork: 0
-                },
-                {
-                    drive: generateAccount().publicKey,
-                    lastApprovedDataModificationId: generateHash(),
-                    dataModificationIdIsValid: 1,
-                    initialDownloadWork: 0
-                }
-            ]
-        }};
-
-        const addGetReplicatorsByBlsKey =  traits => {
-            const generateReplicatorInfos = (count, key) => {
-                const replicatorInfos = [];
-                for (let i = 0; i < count; ++i) {
-                    replicatorInfos.push(traits.generateReplicatorInfo(key ? key : traits.generateKey()));
-                }
-
-                return replicatorInfos;
-            };
-
-            it('returns empty array for unknown key', () => {
-                // Arrange:
-                const entries = test.db.createReplicatorEntries(generateReplicatorInfos(5));
-
-                // Assert:
-                return test.db.runDbTest(
-                    entries,
-                    'replicators',
-                    db => traits.getReplicators(db, traits.generateKey()),
-                    entities => expect(entities.length).to.equal(0)
-                );
-            });
-
-            it('returns replicators from matching entries', () => {
-                // Arrange:
-                const key = traits.generateKey();
-                const replicatorInfos = generateReplicatorInfos(5);
-                const additionalReplicatorsInfo = traits.generateReplicatorInfo(key);
-                replicatorInfos.push(additionalReplicatorsInfo);
-                const entries = test.db.createReplicatorEntries(replicatorInfos);
-                const expectedEntry = test.db.createReplicatorEntry(
-                    replicatorInfos.length,
-                    additionalReplicatorsInfo.key,
-                    additionalReplicatorsInfo.version,
-                    additionalReplicatorsInfo.capacity,
-                    additionalReplicatorsInfo.blsKey,
-                    additionalReplicatorsInfo.drives
-                );
-                delete expectedEntry._id;
-
-                // Assert:
-                return test.db.runDbTest(
-                    entries,
-                    'replicators',
-                    db => traits.getReplicators(db, key),
-                    entities =>
-                        expect(entities).to.deep.equal([expectedEntry])
-                );
-            });
-
-            describe('query respects supplied document id', () => {
-                const assertReplicatorsWithDocumentId = (sortOrder) => {
-                    // Arrange:
-                    const key = traits.generateKey();
-                    const replicatorInfos = generateReplicatorInfos(100, key);
-                    const entries = test.db.createReplicatorEntries(replicatorInfos);
-                    const id = entries[9]._id.toString();
-                    let expectedEntries = sortOrder > 0 ?
-                        test.db.createReplicatorEntries(replicatorInfos.slice(10)) :
-                        test.db.createReplicatorEntries(replicatorInfos.slice(0, 9).reverse());
-                    expectedEntries.map(entry => delete entry._id);
-
-                    // Assert:
-                    return test.db.runDbTest(
-                        entries,
-                        'replicators',
-                        db => traits.getReplicators(db, key, id, 100, sortOrder),
-                        entities => expect(entities).to.deep.equal(expectedEntries)
-                    );
-                };
-
-                it('ascending order', () => {
-                    return assertReplicatorsWithDocumentId(1);
-                });
-
-                it('descending order', () => {
-                    return assertReplicatorsWithDocumentId(-1);
-                });
-            });
-
-            describe('paging', () => {
-                const assertReplicatorsWithPaging = (sortOrder, pageSize, expectedSize) => {
-                    // Arrange:
-                    const key = traits.generateKey();
-                    const replicatorInfos = generateReplicatorInfos(200, key);
-                    const entries = test.db.createReplicatorEntries(replicatorInfos);
-
-                    // Assert:
-                    return test.db.runDbTest(
-                        entries,
-                        'replicators',
-                        db => traits.getReplicators(db, key, undefined, pageSize, sortOrder),
-                        entities => expect(entities.length).to.equal(expectedSize)
-                    );
-                };
-
-                describe('query respects page size', () => {
-                    it('ascending order', () => {
-                        return assertReplicatorsWithPaging(1, 50, 50);
-                    });
-
-                    it('descending order', () => {
-                        return assertReplicatorsWithPaging(-1, 50, 50);
-                    });
-                });
-
-                describe('query ensures minimum page size', () => {
-                    it('ascending order', () => {
-                        return assertReplicatorsWithPaging(1, 5, 10);
-                    });
-
-                    it('descending order', () => {
-                        return assertReplicatorsWithPaging(-1, 5, 10);
-                    });
-                });
-
-                describe('query ensures maximum page size', () => {
-                    it('ascending order', () => {
-                        return assertReplicatorsWithPaging(1, 150, 100);
-                    });
-
-                    it('descending order', () => {
-                        return assertReplicatorsWithPaging(-1, 150, 100);
-                    });
-                });
-            });
-        };
-
-        describe('by bls key', () => addGetReplicatorsByBlsKey({
-            generateKey: () => generateBlsPublicKey(),
-            generateReplicatorInfo: (blsKey) => generateReplicatorInfo(blsKey),
-            getReplicators: (db, blsKey, pagingId, pageSize, sortOrder) => {
-                return db.getReplicatorsByBlsKey(blsKey, pagingId, pageSize, { sortOrder });
-            }
-        }));
-    });
-
     describe('replicators', () => {
         const replicator = test.random.publicKey();
-        const blsKey = generateBlsPublicKey();
         const drive1 = generateHash();
         const drive2 = generateHash();
 
@@ -982,7 +670,7 @@ describe('storage db', () => {
         ];
 
         const createReplicator = (objectId, version, capacity) => (
-            test.db.createReplicatorEntry(objectId, replicator, version, capacity, blsKey, driveInfo)
+            test.db.createReplicatorEntry(objectId, replicator, version, capacity, driveInfo)
         );
 
         const runTestAndVerifyIds = (dbTransactions, filters, options, expectedIds) => {

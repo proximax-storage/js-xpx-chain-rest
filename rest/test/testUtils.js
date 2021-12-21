@@ -34,8 +34,7 @@ const random = {
 	account: () => ({
 		publicKey: random.publicKey(),
 		address: random.address()
-	}),
-	blsPublicKey: () => crypto.randomBytes(sizes.blsPublicKey)
+	})
 };
 
 module.exports = {

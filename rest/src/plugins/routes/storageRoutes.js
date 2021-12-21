@@ -27,7 +27,9 @@ module.exports = {
 
 				replicatorCount: params.replicatorCount ? routeUtils.parseArgument(params, 'replicatorCount', 'uint16') : undefined,
 				fromReplicatorCount: params.fromReplicatorCount ? routeUtils.parseArgument(params, 'fromReplicatorCount', 'uint16') : undefined,
-				toReplicatorCount: params.toReplicatorCount ? routeUtils.parseArgument(params, 'toReplicatorCount', 'uint16') : undefined
+				toReplicatorCount: params.toReplicatorCount ? routeUtils.parseArgument(params, 'toReplicatorCount', 'uint16') : undefined,
+
+				owner: params.owner ? routeUtils.parseArgument(req.params, 'owner', 'publicKey') : undefined
 			};
 
 			const options = routeUtils.parsePaginationArguments(params, service.config.pageSize);
@@ -93,20 +95,6 @@ module.exports = {
 			const downloadChannelId = routeUtils.parseArgument(req.params, 'downloadChannelId', 'hash256');
 			return db.getDownloadsByDownloadChannelId(downloadChannelId, pagingOptions.id, pagingOptions.pageSize)
 				.then(routeUtils.createSender('downloadChannelEntry').sendArray('downloadChannelId', res, next));
-		});
-
-		server.get('/account/:owner/drives_v2', (req, res, next) => {
-			const pagingOptions = routeUtils.parsePagingArguments(req.params);
-			const owner = routeUtils.parseArgument(req.params, 'owner', 'publicKey');
-			return db.getBcDrivesByOwnerPublicKey(owner, pagingOptions.id, pagingOptions.pageSize)
-				.then(routeUtils.createSender('bcDriveEntry').sendArray('owner', res, next));
-		});
-
-		server.get('/account/:blsKey/replicators_v2', (req, res, next) => {
-			const pagingOptions = routeUtils.parsePagingArguments(req.params);
-			const blsKey = routeUtils.parseArgument(req.params, 'blsKey', 'blsPublicKey');
-			return db.getReplicatorsByBlsKey(blsKey, pagingOptions.id, pagingOptions.pageSize)
-				.then(routeUtils.createSender('replicatorEntry').sendArray('blsKey', res, next));
 		});
     }
 };

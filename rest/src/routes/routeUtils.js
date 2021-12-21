@@ -34,7 +34,6 @@ const constants = {
 		hash256: 32,
 		hash512: 64,
 		hexUint64: 16,
-		blsPublicKey: 48,
 	}
 };
 
@@ -100,12 +99,6 @@ const namedParserMap = {
 			throw Error('must be boolean value \'true\' or \'false\'');
 
 		return 'true' === str;
-	},
-	blsPublicKey: str => {
-		if (2 * constants.sizes.blsPublicKey === str.length)
-			return convert.hexToUint8(str);
-
-		throw Error(`invalid length of blsPublicKey '${str.length}'`);
 	}
 };
 

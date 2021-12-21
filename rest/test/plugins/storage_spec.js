@@ -30,8 +30,6 @@
                 '/replicators_v2/:publicKey',
                 '/downloads_v2',
                 '/downloads_v2/:downloadChannelId',
-                '/account/:owner/drives_v2',
-                '/account/:blsKey/replicators_v2'
              ]);
          });
      });

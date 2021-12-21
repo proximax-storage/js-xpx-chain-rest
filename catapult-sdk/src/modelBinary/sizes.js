@@ -50,16 +50,6 @@ const sizes = {
 	 * @property {numeric} Size of a sha3 512 hash.
 	 */
 	hash512: 64,
-
-	/**
-	 * @property {numeric} Size of a BLS public key.
-	 */
-	blsPublicKey: 48,
-
-	/**
-	 * @property {numeric} Size of a BLS signature.
-	 */
-	blsSignature: 96,
 };
 
 module.exports = sizes;
