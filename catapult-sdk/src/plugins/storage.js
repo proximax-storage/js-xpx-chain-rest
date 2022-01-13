@@ -34,6 +34,7 @@ const storagePlugin = {
 			driveKey:				{ type: ModelType.binary, schemaName: 'download.driveKey' },
 			downloadSize:			{ type: ModelType.uint64, schemaName: 'download.downloadSize' },
 			feedbackFeeAmount:		{ type: ModelType.uint64, schemaName: 'download.feedbackFeeAmount' },
+			publicKeyCount:			{ type: ModelType.uint16, schemaName: 'download.publicKeyCount' },
 			listOfPublicKeys:		{ type: ModelType.array,  schemaName: ModelType.binary },
 		});
 

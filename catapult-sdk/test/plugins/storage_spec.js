@@ -56,11 +56,12 @@ describe('storage plugin', () => {
 				'feedbackFeeAmount',
 			]);
 
-			expect(Object.keys(modelSchema.download).length).to.equal(Object.keys(modelSchema.transaction).length + 4);
+			expect(Object.keys(modelSchema.download).length).to.equal(Object.keys(modelSchema.transaction).length + 5);
 			expect(modelSchema.download).to.contain.all.keys([
 				'driveKey',
 				'downloadSize',
 				'feedbackFeeAmount',
+				'publicKeyCount',
 				'listOfPublicKeys',
 			]);
 
