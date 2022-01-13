@@ -31,6 +31,7 @@ const storagePlugin = {
 		});
 
 		builder.addTransactionSupport(EntityType.download, {
+			driveKey:				{ type: ModelType.binary, schemaName: 'download.driveKey' },
 			downloadSize:			{ type: ModelType.uint64, schemaName: 'download.downloadSize' },
 			feedbackFeeAmount:		{ type: ModelType.uint64, schemaName: 'download.feedbackFeeAmount' },
 			listOfPublicKeys:		{ type: ModelType.array,  schemaName: ModelType.binary },
@@ -55,6 +56,7 @@ const storagePlugin = {
 		});
 
 		builder.addTransactionSupport(EntityType.replicatorOffboarding, {
+			driveKey:				{ type: ModelType.binary, schemaName: 'replicatorOffboarding.driveKey' },
 		});
 
 		builder.addTransactionSupport(EntityType.finishDownload, {
@@ -87,10 +89,14 @@ const storagePlugin = {
 
 		builder.addTransactionSupport(EntityType.downloadApproval, {
 			downloadChannelId: 						{ type: ModelType.binary, schemaName: 'downloadApproval.downloadChannelId' },
+			approvalTrigger: 						{ type: ModelType.binary, schemaName: 'downloadApproval.approvalTrigger' },
 			sequenceNumber:							{ type: ModelType.uint16, schemaName: 'downloadApproval.sequenceNumber' },
 			responseToFinishDownloadTransaction:	{ type: ModelType.uint8,  schemaName: 'downloadApproval.responseToFinishDownloadTransaction' },
+			judgingCount:							{ type: ModelType.uint8,  schemaName: 'downloadApproval.judgingCount' },
+			overlappingCount:						{ type: ModelType.uint8,  schemaName: 'downloadApproval.overlappingCount' },
+			judgedCount:							{ type: ModelType.uint8,  schemaName: 'downloadApproval.judgedCount' },
+			opinionElementCount:					{ type: ModelType.uint16, schemaName: 'downloadApproval.opinionElementCount' },
 			publicKeys:								{ type: ModelType.array,  schemaName: ModelType.binary },
-			opinionIndices:							{ type: ModelType.array,  schemaName: ModelType.uint8 },
 			blsSignatures:							{ type: ModelType.array,  schemaName: ModelType.binary },
 			presentOpinions:						{ type: ModelType.array,  schemaName: ModelType.uint8 },
 			opinions:								{ type: ModelType.array,  schemaName: ModelType.uint64 },
@@ -141,6 +147,7 @@ const storagePlugin = {
 		codecBuilder.addTransactionSupport(EntityType.download, {
 			deserialize: parser => {
 				const transaction = {};
+				transaction.driveKey = parser.buffer(constants.sizes.signer);
 				transaction.downloadSize = parser.uint64();
 				transaction.feedbackFeeAmount = parser.uint64();
 				transaction.publicKeyCount = parser.uint16();
@@ -155,6 +162,7 @@ const storagePlugin = {
 			},
 
 			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.driveKey);
 				serializer.writeUint64(transaction.downloadSize);
 				serializer.writeUint64(transaction.feedbackFeeAmount);
 				serializer.writeUint16(transaction.publicKeyCount);
@@ -217,10 +225,14 @@ const storagePlugin = {
 
 		codecBuilder.addTransactionSupport(EntityType.replicatorOffboarding, {
 			deserialize: parser => {
-				return {};
+				const transaction = {};
+				transaction.driveKey = parser.buffer(constants.sizes.signer);
+
+				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.driveKey);
 			}
 		});
 
@@ -327,34 +339,36 @@ const storagePlugin = {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.downloadChannelId = parser.buffer(constants.sizes.hash256);
+				transaction.approvalTrigger = parser.buffer(constants.sizes.hash256);
 				transaction.sequenceNumber = parser.uint16();
 				transaction.responseToFinishDownloadTransaction = parser.uint8();
-				transaction.opinionCount = parser.uint8();
 				transaction.judgingCount = parser.uint8();
+				transaction.overlappingCount = parser.uint8();
 				transaction.judgedCount = parser.uint8();
-				transaction.opinionElementCount = parser.uint8();
+				transaction.opinionElementCount = parser.uint16();
 
 				transaction.publicKeys = [];
-				let count = transaction.judgedCount;
+				let count = transaction.judgingCount + transaction.overlappingCount + transaction.judgedCount;
 				while (count-- > 0) {
 					transaction.publicKeys.push(parser.buffer(constants.sizes.signer));
 				}
 
-				transaction.opinionIndices = [];
-				count = transaction.judgingCount;
-				while (count-- > 0) {
-					transaction.opinionIndices.push(parser.uint8());
-				}
-
 				transaction.blsSignatures = [];
-				count = transaction.opinionCount;
+				count = transaction.judgingCount + transaction.overlappingCount;
 				while (count-- > 0) {
 					transaction.blsSignatures.push(parser.buffer(constants.sizes.blsSignature));
 				}
 
 				transaction.presentOpinions = [];
-				count = Math.floor((transaction.opinionCount * transaction.judgedCount + 7) / 8);
+				count = Math.floor(((transaction.judgingCount + transaction.overlappingCount) * transaction.judgedCount + 7) / 8);
 				while (count-- > 0) {
+					transaction.presentOpinions.push(parser.uint8());
+				}
+
+				const totalJudgingCount = transaction.overlappingCount + transaction.judgingCount;
+				const totalJudgedCount = transaction.overlappingCount + transaction.judgedCount;
+				const presentOpinionByteCount = Math.floor((totalJudgingCount * totalJudgedCount + 7) / 8);
+				for (let i = 0; i < presentOpinionByteCount; ++i) {
 					transaction.presentOpinions.push(parser.uint8());
 				}
 
@@ -369,28 +383,29 @@ const storagePlugin = {
 
 			serialize: (transaction, serializer) => {
 				serializer.writeBuffer(transaction.downloadChannelId);
+				serializer.writeBuffer(transaction.approvalTrigger);
 				serializer.writeUint16(transaction.sequenceNumber);
 				serializer.writeUint8(transaction.responseToFinishDownloadTransaction);
-				serializer.writeUint8(transaction.opinionCount);
 				serializer.writeUint8(transaction.judgingCount);
+				serializer.writeUint8(transaction.overlappingCount);
 				serializer.writeUint8(transaction.judgedCount);
-				serializer.writeUint8(transaction.opinionElementCount);
-				for (let i = 0; i < transaction.judgedCount; ++i) {
-					serializer.writeBuffer(transaction.publicKeys[i]);
-				}
-				for (let i = 0; i < transaction.judgingCount; ++i) {
-					serializer.writeUint8(transaction.opinionIndices[i]);
-				}
-				for (let i = 0; i < transaction.opinionCount; ++i) {
-					serializer.writeBuffer(transaction.blsSignatures[i]);
-				}
-				const count = Math.floor((transaction.opinionCount * transaction.judgedCount + 7) / 8);
-				for (let i = 0; i < count; ++i) {
-					serializer.writeUint8(transaction.presentOpinions[i]);
-				}
-				for (let i = 0; i < transaction.opinionElementCount; ++i) {
-					serializer.writeUint64(transaction.opinions[i]);
-				}
+				serializer.writeUint16(transaction.opinionElementCount);
+
+				transaction.publicKeys.forEach(key => {
+					serializer.writeBuffer(key);
+				});
+
+				transaction.blsSignatures.forEach(signature => {
+					serializer.writeBuffer(signature);
+				})
+
+				transaction.presentOpinions.forEach(presentOpinion => {
+					serializer.writeUint8(presentOpinion);
+				})
+
+				transaction.opinions.forEach(opinion => {
+					serializer.writeUint64(opinion);
+				})
 			}
 		});
 

@@ -56,8 +56,9 @@ describe('storage plugin', () => {
 				'feedbackFeeAmount',
 			]);
 
-			expect(Object.keys(modelSchema.download).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
+			expect(Object.keys(modelSchema.download).length).to.equal(Object.keys(modelSchema.transaction).length + 4);
 			expect(modelSchema.download).to.contain.all.keys([
+				'driveKey',
 				'downloadSize',
 				'feedbackFeeAmount',
 				'listOfPublicKeys',
@@ -84,7 +85,10 @@ describe('storage plugin', () => {
 				'blsKey',
 			]);
 
-			expect(Object.keys(modelSchema.replicatorOffboarding).length).to.equal(Object.keys(modelSchema.transaction).length);
+			expect(Object.keys(modelSchema.replicatorOffboarding).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
+			expect(modelSchema.replicatorOffboarding).to.contain.all.keys([
+				'driveKey',
+			]);
 
 			expect(Object.keys(modelSchema.finishDownload).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
 			expect(modelSchema.finishDownload).to.contain.all.keys([
@@ -119,13 +123,17 @@ describe('storage plugin', () => {
 				'verificationFeeAmount',
 			]);
 
-			expect(Object.keys(modelSchema.downloadApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 8);
+			expect(Object.keys(modelSchema.downloadApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 12);
 			expect(modelSchema.downloadApproval).to.contain.all.keys([
 				'downloadChannelId',
+				'approvalTrigger',
 				'sequenceNumber',
 				'responseToFinishDownloadTransaction',
+				'judgingCount',
+				'overlappingCount',
+				'judgedCount',
+				'opinionElementCount',
 				'publicKeys',
-				'opinionIndices',
 				'blsSignatures',
 				'presentOpinions',
 				'opinions',
@@ -224,27 +232,32 @@ describe('storage plugin', () => {
 
 		describe('supports download transaction', () => {
 			const codec = getCodecs()[EntityType.download];
-			const downloadSize = Buffer.of(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-			const feedbackFeeAmount = Buffer.of(0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-			const publicKeyCount = Buffer.of(0x03, 0x00);
-			const key1 = createByteArray(0x04);
-			const key2 = createByteArray(0x05);
-			const key3 = createByteArray(0x06);
+			const driveKey = createByteArray(0x01);
+			const downloadSize = Buffer.of(0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+			const feedbackFeeAmount = Buffer.of(0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+			const publicKeyCount = Buffer.of(0x04, 0x00);
+			const key1 = createByteArray(0x05);
+			const key2 = createByteArray(0x06);
+			const key3 = createByteArray(0x07);
+			const key4 = createByteArray(0x08);
 
-			test.binary.test.addAll(codec, 2 * 8 + 2 + 3 * 32, () => ({
+			test.binary.test.addAll(codec, 32 + 2 * 8 + 2 + 4 * 32, () => ({
 				buffer: Buffer.concat([
+					driveKey,
 					downloadSize,
 					feedbackFeeAmount,
 					publicKeyCount,
 					key1,
 					key2,
 					key3,
+					key4,
 				]),
 				object: {
-					downloadSize: [0x01, 0x0],
-					feedbackFeeAmount: [0x02, 0x0],
-					publicKeyCount: 0x03,
-					listOfPublicKeys: [ key1, key2, key3 ],
+					driveKey,
+					downloadSize: [0x02, 0x00],
+					feedbackFeeAmount: [0x03, 0x00],
+					publicKeyCount: 0x04,
+					listOfPublicKeys: [ key1, key2, key3, key4 ],
 				}
 			}));
 		});
@@ -311,10 +324,15 @@ describe('storage plugin', () => {
 
 		describe('supports replicator offboarding transaction', () => {
 			const codec = getCodecs()[EntityType.replicatorOffboarding];
+			const driveKey = createByteArray(0x01);
 
-			test.binary.test.addAll(codec, 0, () => ({
-				buffer: Buffer.concat([]),
-				object: {},
+			test.binary.test.addAll(codec, 32, () => ({
+				buffer: Buffer.concat([
+					driveKey,
+				]),
+				object: {
+					driveKey,
+				},
 			}));
 		});
 
@@ -425,57 +443,61 @@ describe('storage plugin', () => {
 		describe('supports download approval transaction', () => {
 			const codec = getCodecs()[EntityType.downloadApproval];
 			const downloadChannelId = createByteArray(0x01);
-			const sequenceNumber = Buffer.of(0x02, 0x00);
-			const responseToFinishDownloadTransaction = Buffer.of(0x03);
-			const opinionCount = Buffer.of(0x02);
-			const judgingCount = Buffer.of(0x05);
-			const judgedCount = Buffer.of(0x03);
-			const opinionElementCount = Buffer.of(0x04);
+			const approvalTrigger = createByteArray(0x02);
+			const sequenceNumber = Buffer.of(0x03, 0x00);
+			const responseToFinishDownloadTransaction = Buffer.of(0x04);
+			const judgingCount = Buffer.of(0x00);
+			const overlappingCount = Buffer.of(0x03);
+			const judgedCount = Buffer.of(0x00);
+			const opinionElementCount = Buffer.of(0x03, 0x00);
+			
 			const key1 = createByteArray(0x08);
 			const key2 = createByteArray(0x09);
 			const key3 = createByteArray(0x0A);
-			const opinionIndices = Buffer.of(0x0B, 0x0C, 0x0D, 0x0E, 0x0F);
+			
 			const blsSignature1 = createByteArray(0x10, 96);
 			const blsSignature2 = createByteArray(0x11, 96);
-			const presentOpinions = Buffer.of(0x12);
+			const blsSignature3 = createByteArray(0x12, 96);
+
+			const presentOpinions = Buffer.of(0x01, 0x02);
 			const opinions = Buffer.of(
 				0x13, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
 				0x14, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-				0x15, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-				0x16, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+				0x15, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0
 			);
 
-			test.binary.test.addAll(codec, 32 + 2 + 5 + 3 * 32 + 5 + 2 * 96 + 1 + 4 * 8, () => ({
+			test.binary.test.addAll(codec, 2 * 32 + 2 + 6 + 3 * 32 + 3 * 96 + 2 + 3 * 8, () => ({
 				buffer: Buffer.concat([
 					downloadChannelId,
+					approvalTrigger,
 					sequenceNumber,
 					responseToFinishDownloadTransaction,
-					opinionCount,
 					judgingCount,
+					overlappingCount,
 					judgedCount,
 					opinionElementCount,
 					key1,
 					key2,
 					key3,
-					opinionIndices,
 					blsSignature1,
 					blsSignature2,
+					blsSignature3,
 					presentOpinions,
 					opinions,
 				]),
 				object: {
 					downloadChannelId,
-					sequenceNumber: 0x02,
-					responseToFinishDownloadTransaction: 0x03,
-					opinionCount: 0x02,
-					judgingCount: 0x05,
-					judgedCount: 0x03,
-					opinionElementCount: 0x04,
+					approvalTrigger,
+					sequenceNumber: 0x03,
+					responseToFinishDownloadTransaction: 0x04,
+					judgingCount: 0x00,
+					overlappingCount: 0x03,
+					judgedCount: 0x00,
+					opinionElementCount: 0x03,
 					publicKeys: [ key1, key2, key3 ],
-					opinionIndices: [ 0x0B, 0x0C, 0x0D, 0x0E, 0x0F ],
-					blsSignatures: [ blsSignature1, blsSignature2 ],
-					presentOpinions: [ 0x12 ],
-					opinions: [ [ 0x13, 0x0 ], [ 0x14, 0x0 ], [ 0x15, 0x0 ], [ 0x16, 0x0 ] ],
+					blsSignatures: [ blsSignature1, blsSignature2, blsSignature3 ],
+					presentOpinions: [ 0x01, 0x02 ],
+					opinions: [ [ 0x13, 0x0 ], [ 0x14, 0x0 ], [ 0x15, 0x0 ] ],
 				}
 			}));
 		});
