@@ -23,7 +23,7 @@ describe('storage plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 17);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 15);
 			expect(modelSchema).to.contain.all.keys([
 				'prepareBcDrive',
 				'dataModification',
@@ -39,9 +39,7 @@ describe('storage plugin', () => {
 				'verificationPayment',
 				'downloadApproval',
 				'driveClosure',
-				'endDriveVerificationV2',
-				'endDriveVerification.verificationOpinions',
-				'endDriveVerification.verificationOpinions.results'
+				'endDriveVerificationV2'
 			]);
 
 			expect(Object.keys(modelSchema.prepareBcDrive).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
@@ -139,25 +137,16 @@ describe('storage plugin', () => {
 				'driveKey',
 			]);
 
-			expect(Object.keys(modelSchema.endDriveVerificationV2).length).to.equal(Object.keys(modelSchema.transaction).length + 4);
+			expect(Object.keys(modelSchema.endDriveVerificationV2).length).to.equal(Object.keys(modelSchema.transaction).length + 8);
 			expect(modelSchema.endDriveVerificationV2).to.contain.all.keys([
 				'driveKey',
 				'verificationTrigger',
-				'provers',
-				'verificationOpinions',
-			]);
-
-			expect(Object.keys(modelSchema['endDriveVerification.verificationOpinions']).length).to.equal(3);
-			expect(modelSchema['endDriveVerification.verificationOpinions']).to.contain.all.keys([
-				'verifier',
-				'blsSignature',
-				'results'
-			]);
-
-			expect(Object.keys(modelSchema['endDriveVerification.verificationOpinions.results']).length).to.equal(2);
-			expect(modelSchema['endDriveVerification.verificationOpinions.results']).to.contain.all.keys([
-				'prover',
-				'result'
+				'shardId',
+				'keyCount',
+				'judgingKeyCount',
+				'publicKeys',
+				'signatures',
+				'opinions',
 			]);
 		});
 	});
@@ -523,68 +512,37 @@ describe('storage plugin', () => {
 			const codec = getCodecs()[EntityType.endDriveVerificationV2];
 			const driveKey = createByteArray(0x01);
 			const trigger = createByteArray(0x02);
-			const proversCount = Buffer.of(0x02, 0x0);
-			const verificationOpinionsCount = Buffer.of(0x02, 0x0);
-			const proverOne = createByteArray(0x11);
-			const proverTwo = createByteArray(0x20);
-			const blsSignatureOne = createByteArray(0x11, 96);
-			const blsSignatureTwo = createByteArray(0x21, 96);
-			const resultOne = Buffer.of(0x01);
-			const resultTwo = Buffer.of(0x01);
-			const indexOfProverOne = Buffer.of(0x00, 0x0);
-			const indexOfProverTwo = Buffer.of(0x01, 0x0);
+			const shardId = Buffer.of(0x05, 0x0);
+			const keyCount = Buffer.of(0x02);
+			const judgingKeyCount = Buffer.of(0x02);
+			const keyOne = createByteArray(0x11);
+			const keyTwo = createByteArray(0x20);
+			const signatureOne = createByteArray(0x11, 64);
+			const signatureTwo = createByteArray(0x21, 64);
+			const opinions = Buffer.of(0x4);
 
-			test.binary.test.addAll(codec, 32 + 32 + (2 /* proversCount */ + 32 * 2) + (2 /* verificationOpinionsCount */ + (2 + 96 + (2 + 1) * 2) * 2), () => ({
+			test.binary.test.addAll(codec, 32 + 32 + 4 + (2 * 32) + (2 * 64) + 1, () => ({
 				buffer: Buffer.concat([
 					driveKey,
 					trigger,
-					proversCount,
-					verificationOpinionsCount,
-					proverOne,
-					proverTwo,
-					// opinion of proverOne
-					indexOfProverOne,
-					blsSignatureOne,
-						// result one of opinion of proverOne
-					indexOfProverOne,
-					resultOne,
-						// result two of opinion of proverOne
-					indexOfProverTwo,
-					resultTwo,
-					// opinion of proverOne
-					indexOfProverTwo,
-					blsSignatureTwo,
-						// result one of opinion of proverTwo
-					indexOfProverOne,
-					resultOne,
-						// result two of opinion of proverTwo
-					indexOfProverTwo,
-					resultTwo,
+					shardId,
+					keyCount,
+					judgingKeyCount,
+					keyOne,
+					keyTwo,
+					signatureOne,
+					signatureTwo,
+					opinions
 				]),
 				object: {
 					driveKey: driveKey,
 					verificationTrigger: trigger,
-					proversCount: 0x02,
-					verificationOpinionsCount: 0x02,
-					provers: [proverOne, proverTwo],
-					verificationOpinions: [
-						{
-							verifier: 0x00,
-							blsSignature: blsSignatureOne,
-							results: [
-								{prover: 0x00, result: 0x01},
-								{prover: 0x01, result: 0x01}
-							]
-						},
-						{
-							verifier: 0x01,
-							blsSignature: blsSignatureTwo,
-							results: [
-								{prover: 0x00, result: 0x01},
-								{prover: 0x01, result: 0x01}
-							]
-						},
-					]
+					shardId: 0x05,
+					keyCount: 0x02,
+					judgingKeyCount: 0x02,
+					publicKeys: [keyOne, keyTwo],
+					signatures: [signatureOne, signatureTwo],
+					opinions: [0x4],
 				}
 			}));
 		});
