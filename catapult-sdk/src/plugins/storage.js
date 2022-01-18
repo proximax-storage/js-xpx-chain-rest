@@ -106,6 +106,17 @@ const storagePlugin = {
 		builder.addTransactionSupport(EntityType.driveClosure, {
 			driveKey: 				{ type: ModelType.binary, schemaName: 'driveClosure.driveKey' },
 		});
+
+		builder.addTransactionSupport(EntityType.endDriveVerificationV2, {
+            driveKey:               {type: ModelType.binary,    schemaName: 'endDriveVerification.driveKey'},
+            verificationTrigger:    {type: ModelType.binary,    schemaName: 'endDriveVerification.verificationTrigger'},
+			shardId:                {type: ModelType.uint16,    schemaName: 'endDriveVerification.shardId'},
+            keyCount:	            {type: ModelType.uint16,    schemaName: 'endDriveVerification.keyCount'},
+			judgingKeyCount:	    {type: ModelType.uint16,    schemaName: 'endDriveVerification.judgingKeyCount'},
+			publicKeys:				{ type: ModelType.array,  schemaName: ModelType.binary },
+			signatures:				{ type: ModelType.array,  schemaName: ModelType.binary },
+			opinions:				{ type: ModelType.array,  schemaName: ModelType.uint8 },
+        });
 	},
 
 	registerCodecs: codecBuilder => {
@@ -422,6 +433,59 @@ const storagePlugin = {
 				serializer.writeBuffer(transaction.driveKey);
 			}
 		});
+
+        codecBuilder.addTransactionSupport(EntityType.endDriveVerificationV2, {
+            deserialize: parser => {
+                const transaction = {};
+                transaction.driveKey = parser.buffer(constants.sizes.signer);
+                transaction.verificationTrigger = parser.buffer(constants.sizes.hash256);
+                transaction.shardId = parser.uint16();
+				transaction.keyCount = parser.uint8();
+				transaction.judgingKeyCount = parser.uint8();
+				transaction.publicKeys = [];
+				transaction.signatures = [];
+				transaction.opinions = [];
+
+				let count = transaction.keyCount;
+				while (count--) {
+					transaction.publicKeys.push(parser.buffer(constants.sizes.signer));
+				}
+
+				count = transaction.judgingKeyCount;
+				while (count--) {
+					transaction.signatures.push(parser.buffer(constants.sizes.signature));
+				}
+
+				count = Math.floor((transaction.judgingKeyCount * transaction.keyCount + 7) / 8);
+				while (count--) {
+					transaction.opinions.push(parser.uint8());
+				}
+
+                return transaction;
+            },
+
+            serialize: (transaction, serializer) => {
+                serializer.writeBuffer(transaction.driveKey);
+                serializer.writeBuffer(transaction.verificationTrigger);
+				serializer.writeUint16(transaction.shardId);
+
+				serializer.writeUint8(transaction.publicKeys.length);
+				serializer.writeUint8(transaction.signatures.length);
+
+                for (let i = 0; i < transaction.publicKeys.length; ++i) {
+					serializer.writeBuffer(transaction.publicKeys[i]);
+				}
+
+				for (let i = 0; i < transaction.signatures.length; ++i) {
+					serializer.writeBuffer(transaction.signatures[i]);
+				}
+
+				const len = Math.floor((transaction.signatures.length * transaction.publicKeys.length + 7) / 8);
+				for (let i = 0; i < len; ++i) {
+					serializer.writeUint8(transaction.opinions[i]);
+				}
+            }
+        });
 	}
 };
 

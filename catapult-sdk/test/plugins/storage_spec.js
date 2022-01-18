@@ -23,7 +23,7 @@ describe('storage plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 14);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 15);
 			expect(modelSchema).to.contain.all.keys([
 				'prepareBcDrive',
 				'dataModification',
@@ -39,6 +39,7 @@ describe('storage plugin', () => {
 				'verificationPayment',
 				'downloadApproval',
 				'driveClosure',
+				'endDriveVerificationV2'
 			]);
 
 			expect(Object.keys(modelSchema.prepareBcDrive).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
@@ -144,6 +145,18 @@ describe('storage plugin', () => {
 			expect(modelSchema.driveClosure).to.contain.all.keys([
 				'driveKey',
 			]);
+
+			expect(Object.keys(modelSchema.endDriveVerificationV2).length).to.equal(Object.keys(modelSchema.transaction).length + 8);
+			expect(modelSchema.endDriveVerificationV2).to.contain.all.keys([
+				'driveKey',
+				'verificationTrigger',
+				'shardId',
+				'keyCount',
+				'judgingKeyCount',
+				'publicKeys',
+				'signatures',
+				'opinions',
+			]);
 		});
 	});
 
@@ -162,7 +175,7 @@ describe('storage plugin', () => {
 			const codecs = getCodecs();
 
 			// Assert: codec was registered
-			expect(Object.keys(codecs).length).to.equal(14);
+			expect(Object.keys(codecs).length).to.equal(15);
 			expect(codecs).to.contain.all.keys([
 				EntityType.prepareBcDrive.toString(),
 				EntityType.dataModification.toString(),
@@ -178,6 +191,7 @@ describe('storage plugin', () => {
 				EntityType.verificationPayment.toString(),
 				EntityType.downloadApproval.toString(),
 				EntityType.driveClosure.toString(),
+				EntityType.endDriveVerificationV2.toString(),
 			]);
 		});
 
@@ -513,6 +527,45 @@ describe('storage plugin', () => {
 				]),
 				object: {
 					driveKey,
+				}
+			}));
+		});
+
+		describe('supports end drive verification transaction', () => {
+			const codec = getCodecs()[EntityType.endDriveVerificationV2];
+			const driveKey = createByteArray(0x01);
+			const trigger = createByteArray(0x02);
+			const shardId = Buffer.of(0x05, 0x0);
+			const keyCount = Buffer.of(0x02);
+			const judgingKeyCount = Buffer.of(0x02);
+			const keyOne = createByteArray(0x11);
+			const keyTwo = createByteArray(0x20);
+			const signatureOne = createByteArray(0x11, 64);
+			const signatureTwo = createByteArray(0x21, 64);
+			const opinions = Buffer.of(0x4);
+
+			test.binary.test.addAll(codec, 32 + 32 + 4 + (2 * 32) + (2 * 64) + 1, () => ({
+				buffer: Buffer.concat([
+					driveKey,
+					trigger,
+					shardId,
+					keyCount,
+					judgingKeyCount,
+					keyOne,
+					keyTwo,
+					signatureOne,
+					signatureTwo,
+					opinions
+				]),
+				object: {
+					driveKey: driveKey,
+					verificationTrigger: trigger,
+					shardId: 0x05,
+					keyCount: 0x02,
+					judgingKeyCount: 0x02,
+					publicKeys: [keyOne, keyTwo],
+					signatures: [signatureOne, signatureTwo],
+					opinions: [0x4],
 				}
 			}));
 		});
