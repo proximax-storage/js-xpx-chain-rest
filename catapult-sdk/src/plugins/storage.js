@@ -106,6 +106,66 @@ const storagePlugin = {
 		builder.addTransactionSupport(EntityType.driveClosure, {
 			driveKey: 				{ type: ModelType.binary, schemaName: 'driveClosure.driveKey' },
 		});
+
+		builder.addSchema('bcDriveEntry', {
+			drive: { type: ModelType.object, schemaName: 'bcdrive' }
+		});
+
+		builder.addSchema('bcdrive', {
+			multisig:					ModelType.binary,
+			multisigAddress:			ModelType.binary,
+			owner:						ModelType.binary,
+			rootHash:					ModelType.binary,
+			size:						ModelType.uint64,
+			usedSize:					ModelType.uint64,
+			metaFilesSize:				ModelType.uint64,
+			replicatorCount:			ModelType.uint32,
+			ownerCumulativeUploadSize:	ModelType.uint64,
+			activeDataModifications: 	{ type: ModelType.array, schemaName: 'activeDataModification' },
+			completedDataModifications: { type: ModelType.array, schemaName: 'completedDataModification' },
+			confirmedUsedSizes: 		{ type: ModelType.array, schemaName: 'confirmedUsedSize' },
+			replicators: 				{ type: ModelType.array, schemaName: ModelType.binary },
+			offboardingReplicators: 	{ type: ModelType.array, schemaName: ModelType.binary },
+			verifications: 				{ type: ModelType.array, schemaName: 'verification' },
+		});
+
+		builder.addSchema('activeDataModification', {
+			id:						ModelType.binary,
+			owner:					ModelType.binary,
+			downloadDataCdi:		ModelType.binary,
+			expectedUploadSize:		ModelType.uint64,
+			actualUploadSize:		ModelType.uint64,
+			folderName:				ModelType.string,
+			readyForApproval:		ModelType.boolean,
+		});
+
+		builder.addSchema('completedDataModification', {
+			id:						ModelType.binary,
+			owner:					ModelType.binary,
+			downloadDataCdi:		ModelType.binary,
+			expectedUploadSize:		ModelType.uint64,
+			actualUploadSize:		ModelType.uint64,
+			folderName:				ModelType.string,
+			readyForApproval:		ModelType.boolean,
+			state:					ModelType.uint8,
+		});
+
+		builder.addSchema('confirmedUsedSize', {
+			replicator:				ModelType.binary,
+			size:					ModelType.uint64,
+		});
+
+		builder.addSchema('verification', {
+			verificationTrigger:	ModelType.binary,
+			expiration:				ModelType.uint64,
+			expired:				ModelType.boolean,
+			shards:					{ type: ModelType.array, schemaName: 'shard' },
+		});
+
+		builder.addSchema('shard', {
+			id:						ModelType.uint32,
+			replicators:			{ type: ModelType.array, schemaName: ModelType.binary },
+		});
 	},
 
 	registerCodecs: codecBuilder => {
