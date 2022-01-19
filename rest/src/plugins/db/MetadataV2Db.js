@@ -20,10 +20,12 @@
  */
 
 const { convertToLong, buildOffsetCondition } = require('../../db/dbUtils');
+const MongoDb = require('mongodb');
+const { ObjectId } = MongoDb;
 
-class MetadataNemDb {
+class MetadataV2Db {
 	/**
-	 * Creates MetadataNemDb around CatapultDb.
+	 * Creates MetadataV2Db around CatapultDb.
 	 * @param {module:db/CatapultDb} db Catapult db instance.
 	 */
 	constructor(db) {
@@ -42,31 +44,37 @@ class MetadataNemDb {
 	 * @returns {Promise.<object>} Metadata page.
 	 */
 	metadata(sourceAddress, targetKey, scopedMetadataKey, targetId, metadataType, options) {
-		let conditions = {};
+		let conditions = [];
+
+		// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
+		// in fact, offset logic should be moved to `queryPagedDocuments`
+		if (options.offset !== undefined)
+			conditions.push({[options.sortField]: {[1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset)}});
 
 		if (undefined !== sourceAddress)
-			conditions['metadataEntry.sourceAddress'] = Buffer.from(sourceAddress);
+			conditions.push({ 'metadataEntry.sourceAddress': Buffer.from(sourceAddress) });
 
 		if (undefined !== targetKey)
-			conditions['metadataEntry.targetKey'] = Buffer.from(targetKey);
+			conditions.push({ 'metadataEntry.targetKey': Buffer.from(targetKey) });
 
 		if (undefined !== scopedMetadataKey)
-			conditions['metadataEntry.scopedMetadataKey'] = convertToLong(scopedMetadataKey);
+			conditions.push({ 'metadataEntry.scopedMetadataKey': convertToLong(scopedMetadataKey) });
 
 		if (undefined !== targetId)
-			conditions['metadataEntry.targetId'] = convertToLong(targetId);
+			conditions.push({ 'metadataEntry.targetId': convertToLong(targetId) });
 
 		if (undefined !== metadataType)
-			conditions['metadataEntry.metadataType'] = metadataType;
+			conditions.push({ 'metadataEntry.metadataType': metadataType });
 
-		const { pageSize, id } = options;
-		return this.catapultDb.queryPagedDocuments('metadata_nem', conditions, id, pageSize, options);
+		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
+
+		return this.catapultDb.queryPagedDocuments_2(conditions, [], sortConditions, 'metadata_v2', options)
 	}
 
 	metadatasByCompositeHash(ids) {
 		const compositeHashes = ids.map(id => Buffer.from(id));
 		const conditions = { 'metadataEntry.compositeHash': { $in: compositeHashes } };
-		const collection = this.catapultDb.database.collection('metadata_nem');
+		const collection = this.catapultDb.database.collection('metadata_v2');
 		return collection.find(conditions)
 			.sort({ _id: -1 })
 			.toArray()
@@ -74,4 +82,4 @@ class MetadataNemDb {
 	}
 }
 
-module.exports = MetadataNemDb;
+module.exports = MetadataV2Db;

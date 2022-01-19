@@ -61,10 +61,10 @@ const metadataPlugin = {
 
 		builder.addSchema('metadata', {
 			id: ModelType.objectId,
-			metadataEntry: { type: ModelType.object, schemaName: 'metadataNemEntry' }
+			metadataEntry: { type: ModelType.object, schemaName: 'metadataV2Entry' }
 		});
 
-		builder.addSchema('metadataNemEntry', {
+		builder.addSchema('metadataV2Entry', {
 			version: ModelType.uint16,
 			compositeHash: ModelType.binary,
 			sourceAddress: ModelType.binary,

@@ -210,8 +210,17 @@ const EntityType = {
 	/** Drive closure transaction */
 	driveClosure: 0x4E62,
 
-	/** Dnd drive verification transaction */
+	/** End drive verification transaction */
 	endDriveVerificationV2: 0x4F62,
+
+	/** Stream start transaction. */
+	streamStart: 0x4167,
+
+	/** Stream finish transaction. */
+	streamFinish: 0x4267,
+
+	/** Stream payment transaction. */
+	streamPayment: 0x4367,
 };
 
 module.exports = EntityType;

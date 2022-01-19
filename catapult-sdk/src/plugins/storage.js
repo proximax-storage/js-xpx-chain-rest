@@ -43,11 +43,16 @@ const storagePlugin = {
 			dataModificationId:		{ type: ModelType.binary, schemaName: 'dataModificationApproval.dataModificationId' },
 			fileStructureCdi:		{ type: ModelType.binary, schemaName: 'dataModificationApproval.fileStructureCdi' },
 			fileStructureSize:		{ type: ModelType.uint64, schemaName: 'dataModificationApproval.fileStructureSize' },
+			metaFilesSize: 			{ type: ModelType.uint64, schemaName: 'dataModificationApproval.metaFilesSize' },
 			usedDriveSize:			{ type: ModelType.uint64, schemaName: 'dataModificationApproval.usedDriveSize' },
+			publicKeys:				{ type: ModelType.array,  schemaName: ModelType.binary },
+			signatures:				{ type: ModelType.array,  schemaName: ModelType.binary },
+			presentOpinions:		{ type: ModelType.array,  schemaName: ModelType.uint8 },
+			opinions:				{ type: ModelType.array,  schemaName: ModelType.uint64 },
 		});
 
 		builder.addTransactionSupport(EntityType.dataModificationCancel, {
-			driveKey:				{ type: ModelType.binary, schemaName: 'dataModificationCancel.driveKey' },
+			drive:					{ type: ModelType.binary, schemaName: 'dataModificationCancel.drive' },
 			dataModificationId:		{ type: ModelType.binary, schemaName: 'dataModificationCancel.dataModificationId' },
 		});
 
@@ -78,8 +83,9 @@ const storagePlugin = {
 		builder.addTransactionSupport(EntityType.dataModificationSingleApproval, {
 			driveKey:				{ type: ModelType.binary, schemaName: 'dataModificationSingleApproval.driveKey' },
 			dataModificationId:		{ type: ModelType.binary, schemaName: 'dataModificationSingleApproval.dataModificationId' },
-			uploaderKeys:			{ type: ModelType.array,  schemaName: ModelType.binary },
-			uploadOpinion:			{ type: ModelType.array,  schemaName: ModelType.uint16 },
+			publicKeysCount:		{ type: ModelType.uint8, schemaName: 'dataModificationSingleApproval.publicKeysCount' },
+			publicKeys:				{ type: ModelType.array, schemaName: ModelType.binary },
+			opinions:				{ type: ModelType.array, schemaName: ModelType.uint64 },
 		});
 
 		builder.addTransactionSupport(EntityType.verificationPayment, {
@@ -97,13 +103,49 @@ const storagePlugin = {
 			judgedCount:							{ type: ModelType.uint8,  schemaName: 'downloadApproval.judgedCount' },
 			opinionElementCount:					{ type: ModelType.uint16, schemaName: 'downloadApproval.opinionElementCount' },
 			publicKeys:								{ type: ModelType.array,  schemaName: ModelType.binary },
-			blsSignatures:							{ type: ModelType.array,  schemaName: ModelType.binary },
+			signatures:								{ type: ModelType.array,  schemaName: ModelType.binary },
 			presentOpinions:						{ type: ModelType.array,  schemaName: ModelType.uint8 },
 			opinions:								{ type: ModelType.array,  schemaName: ModelType.uint64 },
 		});
 
 		builder.addTransactionSupport(EntityType.driveClosure, {
-			driveKey: 				{ type: ModelType.binary, schemaName: 'driveClosure.driveKey' },
+			driveKey: 	{ type: ModelType.binary, schemaName: 'driveClosure.driveKey' },
+		});
+
+		builder.addSchema('replicatorEntry', {
+			replicator: { type: ModelType.object, schemaName: 'replicator' }
+		});
+
+		builder.addSchema('driveInfo', {
+			drive: ModelType.binary,
+			lastApprovedDataModificationId: ModelType.binary,
+			dataModificationIdIsValid: ModelType.uint8,
+			initialDownloadWork: ModelType.uint64,
+		});
+
+		builder.addSchema('replicator', {
+			key:			ModelType.binary,
+			version:		ModelType.uint32,
+			capacity:		ModelType.uint64,
+			drives: 		{ type: ModelType.array, schemaName: 'driveInfo' },
+		});
+
+		builder.addSchema('downloadChannelEntry', {
+			downloadChannelInfo: { type: ModelType.object, schemaName: 'downloadChannelInfo' }
+		});
+
+		builder.addSchema('cumulativePayments', {
+			replicator:		ModelType.binary,
+			payment:		ModelType.uint64,
+		});
+
+		builder.addSchema('downloadChannelInfo', {
+			id:						ModelType.binary,
+			consumer:				ModelType.binary,
+			downloadSize:			ModelType.uint64,
+			downloadApprovalCount:	ModelType.uint16,
+			listOfPublicKeys: 		{ type: ModelType.array, schemaName: ModelType.binary },
+			cumulativePayments: 	{ type: ModelType.array, schemaName: 'cumulativePayments' },
 		});
 
 		builder.addSchema('bcDriveEntry', {
@@ -250,7 +292,38 @@ const storagePlugin = {
 				transaction.dataModificationId = parser.buffer(constants.sizes.hash256);
 				transaction.fileStructureCdi = parser.buffer(constants.sizes.hash256);
 				transaction.fileStructureSize = parser.uint64();
+				transaction.metaFilesSize = parser.uint64();
 				transaction.usedDriveSize = parser.uint64();
+				transaction.judgingKeysCount = parser.uint8();
+				transaction.overlappingKeysCount = parser.uint8();
+				transaction.judgedKeysCount = parser.uint8();
+				transaction.opinionElementCount = parser.uint8();
+
+				transaction.publicKeys = []
+				let count = transaction.judgingKeysCount + transaction.overlappingKeysCount + transaction.judgedKeysCount;
+				while (count-- > 0) {
+					transaction.publicKeys.push(parser.buffer(constants.sizes.signer));
+				}
+
+				transaction.signatures = [];
+				const totalJudgingKeysCount = transaction.judgingKeysCount + transaction.overlappingKeysCount;
+				count = totalJudgingKeysCount;
+				while (count-- > 0) {
+					transaction.signatures.push(parser.buffer(constants.sizes.signature));
+				}
+
+				transaction.presentOpinions = [];
+				const totalJudgedKeysCount = transaction.overlappingKeysCount + transaction.judgedKeysCount;
+				count = Math.floor((totalJudgingKeysCount * totalJudgedKeysCount + 7) / 8);
+				while (count-- > 0) {
+					transaction.presentOpinions.push(parser.uint8());
+				}
+
+				transaction.opinions = [];
+				count = transaction.opinionElementCount;
+				while (count-- > 0) {
+					transaction.opinions.push(parser.uint64());
+				}
 
 				return transaction;
 			},
@@ -260,7 +333,28 @@ const storagePlugin = {
 				serializer.writeBuffer(transaction.dataModificationId);
 				serializer.writeBuffer(transaction.fileStructureCdi);
 				serializer.writeUint64(transaction.fileStructureSize);
+				serializer.writeUint64(transaction.metaFilesSize);
 				serializer.writeUint64(transaction.usedDriveSize);
+				serializer.writeUint8(transaction.judgingKeysCount);
+				serializer.writeUint8(transaction.overlappingKeysCount);
+				serializer.writeUint8(transaction.judgedKeysCount);
+				serializer.writeUint8(transaction.opinionElementCount);
+				let count = transaction.judgingKeysCount + transaction.overlappingKeysCount + transaction.judgedKeysCount;
+				for (let i = 0; i < count; ++i) {
+					serializer.writeBuffer(transaction.publicKeys[i]);
+				}
+				const totalJudgingKeysCount = transaction.judgingKeysCount + transaction.overlappingKeysCount;
+				for (let i = 0; i < totalJudgingKeysCount; ++i) {
+					serializer.writeBuffer(transaction.signatures[i]);
+				}
+				const totalJudgedKeysCount = transaction.overlappingKeysCount + transaction.judgedKeysCount;
+				count = Math.floor((totalJudgingKeysCount * totalJudgedKeysCount + 7) / 8);
+				for (let i = 0; i < count; ++i) {
+					serializer.writeUint8(transaction.presentOpinions[i]);
+				}
+				for (let i = 0; i < transaction.opinionElementCount; ++i) {
+					serializer.writeUint64(transaction.opinions[i]);
+				}
 			}
 		});
 
@@ -357,19 +451,18 @@ const storagePlugin = {
 				const transaction = {};
 				transaction.driveKey = parser.buffer(constants.sizes.signer);
 				transaction.dataModificationId = parser.buffer(constants.sizes.hash256);
-				transaction.uploadOpinionPairCount = parser.uint16();
-				transaction.usedDriveSize = parser.uint64();
+				transaction.publicKeyCount = parser.uint8();
 
-				transaction.uploaderKeys = [];
-				let count = transaction.uploadOpinionPairCount;
+				transaction.publicKeys = [];
+				let count = transaction.publicKeyCount;
 				while (count-- > 0) {
-					transaction.uploaderKeys.push(parser.buffer(constants.sizes.signer));
+					transaction.publicKeys.push(parser.buffer(constants.sizes.signer));
 				}
 
-				transaction.uploadOpinion = [];
-				count = transaction.uploadOpinionPairCount;
+				transaction.opinions = [];
+				count = transaction.publicKeyCount;
 				while (count-- > 0) {
-					transaction.uploadOpinion.push(parser.uint8());
+					transaction.opinions.push(parser.uint64());
 				}
 
 				return transaction;
@@ -378,13 +471,12 @@ const storagePlugin = {
 			serialize: (transaction, serializer) => {
 				serializer.writeBuffer(transaction.driveKey);
 				serializer.writeBuffer(transaction.dataModificationId);
-				serializer.writeUint16(transaction.uploadOpinionPairCount);
-				serializer.writeUint64(transaction.usedDriveSize);
-				for (let i = 0; i < transaction.uploadOpinionPairCount; ++i) {
-					serializer.writeBuffer(transaction.uploaderKeys[i]);
+				serializer.writeUint8(transaction.publicKeyCount);
+				for (let i = 0; i < transaction.publicKeyCount; ++i) {
+					serializer.writeBuffer(transaction.publicKeys[i]);
 				}
-				for (let i = 0; i < transaction.uploadOpinionPairCount; ++i) {
-					serializer.writeUint8(transaction.uploadOpinion[i]);
+				for (let i = 0; i < transaction.publicKeyCount; ++i) {
+					serializer.writeUint64(transaction.opinions[i]);
 				}
 			}
 		});
@@ -411,21 +503,21 @@ const storagePlugin = {
 				transaction.approvalTrigger = parser.buffer(constants.sizes.hash256);
 				transaction.sequenceNumber = parser.uint16();
 				transaction.responseToFinishDownloadTransaction = parser.uint8();
-				transaction.judgingCount = parser.uint8();
-				transaction.overlappingCount = parser.uint8();
-				transaction.judgedCount = parser.uint8();
+				transaction.judgingKeysCount = parser.uint8();
+				transaction.overlappingKeysCount = parser.uint8();
+				transaction.judgedKeysCount = parser.uint8();
 				transaction.opinionElementCount = parser.uint16();
 
 				transaction.publicKeys = [];
-				let count = transaction.judgingCount + transaction.overlappingCount + transaction.judgedCount;
+				let count = transaction.judgingKeysCount + transaction.overlappingKeysCount + transaction.judgedKeysCount;
 				while (count-- > 0) {
 					transaction.publicKeys.push(parser.buffer(constants.sizes.signer));
 				}
 
-				transaction.blsSignatures = [];
-				count = transaction.judgingCount + transaction.overlappingCount;
+				transaction.signatures = [];
+				count = transaction.judgingKeysCount + transaction.overlappingKeysCount;
 				while (count-- > 0) {
-					transaction.blsSignatures.push(parser.buffer(constants.sizes.blsSignature));
+					transaction.signatures.push(parser.buffer(constants.sizes.signature));
 				}
 
 				transaction.presentOpinions = [];
@@ -455,9 +547,9 @@ const storagePlugin = {
 				serializer.writeBuffer(transaction.approvalTrigger);
 				serializer.writeUint16(transaction.sequenceNumber);
 				serializer.writeUint8(transaction.responseToFinishDownloadTransaction);
-				serializer.writeUint8(transaction.judgingCount);
-				serializer.writeUint8(transaction.overlappingCount);
-				serializer.writeUint8(transaction.judgedCount);
+				serializer.writeUint8(transaction.judgingKeysCount);
+				serializer.writeUint8(transaction.overlappingKeysCount);
+				serializer.writeUint8(transaction.judgedKeysCount);
 				serializer.writeUint16(transaction.opinionElementCount);
 
 				transaction.publicKeys.forEach(key => {
