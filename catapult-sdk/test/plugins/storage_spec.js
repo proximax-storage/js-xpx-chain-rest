@@ -168,18 +168,6 @@ describe('storage plugin', () => {
 				'driveKey',
 			]);
 
-			expect(Object.keys(modelSchema.endDriveVerificationV2).length).to.equal(Object.keys(modelSchema.transaction).length + 8);
-			expect(modelSchema.endDriveVerificationV2).to.contain.all.keys([
-				'driveKey',
-				'verificationTrigger',
-				'shardId',
-				'keyCount',
-				'judgingKeyCount',
-				'publicKeys',
-				'signatures',
-				'opinions',
-			]);
-
 			expect(Object.keys(modelSchema['replicatorEntry']).length).to.equal(1);
 			expect(modelSchema['replicatorEntry']).to.contain.all.keys(['replicator']);
 
@@ -200,8 +188,47 @@ describe('storage plugin', () => {
 				'drives'
 			]);
 
+			expect(Object.keys(modelSchema['downloadChannelEntry']).length).to.equal(1);
+			expect(modelSchema['downloadChannelEntry']).to.contain.all.keys(['downloadChannelInfo']);
+
+			expect(Object.keys(modelSchema['cumulativePayments']).length).to.equal(2);
+			expect(modelSchema['cumulativePayments']).to.contain.all.keys([
+				'replicator',
+				'payment'
+			]);
+
+			expect(Object.keys(modelSchema['downloadChannelInfo']).length).to.equal(7);
+			expect(modelSchema['downloadChannelInfo']).to.contain.all.keys([
+				'id',
+				'consumer',
+				'drive',
+				'downloadSize',
+				'downloadApprovalCount',
+				'listOfPublicKeys',
+				'cumulativePayments'
+			]);
+
 			expect(Object.keys(modelSchema['bcDriveEntry']).length).to.equal(1);
 			expect(modelSchema['bcDriveEntry']).to.contain.all.keys(['drive']);
+
+			expect(Object.keys(modelSchema['bcDrive']).length).to.equal(15);
+			expect(modelSchema['bcDrive']).to.contain.all.keys([
+				'multisig',
+				'multisigAddress',
+				'owner',
+				'rootHash',
+				'size',
+				'usedSize',
+				'metaFilesSize',
+				'replicatorCount',
+				'ownerCumulativeUploadSize',
+				'activeDataModifications',
+				'completedDataModifications',
+				'confirmedUsedSizes',
+				'replicators',
+				'offboardingReplicators',
+				'verifications',
+			]);
 
 			expect(Object.keys(modelSchema['activeDataModification']).length).to.equal(7);
 			expect(modelSchema['activeDataModification']).to.contain.all.keys([
@@ -240,43 +267,10 @@ describe('storage plugin', () => {
 				'shards'
 			]);
 
-			expect(Object.keys(modelSchema['bcDrive']).length).to.equal(15);
-			expect(modelSchema['bcDrive']).to.contain.all.keys([
-				'multisig',
-				'multisigAddress',
-				'owner',
-				'rootHash',
-				'size',
-				'usedSize',
-				'metaFilesSize',
-				'replicatorCount',
-				'ownerCumulativeUploadSize',
-				'activeDataModifications',
-				'completedDataModifications',
-				'confirmedUsedSizes',
-				'replicators',
-				'offboardingReplicators',
-				'verifications',
-			]);
-
-			expect(Object.keys(modelSchema['downloadChannelEntry']).length).to.equal(1);
-			expect(modelSchema['downloadChannelEntry']).to.contain.all.keys(['downloadChannelInfo']);
-
-			expect(Object.keys(modelSchema['cumulativePayments']).length).to.equal(2);
-			expect(modelSchema['cumulativePayments']).to.contain.all.keys([
-				'replicator',
-				'payment'
-			]);
-
-			expect(Object.keys(modelSchema['downloadChannelInfo']).length).to.equal(7);
-			expect(modelSchema['downloadChannelInfo']).to.contain.all.keys([
-				'id',
-				'consumer',
-				'drive',
-				'downloadSize',
-				'downloadApprovalCount',
-				'listOfPublicKeys',
-				'cumulativePayments'
+			expect(Object.keys(modelSchema['shard']).length).to.equal(2);
+			expect(modelSchema['shard']).to.contain.all.keys([
+				'downloadChannelId',
+				'replicator'
 			]);
 
 			expect(Object.keys(modelSchema.endDriveVerificationV2).length).to.equal(Object.keys(modelSchema.transaction).length + 8);
