@@ -81,10 +81,9 @@ describe('storage plugin', () => {
 				'dataModificationId',
 			]);
 
-			expect(Object.keys(modelSchema.replicatorOnboarding).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
+			expect(Object.keys(modelSchema.replicatorOnboarding).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
 			expect(modelSchema.replicatorOnboarding).to.contain.all.keys([
 				'capacity',
-				'blsKey',
 			]);
 
 			expect(Object.keys(modelSchema.replicatorOffboarding).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
@@ -323,17 +322,10 @@ describe('storage plugin', () => {
 		describe('supports replicator onboarding transaction', () => {
 			const codec = getCodecs()[EntityType.replicatorOnboarding];
 			const capacity = Buffer.of(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-			const blsKey = createByteArray(0x02, 48);
 
-			test.binary.test.addAll(codec, 8 + 48, () => ({
-				buffer: Buffer.concat([
-					capacity,
-					blsKey,
-				]),
-				object: {
-					capacity: [0x01, 0x0],
-					blsKey,
-				}
+			test.binary.test.addAll(codec, 8, () => ({
+				buffer: Buffer.concat([capacity]),
+				object: {capacity: [0x01, 0x0]}
 			}));
 		});
 

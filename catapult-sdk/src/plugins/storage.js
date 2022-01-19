@@ -53,7 +53,6 @@ const storagePlugin = {
 
 		builder.addTransactionSupport(EntityType.replicatorOnboarding, {
 			capacity:				{ type: ModelType.uint64, schemaName: 'replicatorOnboarding.capacity' },
-			blsKey: 				{ type: ModelType.binary, schemaName: 'replicatorOnboarding.blsKey' },
 		});
 
 		builder.addTransactionSupport(EntityType.replicatorOffboarding, {
@@ -224,14 +223,12 @@ const storagePlugin = {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.capacity = parser.uint64();
-				transaction.blsKey = parser.buffer(constants.sizes.blsPublicKey);
 
 				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
 				serializer.writeUint64(transaction.capacity);
-				serializer.writeBuffer(transaction.blsKey);
 			}
 		});
 
