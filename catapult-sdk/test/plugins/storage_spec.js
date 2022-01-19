@@ -270,7 +270,7 @@ describe('storage plugin', () => {
 			expect(Object.keys(modelSchema['shard']).length).to.equal(2);
 			expect(modelSchema['shard']).to.contain.all.keys([
 				'downloadChannelId',
-				'replicator'
+				'replicators'
 			]);
 
 			expect(Object.keys(modelSchema.endDriveVerificationV2).length).to.equal(Object.keys(modelSchema.transaction).length + 8);

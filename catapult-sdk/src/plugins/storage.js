@@ -211,7 +211,7 @@ const storagePlugin = {
 
 		builder.addSchema('shard', {
 			downloadChannelId:		{ type: ModelType.binary, schemaName: 'shard.downloadChannelId' },
-			replicator:			{ type: ModelType.array, schemaName: ModelType.binary },
+			replicators:			{ type: ModelType.array, schemaName: ModelType.binary },
 		});
 
 		builder.addTransactionSupport(EntityType.endDriveVerificationV2, {
