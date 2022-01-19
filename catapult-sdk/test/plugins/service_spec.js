@@ -31,7 +31,7 @@ describe('service plugin', () => {
 				'filesDeposit',
 				'endDrive',
 				'startDriveVerification',
-				'EndDriveVerification',
+				'endDriveVerification',
 				'drive.verificationFailure',
 				'driveFilesReward',
 				'driveFilesReward.uploadInfo',
@@ -84,8 +84,8 @@ describe('service plugin', () => {
 			expect(Object.keys(modelSchema.startDriveVerification).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
 			expect(modelSchema.startDriveVerification).to.contain.all.keys(['driveKey']);
 
-			expect(Object.keys(modelSchema.EndDriveVerification).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
-			expect(modelSchema.EndDriveVerification).to.contain.all.keys(['verificationFailures']);
+			expect(Object.keys(modelSchema.endDriveVerification).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
+			expect(modelSchema.endDriveVerification).to.contain.all.keys(['verificationFailures']);
 
 			expect(Object.keys(modelSchema['drive.verificationFailure']).length).to.equal(3);
 			expect(modelSchema['drive.verificationFailure']).to.contain.all.keys(['size', 'replicator', 'blockHashes']);
@@ -193,7 +193,7 @@ describe('service plugin', () => {
 				EntityType.joinToDrive.toString(),
 				EntityType.endDrive.toString(),
 				EntityType.startDriveVerification.toString(),
-				EntityType.EndDriveVerification.toString(),
+				EntityType.endDriveVerification.toString(),
 				EntityType.driveFileSystem.toString(),
 				EntityType.filesDeposit.toString(),
 				EntityType.driveFilesReward.toString(),
@@ -261,7 +261,7 @@ describe('service plugin', () => {
 		});
 
 		describe('supports end drive verification transaction', () => {
-			const codec = getCodecs()[EntityType.EndDriveVerification];
+			const codec = getCodecs()[EntityType.endDriveVerification];
 			const size1 = Buffer.of(0x64, 0x0, 0x0, 0x0);
 			const replicator1 = createHash(0x01);
 			const blockHash1 = createHash(0x02);

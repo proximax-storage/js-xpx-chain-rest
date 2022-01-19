@@ -38,13 +38,13 @@ module.exports = {
 				.then(result => routeUtils.createSender('bcDriveEntry').sendPage(res, next)(result));
 		});
 
-        server.get('/bcdrive/:accountId', (req, res, next) => {
+        server.get('/bcdrives/:accountId', (req, res, next) => {
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
 			return db.getBcDriveByAccountId(type, accountId)
 				.then(routeUtils.createSender('bcDriveEntry').sendOne(req.params.accountId, res, next));
 		});
 
-		server.get('/replicators_v2', (req, res, next) => {
+		server.get('/replicators', (req, res, next) => {
 			const { params } = req;
 
 			const filters = {
@@ -63,7 +63,7 @@ module.exports = {
 				.then(result => routeUtils.createSender('replicatorEntry').sendPage(res, next)(result));
 		});
 
-		server.get('/replicators_v2/:publicKey', (req, res, next) => {
+		server.get('/replicators/:publicKey', (req, res, next) => {
 			const key = routeUtils.parseArgument(req.params, 'publicKey', 'publicKey');
 			return db.getReplicatorByPublicKey(key)
 				.then(routeUtils.createSender('replicatorEntry').sendOne('publicKey', res, next));

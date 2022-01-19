@@ -87,7 +87,7 @@ describe('entity type enumeration', () => {
 			verificationPayment: 0x4C62,
 			downloadApproval: 0x4D62,
 			driveClosure: 0x4E62,
-			endDriveVerification: 0x4F62,
+			endDriveVerificationV2: 0x4F62,
 			streamStart: 0x4167,
 			streamFinish: 0x4267,
 			streamPayment: 0x4367,

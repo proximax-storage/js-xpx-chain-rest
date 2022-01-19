@@ -23,7 +23,7 @@ describe('storage plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 29);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 28);
 			expect(modelSchema).to.contain.all.keys([
 				'prepareBcDrive',
 				'dataModification',
@@ -39,21 +39,20 @@ describe('storage plugin', () => {
 				'verificationPayment',
 				'downloadApproval',
 				'driveClosure',
-				'endDriveVerificationV2',
-				'endDriveVerification.verificationOpinions',
 				'replicatorEntry',
-				'driveInfo',
-				'replicators',
-				'bcDriveEntry',
-				'activeDataModification',
-				'completedDataModification',
-				'confirmedUsedSizes',
-				'verificationOpinions',
-				'verifications',
-				'bcdrives',
+				'drive',
+				'replicator',
 				'downloadChannelEntry',
 				'cumulativePayments',
-				'downloadChannelInfo'
+				'downloadChannelInfo',
+				'bcDriveEntry',
+				'bcDrive',
+				'activeDataModification',
+				'completedDataModification',
+				'confirmedUsedSize',
+				'verification',
+				'shard',
+				'endDriveVerificationV2'
 			]);
 
 			expect(Object.keys(modelSchema.prepareBcDrive).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
@@ -76,11 +75,11 @@ describe('storage plugin', () => {
 				'driveKey',
 				'downloadSize',
 				'feedbackFeeAmount',
-				'publicKeyCount',
+				'listOfPublicKeysSize',
 				'listOfPublicKeys',
 			]);
 
-			expect(Object.keys(modelSchema.dataModificationApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 10);
+			expect(Object.keys(modelSchema.dataModificationApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 14);
 			expect(modelSchema.dataModificationApproval).to.contain.all.keys([
 				'driveKey',
 				'dataModificationId',
@@ -88,6 +87,10 @@ describe('storage plugin', () => {
 				'fileStructureSize',
 				'metaFilesSize',
 				'usedDriveSize',
+				'judgingKeysCount',
+				'overlappingKeysCount',
+				'judgedKeysCount',
+				'opinionElementCount',
 				'publicKeys',
 				'signatures',
 				'presentOpinions',
@@ -165,34 +168,32 @@ describe('storage plugin', () => {
 				'driveKey',
 			]);
 
-			expect(Object.keys(modelSchema.endDriveVerification).length).to.equal(Object.keys(modelSchema.transaction).length + 4);
-			expect(modelSchema.endDriveVerification).to.contain.all.keys([
-				'drive',
+			expect(Object.keys(modelSchema.endDriveVerificationV2).length).to.equal(Object.keys(modelSchema.transaction).length + 8);
+			expect(modelSchema.endDriveVerificationV2).to.contain.all.keys([
+				'driveKey',
 				'verificationTrigger',
-				'provers',
-				'verificationOpinions',
-			]);
-
-			expect(Object.keys(modelSchema['endDriveVerification.verificationOpinions']).length).to.equal(3);
-			expect(modelSchema['endDriveVerification.verificationOpinions']).to.contain.all.keys([
-				'verifier',
-				'signature',
-				'results'
+				'shardId',
+				'keyCount',
+				'judgingKeyCount',
+				'publicKeys',
+				'signatures',
+				'opinions',
 			]);
 
 			expect(Object.keys(modelSchema['replicatorEntry']).length).to.equal(1);
 			expect(modelSchema['replicatorEntry']).to.contain.all.keys(['replicator']);
 
-			expect(Object.keys(modelSchema['driveInfo']).length).to.equal(4);
-			expect(modelSchema['driveInfo']).to.contain.all.keys([
+			expect(Object.keys(modelSchema['drive']).length).to.equal(5);
+			expect(modelSchema['drive']).to.contain.all.keys([
 				'drive',
 				'lastApprovedDataModificationId',
 				'dataModificationIdIsValid',
-				'initialDownloadWork'
+				'initialDownloadWork',
+				'lastCompletedCumulativeDownloadWork'
 			]);
 
-			expect(Object.keys(modelSchema['replicators']).length).to.equal(4);
-			expect(modelSchema['replicators']).to.contain.all.keys([
+			expect(Object.keys(modelSchema['replicator']).length).to.equal(4);
+			expect(modelSchema['replicator']).to.contain.all.keys([
 				'key',
 				'version',
 				'capacity',
@@ -225,27 +226,22 @@ describe('storage plugin', () => {
 				'state'
 			]);
 
-			expect(Object.keys(modelSchema['confirmedUsedSizes']).length).to.equal(2);
-			expect(modelSchema['confirmedUsedSizes']).to.contain.all.keys([
+			expect(Object.keys(modelSchema['confirmedUsedSize']).length).to.equal(2);
+			expect(modelSchema['confirmedUsedSize']).to.contain.all.keys([
 				'replicator',
 				'size'
 			]);
 
-			expect(Object.keys(modelSchema['verificationOpinions']).length).to.equal(2);
-			expect(modelSchema['verificationOpinions']).to.contain.all.keys([
-				'prover',
-				'result'
-			]);
-
-			expect(Object.keys(modelSchema['verifications']).length).to.equal(3);
-			expect(modelSchema['verifications']).to.contain.all.keys([
+			expect(Object.keys(modelSchema['verification']).length).to.equal(4);
+			expect(modelSchema['verification']).to.contain.all.keys([
 				'verificationTrigger',
-				'state',
-				'results'
+				'expiration',
+				'expired',
+				'shards'
 			]);
 
-			expect(Object.keys(modelSchema['bcdrives']).length).to.equal(14);
-			expect(modelSchema['bcdrives']).to.contain.all.keys([
+			expect(Object.keys(modelSchema['bcDrive']).length).to.equal(15);
+			expect(modelSchema['bcDrive']).to.contain.all.keys([
 				'multisig',
 				'multisigAddress',
 				'owner',
@@ -259,7 +255,8 @@ describe('storage plugin', () => {
 				'completedDataModifications',
 				'confirmedUsedSizes',
 				'replicators',
-				'verifications'
+				'offboardingReplicators',
+				'verifications',
 			]);
 
 			expect(Object.keys(modelSchema['downloadChannelEntry']).length).to.equal(1);
@@ -271,10 +268,11 @@ describe('storage plugin', () => {
 				'payment'
 			]);
 
-			expect(Object.keys(modelSchema['downloadChannelInfo']).length).to.equal(6);
+			expect(Object.keys(modelSchema['downloadChannelInfo']).length).to.equal(7);
 			expect(modelSchema['downloadChannelInfo']).to.contain.all.keys([
 				'id',
 				'consumer',
+				'drive',
 				'downloadSize',
 				'downloadApprovalCount',
 				'listOfPublicKeys',
@@ -385,18 +383,18 @@ describe('storage plugin', () => {
 			const driveKey = createByteArray(0x01);
 			const downloadSize = Buffer.of(0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 			const feedbackFeeAmount = Buffer.of(0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-			const publicKeyCount = Buffer.of(0x04, 0x00);
-			const key1 = createByteArray(0x05);
-			const key2 = createByteArray(0x06);
-			const key3 = createByteArray(0x07);
-			const key4 = createByteArray(0x08);
+			const listOfPublicKeysSize = Buffer.of(0x04, 0x00);
+			const key1 = createByteArray(0x05, 32);
+			const key2 = createByteArray(0x06, 32);
+			const key3 = createByteArray(0x07, 32);
+			const key4 = createByteArray(0x08, 32);
 
 			test.binary.test.addAll(codec, 32 + 2 * 8 + 2 + 4 * 32, () => ({
 				buffer: Buffer.concat([
 					driveKey,
 					downloadSize,
 					feedbackFeeAmount,
-					publicKeyCount,
+					listOfPublicKeysSize,
 					key1,
 					key2,
 					key3,
@@ -406,7 +404,7 @@ describe('storage plugin', () => {
 					driveKey,
 					downloadSize: [0x02, 0x00],
 					feedbackFeeAmount: [0x03, 0x00],
-					publicKeyCount: 0x04,
+					listOfPublicKeysSize: 0x04,
 					listOfPublicKeys: [ key1, key2, key3, key4 ],
 				}
 			}));
@@ -423,7 +421,7 @@ describe('storage plugin', () => {
 			const judgingKeysCount = Buffer.of(0x02);
 			const overlappingKeysCount = Buffer.of(0x00);
 			const judgedKeysCount = Buffer.of(0x01);
-			const opinionElementCount = Buffer.of(0x03);
+			const opinionElementCount = Buffer.of(0x03, 0x00);
 			const publicKey1 = createByteArray(0x0B);
 			const publicKey2 = createByteArray(0x0C);
 			const publicKey3 = createByteArray(0x0D);
@@ -436,7 +434,7 @@ describe('storage plugin', () => {
 				0x14, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
 			);
 
-			test.binary.test.addAll(codec, 3 * 32 + 3 * 8 + 4 + 3 * 32 + 2 * 64 + 1 + 3 * 8, () => ({
+			test.binary.test.addAll(codec, 3 * 32 + 3 * 8 + 5 + 3 * 32 + 2 * 64 + 1 + 3 * 8, () => ({
 				buffer: Buffer.concat([
 					driveKey,
 					dataModificationId,
@@ -626,11 +624,11 @@ describe('storage plugin', () => {
 			const downloadChannelId = createByteArray(0x01);
 			const approvalTrigger = createByteArray(0x02);
 			const sequenceNumber = Buffer.of(0x02, 0x00);
-			const responseToFinishDownloadTransaction = Buffer.of(0x03);
+			const responseToFinishDownloadTransaction = Buffer.of(0x01);
 			const judgingKeysCount = Buffer.of(0x01);
 			const overlappingKeysCount = Buffer.of(0x02);
 			const judgedKeysCount = Buffer.of(0x01);
-			const opinionElementCount = Buffer.of(0x04);
+			const opinionElementCount = Buffer.of(0x04, 0x00);
 			const key1 = createByteArray(0x08);
 			const key2 = createByteArray(0x09);
 			const key3 = createByteArray(0x0A);
@@ -646,7 +644,7 @@ describe('storage plugin', () => {
 				0x14, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
 			);
 
-			test.binary.test.addAll(codec, 32 + 2 + 5 + 4 * 32 + 3 * 64 + 2 + 4 * 8, () => ({
+			test.binary.test.addAll(codec, 2 * 32 + 8 + 4 * 32 + 3 * 64 + 2 + 4 * 8, () => ({
 				buffer: Buffer.concat([
 					downloadChannelId,
 					approvalTrigger,
@@ -670,7 +668,7 @@ describe('storage plugin', () => {
 					downloadChannelId,
 					approvalTrigger,
 					sequenceNumber: 0x02,
-					responseToFinishDownloadTransaction: 0x03,
+					responseToFinishDownloadTransaction: 0x01,
 					judgingKeysCount: 0x01,
 					overlappingKeysCount: 0x02,
 					judgedKeysCount: 0x01,
@@ -693,84 +691,6 @@ describe('storage plugin', () => {
 				]),
 				object: {
 					driveKey,
-				}
-			}));
-		});
-
-		describe('supports end drive verification transaction', () => {
-			const codec = getCodecs()[EntityType.endDriveVerification];
-			const drive = createByteArray(0x01);
-			const verificationTrigger = createByteArray(0x02);
-			const proversCount = Buffer.of(0x03, 0x00);
-			const verificationOpinionsCount = Buffer.of(0x02, 0x00);
-			const prover1 = createByteArray(0x05);
-			const prover2 = createByteArray(0x06);
-			const prover3 = createByteArray(0x07);
-			const verifier1 = createByteArray(0x08);
-			const signature1 = createByteArray(0x09, 64);
-			const result1 = Buffer.of(0x0A);
-			const verifier2 = createByteArray(0x0B);
-			const signature2 = createByteArray(0x0C, 64);
-			const result2 = Buffer.of(0x0D);
-
-			test.binary.test.addAll(codec, 2 * 32 + 2 + 2 + 3 * 32 + 2 * (32 + 64 + 2 * (32 + 1)), () => ({
-				buffer: Buffer.concat([
-					drive,
-					verificationTrigger,
-					proversCount,
-					verificationOpinionsCount,
-					prover1,
-					prover2,
-					prover3,
-					verifier1,
-					signature1,
-					prover1,
-					result1,
-					prover2,
-					result2,
-					verifier2,
-					signature2,
-					prover1,
-					result1,
-					prover2,
-					result2,
-				]),
-				object: {
-					drive,
-					verificationTrigger,
-					proversCount: 0x03,
-					verificationOpinionsCount: 0x02,
-					provers: [ prover1, prover2, prover3 ],
-					verificationOpinions: [
-						{
-							verifier: verifier1,
-							signature: signature1,
-							results: [
-								{
-									prover: prover1,
-									result: 0x0A,
-								},
-								{
-									prover: prover2,
-									result: 0x0D,
-								}
-							]
-						},
-						{
-							verifier: verifier2,
-							signature: signature2,
-							results: [
-								{
-									prover: prover1,
-									result: 0x0A,
-								},
-								{
-									prover: prover2,
-									result: 0x0D,
-								}
-							]
-						}
-					],
 				}
 			}));
 		});

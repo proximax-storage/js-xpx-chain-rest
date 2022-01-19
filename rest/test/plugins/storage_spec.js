@@ -24,10 +24,10 @@
  
              // Assert:
              test.assert.assertRoutes(routes, [
-                '/drives_v2',
-                '/drives_v2/:accountId',
-                '/replicators_v2',
-                '/replicators_v2/:publicKey',
+                '/bcdrives',
+                '/bcdrives/:accountId',
+                '/replicators',
+                '/replicators/:publicKey',
                 '/downloads_v2',
                 '/downloads_v2/:downloadChannelId',
              ]);

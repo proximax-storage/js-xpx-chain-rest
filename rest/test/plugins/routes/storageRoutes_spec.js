@@ -14,7 +14,7 @@
  const { convert } = catapult.utils;
 
  describe('storage routes', () => {
-    describe('/drives_v2/:accountId', () => {
+    describe('/bcdrives/:accountId', () => {
 		const assertGetBcDriveByAccountId = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -24,7 +24,7 @@
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/drives_v2/:accountId',
+				'/bcdrives/:accountId',
 				'get',
 				{accountId: traits.accountId},
 				db,
@@ -48,7 +48,7 @@
 		}));
 	});
 
-	describe('/replicators_v2/:publicKey', () => {
+	describe('/replicators/:publicKey', () => {
 		const addGetReplicatorByPublicKey = traits => {
 			// Arrange:
 			const keyGroups = [];
@@ -58,7 +58,7 @@
 			const registerRoutes = storageRoutes.register;
 			return test.route.executeSingle(
 				registerRoutes,
-				'/replicators_v2/:publicKey',
+				'/replicators/:publicKey',
 				'get',
 				{publicKey: traits.publicKey},
 				db,

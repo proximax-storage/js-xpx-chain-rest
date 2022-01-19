@@ -53,7 +53,7 @@ const servicePlugin = {
 			driveKey: 				{ type: ModelType.binary, schemaName: 'filesDeposit.driveKey' },
 		});
 
-		builder.addTransactionSupport(EntityType.EndDriveVerification, {
+		builder.addTransactionSupport(EntityType.endDriveVerification, {
 			verificationFailures:	{ type: ModelType.array, schemaName: 'drive.verificationFailure' },
 		});
 
@@ -237,7 +237,7 @@ const servicePlugin = {
 			}
 		});
 
-		codecBuilder.addTransactionSupport(EntityType.EndDriveVerification, {
+		codecBuilder.addTransactionSupport(EntityType.endDriveVerification, {
 			deserialize: (parser, size, txCodecs, preprocessedBytes = 0) => {
 				let bodySize = size - preprocessedBytes;
 				const transaction = {};
