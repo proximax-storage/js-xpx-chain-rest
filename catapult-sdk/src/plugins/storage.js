@@ -120,7 +120,7 @@ const storagePlugin = {
 			replicator: { type: ModelType.object, schemaName: 'replicator' }
 		});
 
-		builder.addSchema('drive', {
+		builder.addSchema('driveInfo', {
 			drive: ModelType.binary,
 			lastApprovedDataModificationId: ModelType.binary,
 			dataModificationIdIsValid: ModelType.uint8,
@@ -132,7 +132,7 @@ const storagePlugin = {
 			key:			ModelType.binary,
 			version:		ModelType.uint32,
 			capacity:		ModelType.uint64,
-			drives: 		{ type: ModelType.array, schemaName: 'drive' },
+			drives: 		{ type: ModelType.array, schemaName: 'driveInfo' },
 		});
 
 		builder.addSchema('downloadChannelEntry', {
