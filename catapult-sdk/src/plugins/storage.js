@@ -48,7 +48,7 @@ const storagePlugin = {
 			judgingKeysCount:		{ type: ModelType.uint8, schemaName: 'dataModificationApproval.judgingKeysCount' },
 			overlappingKeysCount:	{ type: ModelType.uint8, schemaName: 'dataModificationApproval.overlappingKeysCount' },
 			judgedKeysCount:		{ type: ModelType.uint8, schemaName: 'dataModificationApproval.judgedKeysCount' },
-			opinionElementCount:	{ type: ModelType.uint8, schemaName: 'dataModificationApproval.opinionElementCount' },
+			opinionElementCount:	{ type: ModelType.uint16, schemaName: 'dataModificationApproval.opinionElementCount' },
 			publicKeys:				{ type: ModelType.array,  schemaName: ModelType.binary },
 			signatures:				{ type: ModelType.array,  schemaName: ModelType.binary },
 			presentOpinions:		{ type: ModelType.array,  schemaName: ModelType.uint8 },
