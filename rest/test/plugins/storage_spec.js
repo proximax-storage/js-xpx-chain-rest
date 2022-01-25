@@ -28,8 +28,8 @@
                 '/bcdrives/:accountId',
                 '/replicators',
                 '/replicators/:publicKey',
-                '/downloads_v2',
-                '/downloads_v2/:downloadChannelId',
+                '/download_channels',
+                '/download_channels/:downloadChannelId',
              ]);
          });
      });

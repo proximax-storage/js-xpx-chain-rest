@@ -69,7 +69,7 @@ module.exports = {
 				.then(routeUtils.createSender('replicatorEntry').sendOne('publicKey', res, next));
 		});
 
-		server.get('/downloads_v2', (req, res, next) => {
+		server.get('/download_channels', (req, res, next) => {
 			const { params } = req;
 
 			const filters = {
@@ -90,7 +90,7 @@ module.exports = {
 			.then(result => routeUtils.createSender('downloadChannelEntry').sendPage(res, next)(result));
 		});
 
-		server.get('/downloads_v2/:downloadChannelId', (req, res, next) => {
+		server.get('/download_channels/:downloadChannelId', (req, res, next) => {
 			const pagingOptions = routeUtils.parsePagingArguments(req.params);
 			const downloadChannelId = routeUtils.parseArgument(req.params, 'downloadChannelId', 'hash256');
 			return db.getDownloadsByDownloadChannelId(downloadChannelId, pagingOptions.id, pagingOptions.pageSize)

@@ -109,8 +109,8 @@
 			pagingTestsFactory.addFailureTest(traits.invalid.name, traits.invalid.params, traits.invalid.error);
 	};
 
-	describe('/downloads_v2/:downloadChannelId', () => addGetDownloadChannelTests({
-		routeName: '/downloads_v2/:downloadChannelId',
+	describe('/download_channels/:downloadChannelId', () => addGetDownloadChannelTests({
+		routeName: '/download_channels/:downloadChannelId',
 		valid: {
 			params: { downloadChannelId: hashes256.valid[0] },
 			expected: { downloadChannelId: convert.hexToUint8(hashes256.valid[0]), options: undefined }
