@@ -166,7 +166,7 @@ const storagePlugin = {
 			size:						ModelType.uint64,
 			usedSize:					ModelType.uint64,
 			metaFilesSize:				ModelType.uint64,
-			replicatorCount:			ModelType.uint32,
+			replicatorCount:			ModelType.uint16,
 			ownerCumulativeUploadSize:	ModelType.uint64,
 			activeDataModifications: 	{ type: ModelType.array, schemaName: 'activeDataModification' },
 			completedDataModifications: { type: ModelType.array, schemaName: 'completedDataModification' },
