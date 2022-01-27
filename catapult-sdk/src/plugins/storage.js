@@ -194,7 +194,7 @@ const storagePlugin = {
 			actualUploadSize:		ModelType.uint64,
 			folderName:				ModelType.string,
 			readyForApproval:		ModelType.boolean,
-			state:					ModelType.uint8,
+			modificationState:		ModelType.uint8,
 		});
 
 		builder.addSchema('confirmedUsedSize', {
