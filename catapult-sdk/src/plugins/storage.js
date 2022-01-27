@@ -120,19 +120,19 @@ const storagePlugin = {
 			replicator: { type: ModelType.object, schemaName: 'replicator' }
 		});
 
-		builder.addSchema('driveInfo', {
-			drive: ModelType.binary,
-			lastApprovedDataModificationId: ModelType.binary,
-			dataModificationIdIsValid: ModelType.uint8,
-			initialDownloadWork: ModelType.uint64,
-			lastCompletedCumulativeDownloadWork: ModelType.uint64,
-		});
-
 		builder.addSchema('replicator', {
 			key:			ModelType.binary,
 			version:		ModelType.uint32,
 			capacity:		ModelType.uint64,
 			drives: 		{ type: ModelType.array, schemaName: 'driveInfo' },
+		});
+
+		builder.addSchema('driveInfo', {
+			drive: ModelType.binary,
+			lastApprovedDataModificationId: ModelType.binary,
+			dataModificationIdIsValid: ModelType.boolean,
+			initialDownloadWork: ModelType.uint64,
+			lastCompletedCumulativeDownloadWork: ModelType.uint64,
 		});
 
 		builder.addSchema('downloadChannelEntry', {
@@ -194,7 +194,7 @@ const storagePlugin = {
 			actualUploadSize:		ModelType.uint64,
 			folderName:				ModelType.string,
 			readyForApproval:		ModelType.boolean,
-			modificationState:		ModelType.uint8,
+			state:		ModelType.uint8,
 		});
 
 		builder.addSchema('confirmedUsedSize', {

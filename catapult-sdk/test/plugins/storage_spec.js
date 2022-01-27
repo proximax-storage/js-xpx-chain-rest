@@ -40,8 +40,8 @@ describe('storage plugin', () => {
 				'downloadApproval',
 				'driveClosure',
 				'replicatorEntry',
-				'driveInfo',
 				'replicator',
+				'driveInfo',
 				'downloadChannelEntry',
 				'cumulativePayments',
 				'downloadChannelInfo',
@@ -171,6 +171,14 @@ describe('storage plugin', () => {
 			expect(Object.keys(modelSchema['replicatorEntry']).length).to.equal(1);
 			expect(modelSchema['replicatorEntry']).to.contain.all.keys(['replicator']);
 
+			expect(Object.keys(modelSchema['replicator']).length).to.equal(4);
+			expect(modelSchema['replicator']).to.contain.all.keys([
+				'key',
+				'version',
+				'capacity',
+				'drives'
+			]);
+
 			expect(Object.keys(modelSchema['driveInfo']).length).to.equal(5);
 			expect(modelSchema['driveInfo']).to.contain.all.keys([
 				'drive',
@@ -178,14 +186,6 @@ describe('storage plugin', () => {
 				'dataModificationIdIsValid',
 				'initialDownloadWork',
 				'lastCompletedCumulativeDownloadWork'
-			]);
-
-			expect(Object.keys(modelSchema['replicator']).length).to.equal(4);
-			expect(modelSchema['replicator']).to.contain.all.keys([
-				'key',
-				'version',
-				'capacity',
-				'drives'
 			]);
 
 			expect(Object.keys(modelSchema['downloadChannelEntry']).length).to.equal(1);
