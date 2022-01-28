@@ -77,43 +77,32 @@
 		}));
 	});
 
-	const factory = {
-		createPagingRouteInfo: (routeName) => ({
-			routes: storageRoutes,
-			routeName,
-			createDb: (keyGroups, documents) => ({
-				getDownloadsByDownloadChannelId: (downloadChannelId, pageId, pageSize, options) => {
-					keyGroups.push({
-						downloadChannelId,
-						pageId,
-						pageSize,
-						options
-					});
-					return Promise.resolve(documents);
+	describe('/download_channels/:downloadChannelId', () => {
+		const addGetDownloadsByDownloadChannelId = traits => {
+			// Arrange:
+			const keyGroups = [];
+			const db = test.setup.createCapturingDb('getDownloadsByDownloadChannelId', keyGroups, [{value: 'this is nonsense'}]);
+
+			// Act:
+			const registerRoutes = storageRoutes.register;
+			return test.route.executeSingle(
+				registerRoutes,
+				'/download_channels/:downloadChannelId',
+				'get',
+				{downloadChannelId: traits.downloadChannelId},
+				db,
+				null,
+				response => {
+					// Assert:
+					expect(keyGroups).to.deep.equal(traits.expected);
+					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'downloadChannelEntry'});
 				}
-			}),
-			routeCaptureMethod: 'get'
-		})
-	};
+			);
+		};
 
-	const addGetDownloadChannelTests = traits => {
-		const pagingTestsFactory = test.setup.createPagingTestsFactory(
-			factory.createPagingRouteInfo(traits.routeName),
-			traits.valid.params,
-			traits.valid.expected,
-			'downloadChannelEntry'
-		);
-
-		pagingTestsFactory.addDefault();
-		if (traits.invalid)
-			pagingTestsFactory.addFailureTest(traits.invalid.name, traits.invalid.params, traits.invalid.error);
-	};
-
-	describe('/download_channels/:downloadChannelId', () => addGetDownloadChannelTests({
-		routeName: '/download_channels/:downloadChannelId',
-		valid: {
-			params: { downloadChannelId: hashes256.valid[0] },
-			expected: { downloadChannelId: convert.hexToUint8(hashes256.valid[0]), options: undefined }
-		}
-	}));
+		it('with download channel id', () => addGetDownloadsByDownloadChannelId({
+			downloadChannelId: hashes256.valid[0],
+			expected: [convert.hexToUint8(hashes256.valid[0])]
+		}));
+	});
 });

@@ -60,11 +60,12 @@ const createReplicatorEntries = (replicatorInfos) => {
     return replicatorInfos.map(replicatorInfo => createReplicatorEntry(++i, replicatorInfo.key, replicatorInfo.version, replicatorInfo.capacity, replicatorInfo.drives));
 };
 
-const createDownloadChannelEntry = (id, downloadChannelId, consumer, downloadSize, downloadApprovalCount, listOfPublicKeys) => ({
+const createDownloadChannelEntry = (id, downloadChannelId, consumer, drive, downloadSize, downloadApprovalCount, listOfPublicKeys) => ({
     _id: dbTestUtils.db.createObjectId(id),
     downloadChannelInfo: {
         id: downloadChannelId ? new Binary(downloadChannelId) : null,
         consumer: new Binary(consumer),
+        drive: new Binary(drive),
         downloadSize: downloadSize ? convertToLong(downloadSize) : null,
         downloadApprovalCount: downloadApprovalCount ? convertToLong(downloadApprovalCount) : null,
         listOfPublicKeys: listOfPublicKeys && listOfPublicKeys.length ? 
@@ -74,7 +75,7 @@ const createDownloadChannelEntry = (id, downloadChannelId, consumer, downloadSiz
 
 const createDownloadChannelEntries = (downloadInfos) => {
     let i = 0;
-    return downloadInfos.map(downloadInfo => createDownloadChannelEntry(++i, downloadInfo.id, downloadInfo.consumer, downloadInfo.downloadSize, downloadInfo.downloadApprovalCount, downloadInfo.listOfPublicKeys));
+    return downloadInfos.map(downloadInfo => createDownloadChannelEntry(++i, downloadInfo.id, downloadInfo.consumer, downloadInfo.drive, downloadInfo.downloadSize, downloadInfo.downloadApprovalCount, downloadInfo.listOfPublicKeys));
 };
 
 const storageDbTestUtils = {

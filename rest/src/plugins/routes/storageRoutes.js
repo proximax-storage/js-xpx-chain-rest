@@ -91,10 +91,9 @@ module.exports = {
 		});
 
 		server.get('/download_channels/:downloadChannelId', (req, res, next) => {
-			const pagingOptions = routeUtils.parsePagingArguments(req.params);
 			const downloadChannelId = routeUtils.parseArgument(req.params, 'downloadChannelId', 'hash256');
-			return db.getDownloadsByDownloadChannelId(downloadChannelId, pagingOptions.id, pagingOptions.pageSize)
-				.then(routeUtils.createSender('downloadChannelEntry').sendArray('downloadChannelId', res, next));
+			return db.getDownloadsByDownloadChannelId(downloadChannelId)
+				.then(routeUtils.createSender('downloadChannelEntry').sendOne('downloadChannelId', res, next));
 		});
     }
 };

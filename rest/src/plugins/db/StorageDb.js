@@ -145,16 +145,13 @@ class StorageDb {
 
 	/**
 	 * Retrieves the file downloads by download channel id.
-	 * @param {array<object>} downloadChannelId Download channel id.
-	 * @param {string} pagingId Paging id.
-	 * @param {int} pageSize Page size.
-	 * @returns {Promise.<array>} File download info.
+	 * @param {object} downloadChannelId Download channel id.
+	 * @returns {Promise.<object>} File download info.
 	 */
-	 getDownloadsByDownloadChannelId(downloadChannelId, pagingId, pageSize, options) {
+	 getDownloadsByDownloadChannelId(downloadChannelId) {
 		const buffer = Buffer.from(downloadChannelId);
 		const fieldName = "downloadChannelInfo.id";
-		const conditions = { $and: [ { [fieldName]: buffer } ] };
-		return this.catapultDb.queryPagedDocuments('downloadChannels', conditions, pagingId, pageSize, options).then(this.catapultDb.sanitizer.deleteIds);
+		return this.catapultDb.queryDocuments('downloadChannels',  { [fieldName]: buffer });
 	}
 
 	/**
