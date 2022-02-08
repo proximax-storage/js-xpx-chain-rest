@@ -39,20 +39,20 @@ const storagePlugin = {
 		});
 
 		builder.addTransactionSupport(EntityType.dataModificationApproval, {
-			driveKey:				{ type: ModelType.binary, schemaName: 'dataModificationApproval.driveKey' },
-			dataModificationId:		{ type: ModelType.binary, schemaName: 'dataModificationApproval.dataModificationId' },
-			fileStructureCdi:		{ type: ModelType.binary, schemaName: 'dataModificationApproval.fileStructureCdi' },
-			fileStructureSize:		{ type: ModelType.uint64, schemaName: 'dataModificationApproval.fileStructureSize' },
-			metaFilesSize: 			{ type: ModelType.uint64, schemaName: 'dataModificationApproval.metaFilesSize' },
-			usedDriveSize:			{ type: ModelType.uint64, schemaName: 'dataModificationApproval.usedDriveSize' },
-			judgingKeysCount:		{ type: ModelType.uint8, schemaName: 'dataModificationApproval.judgingKeysCount' },
-			overlappingKeysCount:	{ type: ModelType.uint8, schemaName: 'dataModificationApproval.overlappingKeysCount' },
-			judgedKeysCount:		{ type: ModelType.uint8, schemaName: 'dataModificationApproval.judgedKeysCount' },
-			opinionElementCount:	{ type: ModelType.uint16, schemaName: 'dataModificationApproval.opinionElementCount' },
-			publicKeys:				{ type: ModelType.array,  schemaName: ModelType.binary },
-			signatures:				{ type: ModelType.array,  schemaName: ModelType.binary },
-			presentOpinions:		{ type: ModelType.array,  schemaName: ModelType.uint8 },
-			opinions:				{ type: ModelType.array,  schemaName: ModelType.uint64 },
+			driveKey:				{ type: ModelType.binary, 	schemaName: 'dataModificationApproval.driveKey' },
+			dataModificationId:		{ type: ModelType.binary, 	schemaName: 'dataModificationApproval.dataModificationId' },
+			fileStructureCdi:		{ type: ModelType.binary, 	schemaName: 'dataModificationApproval.fileStructureCdi' },
+			fileStructureSize:		{ type: ModelType.uint64, 	schemaName: 'dataModificationApproval.fileStructureSize' },
+			metaFilesSize: 			{ type: ModelType.uint64, 	schemaName: 'dataModificationApproval.metaFilesSize' },
+			usedDriveSize:			{ type: ModelType.uint64, 	schemaName: 'dataModificationApproval.usedDriveSize' },
+			judgingKeysCount:		{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.judgingKeysCount' },
+			overlappingKeysCount:	{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.overlappingKeysCount' },
+			judgedKeysCount:		{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.judgedKeysCount' },
+			opinionElementCount:	{ type: ModelType.uint16, 	schemaName: 'dataModificationApproval.opinionElementCount' },
+			publicKeys:				{ type: ModelType.array,  	schemaName: ModelType.binary },
+			signatures:				{ type: ModelType.array,  	schemaName: ModelType.binary },
+			presentOpinions:		{ type: ModelType.array,  	schemaName: ModelType.uint8 },
+			opinions:				{ type: ModelType.array,  	schemaName: ModelType.uint64 },
 		});
 
 		builder.addTransactionSupport(EntityType.dataModificationCancel, {
@@ -85,11 +85,11 @@ const storagePlugin = {
 		});
 
 		builder.addTransactionSupport(EntityType.dataModificationSingleApproval, {
-			driveKey:				{ type: ModelType.binary, schemaName: 'dataModificationSingleApproval.driveKey' },
-			dataModificationId:		{ type: ModelType.binary, schemaName: 'dataModificationSingleApproval.dataModificationId' },
-			publicKeysCount:		{ type: ModelType.uint8, schemaName: 'dataModificationSingleApproval.publicKeysCount' },
-			publicKeys:				{ type: ModelType.array, schemaName: ModelType.binary },
-			opinions:				{ type: ModelType.array, schemaName: ModelType.uint64 },
+			driveKey:				{ type: ModelType.binary, 	schemaName: 'dataModificationSingleApproval.driveKey' },
+			dataModificationId:		{ type: ModelType.binary, 	schemaName: 'dataModificationSingleApproval.dataModificationId' },
+			publicKeysCount:		{ type: ModelType.uint8, 	schemaName: 'dataModificationSingleApproval.publicKeysCount' },
+			publicKeys:				{ type: ModelType.array, 	schemaName: ModelType.binary },
+			opinions:				{ type: ModelType.array, 	schemaName: ModelType.uint64 },
 		});
 
 		builder.addTransactionSupport(EntityType.verificationPayment, {
@@ -128,11 +128,11 @@ const storagePlugin = {
 		});
 
 		builder.addSchema('driveInfo', {
-			drive: ModelType.binary,
-			lastApprovedDataModificationId: ModelType.binary,
-			dataModificationIdIsValid: ModelType.boolean,
-			initialDownloadWork: ModelType.uint64,
-			lastCompletedCumulativeDownloadWork: ModelType.uint64,
+			drive: 									ModelType.binary,
+			lastApprovedDataModificationId: 		ModelType.binary,
+			dataModificationIdIsValid: 				ModelType.boolean,
+			initialDownloadWork: 					ModelType.uint64,
+			lastCompletedCumulativeDownloadWork: 	ModelType.uint64,
 		});
 
 		builder.addSchema('downloadChannelEntry', {
@@ -174,6 +174,7 @@ const storagePlugin = {
 			replicators: 				{ type: ModelType.array, schemaName: ModelType.binary },
 			offboardingReplicators: 	{ type: ModelType.array, schemaName: ModelType.binary },
 			verifications: 				{ type: ModelType.array, schemaName: 'verification' },
+			downloadShards:				{ type: ModelType.array, schemaName: 'downloadShard' },
 		});
 
 		builder.addSchema('activeDataModification', {
@@ -194,7 +195,7 @@ const storagePlugin = {
 			actualUploadSize:		ModelType.uint64,
 			folderName:				ModelType.string,
 			readyForApproval:		ModelType.boolean,
-			state:		ModelType.uint8,
+			state:					ModelType.uint8,
 		});
 
 		builder.addSchema('confirmedUsedSize', {
@@ -214,15 +215,20 @@ const storagePlugin = {
 			replicators:			{ type: ModelType.array, schemaName: ModelType.binary },
 		});
 
+		builder.addSchema('downloadShard', {
+			downloadChannelId:		ModelType.binary,
+			replicators:			{ type: ModelType.array, schemaName: ModelType.binary },
+		});
+
 		builder.addTransactionSupport(EntityType.endDriveVerificationV2, {
-            driveKey:               {type: ModelType.binary,    schemaName: 'endDriveVerification.driveKey'},
-            verificationTrigger:    {type: ModelType.binary,    schemaName: 'endDriveVerification.verificationTrigger'},
-			shardId:                {type: ModelType.uint16,    schemaName: 'endDriveVerification.shardId'},
-            keyCount:	            {type: ModelType.uint8,    schemaName: 'endDriveVerification.keyCount'},
-			judgingKeyCount:	    {type: ModelType.uint8,    schemaName: 'endDriveVerification.judgingKeyCount'},
-			publicKeys:				{ type: ModelType.array,  schemaName: ModelType.binary },
-			signatures:				{ type: ModelType.array,  schemaName: ModelType.binary },
-			opinions:				{ type: ModelType.array,  schemaName: ModelType.uint8 },
+            driveKey:               {type: ModelType.binary, 	schemaName: 'endDriveVerification.driveKey'},
+            verificationTrigger:    {type: ModelType.binary, 	schemaName: 'endDriveVerification.verificationTrigger'},
+			shardId:                {type: ModelType.uint16, 	schemaName: 'endDriveVerification.shardId'},
+            keyCount:	            {type: ModelType.uint8, 	schemaName: 'endDriveVerification.keyCount'},
+			judgingKeyCount:	    {type: ModelType.uint8,    	schemaName: 'endDriveVerification.judgingKeyCount'},
+			publicKeys:				{ type: ModelType.array,  	schemaName: ModelType.binary },
+			signatures:				{ type: ModelType.array,  	schemaName: ModelType.binary },
+			opinions:				{ type: ModelType.array,  	schemaName: ModelType.uint8 },
         });
 	},
 
