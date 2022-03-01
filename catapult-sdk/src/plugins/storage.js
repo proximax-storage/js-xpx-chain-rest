@@ -175,6 +175,7 @@ const storagePlugin = {
 			offboardingReplicators: 	{ type: ModelType.array, schemaName: ModelType.binary },
 			verifications: 				{ type: ModelType.array, schemaName: 'verification' },
 			downloadShards:				{ type: ModelType.array, schemaName: 'downloadShard' },
+			dataModificationShards:		{ type: ModelType.array, schemaName: 'dataModificationShard' },
 		});
 
 		builder.addSchema('activeDataModification', {
@@ -216,8 +217,14 @@ const storagePlugin = {
 		});
 
 		builder.addSchema('downloadShard', {
-			downloadChannelId:		ModelType.binary,
-			replicators:			{ type: ModelType.array, schemaName: ModelType.binary },
+			downloadChannelId:	ModelType.binary,
+			replicators:		{ type: ModelType.array, schemaName: ModelType.binary },
+		});
+
+		builder.addSchema('dataModificationShard', {
+			replicator:				ModelType.binary,
+			shardReplicators:		{ type: ModelType.array, schemaName: ModelType.binary },
+			additionalReplicators:	{ type: ModelType.array, schemaName: ModelType.binary },
 		});
 
 		builder.addTransactionSupport(EntityType.endDriveVerificationV2, {
