@@ -43,7 +43,7 @@ const storagePlugin = {
 			dataModificationId:		{ type: ModelType.binary, 	schemaName: 'dataModificationApproval.dataModificationId' },
 			fileStructureCdi:		{ type: ModelType.binary, 	schemaName: 'dataModificationApproval.fileStructureCdi' },
 			fileStructureSize:		{ type: ModelType.uint64, 	schemaName: 'dataModificationApproval.fileStructureSize' },
-			metaFilesSize: 			{ type: ModelType.uint64, 	schemaName: 'dataModificationApproval.metaFilesSize' },
+			metaFileSizeBytes:		{ type: ModelType.uint64, 	schemaName: 'dataModificationApproval.metaFileSizeBytes' },
 			usedDriveSize:			{ type: ModelType.uint64, 	schemaName: 'dataModificationApproval.usedDriveSize' },
 			judgingKeysCount:		{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.judgingKeysCount' },
 			overlappingKeysCount:	{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.overlappingKeysCount' },
@@ -100,12 +100,9 @@ const storagePlugin = {
 		builder.addTransactionSupport(EntityType.downloadApproval, {
 			downloadChannelId: 						{ type: ModelType.binary, schemaName: 'downloadApproval.downloadChannelId' },
 			approvalTrigger: 						{ type: ModelType.binary, schemaName: 'downloadApproval.approvalTrigger' },
-			sequenceNumber:							{ type: ModelType.uint16, schemaName: 'downloadApproval.sequenceNumber' },
-			responseToFinishDownloadTransaction:	{ type: ModelType.uint8,  schemaName: 'downloadApproval.responseToFinishDownloadTransaction' },
-			judgingCount:							{ type: ModelType.uint8,  schemaName: 'downloadApproval.judgingCount' },
-			overlappingCount:						{ type: ModelType.uint8,  schemaName: 'downloadApproval.overlappingCount' },
-			judgedCount:							{ type: ModelType.uint8,  schemaName: 'downloadApproval.judgedCount' },
-			opinionElementCount:					{ type: ModelType.uint16, schemaName: 'downloadApproval.opinionElementCount' },
+			judgingKeysCount:						{ type: ModelType.uint8,  schemaName: 'downloadApproval.judgingKeysCount' },
+			overlappingKeysCount:					{ type: ModelType.uint8,  schemaName: 'downloadApproval.overlappingKeysCount' },
+			judgedKeysCount:						{ type: ModelType.uint8,  schemaName: 'downloadApproval.judgedKeysCount' },
 			publicKeys:								{ type: ModelType.array,  schemaName: ModelType.binary },
 			signatures:								{ type: ModelType.array,  schemaName: ModelType.binary },
 			presentOpinions:						{ type: ModelType.array,  schemaName: ModelType.uint8 },
@@ -297,11 +294,11 @@ const storagePlugin = {
 				serializer.writeBuffer(transaction.driveKey);
 				serializer.writeUint64(transaction.downloadSize);
 				serializer.writeUint64(transaction.feedbackFeeAmount);
-				serializer.writeUint16(transaction.listOfPublicKeysSize);
+				serializer.writeUint16(transaction.listOfPublicKeys.length);
 
-				for (let i = 0; i < transaction.listOfPublicKeysSize; ++i) {
-					serializer.writeBuffer(transaction.listOfPublicKeys[i]);
-				}
+				transaction.listOfPublicKeys.forEach(key => {
+					serializer.writeBuffer(key);
+				});
 			}
 		});
 
@@ -312,7 +309,7 @@ const storagePlugin = {
 				transaction.dataModificationId = parser.buffer(constants.sizes.hash256);
 				transaction.fileStructureCdi = parser.buffer(constants.sizes.hash256);
 				transaction.fileStructureSize = parser.uint64();
-				transaction.metaFilesSize = parser.uint64();
+				transaction.metaFilesSizeBytes = parser.uint64();
 				transaction.usedDriveSize = parser.uint64();
 				transaction.judgingKeysCount = parser.uint8();
 				transaction.overlappingKeysCount = parser.uint8();
@@ -353,7 +350,7 @@ const storagePlugin = {
 				serializer.writeBuffer(transaction.dataModificationId);
 				serializer.writeBuffer(transaction.fileStructureCdi);
 				serializer.writeUint64(transaction.fileStructureSize);
-				serializer.writeUint64(transaction.metaFilesSize);
+				serializer.writeUint64(transaction.metaFilesSizeBytes);
 				serializer.writeUint64(transaction.usedDriveSize);
 				serializer.writeUint8(transaction.judgingKeysCount);
 				serializer.writeUint8(transaction.overlappingKeysCount);
@@ -523,12 +520,9 @@ const storagePlugin = {
 				const transaction = {};
 				transaction.downloadChannelId = parser.buffer(constants.sizes.hash256);
 				transaction.approvalTrigger = parser.buffer(constants.sizes.hash256);
-				transaction.sequenceNumber = parser.uint16();
-				transaction.responseToFinishDownloadTransaction = parser.uint8();
 				transaction.judgingKeysCount = parser.uint8();
 				transaction.overlappingKeysCount = parser.uint8();
 				transaction.judgedKeysCount = parser.uint8();
-				transaction.opinionElementCount = parser.uint16();
 
 				transaction.publicKeys = [];
 				let count = transaction.judgingKeysCount + transaction.overlappingKeysCount + transaction.judgedKeysCount;
@@ -562,12 +556,9 @@ const storagePlugin = {
 			serialize: (transaction, serializer) => {
 				serializer.writeBuffer(transaction.downloadChannelId);
 				serializer.writeBuffer(transaction.approvalTrigger);
-				serializer.writeUint16(transaction.sequenceNumber);
-				serializer.writeUint8(transaction.responseToFinishDownloadTransaction);
 				serializer.writeUint8(transaction.judgingKeysCount);
 				serializer.writeUint8(transaction.overlappingKeysCount);
 				serializer.writeUint8(transaction.judgedKeysCount);
-				serializer.writeUint16(transaction.opinionElementCount);
 
 				transaction.publicKeys.forEach(key => {
 					serializer.writeBuffer(key);
@@ -638,13 +629,13 @@ const storagePlugin = {
 				serializer.writeUint8(transaction.publicKeys.length);
 				serializer.writeUint8(transaction.signatures.length);
 
-                for (let i = 0; i < transaction.publicKeys.length; ++i) {
-					serializer.writeBuffer(transaction.publicKeys[i]);
-				}
+				transaction.publicKeys.forEach(key => {
+					serializer.writeBuffer(key);
+				})
 
-				for (let i = 0; i < transaction.signatures.length; ++i) {
-					serializer.writeBuffer(transaction.signatures[i]);
-				}
+				transaction.signatures.forEach(signature => {
+					serializer.writeBuffer(signature);
+				})
 
 				const len = Math.floor((transaction.signatures.length * transaction.publicKeys.length + 7) / 8);
 				for (let i = 0; i < len; ++i) {
