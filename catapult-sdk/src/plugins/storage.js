@@ -210,7 +210,7 @@ const storagePlugin = {
 		});
 
 		builder.addSchema('shard', {
-			id:				{ type: ModelType.binary, schemaName: ModelType.binary },
+			id:				{ type: ModelType.uint32, schemaName: ModelType.binary },
 			replicators:	{ type: ModelType.array, schemaName: ModelType.binary },
 		});
 
