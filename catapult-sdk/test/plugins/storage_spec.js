@@ -23,7 +23,7 @@ describe('storage plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 28);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 31);
 			expect(modelSchema).to.contain.all.keys([
 				'prepareBcDrive',
 				'dataModification',
@@ -79,22 +79,22 @@ describe('storage plugin', () => {
 				'listOfPublicKeys',
 			]);
 
-			expect(Object.keys(modelSchema.dataModificationApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 14);
+			expect(Object.keys(modelSchema.dataModificationApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 6);
 			expect(modelSchema.dataModificationApproval).to.contain.all.keys([
 				'driveKey',
 				'dataModificationId',
 				'fileStructureCdi',
-				'fileStructureSize',
-				'metaFilesSize',
-				'usedDriveSize',
-				'judgingKeysCount',
-				'overlappingKeysCount',
-				'judgedKeysCount',
-				'opinionElementCount',
-				'publicKeys',
-				'signatures',
-				'presentOpinions',
-				'opinions',
+				'fileStructureSizeBytes',
+				'metaFilesSizeBytes',
+				'usedDriveSizeBytes',
+				// 'judgingKeysCount',
+				// 'overlappingKeysCount',
+				// 'judgedKeysCount',
+				// 'opinionElementCount',
+				// 'publicKeys',
+				// 'signatures',
+				// 'presentOpinions',
+				// 'opinions',
 			]);
 
 			expect(Object.keys(modelSchema.dataModificationCancel).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
@@ -147,15 +147,13 @@ describe('storage plugin', () => {
 				'verificationFeeAmount',
 			]);
 
-			expect(Object.keys(modelSchema.downloadApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 12);
+			expect(Object.keys(modelSchema.downloadApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 10);
 			expect(modelSchema.downloadApproval).to.contain.all.keys([
 				'downloadChannelId',
 				'approvalTrigger',
-				'sequenceNumber',
-				'responseToFinishDownloadTransaction',
-				'judgingCount',
-				'overlappingCount',
-				'judgedCount',
+				'judgingKeysCount',
+				'overlappingKeysCount',
+				'judgedKeysCount',
 				'opinionElementCount',
 				'publicKeys',
 				'signatures',
@@ -197,37 +195,38 @@ describe('storage plugin', () => {
 				'payment'
 			]);
 
-			expect(Object.keys(modelSchema['downloadChannelInfo']).length).to.equal(7);
+			expect(Object.keys(modelSchema['downloadChannelInfo']).length).to.equal(8);
 			expect(modelSchema['downloadChannelInfo']).to.contain.all.keys([
 				'id',
 				'consumer',
 				'drive',
 				'downloadSize',
-				'downloadApprovalCount',
+				'downloadApprovalCountLeft',
 				'listOfPublicKeys',
+				'shardReplicators',
 				'cumulativePayments'
 			]);
 
 			expect(Object.keys(modelSchema['bcDriveEntry']).length).to.equal(1);
 			expect(modelSchema['bcDriveEntry']).to.contain.all.keys(['drive']);
 
-			expect(Object.keys(modelSchema['bcDrive']).length).to.equal(15);
+			expect(Object.keys(modelSchema['bcDrive']).length).to.equal(16);
 			expect(modelSchema['bcDrive']).to.contain.all.keys([
 				'multisig',
 				'multisigAddress',
 				'owner',
 				'rootHash',
 				'size',
-				'usedSize',
-				'metaFilesSize',
+				'usedSizeBytes',
+				'metaFilesSizeBytes',
 				'replicatorCount',
-				'ownerCumulativeUploadSize',
 				'activeDataModifications',
 				'completedDataModifications',
 				'confirmedUsedSizes',
 				'replicators',
 				'offboardingReplicators',
 				'verifications',
+				'dataModificationShards'
 			]);
 
 			expect(Object.keys(modelSchema['activeDataModification']).length).to.equal(7);
@@ -269,7 +268,7 @@ describe('storage plugin', () => {
 
 			expect(Object.keys(modelSchema['shard']).length).to.equal(2);
 			expect(modelSchema['shard']).to.contain.all.keys([
-				'downloadChannelId',
+				'id',
 				'replicators'
 			]);
 
@@ -409,60 +408,41 @@ describe('storage plugin', () => {
 			const driveKey = createByteArray(0x01);
 			const dataModificationId = createByteArray(0x02);
 			const fileStructureCdi = createByteArray(0x03);
-			const fileStructureSize = Buffer.of(0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-			const metaFilesSize = Buffer.of(0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-			const usedDriveSize = Buffer.of(0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-			const judgingKeysCount = Buffer.of(0x02);
-			const overlappingKeysCount = Buffer.of(0x00);
-			const judgedKeysCount = Buffer.of(0x01);
-			const opinionElementCount = Buffer.of(0x03, 0x00);
-			const publicKey1 = createByteArray(0x0B);
-			const publicKey2 = createByteArray(0x0C);
-			const publicKey3 = createByteArray(0x0D);
-			const signature1 = createByteArray(0x0E, 64);
-			const signature2 = createByteArray(0x0F, 64);
-			const presentOpinions = Buffer.of(0x11);
-			const opinions = Buffer.of(
-				0x12, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-				0x13, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-				0x14, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-			);
+			const fileStructureSizeBytes = Buffer.of(0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+			const metaFilesSizeBytes = Buffer.of(0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+			const usedDriveSizeBytes = Buffer.of(0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+			// const judgingKeysCount = Buffer.of(0x02);
+			// const overlappingKeysCount = Buffer.of(0x00);
+			// const judgedKeysCount = Buffer.of(0x01);
+			// const opinionElementCount = Buffer.of(0x03, 0x00);
+			// const publicKey1 = createByteArray(0x0B);
+			// const publicKey2 = createByteArray(0x0C);
+			// const publicKey3 = createByteArray(0x0D);
+			// const signature1 = createByteArray(0x0E, 64);
+			// const signature2 = createByteArray(0x0F, 64);
+			// const presentOpinions = Buffer.of(0x11);
+			// const opinions = Buffer.of(
+			// 	0x12, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+			// 	0x13, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+			// 	0x14, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+			// );
 
-			test.binary.test.addAll(codec, 3 * 32 + 3 * 8 + 5 + 3 * 32 + 2 * 64 + 1 + 3 * 8, () => ({
+			test.binary.test.addAll(codec, 3 * 32 + 3 * 8, () => ({
 				buffer: Buffer.concat([
 					driveKey,
 					dataModificationId,
 					fileStructureCdi,
-					fileStructureSize,
-					metaFilesSize,
-					usedDriveSize,
-					judgingKeysCount,
-					overlappingKeysCount,
-					judgedKeysCount,
-					opinionElementCount,
-					publicKey1,
-					publicKey2,
-					publicKey3,
-					signature1,
-					signature2,
-					presentOpinions,
-					opinions,
+					fileStructureSizeBytes,
+					metaFilesSizeBytes,
+					usedDriveSizeBytes,
 				]),
 				object: {
 					driveKey,
 					dataModificationId,
 					fileStructureCdi,
-					fileStructureSize: [ 0x04, 0x0 ],
-					metaFilesSize: [ 0x05, 0x0 ],
-					usedDriveSize: [ 0x06, 0x0 ],
-					judgingKeysCount: 0x02,
-					overlappingKeysCount: 0x00,
-					judgedKeysCount: 0x01,
-					opinionElementCount: 0x03,
-					publicKeys: [ publicKey1, publicKey2, publicKey3 ],
-					signatures: [ signature1, signature2 ],
-					presentOpinions: [ 0x11 ],
-					opinions: [ [ 0x12, 0x0 ], [ 0x13, 0x0 ] , [ 0x14, 0x0 ] ],
+					fileStructureSizeBytes: [ 0x04, 0x0 ],
+					metaFilesSizeBytes: [ 0x05, 0x0 ],
+					usedDriveSizeBytes: [ 0x06, 0x0 ],
 				}
 			}));
 		});
@@ -617,8 +597,6 @@ describe('storage plugin', () => {
 			const codec = getCodecs()[EntityType.downloadApproval];
 			const downloadChannelId = createByteArray(0x01);
 			const approvalTrigger = createByteArray(0x02);
-			const sequenceNumber = Buffer.of(0x02, 0x00);
-			const responseToFinishDownloadTransaction = Buffer.of(0x01);
 			const judgingKeysCount = Buffer.of(0x01);
 			const overlappingKeysCount = Buffer.of(0x02);
 			const judgedKeysCount = Buffer.of(0x01);
@@ -638,12 +616,10 @@ describe('storage plugin', () => {
 				0x14, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
 			);
 
-			test.binary.test.addAll(codec, 2 * 32 + 8 + 4 * 32 + 3 * 64 + 2 + 4 * 8, () => ({
+			test.binary.test.addAll(codec, 2 * 32 + 5 + 4 * 32 + 3 * 64 + 2 + 4 * 8, () => ({
 				buffer: Buffer.concat([
 					downloadChannelId,
 					approvalTrigger,
-					sequenceNumber,
-					responseToFinishDownloadTransaction,
 					judgingKeysCount,
 					overlappingKeysCount,
 					judgedKeysCount,
@@ -661,8 +637,6 @@ describe('storage plugin', () => {
 				object: {
 					downloadChannelId,
 					approvalTrigger,
-					sequenceNumber: 0x02,
-					responseToFinishDownloadTransaction: 0x01,
 					judgingKeysCount: 0x01,
 					overlappingKeysCount: 0x02,
 					judgedKeysCount: 0x01,
