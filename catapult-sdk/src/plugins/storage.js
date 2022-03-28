@@ -222,12 +222,12 @@ const storagePlugin = {
 			replicator:				ModelType.binary,
 			actualShardReplicators: { type: ModelType.array, schemaName: 'uploadInfo' },
 			formerShardReplicators: { type: ModelType.array, schemaName: 'uploadInfo' },
-			ownerUpload:			{ type: ModelType.array, schemaName: ModelType.uint64 },
+			ownerUpload:			ModelType.uint64,
 		});
 
 		builder.addSchema('uploadInfo', {
 			key:		ModelType.binary,
-			uploadSize:	{ type: ModelType.array, schemaName: ModelType.uint64 },
+			uploadSize:	ModelType.uint64,
 		});
 
 		builder.addTransactionSupport(EntityType.endDriveVerificationV2, {
