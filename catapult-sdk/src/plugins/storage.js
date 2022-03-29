@@ -114,6 +114,17 @@ const storagePlugin = {
 			driveKey: 	{ type: ModelType.binary, schemaName: 'driveClosure.driveKey' },
 		});
 
+		builder.addTransactionSupport(EntityType.endDriveVerificationV2, {
+			driveKey:               {type: ModelType.binary, 	schemaName: 'endDriveVerification.driveKey'},
+			verificationTrigger:    {type: ModelType.binary, 	schemaName: 'endDriveVerification.verificationTrigger'},
+			shardId:                {type: ModelType.uint16, 	schemaName: 'endDriveVerification.shardId'},
+			keyCount:	            {type: ModelType.uint8, 	schemaName: 'endDriveVerification.keyCount'},
+			judgingKeyCount:	    {type: ModelType.uint8,    	schemaName: 'endDriveVerification.judgingKeyCount'},
+			publicKeys:				{ type: ModelType.array,  	schemaName: ModelType.binary },
+			signatures:				{ type: ModelType.array,  	schemaName: ModelType.binary },
+			opinions:				{ type: ModelType.array,  	schemaName: ModelType.uint8 },
+		});
+
 		builder.addSchema('replicatorEntry', {
 			replicator: { type: ModelType.object, schemaName: 'replicator' }
 		});
@@ -229,17 +240,6 @@ const storagePlugin = {
 			key:		ModelType.binary,
 			uploadSize:	ModelType.uint64,
 		});
-
-		builder.addTransactionSupport(EntityType.endDriveVerificationV2, {
-            driveKey:               {type: ModelType.binary, 	schemaName: 'endDriveVerification.driveKey'},
-            verificationTrigger:    {type: ModelType.binary, 	schemaName: 'endDriveVerification.verificationTrigger'},
-			shardId:                {type: ModelType.uint16, 	schemaName: 'endDriveVerification.shardId'},
-            keyCount:	            {type: ModelType.uint8, 	schemaName: 'endDriveVerification.keyCount'},
-			judgingKeyCount:	    {type: ModelType.uint8,    	schemaName: 'endDriveVerification.judgingKeyCount'},
-			publicKeys:				{ type: ModelType.array,  	schemaName: ModelType.binary },
-			signatures:				{ type: ModelType.array,  	schemaName: ModelType.binary },
-			opinions:				{ type: ModelType.array,  	schemaName: ModelType.uint8 },
-        });
 	},
 
 	registerCodecs: codecBuilder => {

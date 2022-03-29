@@ -50,8 +50,17 @@ tags:
   - name: Exchange routes
     description: |
       Exchange related endpoints.
+  - name: Service routes
+      description: |
+        Service related endpoints.
+  - name: Starage routes
+      description: |
+        Storage related endpoints.
 
 paths:
+
+  # Account start
+
   "/account/{accountId}":
     get:
       tags:
@@ -210,6 +219,11 @@ paths:
           description: resource not found
         "409":
           description: invalid argument
+
+  # Account end
+
+  # Block start
+
   "/blocks/{height}/limit/{limit}":
     get:
       tags:
@@ -381,6 +395,11 @@ paths:
           description: resource not found
         "409":
           description: invalid argument
+
+  # Block start
+
+  # Chain start
+
   /chain/height:
     get:
       tags:
@@ -416,6 +435,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/BlockchainScoreDTO"
+
+  # Chain end
+
+  # Diagnostic start
+
   /diagnostic/storage:
     get:
       tags:
@@ -444,6 +468,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ServerDTO"
+
+  # Diagnostic end
+
+  # Config start
+
   '/config/{height}':
     get:
       tags:
@@ -471,6 +500,11 @@ paths:
           description: resource not found
         '409':
           description: invalid argument
+
+  # Config end
+
+  # Metadata_v2 start
+
   '/metadata_v2/{compositeHash}':
     get:
       tags:
@@ -491,7 +525,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MetadataNemInfoDTO'
+                $ref: '#/components/schemas/MetadataV2InfoDTO'
         '400':
           description: invalid content
         '409':
@@ -519,7 +553,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MetadataNemPage'
+                $ref: '#/components/schemas/MetadataV2Page'
         '409':
           description: invalid argument
     post:
@@ -539,11 +573,16 @@ paths:
                 type: array
                 description: The array of mosaic names.
                 items:
-                  $ref: '#/components/schemas/MetadataNemInfoDTO'
+                  $ref: '#/components/schemas/MetadataV2InfoDTO'
         "400":
           description: invalid content
         "409":
           description: invalid argument
+
+  # Metadata_v2 start
+
+  # Mosaic start
+
   "/mosaic/{mosaicId}":
     get:
       tags:
@@ -682,6 +721,11 @@ paths:
           description: invalid content
         "409":
           description: invalid argument
+
+  # Mosaic end
+
+  # Namespace start
+
   "/namespace/{namespaceId}":
     get:
       tags:
@@ -828,6 +872,11 @@ paths:
           description: invalid content
         "409":
           description: invalid argument
+
+  # Namespace start
+
+  # Transaction start
+
   "/transactions":
     put:
       tags:
@@ -1100,6 +1149,11 @@ paths:
           description: invalid content
         "409":
           description: invalid argument
+
+  # Transaction start
+
+  # Network start
+
   /network:
     get:
       tags:
@@ -1114,6 +1168,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/NetworkTypeDTO"
+
+  # Network ends
+
+  # Node start
+
   /node/info:
     get:
       tags:
@@ -1143,6 +1202,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/NodeTimeDTO"
+
+  # Node end
+
+  # Upgrade start
+
   '/upgrade/{height}':
     get:
       tags:
@@ -1170,6 +1234,10 @@ paths:
           description: resource not found
         '409':
           description: invalid argument
+
+  # Upgrade end
+
+  # Exchange start
 
   '/account/{accountId}/exchange':
     get:
@@ -1253,6 +1321,11 @@ paths:
                     mosaicId:
                       type: string
                       example: "0DE5F42A0A3B4200"
+
+  # Exchange end
+
+  # Lock start
+
   '/account/{accountId}/lock/hash':
     get:
       tags:
@@ -1383,11 +1456,17 @@ paths:
         "409":
           description: invalid argument
 
+  # Lock end
+
 externalDocs:
   description: ProximaX Developer Center
   url: 'https://proximax.io/'
 servers:
-  - url: http://bctestnet1.brimstone.xpxsirius.io:3000
+  - url:
+      enum:
+        - http://bctestnet1.brimstone.xpxsirius.io:3000/
+        - http://bctestnet2.brimstone.xpxsirius.io:3000/
+        - http://bctestnet3.brimstone.xpxsirius.io:3000/
 components:
   parameters:
     metadataType:
@@ -2270,14 +2349,24 @@ components:
         * 0x4360 (17248 decimal) - End Execute.
         * 0x4460 (17504 decimal) - Super Contract File System.
         * 0x4560 (17760 decimal) - Deactivate.
-        * 0x4162 (16738 decimal) - Prepare Bc Drive.
-        * 0x4262 (16994 decimal) - Data Modification.
-        * 0x4362 (17250 decimal) - Download.
-        * 0x4462 (17506 decimal) - Data Modification Approval.
-        * 0x4562 (17762 decimal) - Data Modification Cancel.
-        * 0x4662 (18018 decimal) - Replicator Onboarding.
-        * 0x4E62 (20066 decimal) - Drive Closure.
-
+        * 0x4162 (16738 decimal) - Prepare BcDrive transaction
+        * 0x4262 (16994 decimal) - Data modification transaction
+        * 0x4362 (17250 decimal) - Download transaction
+        * 0x4462 (17506 decimal) - Data modification approval transaction
+        * 0x4562 (17762 decimal) - Data modification cancel transaction
+        * 0x4662 (18018 decimal) - Replicator onboarding transaction
+        * 0x4762 (18274 decimal) - Replicator offboarding transaction
+        * 0x4862 (18530 decimal) - Finish download transaction
+        * 0x4962 (18786 decimal) - Download payment transaction
+        * 0x4A62 (19042 decimal) - Storage payment transaction
+        * 0x4B62 (19298 decimal) - Data modification single approval transaction
+        * 0x4C62 (19554 decimal) - Verification payment transaction
+        * 0x4D62 (19810 decimal) - Download approval transaction
+        * 0x4E62 (20066 decimal) - Drive closure transaction
+        * 0x4F62 (20322 decimal) - End drive verification transaction
+        * 0x4167 (16743 decimal) - Stream start transaction.
+        * 0x4267 (16999 decimal) - Stream finish transaction.
+        * 0x4367 (17255 decimal) - Stream payment transaction.
     HashAlgorithmEnum:
       type: integer
       enum:
@@ -2455,6 +2544,21 @@ components:
       example:
         - 59B8DA0F0CB2720001103922
         - 59B8D8E60CB2720001103904
+    PublicKey:
+        type: string
+        example: "C5563D82371B6EB2BC3B53CF3E2131A4DBBF728F8BAB25037E8028A03A05E1E1"
+    PublicKeyList:
+      type: array
+        items:
+          type: string
+        example:
+          - "8599BA6DB5B81BB69F96B88DD80A3B9EB7BBF8849CBD979100E89D69C30356E0"
+          - "3DCB6E5EFF4D63A38902EF948E895B01D6EA497EBF84B1460C14CA5BEDCAD9F3"
+    Signature:
+      type: string
+      format: "hex"
+      example: "C117DC00B78106923C440BB4B0D508244C193CD5845AC1681A1753C813CFF2491E4AE27AF78A29C7E86394472B76D8F40AFE4A17B28FA9EBD865A8830289CC06"
+
     # Account endpoints
     AccountInfoDTO:
       type: object
@@ -3203,7 +3307,7 @@ components:
               $ref: '#/components/schemas/UInt64DTO'
 
     # Metadata V2 enpoints
-    MetadataNemPage:
+    MetadataV2Page:
       type: object
       required:
         - data
@@ -3213,7 +3317,7 @@ components:
           type: array
           description: Array of metadata entries.
           items:
-            $ref: '#/components/schemas/MetadataNemInfoDTO'
+            $ref: '#/components/schemas/MetadataV2InfoDTO'
         pagination:
           $ref: '#/components/schemas/Pagination'
     Pagination:
@@ -3226,17 +3330,17 @@ components:
           type: integer
         pageSize:
           type: integer
-    MetadataNemInfoDTO:
+    MetadataV2InfoDTO:
       type: object
       required:
         - metadata
       properties:
         metadataEntry:
-          $ref: '#/components/schemas/MetadataNemDTO'
+          $ref: '#/components/schemas/MetadataV2DTO'
         id:
           type: string
           example: "610AB681D05149F167E3EE94"
-    MetadataNemDTO:
+    MetadataV2DTO:
       allOf:
         - type: object
           required:
@@ -3518,6 +3622,21 @@ components:
             - $ref: "#/components/schemas/DriveFilesRewardTransactionDTO"
             - $ref: "#/components/schemas/StartDriveVerificationTransactionDTO"
             - $ref: "#/components/schemas/EndDriveVerificationTransactionDTO"
+            - $ref: "#/components/schemas/PrepareBcDriveTransactionDTO"
+            - $ref: "#/components/schemas/DataModificationTransactionDTO"
+            - $ref: "#/components/schemas/DownloadTransactionDTO"
+            - $ref: "#/components/schemas/DataModificationApprovalTransactionDTO"
+            - $ref: "#/components/schemas/DataModificationCancelTransactionDTO"
+            - $ref: "#/components/schemas/ReplicatorOnboardingTransactionDTO"
+            - $ref: "#/components/schemas/ReplicatorOffboardingTransactionDTO"
+            - $ref: "#/components/schemas/FinishDownloadTransactionDTO"
+            - $ref: "#/components/schemas/DownloadPaymentTransactionDTO"
+            - $ref: "#/components/schemas/StoragePaymentTransactionDTO"
+            - $ref: "#/components/schemas/DataModificationSingleApprovalTransactionDTO"
+            - $ref: "#/components/schemas/VerificationPaymentTransactionDTO"
+            - $ref: "#/components/schemas/DownloadApprovalTransactionDTO"
+            - $ref: "#/components/schemas/DriveClosureTransactionDTO"
+            - $ref: "#/components/schemas/EndDriveVerificationV2TransactionDTO"
     EmbeddedTransactionMetaDTO:
       type: object
       required:
@@ -4107,6 +4226,81 @@ components:
       allOf:
         - $ref: "#/components/schemas/EmbeddedTransactionDTO"
         - $ref: "#/components/schemas/AccountLinkTransactionBodyDTO"
+    EmbeddedPrepareBcDriveTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/EmbeddedTransactionDTO"
+        - $ref: "#/components/schemas/PrepareBcDriveTransactionDTO"
+    EmbeddedDataModificationTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/EmbeddedTransactionDTO"
+        - $ref: "#/components/schemas/DataModificationTransactionDTO"
+    EmbeddedDownloadTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/EmbeddedTransactionDTO"
+        - $ref: "#/components/schemas/DownloadTransactionDTO"
+    EmbeddedDataModificationApprovalTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/EmbeddedTransactionDTO"
+        - $ref: "#/components/schemas/DataModificationApprovalTransactionDTO"
+    EmbeddedDataModificationCancelTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/EmbeddedTransactionDTO"
+        - $ref: "#/components/schemas/DataModificationCancelTransactionDTO"
+    EmbeddedReplicatorOnboardingTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/EmbeddedTransactionDTO"
+        - $ref: "#/components/schemas/ReplicatorOnboardingTransactionDTO"
+    EmbeddedReplicatorOffboardingTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/EmbeddedTransactionDTO"
+        - $ref: "#/components/schemas/ReplicatorOffboardingTransactionDTO"
+    EmbeddedFinishDownloadTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/EmbeddedTransactionDTO"
+        - $ref: "#/components/schemas/FinishDownloadTransactionDTO"
+    EmbeddedDownloadPaymentTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/EmbeddedTransactionDTO"
+        - $ref: "#/components/schemas/DownloadPaymentTransactionDTO"
+    EmbeddedStoragePaymentTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/EmbeddedTransactionDTO"
+        - $ref: "#/components/schemas/StoragePaymentTransactionDTO"
+    EmbeddedDataModificationSingleApprovalTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/EmbeddedTransactionDTO"
+        - $ref: "#/components/schemas/DataModificationSingleApprovalTransactionDTO"
+    EmbeddedVerificationPaymentTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/EmbeddedTransactionDTO"
+        - $ref: "#/components/schemas/VerificationPaymentTransactionDTO"
+    EmbeddedDownloadApprovalTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/EmbeddedTransactionDTO"
+        - $ref: "#/components/schemas/DownloadApprovalTransactionDTO"
+    EmbeddedDriveClosureTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/EmbeddedTransactionDTO"
+        - $ref: "#/components/schemas/DriveClosureTransactionDTO"
+    EmbeddedEndDriveVerificationV2TransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/EmbeddedTransactionDTO"
+        - $ref: "#/components/schemas/EndDriveVerificationV2TransactionDTO"
     AnnounceTransactionInfoDTO:
       type: object
       required:
@@ -4325,7 +4519,7 @@ components:
           type: number
           example: 1.5
 
-    # Service endpoints
+    # Service transactions DTOs
     PrepareDriveTransactionDTO:
       type: object
       allOf:
@@ -4519,6 +4713,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/HashDTO"
+
+#    Service entities DTOs start
 
     DrivesArray:
       type: array
@@ -4825,6 +5021,372 @@ components:
       properties:
         communicationTimestamps:
           $ref: "#/components/schemas/communicationTimestamps"
+
+    # Storage DTOs
+
+    PrepareBcDriveTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/PrepareBcDriveTransactionBodyDTO"
+    DataModificationTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/DataModificationTransactionBodyDTO"
+    DownloadTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/DownloadTransactionBodyDTO"
+    DataModificationApprovalTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/DataModificationApprovalTransactionBodyDTO"
+    DataModificationCancelTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/DataModificationCancelTransactionBodyDTO"
+    ReplicatorOnboardingTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/ReplicatorOnboardingTransactionBodyDTO"
+    ReplicatorOffboardingTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/ReplicatorOffboardingTransactionBodyDTO"
+    FinishDownloadTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/FinishDownloadTransactionBodyDTO"
+    DownloadPaymentTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/DownloadPaymentTransactionBodyDTO"
+    StoragePaymentTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/StoragePaymentTransactionBodyDTO"
+    DataModificationSingleApprovalTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/DataModificationSingleApprovalTransactionBodyDTO"
+    VerificationPaymentTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/VerificationPaymentTransactionBodyDTO"
+    DownloadApprovalTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/DownloadApprovalTransactionBodyDTO"
+    DriveClosureTransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/DriveClosureTransactionBodyDTO"
+    EndDriveVerificationV2TransactionDTO:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/TransactionDTO"
+        - $ref: "#/components/schemas/EndDriveVerificationV2TransactionBodyDTO"
+
+    PrepareBcDriveTransactionBodyDTO:
+      type: object
+      required:
+        - driveSize
+        - verificationFeeAmount
+        - replicatorCount
+      properties:
+        driveSize:
+          type: integer
+          example: 300
+        verificationFeeAmount:
+          type: integer
+          example: 1000
+        replicatorCount:
+          type: integer
+          example: 5
+    DataModificationTransactionBodyDTO:
+      type: object
+      required:
+        - driveKey
+        - downloadDataCdi
+        - uploadSize
+        - feedbackFeeAmount
+      properties:
+        driveKey:
+          description: public key of a drive
+          $ref: "#/components/schemas/PublicKey"
+        downloadDataCdi:
+          $ref: "#/components/schemas/HashDTO"
+        uploadSize:
+          type: integer
+          example: 10
+        feedbackFeeAmount:
+          type: integer
+          example: 1000
+    DownloadTransactionBodyDTO:
+      type: object
+      required:
+        - driveKey
+        - downloadSize
+        - feedbackFeeAmount
+        - listOfPublicKeysSize
+      properties:
+        driveKey:
+          description: public key of a drive
+          $ref: "#/components/schemas/PublicKey"
+        downloadSize:
+          type: integer
+          example: 10
+        feedbackFeeAmount:
+          type: integer
+          example: 10
+        listOfPublicKeysSize:
+          type: integer
+          example: 5
+        listOfPublicKeys:
+          $ref: "#/components/schemas/PublicKeyList"
+    DataModificationApprovalTransactionBodyDTO:
+      type: object
+      required:
+        - driveKey
+        - dataModificationId
+        - fileStructureCdi
+        - fileStructureSizeBytes
+        - metaFilesSizeBytes
+        - usedDriveSizeBytes
+      properties:
+        driveKey:
+          description: public key of a drive
+          $ref: "#/components/schemas/PublicKey"
+        dataModificationId:
+          description: hash of a data modification
+          $ref: "#/components/schemas/HashDTO"
+        fileStructureCdi:
+          description: hash of a drive root
+          $ref: "#/components/schemas/HashDTO"
+        fileStructureSizeBytes:
+          type: integer
+          example: 10
+        metaFilesSizeBytes:
+          type: integer
+          example: 10
+        usedDriveSizeBytes:
+          type: integer
+          example: 10
+    DataModificationCancelTransactionBodyDTO:
+      type: object
+      required:
+        - driveKey
+        - dataModificationId
+      properties:
+        driveKey:
+          description: public key of a drive
+          $ref: "#/components/schemas/PublicKey"
+        dataModificationId:
+          description: hash of a data modification
+          $ref: "#/components/schemas/HashDTO"
+    ReplicatorOnboardingTransactionBodyDTO:
+      type: object
+      required:
+        - capacity
+      properties:
+        capacity:
+          type: integer
+          example: 10
+    ReplicatorOffboardingTransactionBodyDTO:
+      type: object
+      required:
+        - driveKey
+      properties:
+        driveKey:
+          description: public key of a drive
+          $ref: "#/components/schemas/PublicKey"
+    FinishDownloadTransactionBodyDTO:
+      type: object
+      required:
+        - downloadChannelId
+        - feedbackFeeAmount
+      properties:
+        downloadChannelId:
+          description: hash of a download channel
+          $ref: "#/components/schemas/HashDTO"
+        feedbackFeeAmount:
+          type: integer
+          example: 10
+    DownloadPaymentTransactionBodyDTO:
+      type: object
+      required:
+        - downloadChannelId
+        - downloadSize
+        - feedbackFeeAmount
+      properties:
+        downloadChannelId:
+          description: hash of a download channel
+          $ref: "#/components/schemas/HashDTO"
+        downloadSize:
+          type: integer
+          example: 10
+        feedbackFeeAmount:
+          type: integer
+          example: 10
+    StoragePaymentTransactionBodyDTO:
+      type: object
+      required:
+        - driveKey
+        - storageUnits
+      properties:
+        driveKey:
+          description: public key of a drive
+          $ref: "#/components/schemas/PublicKey"
+        storageUnits:
+          type: integer
+          example: 10
+    DataModificationSingleApprovalTransactionBodyDTO:
+      type: object
+      required:
+        - driveKey
+        - dataModificationId
+        - publicKeysCount
+        - publicKeys
+        - opinions
+      properties:
+        driveKey:
+          description: public key of a drive
+          $ref: "#/components/schemas/PublicKey"
+        dataModificationId:
+          description: hash of a data modification
+          $ref: "#/components/schemas/HashDTO"
+        publicKeysCount:
+          type: integer
+          example: 10
+        publicKeys:
+          $ref: "#/components/schemas/PublicKeyList"
+        opinions:
+          description: opinions are represented like a bit array
+          type: array
+          items:
+            type: integer
+            example: [ 57, 85 ]
+    VerificationPaymentTransactionBodyDTO:
+      type: object
+      required:
+        - driveKey
+        - verificationFeeAmount
+      properties:
+        driveKey:
+          description: public key of a drive
+          $ref: "#/components/schemas/PublicKey"
+        verificationFeeAmount:
+          type: integer
+          example: 10
+    DownloadApprovalTransactionBodyDTO:
+      type: object
+      required:
+        - downloadChannelId
+        - approvalTrigger
+        - judgingKeysCount
+        - overlappingKeysCount
+        - judgedKeysCount
+        - opinionElementCount
+        - publicKeys
+        - signatures
+        - presentOpinions
+        - opinions
+      properties:
+        downloadChannelId:
+          description: hash of a download channel
+          $ref: "#/components/schemas/HashDTO"
+        approvalTrigger:
+          description: a block hash that started verification
+          $ref: "#/components/schemas/HashDTO"
+        judgingKeysCount:
+          type: integer
+          example: 10
+        overlappingKeysCount:
+          type: integer
+          example: 10
+        judgedKeysCount:
+          type: integer
+          example: 10
+        opinionElementCount:
+          type: integer
+          example: 10
+        publicKeys:
+          $ref: "#/components/schemas/PublicKeyList"
+        signatures:
+          type: array
+          items:
+            $ref: "#/components/schemas/Signatures"
+        presentOpinions:
+          description: presentOpinions are represented like a bit array
+          type: array
+          items:
+            type: integer
+            example: [ 45, 11 ]
+        opinions:
+          description: opinions are represented like a bit array
+          type: array
+          items:
+            type: integer
+            example: [ 57, 85 ]
+    DriveClosureTransactionBodyDTO:
+      type: object
+      required:
+        - driveKey
+      properties:
+        driveKey:
+          description: public key of a drive
+          $ref: "#/components/schemas/PublicKey"
+    EndDriveVerificationV2TransactionBodyDTO:
+      type: object
+      required:
+        - driveKey
+        - verificationTrigger
+        - shardId
+        - keyCount
+        - judgingKeyCount
+        - publicKeys
+        - signatures
+        - opinions
+      properties:
+        driveKey:
+          description: public key of a drive
+          $ref: "#/components/schemas/PublicKey"
+        verificationTrigger:
+        shardId:
+          type: integer
+          example: 1
+        keyCount:
+          type: integer
+          example: 10
+        judgingKeyCount:
+          type: integer
+          example: 10
+        publicKeys:
+          $ref: "#/components/schemas/PublicKeyList"
+        signatures:
+          type: array
+            items:
+              $ref: "#/components/schemas/Signatures"
+        opinions:
+          description: opinions are represented like a bit array
+          type: array
+          items:
+            type: integer
+            example: [ 57, 85 ]
+
     # Request bodies
     mosaicIds:
       type: object
