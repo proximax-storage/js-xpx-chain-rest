@@ -39,11 +39,14 @@ describe('route system', () => {
 		// Assert:
 		expect(supportedPluginNames).to.deep.equal([
 			'accountLink',
+			'nodeKeyLink',
+			'vrfKeyLink',
 			'accountProperties',
 			'aggregate',
 			'exchange',
 			'config',
 			'contract',
+			'lockfund',
 			'lock',
 			'metadata',
 			'metadata_v2',

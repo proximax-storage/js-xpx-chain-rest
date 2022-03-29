@@ -72,7 +72,9 @@ describe('entity type enumeration', () => {
 			uploadFile: 0x4460,
 			accountMetadata: 0x413F,
 			mosaicMetadata: 0x423F,
-			namespaceMetadata: 0x433F
+			namespaceMetadata: 0x433F,
+			lockFundTransfer: 0x4161,
+			lockFundCancelUnlock: 0x4261
 		});
 	});
 

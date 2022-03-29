@@ -75,6 +75,9 @@ const EntityType = {
 	/** Blockchain Upgrade transaction. */
 	blockchainUpgrade: 0x4158,
 
+	/**  Upgrade account to version 2 */
+	accountV2Upgrade: 0x4258,
+
 	/** Prepare Drive transaction. */
 	prepareDrive: 0x415A,
 
@@ -121,7 +124,10 @@ const EntityType = {
 	accountLink: 0x414C,
 
 	/** Node link transaction. */
-	nodeKeyLink: 0x424B,
+	nodeKeyLink: 0x424C,
+
+	/**  VRF Key link facility code */
+	vrfKeyLink: 0x434C,
 
 	/** Exchange offer transaction. */
 	exchangeOffer: 0x415D,
@@ -169,7 +175,13 @@ const EntityType = {
 	mosaicMetadata: 0x423F,
 
 	/** Namespace metadata transaction */
-	namespaceMetadata: 0x433F
+	namespaceMetadata: 0x433F,
+
+	/** Lock fund transfer transaction */
+	lockFundTransfer: 0x4162,
+
+	/** Lock fund cancel unlock transaction */
+	lockFundCancelUnlock: 0x4262
 };
 
 module.exports = EntityType;

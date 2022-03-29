@@ -53,6 +53,7 @@ describe('all routes', () => {
 			'/network',
 			'/node/info',
 			'/node/time',
+			'/node/unlockedaccount',
 			'/node/peers',
 
 			'/transactions/:group/:transactionId',

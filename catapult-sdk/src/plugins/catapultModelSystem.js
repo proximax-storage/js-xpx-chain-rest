@@ -20,6 +20,8 @@
 
 /** @module plugins/catapultModelSystem */
 const accountLink = require('./accountLink');
+const nodeKeyLink = require('./nodeKeyLink');
+const vrfKeyLink = require('./vrfKeyLink');
 const accountProperties = require('./accountProperties');
 const aggregate = require('./aggregate');
 const config = require('./config');
@@ -30,7 +32,7 @@ const ModelCodecBuilder = require('../modelBinary/ModelCodecBuilder');
 const ModelFormatterBuilder = require('../model/ModelFormatterBuilder');
 const ModelSchemaBuilder = require('../model/ModelSchemaBuilder');
 const metadata = require('./metadata');
-const metadata_nem = require('./metadata_nem');
+const metadata_v2 = require('./metadata_v2');
 const mosaic = require('./mosaic');
 const multisig = require('./multisig');
 const namespace = require('./namespace');
@@ -41,10 +43,12 @@ const service = require('./service');
 const supercontract = require('./supercontract');
 const transfer = require('./transfer');
 const upgrade = require('./upgrade');
+const lockfund = require('./lockfund');
 
 const plugins = {
 	accountLink, 
-	nodeKeyLink, 
+	nodeKeyLink,
+	vrfKeyLink,
 	accountProperties, 
 	aggregate, 
 	exchange, 
@@ -52,7 +56,7 @@ const plugins = {
 	contract, 
 	lock, 
 	metadata, 
-	metadata_nem, 
+	metadata_v2,
 	mosaic, 
 	multisig, 
 	namespace, 
@@ -62,7 +66,8 @@ const plugins = {
 	service, 
 	supercontract, 
 	transfer, 
-	upgrade
+	upgrade,
+	lockfund
 };
 
 /**

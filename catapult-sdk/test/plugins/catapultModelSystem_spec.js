@@ -45,6 +45,8 @@ describe('catapult model system', () => {
 			// Assert:
 			expect(supportedPluginNames).to.deep.equal([
 				'accountLink',
+				'nodeKeyLink',
+				'vrfKeyLink',
 				'accountProperties',
 				'aggregate',
 				'exchange',
@@ -62,7 +64,8 @@ describe('catapult model system', () => {
 				'service',
 				'supercontract',
 				'transfer',
-				'upgrade'
+				'upgrade',
+				'lockfund'
 			]);
 		});
 	});

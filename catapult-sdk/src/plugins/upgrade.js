@@ -19,6 +19,10 @@ const upgradePlugin = {
 			newBlockchainVersion:		{ type: ModelType.uint64, schemaName: 'blockchainUpgrade.newBlockchainVersion' },
 		});
 
+		builder.addTransactionSupport(EntityType.accountV2Upgrade, {
+			newAccountPublicKey: 			{ type: ModelType.binary, schemaName: 'blockchainUpgrade.newAccountPublicKey' },
+		});
+
 		builder.addSchema('blockchainUpgradeEntry', {
 			blockchainUpgrade: { type: ModelType.object, schemaName: 'blockchainUpgrade.height' }
 		});
@@ -42,6 +46,19 @@ const upgradePlugin = {
 			serialize: (transaction, serializer) => {
 				serializer.writeUint64(transaction.upgradePeriod);
 				serializer.writeUint64(transaction.newBlockchainVersion);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.accountV2Upgrade, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.newAccountPublicKey = parser.buffer(constants.sizes.signer);
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeBuffer(transaction.newAccountPublicKey);
 			}
 		});
 	}

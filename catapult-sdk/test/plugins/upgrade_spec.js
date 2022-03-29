@@ -23,8 +23,8 @@ describe('upgrade plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 3);
-			expect(modelSchema).to.contain.all.keys(['blockchainUpgrade', 'blockchainUpgradeEntry', 'blockchainUpgrade.height']);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 4);
+			expect(modelSchema).to.contain.all.keys(['blockchainUpgrade', 'accountV2Upgrade','blockchainUpgradeEntry', 'blockchainUpgrade.height']);
 
 			expect(Object.keys(modelSchema['blockchainUpgrade.height']).length).to.equal(2);
 			expect(modelSchema['blockchainUpgrade.height'])
@@ -33,6 +33,10 @@ describe('upgrade plugin', () => {
 			// - upgrade
 			expect(Object.keys(modelSchema.blockchainUpgrade).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
 			expect(modelSchema.blockchainUpgrade).to.contain.all.keys(['upgradePeriod', 'newBlockchainVersion']);
+
+			// - account V2 upgrade
+			expect(Object.keys(modelSchema.accountV2Upgrade).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
+			expect(modelSchema.accountV2Upgrade).to.contain.all.keys(['newAccountPublicKey']);
 		});
 	});
 
@@ -69,6 +73,20 @@ describe('upgrade plugin', () => {
 				object: {
 					upgradePeriod: [0, 119],
 					newBlockchainVersion: [0, 4]
+				}
+			}));
+		});
+
+		describe('supports account V2 upgrade transaction', () => {
+			const Key_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.signer));
+
+			test.binary.test.addAll(codec, 32, () => ({
+				buffer: Buffer.concat([
+					Key_Buffer,
+				]),
+
+				object: {
+					newAccountPublicKey: Recipient_Buffer
 				}
 			}));
 		});
