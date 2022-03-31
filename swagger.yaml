@@ -1457,20 +1457,192 @@ paths:
 
   # Storage routes start
 
-  /bcdrives:
+  '/bcdrives':
       get:
         tags:
           - Storage routes
         summary: Get pages with existen BcDrives
         description: Returns the paged response with drives.
         operationId: getBcDrives
+        parameters:
+          - $ref: '#/components/parameters/pageSizeQuery'
+          - $ref: '#/components/parameters/pageNumberQuery'
+          - $ref: '#/components/parameters/offsetQuery'
+          - $ref: '#/components/parameters/orderQuery'
         responses:
           "200":
             description: success
             content:
               application/json:
                 schema:
-                  $ref: "#/components/schemas/BcDriveDTO"
+                  type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/BcDriveDTO"
+          "404":
+            description: resource not found
+          "409":
+            description: invalid argument
+
+  '/bcdrives/{accountId}':
+      get:
+        tags:
+          - Storage routes
+        summary: Get a BcDrive by Public Key
+        description: Return BcDrive.
+        operationId: getBcDrive
+        parameters:
+          - name: accountId
+            in: path
+            description: Public key of the Drive.
+            required: true
+            schema:
+              type: string
+          - $ref: '#/components/parameters/pageSizeQuery'
+          - $ref: '#/components/parameters/pageNumberQuery'
+          - $ref: '#/components/parameters/offsetQuery'
+          - $ref: '#/components/parameters/orderQuery'
+        responses:
+          "200":
+            description: success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    drive:
+                      $ref: "#/components/schemas/BcDriveDTO"
+          "404":
+            description: resource not found
+          "409":
+            description: invalid argument
+
+  '/replicators':
+      get:
+        tags:
+          - Storage routes
+        summary: Get pages with existen Replicators
+        description: Returns the paged response with Replicators.
+        operationId: getReplicators
+        parameters:
+          - $ref: '#/components/parameters/pageSizeQuery'
+          - $ref: '#/components/parameters/pageNumberQuery'
+          - $ref: '#/components/parameters/offsetQuery'
+          - $ref: '#/components/parameters/orderQuery'
+        responses:
+          "200":
+            description: success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/ReplicatorDTO"
+          "404":
+            description: resource not found
+          "409":
+            description: invalid argument
+
+  '/relicators/{publicKey}':
+      get:
+        tags:
+          - Storage routes
+        summary: Get a Replicator by Public Key
+        description: Return the Replicator.
+        operationId: getReplicator
+        parameters:
+          - name: publicKey
+            in: path
+            description: Public key of the Replicator.
+            required: true
+            schema:
+              type: string
+          - $ref: '#/components/parameters/pageSizeQuery'
+          - $ref: '#/components/parameters/pageNumberQuery'
+          - $ref: '#/components/parameters/offsetQuery'
+          - $ref: '#/components/parameters/orderQuery'
+        responses:
+          "200":
+            description: success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    replicator:
+                      $ref: "#/components/schemas/ReplicatorDTO"
+          "404":
+            description: resource not found
+          "409":
+            description: invalid argument
+
+  '/download_channels':
+      get:
+        tags:
+          - Storage routes
+        summary: Get pages with existen Download Channels
+        description: Returns the paged response with Download Channels.
+        operationId: getDownloadChannels
+        parameters:
+          - $ref: '#/components/parameters/pageSizeQuery'
+          - $ref: '#/components/parameters/pageNumberQuery'
+          - $ref: '#/components/parameters/offsetQuery'
+          - $ref: '#/components/parameters/orderQuery'
+        responses:
+          "200":
+            description: success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/DownloadChannelInfoDTO"
+          "404":
+            description: resource not found
+          "409":
+            description: invalid argument
+
+  '/download_channels/{downloadChannelId}':
+      get:
+        tags:
+          - Storage routes
+        summary: Get a DownloadChannel by Public Key
+        description: Return the DownloadChannel by ID.
+        operationId: getDownloadChannel
+        parameters:
+          - name: downloadChannelId
+            in: path
+            description: Public key of the Replicator.
+            required: true
+            schema:
+              type: string
+          - $ref: '#/components/parameters/pageSizeQuery'
+          - $ref: '#/components/parameters/pageNumberQuery'
+          - $ref: '#/components/parameters/offsetQuery'
+          - $ref: '#/components/parameters/orderQuery'
+        responses:
+          "200":
+            description: success
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    downloadChannelInfo:
+                      $ref: "#/components/schemas/DownloadChannelInfoDTO"
+          "404":
+            description: resource not found
+          "409":
+            description: invalid argument
+
 
   # Storage routes end
 
