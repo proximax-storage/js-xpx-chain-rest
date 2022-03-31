@@ -9,8 +9,7 @@ info:
 tags:
   - name: Account routes
     description: |
-      Account related
-      endpoints.
+      Account related endpoints.
   - name: Block routes
     description: |
       Block related endpoints.
@@ -50,12 +49,10 @@ tags:
   - name: Exchange routes
     description: |
       Exchange related endpoints.
-  - name: Service routes
-      description: |
-        Service related endpoints.
-  - name: Starage routes
-      description: |
-        Storage related endpoints.
+  - name: Storage routes
+    description: |
+      Storage related endpoints.
+  
 
 paths:
 
@@ -1458,15 +1455,32 @@ paths:
 
   # Lock end
 
+  # Storage routes start
+
+  /bcdrives:
+      get:
+        tags:
+          - Storage routes
+        summary: Get pages with existen BcDrives
+        description: Returns the paged response with drives.
+        operationId: getBcDrives
+        responses:
+          "200":
+            description: success
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/BcDriveDTO"
+
+  # Storage routes end
+
 externalDocs:
   description: ProximaX Developer Center
   url: 'https://proximax.io/'
 servers:
-  - url:
-      enum:
-        - http://bctestnet1.brimstone.xpxsirius.io:3000/
-        - http://bctestnet2.brimstone.xpxsirius.io:3000/
-        - http://bctestnet3.brimstone.xpxsirius.io:3000/
+  - url: "http://bctestnet1.brimstone.xpxsirius.io:3000/"
+  - url: "http://bctestnet2.brimstone.xpxsirius.io:3000/"
+  - url: "http://bctestnet3.brimstone.xpxsirius.io:3000/"
 components:
   parameters:
     metadataType:
@@ -1607,8 +1621,6 @@ components:
         items:
           anyOf:
             - $ref: '#/components/schemas/EntityTypeEnum'
-
-
 
   requestBodies:
     metadataIds:
@@ -2549,15 +2561,21 @@ components:
         example: "C5563D82371B6EB2BC3B53CF3E2131A4DBBF728F8BAB25037E8028A03A05E1E1"
     PublicKeyList:
       type: array
-        items:
-          type: string
-        example:
-          - "8599BA6DB5B81BB69F96B88DD80A3B9EB7BBF8849CBD979100E89D69C30356E0"
-          - "3DCB6E5EFF4D63A38902EF948E895B01D6EA497EBF84B1460C14CA5BEDCAD9F3"
+      items:
+        type: string
+      example:
+        - "8599BA6DB5B81BB69F96B88DD80A3B9EB7BBF8849CBD979100E89D69C30356E0"
+        - "3DCB6E5EFF4D63A38902EF948E895B01D6EA497EBF84B1460C14CA5BEDCAD9F3"
     Signature:
       type: string
       format: "hex"
       example: "C117DC00B78106923C440BB4B0D508244C193CD5845AC1681A1753C813CFF2491E4AE27AF78A29C7E86394472B76D8F40AFE4A17B28FA9EBD865A8830289CC06"
+    Multisig:
+      type: string
+      example: "415C7C61822B063F62A4876A6F6BA2DAAE114AB298D7AC7FC56FDBA95872C309"
+    MultisigAddress:
+      type: string
+      example: "9048760066A50F0F65820D3008A79CF73E1034A564BF44AB3E"
 
     # Account endpoints
     AccountInfoDTO:
@@ -4713,8 +4731,8 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/HashDTO"
-
-#    Service entities DTOs start
+    
+    # Service entities DTOs start
 
     DrivesArray:
       type: array
@@ -5108,11 +5126,9 @@ components:
         - replicatorCount
       properties:
         driveSize:
-          type: integer
-          example: 300
+          $ref: "#/components/schemas/UInt64DTO"
         verificationFeeAmount:
-          type: integer
-          example: 1000
+          $ref: "#/components/schemas/UInt64DTO"
         replicatorCount:
           type: integer
           example: 5
@@ -5130,11 +5146,9 @@ components:
         downloadDataCdi:
           $ref: "#/components/schemas/HashDTO"
         uploadSize:
-          type: integer
-          example: 10
+          $ref: "#/components/schemas/UInt64DTO"
         feedbackFeeAmount:
-          type: integer
-          example: 1000
+          $ref: "#/components/schemas/UInt64DTO"
     DownloadTransactionBodyDTO:
       type: object
       required:
@@ -5147,11 +5161,9 @@ components:
           description: public key of a drive
           $ref: "#/components/schemas/PublicKey"
         downloadSize:
-          type: integer
-          example: 10
+          $ref: "#/components/schemas/UInt64DTO"
         feedbackFeeAmount:
-          type: integer
-          example: 10
+          $ref: "#/components/schemas/UInt64DTO"
         listOfPublicKeysSize:
           type: integer
           example: 5
@@ -5177,14 +5189,11 @@ components:
           description: hash of a drive root
           $ref: "#/components/schemas/HashDTO"
         fileStructureSizeBytes:
-          type: integer
-          example: 10
+          $ref: "#/components/schemas/UInt64DTO"
         metaFilesSizeBytes:
-          type: integer
-          example: 10
+          $ref: "#/components/schemas/UInt64DTO"
         usedDriveSizeBytes:
-          type: integer
-          example: 10
+          $ref: "#/components/schemas/UInt64DTO"
     DataModificationCancelTransactionBodyDTO:
       type: object
       required:
@@ -5203,8 +5212,7 @@ components:
         - capacity
       properties:
         capacity:
-          type: integer
-          example: 10
+          $ref: "#/components/schemas/UInt64DTO"
     ReplicatorOffboardingTransactionBodyDTO:
       type: object
       required:
@@ -5223,8 +5231,7 @@ components:
           description: hash of a download channel
           $ref: "#/components/schemas/HashDTO"
         feedbackFeeAmount:
-          type: integer
-          example: 10
+          $ref: "#/components/schemas/UInt64DTO"
     DownloadPaymentTransactionBodyDTO:
       type: object
       required:
@@ -5236,11 +5243,9 @@ components:
           description: hash of a download channel
           $ref: "#/components/schemas/HashDTO"
         downloadSize:
-          type: integer
-          example: 10
+          $ref: "#/components/schemas/UInt64DTO"
         feedbackFeeAmount:
-          type: integer
-          example: 10
+          $ref: "#/components/schemas/UInt64DTO"
     StoragePaymentTransactionBodyDTO:
       type: object
       required:
@@ -5251,8 +5256,7 @@ components:
           description: public key of a drive
           $ref: "#/components/schemas/PublicKey"
         storageUnits:
-          type: integer
-          example: 10
+          $ref: "#/components/schemas/UInt64DTO"
     DataModificationSingleApprovalTransactionBodyDTO:
       type: object
       required:
@@ -5289,8 +5293,7 @@ components:
           description: public key of a drive
           $ref: "#/components/schemas/PublicKey"
         verificationFeeAmount:
-          type: integer
-          example: 10
+          $ref: "#/components/schemas/UInt64DTO"
     DownloadApprovalTransactionBodyDTO:
       type: object
       required:
@@ -5328,7 +5331,7 @@ components:
         signatures:
           type: array
           items:
-            $ref: "#/components/schemas/Signatures"
+            $ref: "#/components/schemas/Signature"
         presentOpinions:
           description: presentOpinions are represented like a bit array
           type: array
@@ -5365,6 +5368,8 @@ components:
           description: public key of a drive
           $ref: "#/components/schemas/PublicKey"
         verificationTrigger:
+          description: hash of a block that initiated verification
+          $ref: "#/components/schemas/HashDTO"
         shardId:
           type: integer
           example: 1
@@ -5378,14 +5383,318 @@ components:
           $ref: "#/components/schemas/PublicKeyList"
         signatures:
           type: array
-            items:
-              $ref: "#/components/schemas/Signatures"
+          items:
+            $ref: "#/components/schemas/Signature"
         opinions:
           description: opinions are represented like a bit array
           type: array
           items:
             type: integer
             example: [ 57, 85 ]
+
+    # Storage routes
+
+    DriveInfoDTO:
+      type: object
+      required:
+        - drive
+        - lastApprovedDataModificationId
+        - dataModificationIdIsValid
+        - initialDownloadWork
+        - lastCompletedCumulativeDownloadWork
+      properties:
+        drive:
+          description: public key of a Drive
+          $ref: "#/components/schemas/PublicKey"
+        lastApprovedDataModificationId:
+          description: hash of the last approved DataModificationTransaction
+          $ref: "#/components/schemas/HashDTO"
+        dataModificationIdIsValid:
+          type: boolean
+          example: true
+        initialDownloadWork:
+          $ref: "#/components/schemas/UInt64DTO"
+        lastCompletedCumulativeDownloadWork:
+          $ref: "#/components/schemas/UInt64DTO"
+
+    ReplicatorDTO:
+      type: object
+      required:
+        - key
+        - version
+        - capacity
+        - drives
+      properties:
+        key:
+          description: public key of Replicator
+          $ref: "#/components/schemas/PublicKey"
+        version:
+          type: integer
+          description: version of Replicator
+          example: 1
+        capacity:
+          description: capacity of Replicator in GB
+          $ref: "#/components/schemas/UInt64DTO"
+        drives:
+          type: array
+          items:
+            $ref: "#/components/schemas/DriveInfoDTO"
+
+    CumulativePaymentsDTO:
+      type: object
+      required:
+        - replicator
+        - payment
+      properties:
+        replicator:
+          description: public key of Replicator
+          $ref: "#/components/schemas/PublicKey"
+        payment:
+          $ref: "#/components/schemas/UInt64DTO"
+
+    DownloadChannelInfoDTO:
+      type: object
+      required:
+        - id
+        - consumer
+        - drive
+        - downloadSize
+        - downloadApprovalCountLeft
+        - listOfPublicKeys
+        - shardReplicators
+        - cumulativePayments
+      properties:
+        id:
+          description: hash of DownloadTransaction
+          $ref: "#/components/schemas/HashDTO"
+        consumer:
+          description: public key of a Consumer
+          $ref: "#/components/schemas/PublicKey"
+        drive:
+          description: public key of a Drive
+          $ref: "#/components/schemas/PublicKey"
+        downloadSize:
+          $ref: "#/components/schemas/UInt64DTO"
+          description: download size in bytes
+        downloadApprovalCountLeft:
+          type: integer
+          description: count of approvals to be confirmed
+          example: 2
+        listOfPublicKeys:
+          description: list of public keys
+          $ref: "#/components/schemas/PublicKeyList"
+        shardReplicators:
+          $ref: "#/components/schemas/PublicKeyList"
+          description: replicators of the download shard
+        cumulativePayments:
+          $ref: "#/components/schemas/CumulativePaymentsDTO"
+
+    ActiveDataModificationDTO:
+      type: object
+      required:
+        - id
+        - owner
+        - downloadDataCdi
+        - expectedUploadSize
+        - actualUploadSize
+        - folderName
+        - readyForApproval
+      properties:
+        id:
+          description: hash of DataModificationTransaction
+          $ref: "#/components/schemas/HashDTO"
+        owner:
+          description: public key of an Owner
+          $ref: "#/components/schemas/PublicKey"
+        downloadDataCdi:
+          description: CDI of download data
+          $ref: "#/components/schemas/HashDTO"
+        expectedUploadSize:
+          description: expected upload size in bytes
+          $ref: "#/components/schemas/UInt64DTO"
+        actualUploadSize:
+          description: actual upload size in bytes
+          $ref: "#/components/schemas/UInt64DTO"
+        folderName:
+          type: string
+          example: "newFolder"
+        readyForApproval:
+          type: boolean
+          example: true
+
+    CompletedDataModificationDTO:
+      allOf:
+        - $ref: "#/components/schemas/ActiveDataModificationDTO"
+        - type: object
+          required:
+            - state
+          properties:
+            state:
+              type: integer
+              enum: [0, 1]
+              description: >
+                State:
+                  * `0` - Succeeded
+                  * `1` - Cancelled
+
+    ConfirmedUsedSizeDTO:
+      type: object
+      required:
+        - replicator
+        - size
+      properties:
+        replicator:
+          description: public key of Replicator
+          $ref: "#/components/schemas/PublicKey"
+        size:
+          $ref: "#/components/schemas/UInt64DTO"
+
+    ShardDTO:
+      type: object
+      required:
+        - id
+        - replicators
+      properties:
+        id:
+          type: integer
+          example: 1
+        replicators:
+          description: replicators of the shard
+          items:
+            $ref: "#/components/schemas/PublicKey"
+
+    VerificationDTO:
+      type: object
+      required:
+        - verificationTrigger
+        - expiration
+        - expired
+        - shards
+      properties:
+        verificationTrigger:
+          description: hash of a block that initiated verification
+          $ref: "#/components/schemas/HashDTO"
+        expiration:
+          type: integer
+          description: expiration time
+        expired:
+          type: boolean
+          example: true
+        shards:
+          type: array
+          items:
+            $ref: "#/components/schemas/ShardDTO"
+
+    DownloadShardDTO:
+      type: object
+      required:
+        - downloadChannelId
+      properties:
+        downloadChannelId:
+          description: hash of DownloadTransaction
+          $ref: "#/components/schemas/HashDTO"
+
+    UploadInfoStorageDTO:
+      type: object
+      required:
+        - key
+        - uploadSize
+      properties:
+        key:
+          $ref: "#/components/schemas/PublicKey"
+        uploadSize:
+          $ref: "#/components/schemas/UInt64DTO"
+
+    DataModificationShardDTO:
+      type: object
+      required:
+        - replicator
+        - actualShardReplicators
+        - formerShardReplicators
+        - ownerUpload
+      properties:
+        replicator:
+          description: public key of a Replicator
+          $ref: "#/components/schemas/PublicKey"
+        actualShardReplicators:
+          type: array
+          items:
+            $ref: "#/components/schemas/UploadInfoStorageDTO"
+        formerShardReplicators:
+          type: array
+          items:
+            $ref: "#/components/schemas/UploadInfoStorageDTO"
+        ownerUpload:
+          $ref: "#/components/schemas/UInt64DTO"
+
+    BcDriveDTO:
+      type: object
+      required:
+        - multisig
+        - multisigAddress
+        - owner
+        - rootHash
+        - size
+        - usedSizeBytes
+        - metaFilesSizeBytes
+        - replicatorCount
+        - activeDataModifications
+        - completedDataModifications
+        - confirmedUsedSizes
+        - replicators
+        - offboardingReplicators
+        - verifications
+        - downloadShards
+        - dataModificationShards
+      properties:
+        multisig:
+          $ref: "#/components/schemas/Multisig"
+        multisigAddress:
+          $ref: "#/components/schemas/MultisigAddress"
+        owner:
+          description: public key of an Owner
+          $ref: "#/components/schemas/PublicKey"
+        rootHash:
+          description: root hash
+          $ref: "#/components/schemas/HashDTO"
+        size:
+          $ref: "#/components/schemas/UInt64DTO"
+        usedSizeBytes:
+          $ref: "#/components/schemas/UInt64DTO"
+        metaFilesSizeBytes:
+          $ref: "#/components/schemas/UInt64DTO"
+        replicatorCount:
+          type: integer
+          example: 5
+        activeDataModifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActiveDataModificationDTO"
+        completedDataModifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/CompletedDataModificationDTO"
+        confirmedUsedSizes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ConfirmedUsedSizeDTO"
+        replicators:
+          $ref: "#/components/schemas/PublicKeyList"
+        offboardingReplicators:
+          $ref: "#/components/schemas/PublicKeyList"
+        verifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/VerificationDTO"
+        downloadShards:
+          type: array
+          items:
+            $ref: "#/components/schemas/DownloadShardDTO"
+        dataModificationShards:
+          type: array
+          items:
+            $ref: "#/components/schemas/DataModificationShardDTO"
+
 
     # Request bodies
     mosaicIds:

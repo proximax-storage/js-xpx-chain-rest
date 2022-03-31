@@ -125,6 +125,14 @@ const storagePlugin = {
 			opinions:				{ type: ModelType.array,  	schemaName: ModelType.uint8 },
 		});
 
+		builder.addSchema('driveInfo', {
+			drive: 									ModelType.binary,
+			lastApprovedDataModificationId: 		ModelType.binary,
+			dataModificationIdIsValid: 				ModelType.boolean,
+			initialDownloadWork: 					ModelType.uint64,
+			lastCompletedCumulativeDownloadWork: 	ModelType.uint64,
+		});
+
 		builder.addSchema('replicatorEntry', {
 			replicator: { type: ModelType.object, schemaName: 'replicator' }
 		});
@@ -134,14 +142,6 @@ const storagePlugin = {
 			version:		ModelType.uint32,
 			capacity:		ModelType.uint64,
 			drives: 		{ type: ModelType.array, schemaName: 'driveInfo' },
-		});
-
-		builder.addSchema('driveInfo', {
-			drive: 									ModelType.binary,
-			lastApprovedDataModificationId: 		ModelType.binary,
-			dataModificationIdIsValid: 				ModelType.boolean,
-			initialDownloadWork: 					ModelType.uint64,
-			lastCompletedCumulativeDownloadWork: 	ModelType.uint64,
 		});
 
 		builder.addSchema('downloadChannelEntry', {
@@ -166,25 +166,6 @@ const storagePlugin = {
 
 		builder.addSchema('bcDriveEntry', {
 			drive: { type: ModelType.object, schemaName: 'bcDrive' }
-		});
-
-		builder.addSchema('bcDrive', {
-			multisig:					ModelType.binary,
-			multisigAddress:			ModelType.binary,
-			owner:						ModelType.binary,
-			rootHash:					ModelType.binary,
-			size:						ModelType.uint64,
-			usedSizeBytes:				ModelType.uint64,
-			metaFilesSizeBytes:			ModelType.uint64,
-			replicatorCount:			ModelType.uint16,
-			activeDataModifications: 	{ type: ModelType.array, schemaName: 'activeDataModification' },
-			completedDataModifications: { type: ModelType.array, schemaName: 'completedDataModification' },
-			confirmedUsedSizes: 		{ type: ModelType.array, schemaName: 'confirmedUsedSize' },
-			replicators: 				{ type: ModelType.array, schemaName: ModelType.binary },
-			offboardingReplicators: 	{ type: ModelType.array, schemaName: ModelType.binary },
-			verifications: 				{ type: ModelType.array, schemaName: 'verification' },
-			downloadShards:				{ type: ModelType.array, schemaName: 'downloadShard' },
-			dataModificationShards:		{ type: ModelType.array, schemaName: 'dataModificationShard' },
 		});
 
 		builder.addSchema('activeDataModification', {
@@ -213,6 +194,11 @@ const storagePlugin = {
 			size:					ModelType.uint64,
 		});
 
+		builder.addSchema('shard', {
+			id:				ModelType.uint32,
+			replicators:	{ type: ModelType.array, schemaName: ModelType.binary },
+		});
+
 		builder.addSchema('verification', {
 			verificationTrigger:	ModelType.binary,
 			expiration:				ModelType.uint64,
@@ -220,13 +206,13 @@ const storagePlugin = {
 			shards:					{ type: ModelType.array, schemaName: 'shard' },
 		});
 
-		builder.addSchema('shard', {
-			id:				{ type: ModelType.uint32, schemaName: ModelType.binary },
-			replicators:	{ type: ModelType.array, schemaName: ModelType.binary },
-		});
-
 		builder.addSchema('downloadShard', {
 			downloadChannelId:	ModelType.binary,
+		});
+
+		builder.addSchema('uploadInfo', {
+			key:		ModelType.binary,
+			uploadSize:	ModelType.uint64,
 		});
 
 		builder.addSchema('dataModificationShard', {
@@ -236,9 +222,23 @@ const storagePlugin = {
 			ownerUpload:			ModelType.uint64,
 		});
 
-		builder.addSchema('uploadInfo', {
-			key:		ModelType.binary,
-			uploadSize:	ModelType.uint64,
+		builder.addSchema('bcDrive', {
+			multisig:					ModelType.binary,
+			multisigAddress:			ModelType.binary,
+			owner:						ModelType.binary,
+			rootHash:					ModelType.binary,
+			size:						ModelType.uint64,
+			usedSizeBytes:				ModelType.uint64,
+			metaFilesSizeBytes:			ModelType.uint64,
+			replicatorCount:			ModelType.uint16,
+			activeDataModifications: 	{ type: ModelType.array, schemaName: 'activeDataModification' },
+			completedDataModifications: { type: ModelType.array, schemaName: 'completedDataModification' },
+			confirmedUsedSizes: 		{ type: ModelType.array, schemaName: 'confirmedUsedSize' },
+			replicators: 				{ type: ModelType.array, schemaName: ModelType.binary },
+			offboardingReplicators: 	{ type: ModelType.array, schemaName: ModelType.binary },
+			verifications: 				{ type: ModelType.array, schemaName: 'verification' },
+			downloadShards:				{ type: ModelType.array, schemaName: 'downloadShard' },
+			dataModificationShards:		{ type: ModelType.array, schemaName: 'dataModificationShard' },
 		});
 	},
 
