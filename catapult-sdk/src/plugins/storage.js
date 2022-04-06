@@ -45,14 +45,14 @@ const storagePlugin = {
 			fileStructureSizeBytes:	{ type: ModelType.uint64, 	schemaName: 'dataModificationApproval.fileStructureSizeBytes' },
 			metaFilesSizeBytes:		{ type: ModelType.uint64, 	schemaName: 'dataModificationApproval.metaFilesSizeBytes' },
 			usedDriveSizeBytes:		{ type: ModelType.uint64, 	schemaName: 'dataModificationApproval.usedDriveSizeBytes' },
-			// judgingKeysCount:		{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.judgingKeysCount' },
-			// overlappingKeysCount:	{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.overlappingKeysCount' },
-			// judgedKeysCount:		{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.judgedKeysCount' },
-			// opinionElementCount:	{ type: ModelType.uint16, 	schemaName: 'dataModificationApproval.opinionElementCount' },
-			// publicKeys:				{ type: ModelType.array,  	schemaName: ModelType.binary },
-			// signatures:				{ type: ModelType.array,  	schemaName: ModelType.binary },
-			// presentOpinions:		{ type: ModelType.array,  	schemaName: ModelType.uint8 },
-			// opinions:				{ type: ModelType.array,  	schemaName: ModelType.uint64 },
+			judgingKeysCount:		{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.judgingKeysCount' },
+			overlappingKeysCount:	{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.overlappingKeysCount' },
+			judgedKeysCount:		{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.judgedKeysCount' },
+			opinionElementCount:	{ type: ModelType.uint16, 	schemaName: 'dataModificationApproval.opinionElementCount' },
+			publicKeys:				{ type: ModelType.array,  	schemaName: ModelType.binary },
+			signatures:				{ type: ModelType.array,  	schemaName: ModelType.binary },
+			presentOpinions:		{ type: ModelType.array,  	schemaName: ModelType.uint8 },
+			opinions:				{ type: ModelType.array,  	schemaName: ModelType.uint64 },
 		});
 
 		builder.addTransactionSupport(EntityType.dataModificationCancel, {
@@ -317,36 +317,36 @@ const storagePlugin = {
 				transaction.fileStructureSizeBytes = parser.uint64();
 				transaction.metaFilesSizeBytes = parser.uint64();
 				transaction.usedDriveSizeBytes = parser.uint64();
-				// transaction.judgingKeysCount = parser.uint8();
-				// transaction.overlappingKeysCount = parser.uint8();
-				// transaction.judgedKeysCount = parser.uint8();
-				// transaction.opinionElementCount = parser.uint16();
+				transaction.judgingKeysCount = parser.uint8();
+				transaction.overlappingKeysCount = parser.uint8();
+				transaction.judgedKeysCount = parser.uint8();
+				transaction.opinionElementCount = parser.uint16();
 
-				// transaction.publicKeys = []
-				// let count = transaction.judgingKeysCount + transaction.overlappingKeysCount + transaction.judgedKeysCount;
-				// while (count-- > 0) {
-				// 	transaction.publicKeys.push(parser.buffer(constants.sizes.signer));
-				// }
-				//
-				// transaction.signatures = [];
-				// const totalJudgingKeysCount = transaction.judgingKeysCount + transaction.overlappingKeysCount;
-				// count = totalJudgingKeysCount;
-				// while (count-- > 0) {
-				// 	transaction.signatures.push(parser.buffer(constants.sizes.signature));
-				// }
-				//
-				// transaction.presentOpinions = [];
-				// const totalJudgedKeysCount = transaction.overlappingKeysCount + transaction.judgedKeysCount;
-				// count = Math.floor((totalJudgingKeysCount * totalJudgedKeysCount + 7) / 8);
-				// while (count-- > 0) {
-				// 	transaction.presentOpinions.push(parser.uint8());
-				// }
-				//
-				// transaction.opinions = [];
-				// count = transaction.opinionElementCount;
-				// while (count-- > 0) {
-				// 	transaction.opinions.push(parser.uint64());
-				// }
+				transaction.publicKeys = []
+				let count = transaction.judgingKeysCount + transaction.overlappingKeysCount + transaction.judgedKeysCount;
+				while (count-- > 0) {
+					transaction.publicKeys.push(parser.buffer(constants.sizes.signer));
+				}
+				
+				transaction.signatures = [];
+				const totalJudgingKeysCount = transaction.judgingKeysCount + transaction.overlappingKeysCount;
+				count = totalJudgingKeysCount;
+				while (count-- > 0) {
+					transaction.signatures.push(parser.buffer(constants.sizes.signature));
+				}
+				
+				transaction.presentOpinions = [];
+				const totalJudgedKeysCount = transaction.overlappingKeysCount + transaction.judgedKeysCount;
+				count = Math.floor((totalJudgingKeysCount * totalJudgedKeysCount + 7) / 8);
+				while (count-- > 0) {
+					transaction.presentOpinions.push(parser.uint8());
+				}
+				
+				transaction.opinions = [];
+				count = transaction.opinionElementCount;
+				while (count-- > 0) {
+					transaction.opinions.push(parser.uint64());
+				}
 
 				return transaction;
 			},
@@ -358,26 +358,26 @@ const storagePlugin = {
 				serializer.writeUint64(transaction.fileStructureSizeBytes);
 				serializer.writeUint64(transaction.metaFilesSizeBytes);
 				serializer.writeUint64(transaction.usedDriveSizeBytes);
-				// serializer.writeUint8(transaction.judgingKeysCount);
-				// serializer.writeUint8(transaction.overlappingKeysCount);
-				// serializer.writeUint8(transaction.judgedKeysCount);
-				// serializer.writeUint16(transaction.opinionElementCount);
-				//
-				// transaction.publicKeys.forEach(key => {
-				// 	serializer.writeBuffer(key);
-				// });
-				//
-				// transaction.signatures.forEach(signature => {
-				// 	serializer.writeBuffer(signature);
-				// })
-				//
-				// transaction.presentOpinions.forEach(presentOpinion => {
-				// 	serializer.writeUint8(presentOpinion);
-				// })
-				//
-				// transaction.opinions.forEach(opinion => {
-				// 	serializer.writeUint64(opinion);
-				// })
+				serializer.writeUint8(transaction.judgingKeysCount);
+				serializer.writeUint8(transaction.overlappingKeysCount);
+				serializer.writeUint8(transaction.judgedKeysCount);
+				serializer.writeUint16(transaction.opinionElementCount);
+				
+				transaction.publicKeys.forEach(key => {
+					serializer.writeBuffer(key);
+				});
+				
+				transaction.signatures.forEach(signature => {
+					serializer.writeBuffer(signature);
+				})
+				
+				transaction.presentOpinions.forEach(presentOpinion => {
+					serializer.writeUint8(presentOpinion);
+				})
+				
+				transaction.opinions.forEach(opinion => {
+					serializer.writeUint64(opinion);
+				})
 			}
 		});
 

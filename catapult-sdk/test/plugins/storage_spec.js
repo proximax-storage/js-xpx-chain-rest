@@ -79,7 +79,7 @@ describe('storage plugin', () => {
 				'listOfPublicKeys',
 			]);
 
-			expect(Object.keys(modelSchema.dataModificationApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 6);
+			expect(Object.keys(modelSchema.dataModificationApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 14);
 			expect(modelSchema.dataModificationApproval).to.contain.all.keys([
 				'driveKey',
 				'dataModificationId',
@@ -87,14 +87,14 @@ describe('storage plugin', () => {
 				'fileStructureSizeBytes',
 				'metaFilesSizeBytes',
 				'usedDriveSizeBytes',
-				// 'judgingKeysCount',
-				// 'overlappingKeysCount',
-				// 'judgedKeysCount',
-				// 'opinionElementCount',
-				// 'publicKeys',
-				// 'signatures',
-				// 'presentOpinions',
-				// 'opinions',
+				'judgingKeysCount',
+				'overlappingKeysCount',
+				'judgedKeysCount',
+				'opinionElementCount',
+				'publicKeys',
+				'signatures',
+				'presentOpinions',
+				'opinions',
 			]);
 
 			expect(Object.keys(modelSchema.dataModificationCancel).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
@@ -411,23 +411,24 @@ describe('storage plugin', () => {
 			const fileStructureSizeBytes = Buffer.of(0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 			const metaFilesSizeBytes = Buffer.of(0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 			const usedDriveSizeBytes = Buffer.of(0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-			// const judgingKeysCount = Buffer.of(0x02);
-			// const overlappingKeysCount = Buffer.of(0x00);
-			// const judgedKeysCount = Buffer.of(0x01);
-			// const opinionElementCount = Buffer.of(0x03, 0x00);
-			// const publicKey1 = createByteArray(0x0B);
-			// const publicKey2 = createByteArray(0x0C);
-			// const publicKey3 = createByteArray(0x0D);
-			// const signature1 = createByteArray(0x0E, 64);
-			// const signature2 = createByteArray(0x0F, 64);
-			// const presentOpinions = Buffer.of(0x11);
-			// const opinions = Buffer.of(
-			// 	0x12, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-			// 	0x13, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-			// 	0x14, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-			// );
+			const judgingKeysCount = Buffer.of(0x02);
+			const overlappingKeysCount = Buffer.of(0x00);
+			const judgedKeysCount = Buffer.of(0x01);
+			const opinionElementCount = Buffer.of(0x03, 0x00);
+			const publicKey1 = createByteArray(0x0B);
+			const publicKey2 = createByteArray(0x0C);
+			const publicKey3 = createByteArray(0x0D);
+			const signature1 = createByteArray(0x0E, 64);
+			const signature2 = createByteArray(0x0F, 64);
+			const presentOpinions = Buffer.of(0x11);
+			const opinions = Buffer.of(
+				0x12, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+				0x13, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+				0x14, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+			);
 
-			test.binary.test.addAll(codec, 3 * 32 + 3 * 8, () => ({
+
+			test.binary.test.addAll(codec, 3 * 32 + 3 * 8 + 5 + 3 * 32 + 2 * 64 + 1 + 3 * 8, () => ({
 				buffer: Buffer.concat([
 					driveKey,
 					dataModificationId,
@@ -435,6 +436,17 @@ describe('storage plugin', () => {
 					fileStructureSizeBytes,
 					metaFilesSizeBytes,
 					usedDriveSizeBytes,
+					judgingKeysCount,
+					overlappingKeysCount,
+					judgedKeysCount,
+					opinionElementCount,
+					publicKey1,
+					publicKey2,
+					publicKey3,
+					signature1,
+					signature2,
+					presentOpinions,
+					opinions,
 				]),
 				object: {
 					driveKey,
@@ -443,6 +455,14 @@ describe('storage plugin', () => {
 					fileStructureSizeBytes: [ 0x04, 0x0 ],
 					metaFilesSizeBytes: [ 0x05, 0x0 ],
 					usedDriveSizeBytes: [ 0x06, 0x0 ],
+					judgingKeysCount: 0x02,
+					overlappingKeysCount: 0x00,
+					judgedKeysCount: 0x01,
+					opinionElementCount: 0x03,
+					publicKeys: [ publicKey1, publicKey2, publicKey3 ],
+					signatures: [ signature1, signature2 ],
+					presentOpinions: [ 0x11 ],
+					opinions: [ [ 0x12, 0x0 ], [ 0x13, 0x0 ] , [ 0x14, 0x0 ] ],
 				}
 			}));
 		});
