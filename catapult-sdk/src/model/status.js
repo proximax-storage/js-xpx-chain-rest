@@ -38,8 +38,10 @@ const toStringInternal = code => {
 		case 0x80430069: return 'Failure_Core_Block_Harvester_Ineligible';
 		case 0x80430018: return 'Failure_Core_Invalid_FeeInterest';
 		case 0x80430019: return 'Failure_Core_Invalid_FeeInterestDenominator';
+		case 0x8043001A: return 'Failure_Core_Invalid_AccountVersionUnsupported';
 		case 0x81480007: return 'Failure_Hash_Exists';
 		case 0x80530008: return 'Failure_Signature_Not_Verifiable';
+		case 0x80530009: return 'Failure_Signature_Invalid_Version';
 		case 0x804C00AA: return 'Failure_AccountLink_Invalid_Action';
 		case 0x804C00AC: return 'Failure_AccountLink_Link_Already_Exists';
 		case 0x804C00AD: return 'Failure_AccountLink_Link_Does_Not_Exist';
@@ -179,6 +181,10 @@ const toStringInternal = code => {
 		case 0x80580003: return 'Failure_BlockchainUpgrade_Redundant';
 		case 0x80580004: return 'Failure_BlockchainUpgrade_Invalid_Current_Version';
 		case 0x80580005: return 'Failure_BlockchainUpgrade_Plugin_Config_Malformed';
+		case 0x80580006: return 'Failure_BlockchainUpgrade_Account_Duplicate';
+		case 0x80580007: return 'Failure_BlockchainUpgrade_Account_Not_Upgradable';
+		case 0x80580008: return 'Failure_BlockchainUpgrade_Account_Non_Existant';
+		case 0x80580009: return 'Failure_BlockchainUpgrade_Account_Version_Not_Allowed';
 		case 0x803D0001: return 'Failure_Metadata_Invalid_Metadata_Type';
 		case 0x803D0002: return 'Failure_Metadata_Modification_Type_Invalid';
 		case 0x803D0003: return 'Failure_Metadata_Modification_Key_Invalid';
@@ -306,6 +312,14 @@ const toStringInternal = code => {
 		case 0x803F0003: return 'Failure_Metadata_v2_Value_Size_Delta_Too_Large';
 		case 0x803F0004: return 'Failure_Metadata_v2_Value_Size_Delta_Mismatch';
 		case 0x803F0005: return 'Failure_Metadata_v2_Value_Change_Irreversible';
+		case 0x80620001: return 'Failure_LockFund_Invalid_Sender';
+		case 0x80620002: return 'Failure_LockFund_Not_Enough_Funds';
+		case 0x80620003: return 'Failure_LockFund_Duplicate_Record';
+		case 0x80620004: return 'Failure_LockFund_Request_Non_Existant';
+		case 0x80620005: return 'Failure_LockFund_Out_Of_Order_Mosaics';
+		case 0x80620006: return 'Failure_LockFund_Plugin_Config_Malformed';
+		case 0x80620007: return 'Failure_LockFund_Too_Many_Mosaics';
+		case 0x80620008: return 'Failure_LockFund_Zero_Amount';
 		default: return undefined;
 	}
 };
