@@ -342,6 +342,17 @@ const toStringInternal = code => {
 		case 0x80620022: return 'Failure_Storage_Verification_Bad_Verification_Trigger'
 		case 0x80620023: return 'Failure_Storage_Verification_Wrong_Number_Of_Provers'
 		case 0x80620024: return 'Failure_Storage_Verification_Some_Provers_Are_Illegal'
+		case 0x80680001: return 'Failure_LiquidityProvider_Liquidity_Provider_Already_Exists'
+		case 0x80680002: return 'Failure_LiquidityProvider_Invalid_Owner'
+		case 0x80680003: return 'Failure_LiquidityProvider_Invalid_Slashing_Period'
+		case 0x80680004: return 'Failure_LiquidityProvider_Invalid_Window_Size'
+		case 0x80680005: return 'Failure_LiquidityProvider_Is_Not_Registered'
+		case 0x80680006: return 'Failure_LiquidityProvider_Insufficient_Currency'
+		case 0x80680007: return 'Failure_LiquidityProvider_Insufficient_Mosaic'
+		case 0x80680008: return 'Failure_LiquidityProvider_Invalid_Exchange_Rate'
+		case 0x80680009: return 'Failure_LiquidityProvider_Plugin_Config_Malformed'
+		case 0x8068000a: return 'Failure_LiquidityProvider_Invalid_Mosaic_Amount'
+		case 0x8068000b: return 'Failure_LiquidityProvider_Invalid_Currency_Amount'
 		default: return undefined;
 	}
 };

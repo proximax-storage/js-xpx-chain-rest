@@ -91,6 +91,8 @@ describe('entity type enumeration', () => {
 			streamStart: 0x4167,
 			streamFinish: 0x4267,
 			streamPayment: 0x4367,
+			createLiquidityProvider: 0x4168,
+			manualRateChange: 0x4268,
 		});
 	});
 

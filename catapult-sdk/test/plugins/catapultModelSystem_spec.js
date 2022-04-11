@@ -51,6 +51,7 @@ describe('catapult model system', () => {
 				'config',
 				'contract',
 				'lock',
+				'liquidityProvider',
 				'metadata',
 				'metadata_v2',
 				'mosaic',

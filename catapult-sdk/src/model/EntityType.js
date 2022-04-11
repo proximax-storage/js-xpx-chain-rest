@@ -221,6 +221,12 @@ const EntityType = {
 
 	/** Stream payment transaction. */
 	streamPayment: 0x4367,
+
+	/** Create liquidity provider transaction. */
+	createLiquidityProvider: 0x4168,
+
+	/** Manual rate change transaction. (LP) */
+	manualRateChange: 0x4268,
 };
 
 module.exports = EntityType;
