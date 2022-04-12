@@ -45,6 +45,7 @@ describe('route system', () => {
 			'config',
 			'contract',
 			'lock',
+			'liquidityProvider',
 			'metadata',
 			'metadata_v2',
 			'mosaic',
