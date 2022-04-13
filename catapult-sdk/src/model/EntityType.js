@@ -166,7 +166,14 @@ const EntityType = {
 	mosaicMetadata: 0x423F,
 
 	/** Namespace metadata transaction */
-	namespaceMetadata: 0x433F
+	namespaceMetadata: 0x433F,
+
+	/** Place SDA-SDA exchange offer transaction. */
+	placeSdaExchangeOffer: 0x4161,
+
+	/** Remove SDA-SDA exchange offer transaction. */
+	removeSdaExchangeOffer: 0x4261
+
 };
 
 module.exports = EntityType;
