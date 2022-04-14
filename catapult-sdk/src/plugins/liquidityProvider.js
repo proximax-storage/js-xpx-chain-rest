@@ -35,6 +35,36 @@ const liquidityProviderPlugin = {
 			mosaicBalanceIncrease:		{ type: ModelType.boolean, schemaName: 'manualRateChange.mosaicBalanceIncrease' },
 			mosaicBalanceChange:		{ type: ModelType.uint64,  schemaName: 'manualRateChange.mosaicBalanceChange' },
 		});
+
+		builder.addSchema('liquidityProviderEntry', {
+			liquidityProvider: { type: ModelType.object, schemaName: 'liquidityProvider' }
+		});
+
+		builder.addSchema('liquidityProvider', {
+			mosaicId:					ModelType.uint64,
+			providerKey:				ModelType.binary,
+			owner:						ModelType.binary,
+			additionallyMinted:			ModelType.uint64,
+			size:						ModelType.uint64,
+			slashingAccount:			ModelType.binary,
+			slashingPeriod:				ModelType.uint32,
+			windowSize:					ModelType.uint16,
+			creationHeight:				ModelType.uint64,
+			alpha: 						ModelType.uint32,
+			beta: 						ModelType.uint32,
+			recentTurnover:				{ type: ModelType.object, schemaName: 'turnoverEntry' },
+			turnoverHistory:			{ type: ModelType.array, schemaName: 'turnoverEntry' },
+		});
+
+		builder.addSchema('turnoverEntry', {
+			rate:		{ type: ModelType.object, schemaName: 'rate' },
+			turnover:	ModelType.uint64,
+		});
+
+		builder.addSchema('rate', {
+			currencyAmount:			ModelType.uint64,
+			mosaicAmount:			ModelType.uint64,
+		});
 	},
 
 	registerCodecs: codecBuilder => {
