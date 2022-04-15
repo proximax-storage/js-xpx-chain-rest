@@ -23,10 +23,14 @@ describe('liquidity provider plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 2);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 6);
 			expect(modelSchema).to.contain.all.keys([
 				'createLiquidityProvider',
 				'manualRateChange',
+				'liquidityProviderEntry',
+				'liquidityProvider',
+				'turnoverEntry',
+				'rate',
 			]);
 
 			expect(Object.keys(modelSchema.createLiquidityProvider).length).to.equal(Object.keys(modelSchema.transaction).length + 8);
