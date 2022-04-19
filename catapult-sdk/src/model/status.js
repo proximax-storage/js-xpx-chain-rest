@@ -312,14 +312,15 @@ const toStringInternal = code => {
 		case 0x803F0003: return 'Failure_Metadata_v2_Value_Size_Delta_Too_Large';
 		case 0x803F0004: return 'Failure_Metadata_v2_Value_Size_Delta_Mismatch';
 		case 0x803F0005: return 'Failure_Metadata_v2_Value_Change_Irreversible';
-		case 0x80620001: return 'Failure_LockFund_Invalid_Sender';
-		case 0x80620002: return 'Failure_LockFund_Not_Enough_Funds';
-		case 0x80620003: return 'Failure_LockFund_Duplicate_Record';
-		case 0x80620004: return 'Failure_LockFund_Request_Non_Existant';
-		case 0x80620005: return 'Failure_LockFund_Out_Of_Order_Mosaics';
-		case 0x80620006: return 'Failure_LockFund_Plugin_Config_Malformed';
-		case 0x80620007: return 'Failure_LockFund_Too_Many_Mosaics';
-		case 0x80620008: return 'Failure_LockFund_Zero_Amount';
+		case 0x80620001: return 'Duration_Smaller_Than_Configured';
+		case 0x80620002: return 'Failure_LockFund_Invalid_Sender';
+		case 0x80620003: return 'Failure_LockFund_Not_Enough_Funds';
+		case 0x80620004: return 'Failure_LockFund_Duplicate_Record';
+		case 0x80620005: return 'Failure_LockFund_Request_Non_Existant';
+		case 0x80620006: return 'Failure_LockFund_Out_Of_Order_Mosaics';
+		case 0x80620007: return 'Failure_LockFund_Plugin_Config_Malformed';
+		case 0x80620008: return 'Failure_LockFund_Too_Many_Mosaics';
+		case 0x80620009: return 'Failure_LockFund_Zero_Amount';
 		default: return undefined;
 	}
 };
