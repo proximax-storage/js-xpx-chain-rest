@@ -127,6 +127,7 @@ class ModelSchemaBuilder {
 				publicKeyHeight: ModelType.uint64,
 				supplementalAccountKeys: { type: ModelType.object, schemaName: 'supplementalAccountKeys' },
 				mosaics: { type: ModelType.array, schemaName: 'mosaic' },
+				lockedMosaics: { type: ModelType.array, schemaName: 'mosaic' },
 			},
 
 			supplementalAccountKeys: {
