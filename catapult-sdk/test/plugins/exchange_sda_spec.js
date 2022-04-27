@@ -24,7 +24,7 @@ describe('exchange sda plugin', () => {
             const modelSchema = builder.build();
 
             // Assert:
-            expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 11);
+            expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 10);
             expect(modelSchema).to.contain.all.keys([
                 'placeSdaExchangeOffer',
                 'sdaOfferWithOwnerAndDuration',
@@ -36,7 +36,6 @@ describe('exchange sda plugin', () => {
                 'sdaOfferGroupEntry',
                 'sdaOfferGroupEntry.sdaoffergroups',
                 'sdaOfferGroupEntry.sdaOfferGroup',
-                'sdaOfferInformation',
             ]);
 
             expect(Object.keys(modelSchema.placeSdaExchangeOffer).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
@@ -66,11 +65,8 @@ describe('exchange sda plugin', () => {
             expect(Object.keys(modelSchema['sdaOfferGroupEntry.sdaoffergroups']).length).to.equal(2);
             expect(modelSchema['sdaOfferGroupEntry.sdaoffergroups']).to.contain.all.keys(['groupHash', 'sdaOfferGroup']);
 
-            expect(Object.keys(modelSchema['sdaOfferGroupEntry.sdaOfferGroup']).length).to.equal(2);
-            expect(modelSchema['sdaOfferGroupEntry.sdaOfferGroup']).to.contain.all.keys(['groupHash', 'sdaOfferInfo']);
-
-            expect(Object.keys(modelSchema['sdaOfferInformation']).length).to.equal(3);
-            expect(modelSchema['sdaOfferInformation']).to.contain.all.keys(['owner', 'mosaicGiveAmount', 'deadline']);
+            expect(Object.keys(modelSchema['sdaOfferGroupEntry.sdaOfferGroup']).length).to.equal(3);
+            expect(modelSchema['sdaOfferGroupEntry.sdaOfferGroup']).to.contain.all.keys(['owner', 'mosaicGiveAmount', 'deadline']);
         });
     });
 
