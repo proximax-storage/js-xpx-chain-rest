@@ -154,11 +154,12 @@ const storagePlugin = {
 		});
 
 		builder.addSchema('downloadChannelInfo', {
-			id:							ModelType.binary,
-			consumer:					ModelType.binary,
-			drive:						ModelType.binary,
-			downloadSize:				ModelType.uint64,
-			downloadApprovalCountLeft:	ModelType.uint16,
+			id:						ModelType.binary,
+			consumer:				ModelType.binary,
+			drive:					ModelType.binary,
+			downloadSizeMegabytes:	ModelType.uint64,
+			downloadApprovalCount:	ModelType.uint16,
+			finished:	            ModelType.boolean,
 			listOfPublicKeys: 		{ type: ModelType.array, schemaName: ModelType.binary },
 			shardReplicators: 		{ type: ModelType.array, schemaName: ModelType.binary },
 			cumulativePayments: 	{ type: ModelType.array, schemaName: 'cumulativePayments' },
@@ -327,21 +328,21 @@ const storagePlugin = {
 				while (count-- > 0) {
 					transaction.publicKeys.push(parser.buffer(constants.sizes.signer));
 				}
-				
+
 				transaction.signatures = [];
 				const totalJudgingKeysCount = transaction.judgingKeysCount + transaction.overlappingKeysCount;
 				count = totalJudgingKeysCount;
 				while (count-- > 0) {
 					transaction.signatures.push(parser.buffer(constants.sizes.signature));
 				}
-				
+
 				transaction.presentOpinions = [];
 				const totalJudgedKeysCount = transaction.overlappingKeysCount + transaction.judgedKeysCount;
 				count = Math.floor((totalJudgingKeysCount * totalJudgedKeysCount + 7) / 8);
 				while (count-- > 0) {
 					transaction.presentOpinions.push(parser.uint8());
 				}
-				
+
 				transaction.opinions = [];
 				count = transaction.opinionElementCount;
 				while (count-- > 0) {
@@ -362,19 +363,19 @@ const storagePlugin = {
 				serializer.writeUint8(transaction.overlappingKeysCount);
 				serializer.writeUint8(transaction.judgedKeysCount);
 				serializer.writeUint16(transaction.opinionElementCount);
-				
+
 				transaction.publicKeys.forEach(key => {
 					serializer.writeBuffer(key);
 				});
-				
+
 				transaction.signatures.forEach(signature => {
 					serializer.writeBuffer(signature);
 				})
-				
+
 				transaction.presentOpinions.forEach(presentOpinion => {
 					serializer.writeUint8(presentOpinion);
 				})
-				
+
 				transaction.opinions.forEach(opinion => {
 					serializer.writeUint64(opinion);
 				})
