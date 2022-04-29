@@ -211,6 +211,23 @@ const toStringInternal = code => {
 		case 0x805D000D: return 'Failure_Exchange_Duplicated_Offer_In_Request';
 		case 0x805D000E: return 'Failure_Exchange_Offer_Exists';
 		case 0x805D000F: return 'Failure_Exchange_Zero_Offer_Duration';
+		case 0x80610001: return 'Failure_ExchangeSda_No_Offers';
+		case 0x80610002: return 'Failure_ExchangeSda_Exchanging_Own_Units_Is_Not_Allowed;'
+		case 0x80610003: return 'Failure_ExchangeSda_Account_Doesnt_Have_Any_Offer;'
+		case 0x80610004: return 'Failure_ExchangeSda_Duplicated_Offer_In_Request;'
+		case 0x80610005: return 'Failure_ExchangeSda_Zero_Offer_Duration;'
+		case 0x80610006: return 'Failure_ExchangeSda_Offer_Duration_Too_Large;'
+		case 0x80610007: return 'Failure_ExchangeSda_Offer_Duration_Exceeds_Mosaic_Duration;'
+		case 0x80610008: return 'Failure_ExchangeSda_Zero_Amount;'
+		case 0x80610009: return 'Failure_ExchangeSda_Zero_Price;'
+		case 0x8061000A: return 'Failure_ExchangeSda_Offer_Exists;'
+		case 0x8061000B: return 'Failure_ExchangeSda_Offer_Doesnt_Exist;'
+		case 0x8061000C: return 'Failure_ExchangeSda_Offer_Expired;'
+		case 0x8061000D: return 'Failure_ExchangeSda_Invalid_Price;'
+		case 0x8061000E: return 'Failure_ExchangeSda_Not_Enough_Units_In_Offer;'
+		case 0x8061000F: return 'Failure_ExchangeSda_Cant_Remove_Offer_At_Height;'
+		case 0x80610010: return 'Failure_ExchangeSda_No_Offered_Mosaics_To_Remove;'
+		case 0x80610011: return 'Failure_ExchangeSda_Plugin_Config_Malformed;'	
 		case 0x805A0001: return 'Failure_Service_Drive_Duration_Is_Not_Multiple_Of_BillingPeriod';
 		case 0x805A0002: return 'Failure_Service_Wrong_Percent_Approvers';
 		case 0x805A0003: return 'Failure_Service_Min_Replicators_More_Than_Replicas';
