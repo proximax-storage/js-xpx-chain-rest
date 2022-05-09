@@ -129,9 +129,9 @@ class ExchangeSdaDb {
      * @param {object} groupHash Group hash.
      * @returns {Promise.<object>} Minimal SDA-SDA offers info.
      */
-    getMinimalSdaOffersInfoByGroupHash(groupHash) {
+    getSdaOfferGroupsInfoByGroupHash(groupHash) {
         const buffer = Buffer.from(groupHash);
-        const fieldName = 'sdaOfferGroup';
+        const fieldName = 'sdaoffergroups.groupHash';
         return this.catapultDb.queryDocuments('sdaoffergroups', { [fieldName]: buffer });
     }
 }

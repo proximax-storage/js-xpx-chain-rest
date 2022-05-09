@@ -79,35 +79,39 @@ const createSdaExchangeEntriesWithMosaicIds = (accounts, mosaicIdGive, mosaicIdG
     return entries;
 };
 
-const createSdaOfferBasicInfo = (owner, mosaicIdGive) => {
+const createSdaOfferBasicInfo = (owner, mosaicIdGive, deadline) => {
     const offer = {
-        owner: new Binary(owner.address),     
-        mosaicIdGive: Long.fromNumber(mosaicIdGive), 
-        deadline: Long.fromNumber(randomInt()),
+        owner: new Binary(owner.publicKey),     
+        mosaicGiveAmount: Long.fromNumber(mosaicIdGive), 
+        deadline: Long.fromNumber(deadline),
     };
 
     return offer;
 };
 
-const createSdaOfferBasicInfos = (owner, mosaicIdGive) => {
+const createSdaOfferBasicInfos = (accounts) => {
     const sdaOfferBasicInfos = [];
-    for (let i = 0; i < mosaicIdGive.length; ++i)
-        sdaOfferBasicInfos.push(createSdaOfferBasicInfo(owner, mosaicIdGive[i]));
+    for (let i = 0; i < accounts.length; ++i)
+        sdaOfferBasicInfos.push(createSdaOfferBasicInfo(accounts[i].owner, createMosaicIds(1, i * 180), accounts[i].deadline));
 
     return sdaOfferBasicInfos;
 };
 
-const createSdaOfferGroupEntry = (id, owner, groupHash, mosaicIdGive) => ({
+const createSdaOfferGroupEntry = (id, groupHash, accounts) => ({
     _id: dbTestUtils.db.createObjectId(id),
-    exchangesda: {
+    sdaoffergroups: {
         groupHash: new Binary(groupHash),
-        sdaOfferGroup: createSdaOfferBasicInfos(owner, mosaicIdGive)
+        sdaOfferGroup: createSdaOfferBasicInfos(accounts)
     }
 });
 
 const createSdaOfferGroupEntries = (sdaOfferGroupInfos) => {
-    let i = 0;
-    return sdaOfferGroupInfos.map(sdaOfferGroupInfo => createSdaOfferGroupEntry(++i, sdaOfferGroupInfo.groupHash, sdaOfferGroupInfo.sdaOfferGroup));
+    const entries = [];
+    for (let i = 0; i < sdaOfferGroupInfos.length; ++i) {
+        entries.push(createSdaOfferGroupEntry(i, sdaOfferGroupInfos[i].groupHash, sdaOfferGroupInfos[i].sdaOfferGroup));
+    }
+
+    return entries;
 };
 
 const exchangeSdaDbTestUtils = {
