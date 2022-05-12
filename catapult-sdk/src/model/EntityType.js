@@ -159,6 +159,12 @@ const EntityType = {
 	/** Deactivate super contract. */
 	deactivate: 0x4560,
 
+	/** Add harvester. */
+	addHarvester: 0x4161,
+
+	/** Remove harvester. */
+	removeHarvester: 0x4261,
+
 	/** Account metadata transaction */
 	accountMetadata: 0x413F,
 

@@ -49,5 +49,6 @@ module.exports = {
 	// `uint64HexIdentifier` requires branching accountRestrictions->restrictionAdditions provides uint64 as binary
 	[ModelType.uint64HexIdentifier]: value => uint64.toHex(value instanceof Binary ? uint64.fromBytes(value.buffer) : longToUint64(value)),
 	[ModelType.int]: value => value.valueOf(),
-	[ModelType.boolean]: value => value
+	[ModelType.boolean]: value => (value instanceof Binary ? Boolean(value.buffer[0]) : value),
+	[ModelType.double]: value => (value instanceof Binary ? Buffer.from(value.buffer).readDoubleLE(0) : value),
 };

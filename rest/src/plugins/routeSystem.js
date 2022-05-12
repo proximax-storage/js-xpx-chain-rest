@@ -20,6 +20,7 @@
 
 const accountProperties = require('./accountProperties');
 const aggregate = require('./aggregate');
+const committee = require('./committee');
 const config = require('./config');
 const contract = require('./contract');
 const empty = require('./empty');
@@ -41,7 +42,7 @@ const service = require('./service');
 const storage = require('./storage');
 
 const plugins = {
-	accountLink: empty, accountProperties, aggregate, exchange, config, contract, lock, liquidityProvider, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, transfer: empty, upgrade
+	accountLink: empty, accountProperties, aggregate, exchange, committee, config, contract, lock, liquidityProvider, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, transfer: empty, upgrade
 };
 
 module.exports = {

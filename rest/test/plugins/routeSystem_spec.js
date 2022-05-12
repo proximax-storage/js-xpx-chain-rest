@@ -42,6 +42,7 @@ describe('route system', () => {
 			'accountProperties',
 			'aggregate',
 			'exchange',
+			'committee',
 			'config',
 			'contract',
 			'lock',

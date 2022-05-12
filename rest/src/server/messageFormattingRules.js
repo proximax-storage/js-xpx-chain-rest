@@ -42,5 +42,6 @@ module.exports = {
 	[ModelType.uint64]: value => value,
 	[ModelType.uint64HexIdentifier]: value => uint64.toHex(value),
 	[ModelType.int]: value => value,
-	[ModelType.boolean]: value => value
+	[ModelType.boolean]: value => value,
+	[ModelType.double]: value => value,
 };

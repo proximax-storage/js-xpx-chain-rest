@@ -195,13 +195,14 @@ describe('storage plugin', () => {
 				'payment'
 			]);
 
-			expect(Object.keys(modelSchema['downloadChannelInfo']).length).to.equal(8);
+			expect(Object.keys(modelSchema['downloadChannelInfo']).length).to.equal(9);
 			expect(modelSchema['downloadChannelInfo']).to.contain.all.keys([
 				'id',
 				'consumer',
 				'drive',
-				'downloadSize',
-				'downloadApprovalCountLeft',
+				'downloadSizeMegabytes',
+				'downloadApprovalCount',
+				'finished',
 				'listOfPublicKeys',
 				'shardReplicators',
 				'cumulativePayments'
