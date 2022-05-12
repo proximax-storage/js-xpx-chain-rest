@@ -226,7 +226,8 @@ describe('storage plugin', () => {
 				'confirmedUsedSizes',
 				'replicators',
 				'offboardingReplicators',
-				'verifications',
+				'verification',
+				'downloadShards',
 				'dataModificationShards'
 			]);
 
@@ -263,7 +264,7 @@ describe('storage plugin', () => {
 			expect(modelSchema['verification']).to.contain.all.keys([
 				'verificationTrigger',
 				'expiration',
-				'expired',
+				'duration',
 				'shards'
 			]);
 
