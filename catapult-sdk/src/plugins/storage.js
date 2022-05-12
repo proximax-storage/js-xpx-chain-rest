@@ -203,7 +203,7 @@ const storagePlugin = {
 		builder.addSchema('verification', {
 			verificationTrigger:	ModelType.binary,
 			expiration:				ModelType.uint64,
-			expired:				ModelType.boolean,
+			duration:				ModelType.uint32,
 			shards:					{ type: ModelType.array, schemaName: 'shard' },
 		});
 
@@ -237,7 +237,7 @@ const storagePlugin = {
 			confirmedUsedSizes: 		{ type: ModelType.array, schemaName: 'confirmedUsedSize' },
 			replicators: 				{ type: ModelType.array, schemaName: ModelType.binary },
 			offboardingReplicators: 	{ type: ModelType.array, schemaName: ModelType.binary },
-			verifications: 				{ type: ModelType.array, schemaName: 'verification' },
+			verification: 				{ type: ModelType.object, schemaName: 'verification' },
 			downloadShards:				{ type: ModelType.array, schemaName: 'downloadShard' },
 			dataModificationShards:		{ type: ModelType.array, schemaName: 'dataModificationShard' },
 		});
