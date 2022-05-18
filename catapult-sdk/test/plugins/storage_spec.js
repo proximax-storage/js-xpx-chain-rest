@@ -698,30 +698,61 @@ describe('storage plugin', () => {
 			const signatureTwo = createByteArray(0x21, 64);
 			const opinions = Buffer.of(0x4);
 
-			test.binary.test.addAll(codec, 32 + 32 + 4 + (2 * 32) + (2 * 64) + 1, () => ({
-				buffer: Buffer.concat([
-					driveKey,
-					trigger,
-					shardId,
-					keyCount,
-					judgingKeyCount,
-					keyOne,
-					keyTwo,
-					signatureOne,
-					signatureTwo,
-					opinions
-				]),
-				object: {
-					driveKey: driveKey,
-					verificationTrigger: trigger,
-					shardId: 0x05,
-					keyCount: 0x02,
-					judgingKeyCount: 0x02,
-					publicKeys: [keyOne, keyTwo],
-					signatures: [signatureOne, signatureTwo],
-					opinions: [0x4],
-				}
-			}));
+            it('can be serialized', () => {
+                // Arrange:
+                const serializationObject = {
+                    driveKey: driveKey,
+                    verificationTrigger: trigger,
+                    shardId: 0x05,
+                    publicKeys: [keyOne, keyTwo],
+                    signatures: [signatureOne, signatureTwo],
+                    opinions: 0x4,
+                }
+                const serializedBuffer = Buffer.concat([
+                    driveKey,
+                    trigger,
+                    shardId,
+                    keyOne,
+                    keyTwo,
+                    signatureOne,
+                    signatureTwo,
+                    opinions
+                ])
+                const serializationSize = 32 + 32 + 2 + (2 * 32) + (2 * 64) + 1;
+
+                // Assert:
+                test.binary.assertSerialization(codec, serializationSize, serializationObject, serializedBuffer);
+            });
+
+			it('can be deserialized', () => {
+                // Arrange:
+                const deserializationObject = {
+                    driveKey: driveKey,
+                    verificationTrigger: trigger,
+                    shardId: 0x05,
+                    keyCount: 0x02,
+                    judgingKeyCount: 0x02,
+                    publicKeys: [keyOne, keyTwo],
+                    signatures: [signatureOne, signatureTwo],
+                    opinions: 0x4,
+                }
+                const deserializedBuffer = Buffer.concat([
+                    driveKey,
+                    trigger,
+                    shardId,
+                    keyCount,
+                    judgingKeyCount,
+                    keyOne,
+                    keyTwo,
+                    signatureOne,
+                    signatureTwo,
+                    opinions
+                ])
+                const deserializationSize = 32 + 32 + 2 + 1 + 1 + (2 * 32) + (2 * 64) + 1;
+
+				// Assert:
+				test.binary.assertDeserialization(codec, deserializationSize, deserializedBuffer, deserializationObject);
+			});
 		});
 	});
 });

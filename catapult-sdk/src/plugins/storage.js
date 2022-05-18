@@ -115,14 +115,14 @@ const storagePlugin = {
 		});
 
 		builder.addTransactionSupport(EntityType.endDriveVerificationV2, {
-			driveKey:               {type: ModelType.binary, 	schemaName: 'endDriveVerification.driveKey'},
-			verificationTrigger:    {type: ModelType.binary, 	schemaName: 'endDriveVerification.verificationTrigger'},
-			shardId:                {type: ModelType.uint16, 	schemaName: 'endDriveVerification.shardId'},
-			keyCount:	            {type: ModelType.uint8, 	schemaName: 'endDriveVerification.keyCount'},
-			judgingKeyCount:	    {type: ModelType.uint8,    	schemaName: 'endDriveVerification.judgingKeyCount'},
+			driveKey:               ModelType.binary,
+			verificationTrigger:    ModelType.binary,
+			shardId:                ModelType.uint16,
+			keyCount:	            ModelType.uint8,
+			judgingKeyCount:	    ModelType.uint8,
 			publicKeys:				{ type: ModelType.array,  	schemaName: ModelType.binary },
 			signatures:				{ type: ModelType.array,  	schemaName: ModelType.binary },
-			opinions:				{ type: ModelType.array,  	schemaName: ModelType.uint8 },
+			opinions: 				ModelType.uint8,
 		});
 
 		builder.addSchema('driveInfo', {
@@ -610,7 +610,6 @@ const storagePlugin = {
 				transaction.judgingKeyCount = parser.uint8();
 				transaction.publicKeys = [];
 				transaction.signatures = [];
-				transaction.opinions = [];
 
 				let count = transaction.keyCount;
 				while (count--) {
@@ -622,10 +621,7 @@ const storagePlugin = {
 					transaction.signatures.push(parser.buffer(constants.sizes.signature));
 				}
 
-				count = Math.floor((transaction.judgingKeyCount * transaction.keyCount + 7) / 8);
-				while (count--) {
-					transaction.opinions.push(parser.uint8());
-				}
+				transaction.opinions = parser.uint8();
 
                 return transaction;
             },
@@ -635,9 +631,6 @@ const storagePlugin = {
                 serializer.writeBuffer(transaction.verificationTrigger);
 				serializer.writeUint16(transaction.shardId);
 
-				serializer.writeUint8(transaction.publicKeys.length);
-				serializer.writeUint8(transaction.signatures.length);
-
 				transaction.publicKeys.forEach(key => {
 					serializer.writeBuffer(key);
 				})
@@ -646,10 +639,7 @@ const storagePlugin = {
 					serializer.writeBuffer(signature);
 				})
 
-				const len = Math.floor((transaction.signatures.length * transaction.publicKeys.length + 7) / 8);
-				for (let i = 0; i < len; ++i) {
-					serializer.writeUint8(transaction.opinions[i]);
-				}
+				serializer.writeUint8(transaction.opinions)
             }
         });
 	}
