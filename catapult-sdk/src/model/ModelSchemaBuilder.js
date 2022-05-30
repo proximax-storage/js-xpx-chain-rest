@@ -101,7 +101,8 @@ class ModelSchemaBuilder {
 					type: ModelType.object,
 					// notice that this needs to be set in build to allow graceful fallback when some txes are not registered
 					schemaName: undefined
-				}
+				},
+				embedded: { type: ModelType.array, schemaName: 'transactionWithMetadata' }
 			},
 
 			// endregion

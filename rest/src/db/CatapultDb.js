@@ -293,7 +293,13 @@ class CatapultDb {
 	 * metadata - which is comprised of: `totalEntries`, `pageNumber`, and `pageSize`.
 	 */
 	queryPagedDocuments_2(queryConditions, removedFields, sortConditions, collectionName, options) {
-		const conditions = [];
+		let conditions = [];
+		let preprocessingIndex = queryConditions.findIndex(i => i.key === 'preprocessing')
+		if (preprocessingIndex !== -1) {
+			conditions = conditions.concat(queryConditions[preprocessingIndex].value)
+			queryConditions.splice(preprocessingIndex, 1)
+		}
+
 		if (queryConditions.length)
 			conditions.push(1 === queryConditions.length ? { $match: queryConditions[0] } : { $match: { $and: queryConditions } });
 
@@ -392,7 +398,8 @@ class CatapultDb {
 		};
 
 		const buildConditions = () => {
-			const conditions = [];
+			let conditions = []
+			let preprocessing = []
 
 			// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
 			// in fact, offset logic should be moved to `queryPagedDocuments`
@@ -407,6 +414,48 @@ class CatapultDb {
 				conditions.push({ 'meta.height': { $gte: convertToLong(filters.fromHeight) } });
 			else if (filters.toHeight !== undefined)
 				conditions.push({ 'meta.height': { $lte: convertToLong(filters.toHeight) } });
+			
+			if (filters.firstLevel !== undefined && !filters.firstLevel)
+				preprocessing.push(
+					{ $set: { "meta.id": '$_id' } },
+					{
+						$facet: {
+							transactions: [
+								{ $match: { 'meta.aggregateId': { $exists: false } } },
+							  ],
+							  embedded: [
+								{ $match: { 'meta.aggregateId': { $exists: true } } },
+								{ $unset: '_id' },
+								{ $group: {  '_id': '$meta.aggregateId',
+										transactions:{
+											$push: {'_id': '$_id', 'meta': '$meta', 'transaction': '$transaction'}
+										} 
+									},
+								} ]
+						},
+					},
+					{
+						$project: {
+							all: {
+								$concatArrays: [ "$transactions", "$embedded" ]
+							}
+						},
+					},
+					{
+						$unwind: { 'path': '$all' },
+					},
+					{
+						$group: {
+							_id: '$all._id', 
+							 meta: { "$first": "$all.meta" }, 
+							transaction: { "$first": "$all.transaction" }, 
+							embedded: { "$push": "$all.transactions" } 
+						},
+					},
+					{
+						$unwind: { 'path': '$embedded', "preserveNullAndEmptyArrays": true }
+					}
+				);
 
 			if (!filters.embedded)
 				conditions.push({ 'meta.aggregateId': { $exists: false } });
@@ -417,6 +466,9 @@ class CatapultDb {
 			const accountConditions = buildAccountConditions();
 			if (accountConditions)
 				conditions.push(accountConditions);
+
+			if (preprocessing.length > 0)
+				conditions.unshift({ 'key': 'preprocessing', 'value' : preprocessing })
 
 			return conditions;
 		};

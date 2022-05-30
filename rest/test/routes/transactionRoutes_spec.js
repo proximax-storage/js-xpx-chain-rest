@@ -243,7 +243,8 @@ describe('transaction routes', () => {
 								recipientAddress: undefined,
 								signerPublicKey: undefined,
 								embedded: undefined,
-								transactionTypes: undefined
+								transactionTypes: undefined,
+								firstLevel: undefined
 							};
 
 							expectedResult[filter] = value;
@@ -284,7 +285,8 @@ describe('transaction routes', () => {
 								recipientAddress: undefined,
 								signerPublicKey: undefined,
 								embedded: undefined,
-								transactionTypes: [1, 5, 25]
+								transactionTypes: [1, 5, 25],
+								firstLevel: undefined
 							});
 						});
 					});
@@ -307,7 +309,8 @@ describe('transaction routes', () => {
 								recipientAddress: undefined,
 								signerPublicKey: undefined,
 								embedded: undefined,
-								transactionTypes: undefined
+								transactionTypes: undefined,
+								firstLevel: undefined
 							});
 						});
 					});
@@ -410,7 +413,8 @@ describe('transaction routes', () => {
 									recipientAddress: undefined,
 									signerPublicKey: undefined,
 									embedded: undefined,
-									transactionTypes: undefined
+									transactionTypes: undefined,
+									firstLevel: undefined
 								});
 							}));
 					};
