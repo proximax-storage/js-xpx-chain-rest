@@ -369,6 +369,12 @@ const toStringInternal = code => {
 		case 0x80680009: return 'Failure_LiquidityProvider_Plugin_Config_Malformed'
 		case 0x8068000a: return 'Failure_LiquidityProvider_Invalid_Mosaic_Amount'
 		case 0x8068000b: return 'Failure_LiquidityProvider_Invalid_Currency_Amount'
+		case 0x80610001: return 'Failure_Committee_Plugin_Config_Malformed';
+		case 0x80610002: return 'Failure_Committee_Redundant';
+		case 0x80610003: return 'Failure_Committee_Harvester_Ineligible';
+		case 0x80610004: return 'Failure_Committee_Account_Does_Not_Exist';
+		case 0x80610005: return 'Failure_Committee_Signer_Is_Not_Owner';
+		case 0x80610006: return 'Failure_Committee_Harvester_Already_Disabled';
 		default: return undefined;
 	}
 };
