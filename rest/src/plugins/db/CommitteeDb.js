@@ -29,6 +29,18 @@ class CommitteeDb {
         return this.catapultDb.queryDocuments('harvesters', { [fieldName]: buffer });
     }
 
+    /**
+	 * Retrieves paginated harvesters.
+	 * @param {object} options Options for ordering and pagination. Can have the `sortField`, `sortDirection`,
+	 * `pageSize`.
+	 * and `pageNumber`.
+	 * @returns {Promise.<object>} Harvesters page.
+	 */
+     harvesters(options) {
+		const sortConditions = {$sort: {[options.sortField]: options.sortDirection}};
+		return this.catapultDb.queryPagedDocuments_2([], [], sortConditions, "harvesters", options);
+    }
+
 	// endregion
 }
 
