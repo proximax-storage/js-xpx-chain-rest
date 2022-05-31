@@ -124,7 +124,7 @@ describe('exchange sda plugin', () => {
                 ]),
                 object: {
                     sdaOffersCount: 0x02,
-                    sdaOffers: [
+                    offers: [
                         {
                             mosaicIdGive: [0x01, 0],
                             mosaicAmountGive: [0x02, 0],
@@ -162,7 +162,7 @@ describe('exchange sda plugin', () => {
                 ]),
                 object: {
                     sdaOffersCount: 0x02,
-                    sdaOffers: [
+                    offers: [
                         {
                             mosaicIdGive: [0x01, 0],
                             mosaicIdGet: [0x02, 0]

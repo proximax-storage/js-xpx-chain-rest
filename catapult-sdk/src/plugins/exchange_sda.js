@@ -97,13 +97,13 @@ const exchangeSdaPlugin = {
          deserialize: parser => {
             const transaction = {};
             transaction.sdaOffersCount = parser.uint8();
-            transaction.sdaOffers = [];
+            transaction.offers = [];
             let count = transaction.sdaOffersCount;
             while (count--) {
                const sdaOfferWithOwnerAndDuration = readSdaOffer(parser);
                sdaOfferWithOwnerAndDuration.owner = parser.buffer(constants.sizes.signer);
                sdaOfferWithOwnerAndDuration.duration = parser.uint64();
-               transaction.sdaOffers.push(sdaOfferWithOwnerAndDuration);
+               transaction.offers.push(sdaOfferWithOwnerAndDuration);
             }
 
             return transaction;
@@ -111,7 +111,7 @@ const exchangeSdaPlugin = {
 
          serialize: (transaction, serializer) => {
             serializer.writeUint8(transaction.sdaOffersCount);
-            transaction.sdaOffers.forEach(sdaOfferWithOwnerAndDuration => {
+            transaction.offers.forEach(sdaOfferWithOwnerAndDuration => {
                writeSdaOffer(sdaOfferWithOwnerAndDuration, serializer);
                serializer.writeBuffer(sdaOfferWithOwnerAndDuration.owner);
                serializer.writeUint64(sdaOfferWithOwnerAndDuration.duration);
@@ -123,13 +123,13 @@ const exchangeSdaPlugin = {
          deserialize: parser => {
             const transaction = {};
             transaction.sdaOffersCount = parser.uint8();
-            transaction.sdaOffers = [];
+            transaction.offers = [];
             let count = transaction.sdaOffersCount;
             while (count--) {
                const sdaOfferMosaic = {};
                sdaOfferMosaic.mosaicIdGive = parser.uint64();
                sdaOfferMosaic.mosaicIdGet = parser.uint64();
-               transaction.sdaOffers.push(sdaOfferMosaic);
+               transaction.offers.push(sdaOfferMosaic);
             }
 
             return transaction;
@@ -137,7 +137,7 @@ const exchangeSdaPlugin = {
 
          serialize: (transaction, serializer) => {
             serializer.writeUint8(transaction.sdaOffersCount);
-            transaction.sdaOffers.forEach(sdaOfferMosaic => {
+            transaction.offers.forEach(sdaOfferMosaic => {
                serializer.writeUint64(sdaOfferMosaic.mosaicIdGive);
                serializer.writeUint64(sdaOfferMosaic.mosaicIdGet);
             });
