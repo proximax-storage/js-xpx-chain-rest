@@ -169,10 +169,10 @@ const EntityType = {
 	namespaceMetadata: 0x433F,
 
 	/** Place SDA-SDA exchange offer transaction. */
-	placeSdaExchangeOffer: 0x4161,
+	placeSdaExchangeOffer: 0x416A,
 
 	/** Remove SDA-SDA exchange offer transaction. */
-	removeSdaExchangeOffer: 0x4261
+	removeSdaExchangeOffer: 0x426A
 
 };
 

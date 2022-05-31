@@ -73,8 +73,8 @@ describe('entity type enumeration', () => {
 			accountMetadata: 0x413F,
 			mosaicMetadata: 0x423F,
 			namespaceMetadata: 0x433F,
-			placeSdaExchangeOffer: 0x4161,
-			removeSdaExchangeOffer: 0x4261
+			placeSdaExchangeOffer: 0x416A,
+			removeSdaExchangeOffer: 0x426A
 		});
 	});
 
