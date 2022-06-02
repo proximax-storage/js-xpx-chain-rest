@@ -34,7 +34,6 @@ const mosaicPlugin = {
 	registerSchema: builder => {
 		builder.addTransactionSupport(EntityType.mosaicDefinition, {
 			mosaicId: ModelType.uint64,
-			mosaicSupply: ModelType.uint64,
 			mosaicNonce: ModelType.uint32,
 			properties: { type: ModelType.array, schemaName: 'mosaicDefinition.mosaicProperty' }
 		});
@@ -89,7 +88,6 @@ const mosaicPlugin = {
 
 				transaction.mosaicNonce = parser.uint32();
 				transaction.mosaicId = parser.uint64();
-				transaction.mosaicSupply = parser.uint64();
 				const propertiesCount = parser.uint8();
 
 				transaction.properties = [];
@@ -110,7 +108,6 @@ const mosaicPlugin = {
 			serialize: (transaction, serializer) => {
 				serializer.writeUint32(transaction.mosaicNonce);
 				serializer.writeUint64(transaction.mosaicId);
-				serializer.writeUint64(transaction.mosaicSupply);
 
 				const propertiesCount = transaction.properties.length - numRequiredProperties;
 				if (0 > propertiesCount)

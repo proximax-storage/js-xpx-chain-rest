@@ -28,7 +28,7 @@ const { expect } = require('chai');
 
 const constants = {
 	sizes: {
-		mosaicDefinition: 23,
+		mosaicDefinition: 15,
 		mosaicProperty: 9,
 		mosaicSupplyChange: 17
 	}
@@ -59,8 +59,8 @@ describe('mosaic plugin', () => {
 			);
 
 			// - mosaic definition
-			expect(Object.keys(modelSchema.mosaicDefinition).length).to.equal(Object.keys(modelSchema.transaction).length + 4);
-			expect(modelSchema.mosaicDefinition).to.contain.all.keys(['mosaicId', 'mosaicSupply', 'mosaicNonce', 'properties']);
+			expect(Object.keys(modelSchema.mosaicDefinition).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
+			expect(modelSchema.mosaicDefinition).to.contain.all.keys(['mosaicId', 'mosaicNonce', 'properties']);
 
 			// - mosaic property
 			expect(modelSchema['mosaicDefinition.mosaicProperty']).to.deep.equal({
@@ -113,14 +113,12 @@ describe('mosaic plugin', () => {
 				buffer: Buffer.concat([
 					Buffer.of(0x06, 0xFF, 0xCA, 0xB8), // mosaic nonce
 					Buffer.of(0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92), // mosaic id
-					Buffer.of(0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x91), // mosaic supply
 					Buffer.of(0x00, 0x11, 0xFF) // properties header
 				]),
 
 				object: {
 					mosaicNonce: 3100311302,
 					mosaicId: [0x066C26F2, 0x92B28340],
-					mosaicSupply: [0x066C26F2, 0x91B28340],
 					properties: [
 						{ id: 0x00, value: [0x11, 0] },
 						{ id: 0x01, value: [0xFF, 0] }
