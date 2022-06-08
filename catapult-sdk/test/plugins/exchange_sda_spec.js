@@ -27,7 +27,7 @@ describe('exchange sda plugin', () => {
             expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 10);
             expect(modelSchema).to.contain.all.keys([
                 'placeSdaExchangeOffer',
-                'sdaOfferWithOwnerAndDuration',
+                'sdaOfferWithDuration',
                 'removeSdaExchangeOffer',
                 'sdaOfferMosaic',
                 'sdaExchangeEntry',
@@ -41,8 +41,8 @@ describe('exchange sda plugin', () => {
             expect(Object.keys(modelSchema.placeSdaExchangeOffer).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
             expect(modelSchema.placeSdaExchangeOffer).to.contain.all.keys(['offers']);
 
-            expect(Object.keys(modelSchema['sdaOfferWithOwnerAndDuration']).length).to.equal(6);
-            expect(modelSchema['sdaOfferWithOwnerAndDuration']).to.contain.all.keys(['mosaicIdGive', 'mosaicAmountGive', 'mosaicIdGet', 'mosaicAmountGet', 'owner', 'duration']);
+            expect(Object.keys(modelSchema['sdaOfferWithDuration']).length).to.equal(5);
+            expect(modelSchema['sdaOfferWithDuration']).to.contain.all.keys(['mosaicIdGive', 'mosaicAmountGive', 'mosaicIdGet', 'mosaicAmountGet', 'duration']);
 
             expect(Object.keys(modelSchema.removeSdaExchangeOffer).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
             expect(modelSchema.removeSdaExchangeOffer).to.contain.all.keys(['offers']);
@@ -100,26 +100,20 @@ describe('exchange sda plugin', () => {
                 0x02, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
                 0x03, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
                 0x04, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
-            const sdaOfferOwner1 = new Uint8Array(32);
-            sdaOfferOwner1[0] = 0x05;
-            const sdaOfferDuration1 = Buffer.of(0x6, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+            const sdaOfferDuration1 = Buffer.of(0x5, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
             const sdaOffer2 = Buffer.of(
+                0x06, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
                 0x07, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
                 0x08, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x09, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x0A, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
-            const sdaOfferOwner2 = new Uint8Array(32);
-            sdaOfferOwner2[0] = 0x0B;
-            const sdaOfferDuration2 = Buffer.of(0xC, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+                0x09, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+            const sdaOfferDuration2 = Buffer.of(0xA, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
 
-            test.binary.test.addAll(codec, 1 + 2 * (5 * 8 + 32), () => ({
+            test.binary.test.addAll(codec, 1 + 2 * (5 * 8), () => ({
                 buffer: Buffer.concat([
                     sdaOffersCount,
                     sdaOffer1,
-                    sdaOfferOwner1,
                     sdaOfferDuration1,
                     sdaOffer2,
-                    sdaOfferOwner2,
                     sdaOfferDuration2
                 ]),
                 object: {
@@ -130,16 +124,14 @@ describe('exchange sda plugin', () => {
                             mosaicAmountGive: [0x02, 0],
                             mosaicIdGet: [0x03, 0],
                             mosaicAmountGet: [0x04, 0],
-                            owner: sdaOfferOwner1,
-                            duration: [0x06, 0]
+                            duration: [0x05, 0]
                         },
                         {
-                            mosaicIdGive: [0x07, 0],
-                            mosaicAmountGive: [0x08, 0],
-                            mosaicIdGet: [0x09, 0],
-                            mosaicAmountGet: [0x0A, 0],
-                            owner: sdaOfferOwner2,
-                            duration: [0x0C, 0]
+                            mosaicIdGive: [0x06, 0],
+                            mosaicAmountGive: [0x07, 0],
+                            mosaicIdGet: [0x08, 0],
+                            mosaicAmountGet: [0x09, 0],
+                            duration: [0x0A, 0]
                         }
                     ]
                 }

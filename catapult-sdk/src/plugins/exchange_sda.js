@@ -18,15 +18,14 @@ const constants = { sizes };
 const exchangeSdaPlugin = {
    registerSchema: builder => {
       builder.addTransactionSupport(EntityType.placeSdaExchangeOffer, {
-         offers:  { type: ModelType.array, schemaName: 'sdaOfferWithOwnerAndDuration' },
+         offers:  { type: ModelType.array, schemaName: 'sdaOfferWithDuration' },
       });
 
-      builder.addSchema('sdaOfferWithOwnerAndDuration', {
+      builder.addSchema('sdaOfferWithDuration', {
          mosaicIdGive:     ModelType.uint64,
          mosaicAmountGive: ModelType.uint64,
          mosaicIdGet:      ModelType.uint64,
          mosaicAmountGet:  ModelType.uint64,
-         owner:            ModelType.binary,
          duration:         ModelType.uint64,
       });
 
@@ -100,10 +99,9 @@ const exchangeSdaPlugin = {
             transaction.offers = [];
             let count = transaction.sdaOffersCount;
             while (count--) {
-               const sdaOfferWithOwnerAndDuration = readSdaOffer(parser);
-               sdaOfferWithOwnerAndDuration.owner = parser.buffer(constants.sizes.signer);
-               sdaOfferWithOwnerAndDuration.duration = parser.uint64();
-               transaction.offers.push(sdaOfferWithOwnerAndDuration);
+               const sdaOfferWithDuration = readSdaOffer(parser);
+               sdaOfferWithDuration.duration = parser.uint64();
+               transaction.offers.push(sdaOfferWithDuration);
             }
 
             return transaction;
@@ -111,10 +109,9 @@ const exchangeSdaPlugin = {
 
          serialize: (transaction, serializer) => {
             serializer.writeUint8(transaction.sdaOffersCount);
-            transaction.offers.forEach(sdaOfferWithOwnerAndDuration => {
-               writeSdaOffer(sdaOfferWithOwnerAndDuration, serializer);
-               serializer.writeBuffer(sdaOfferWithOwnerAndDuration.owner);
-               serializer.writeUint64(sdaOfferWithOwnerAndDuration.duration);
+            transaction.offers.forEach(sdaOfferWithDuration => {
+               writeSdaOffer(sdaOfferWithDuration, serializer);
+               serializer.writeUint64(sdaOfferWithDuration.duration);
             });
          }
       });
