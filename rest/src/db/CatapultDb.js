@@ -294,18 +294,18 @@ class CatapultDb {
 	 */
 	queryPagedDocuments_2(queryConditions, removedFields, sortConditions, collectionName, options) {
 		const conditions = [];
-		if (queryConditions.length)
+		const countConditions = [];
+		if (queryConditions.length) {
 			conditions.push(1 === queryConditions.length ? { $match: queryConditions[0] } : { $match: { $and: queryConditions } });
+			countConditions.push(1 === queryConditions.length ? queryConditions[0] : { $and: queryConditions });
+		}
 
 		conditions.push(sortConditions);
 
 		const { pageSize } = options;
 		const pageIndex = options.pageNumber - 1;
 
-		const facet = [
-			{ $skip: pageSize * pageIndex },
-			{ $limit: pageSize }
-		];
+		const facet = [];
 
 		// rename _id to id
 		facet.push({ $set: { "meta.id": '$_id' } });
@@ -314,39 +314,49 @@ class CatapultDb {
 		if (0 < Object.keys(removedFields).length)
 			facet.push({ $unset: removedFields });
 
-		conditions.push({
-			$facet: {
-				data: facet,
-				pagination: [
-					{ $count: 'totalEntries' },
-					{
-						$set: {
-							pageNumber: options.pageNumber,
-							pageSize
-						}
-					}
-				]
-			}
-		});
+		conditions.push({ $skip: pageSize * pageIndex });
+		conditions.push({ $limit: pageSize });
+		
+		let collection = this.database.collection(collectionName);
+		var aggregateResult = function (totalEntries) {
+			conditions.push({
+				$facet: {
+					data: facet
+				}
+			},
+			{ $addFields: {
+				'pagination.totalEntries': totalEntries, 
+				'pagination.pageNumber': options.pageNumber,
+				'pagination.pageSize': pageSize,
+				'pagination.totalPages': 0
+			} });
 
-		return this.database.collection(collectionName)
+			return collection
 			.aggregate(conditions, { promoteLongs: false , allowDiskUse: true })
 			.toArray()
 			.then(result => {
 				const formattedResult = result[0];
-
-				// when query is empty, mongodb does not fill the pagination info
-				if (!formattedResult.pagination.length)
-					formattedResult.pagination = { totalEntries: 0, pageNumber: options.pageNumber, pageSize };
-				else
-					formattedResult.pagination = formattedResult.pagination[0];
-
 				formattedResult.pagination.totalPages = Math.ceil(
 					formattedResult.pagination.totalEntries / formattedResult.pagination.pageSize
 				);
 
 				return formattedResult;
 			});
+		};
+
+		if (countConditions.length) {
+			return collection
+				.countDocuments(countConditions[0])
+				.then(totalEntries => {
+					return aggregateResult(totalEntries);
+				});
+		} else {
+			return collection
+				.estimatedDocumentCount()
+				.then(totalEntries => {
+					return aggregateResult(totalEntries);
+				});
+		}
 	}
 
 	/**
