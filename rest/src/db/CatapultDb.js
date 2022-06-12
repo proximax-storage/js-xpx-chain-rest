@@ -323,7 +323,6 @@ class CatapultDb {
 
 		conditions.push({ $skip: pageSize * pageIndex });
 		conditions.push({ $limit: pageSize });
-		conditions = conditions.concat(firstLevelConditions);
 		
 		let collection = this.database.collection(collectionName);
 		var aggregateResult = function (totalEntries) {
@@ -348,9 +347,23 @@ class CatapultDb {
 					formattedResult.pagination.totalEntries / formattedResult.pagination.pageSize
 				);
 
-				return formattedResult;
+				if (firstLevelConditions.length) {
+					const promises = [];
+					formattedResult.data.forEach(item => {
+						promises.push(
+							this.transactionsByIdsImpl(
+								collectionName, { 'meta.hash': { $in: [item.meta.hash] } }));
+					})
+
+					return Promise.all(promises).then( finalResult => {
+						formattedResult.data = finalResult.map(i => { return i[0]; });
+						return formattedResult;
+					});
+				} else {
+					return formattedResult;
+				}
 			});
-		};
+		}.bind(this);
 
 		if (countConditions.length) {
 			return collection
@@ -428,46 +441,7 @@ class CatapultDb {
 				conditions.push({ 'meta.height': { $lte: convertToLong(filters.toHeight) } });
 				
 			if (filters.firstLevel !== undefined && !filters.firstLevel)
-				firstLevelConditions.push(
-					{ $set: { "meta.id": '$_id' } },
-					{
-						$facet: {
-							transactions: [
-								{ $match: { 'meta.aggregateId': { $exists: false } } },
-							  ],
-							  embedded: [
-								{ $match: { 'meta.aggregateId': { $exists: true } } },
-								{ $unset: '_id' },
-								{ $group: {  '_id': '$meta.aggregateId',
-										transactions:{
-											$push: {'_id': '$_id', 'meta': '$meta', 'transaction': '$transaction'}
-										} 
-									},
-								} ]
-						},
-					},
-					{
-						$project: {
-							all: {
-								$concatArrays: [ "$transactions", "$embedded" ]
-							}
-						},
-					},
-					{
-						$unwind: { 'path': '$all' },
-					},
-					{
-						$group: {
-							_id: '$all._id', 
-							 meta: { "$first": "$all.meta" }, 
-							transaction: { "$first": "$all.transaction" }, 
-							embedded: { "$push": "$all.transactions" } 
-						},
-					},
-					{
-						$unwind: { 'path': '$embedded', "preserveNullAndEmptyArrays": true }
-					}
-				);
+				firstLevelConditions.push(1);
 
 			if (!filters.embedded)
 				conditions.push({ 'meta.aggregateId': { $exists: false } });
