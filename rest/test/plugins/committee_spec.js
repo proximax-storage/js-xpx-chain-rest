@@ -25,7 +25,8 @@ describe('committee plugin', () => {
 
 			// Assert:
 			test.assert.assertRoutes(routes, [
-				'/account/:accountId/harvesting'
+				'/account/:accountId/harvesting',
+				'/harvesters'
 			]);
 		});
 	});

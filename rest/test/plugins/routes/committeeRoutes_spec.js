@@ -6,8 +6,9 @@
 
 const committeeRoutes = require('../../../src/plugins/routes/committeeRoutes');
 const catapult = require('catapult-sdk');
-const { test } = require('../../routes/utils/routeTestUtils');
+const { MockServer, test } = require('../../routes/utils/routeTestUtils');
 const { expect } = require('chai');
+const sinon = require('sinon');
 
 const { address } = catapult.model;
 const { addresses, publicKeys } = test.sets;
@@ -46,5 +47,52 @@ describe('committee routes', () => {
 			accountId: addresses.valid[0],
 			expected: ['address', address.stringToAddress(addresses.valid[0])]
 		}));
+	});
+
+	describe('/harvesters', () => {
+		const fakeHarvester = { meta: { id: "" }, harvester: {} };
+		const fakePaginatedHarvester = {
+			data: [fakeHarvester],
+			pagination: {
+				pageNumber: 1,
+				pageSize: 10,
+				totalEntries: 1,
+				totalPages: 1
+			}
+		};
+		const dbHarvestersFake = sinon.fake.resolves(fakePaginatedHarvester);
+
+		const mockServer = new MockServer();
+		const db = { harvesters: dbHarvestersFake };
+		const services = {
+			config: {
+				pageSize: {
+					min: 10,
+					max: 100,
+					default: 20
+				}
+			}
+		};
+
+		const registerRoutes = committeeRoutes.register(mockServer.server, db, services);
+		const route = mockServer.getRoute('/harvesters').get();
+
+		const req = {
+			params: { sortField: '_id' }
+		};
+
+		it('returns correct structure with harvesters', () => {
+			// Act:
+			return mockServer.callRoute(route, req).then(() => {
+				console.log(mockServer.send.call)
+				// Assert:
+				expect(mockServer.send.firstCall.args[0]).to.deep.equal({
+					payload: fakePaginatedHarvester,
+					type: 'committeeEntry',
+					structure: 'page'
+				});
+				expect(mockServer.next.calledOnce).to.equal(true);
+			});
+		});
 	});
 });
