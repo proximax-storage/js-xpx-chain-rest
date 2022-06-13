@@ -61,10 +61,13 @@ const ModelType = {
 	int: SchemaType.max + 11,
 
 	/** Schema property type indicating a boolean value. */
-	boolean: SchemaType.max + 12
+	boolean: SchemaType.max + 12,
+
+	/** Schema property type indicating a double value. */
+	double: SchemaType.max + 13,
 };
 
 Object.assign(ModelType, SchemaType);
-ModelType.max = ModelType.boolean;
+ModelType.max = ModelType.double;
 
 module.exports = ModelType;

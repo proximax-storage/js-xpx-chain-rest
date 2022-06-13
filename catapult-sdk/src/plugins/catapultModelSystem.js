@@ -22,10 +22,12 @@
 const accountLink = require('./accountLink');
 const accountProperties = require('./accountProperties');
 const aggregate = require('./aggregate');
+const committee = require('./committee');
 const config = require('./config');
 const contract = require('./contract');
 const exchange = require('./exchange');
 const lock = require('./lock');
+const liquidityProvider = require('./liquidityProvider');
 const ModelCodecBuilder = require('../modelBinary/ModelCodecBuilder');
 const ModelFormatterBuilder = require('../model/ModelFormatterBuilder');
 const ModelSchemaBuilder = require('../model/ModelSchemaBuilder');
@@ -38,12 +40,13 @@ const operation = require('./operation');
 const receipts = require('./receipts');
 const richlist = require('./richlist');
 const service = require('./service');
+const storage = require('./storage');
 const supercontract = require('./supercontract');
 const transfer = require('./transfer');
 const upgrade = require('./upgrade');
 
 const plugins = {
-	accountLink, accountProperties, aggregate, exchange, config, contract, lock, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, supercontract, transfer, upgrade
+	accountLink, accountProperties, aggregate, exchange, committee, config, contract, lock, liquidityProvider, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, transfer, upgrade
 };
 
 /**

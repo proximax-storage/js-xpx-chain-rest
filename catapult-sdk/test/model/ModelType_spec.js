@@ -41,7 +41,8 @@ describe('model type enumeration', () => {
 			uint64HexIdentifier: 13,
 			int: 14,
 			boolean: 15,
-			max: 15
+			double: 16,
+			max: 16
 		});
 	});
 });

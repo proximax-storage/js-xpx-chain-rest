@@ -87,9 +87,7 @@ const mosaicPlugin = {
 				const transaction = {};
 
 				transaction.mosaicNonce = parser.uint32();
-
 				transaction.mosaicId = parser.uint64();
-
 				const propertiesCount = parser.uint8();
 
 				transaction.properties = [];
