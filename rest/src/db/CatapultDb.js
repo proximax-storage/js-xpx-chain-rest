@@ -293,7 +293,14 @@ class CatapultDb {
 	 * metadata - which is comprised of: `totalEntries`, `pageNumber`, and `pageSize`.
 	 */
 	queryPagedDocuments_2(queryConditions, removedFields, sortConditions, collectionName, options) {
-		const conditions = [];
+		let conditions = [];
+		let firstLevelConditions = [];
+		let preprocessingIndex = queryConditions.findIndex(i => i.key === 'firstLevel')
+		if (preprocessingIndex !== -1) {
+			firstLevelConditions = queryConditions[preprocessingIndex].value;
+			queryConditions.splice(preprocessingIndex, 1);
+		}
+		
 		const countConditions = [];
 		if (queryConditions.length) {
 			conditions.push(1 === queryConditions.length ? { $match: queryConditions[0] } : { $match: { $and: queryConditions } });
@@ -340,9 +347,23 @@ class CatapultDb {
 					formattedResult.pagination.totalEntries / formattedResult.pagination.pageSize
 				);
 
-				return formattedResult;
+				if (firstLevelConditions.length) {
+					const promises = [];
+					formattedResult.data.forEach(item => {
+						promises.push(
+							this.transactionsByIdsImpl(
+								collectionName, { 'meta.hash': { $in: [item.meta.hash] } }));
+					})
+
+					return Promise.all(promises).then( finalResult => {
+						formattedResult.data = finalResult.map(i => { return i[0]; });
+						return formattedResult;
+					});
+				} else {
+					return formattedResult;
+				}
 			});
-		};
+		}.bind(this);
 
 		if (countConditions.length) {
 			return collection
@@ -402,7 +423,8 @@ class CatapultDb {
 		};
 
 		const buildConditions = () => {
-			const conditions = [];
+			let conditions = []
+			let firstLevelConditions = []
 
 			// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
 			// in fact, offset logic should be moved to `queryPagedDocuments`
@@ -417,6 +439,9 @@ class CatapultDb {
 				conditions.push({ 'meta.height': { $gte: convertToLong(filters.fromHeight) } });
 			else if (filters.toHeight !== undefined)
 				conditions.push({ 'meta.height': { $lte: convertToLong(filters.toHeight) } });
+				
+			if (filters.firstLevel !== undefined && !filters.firstLevel)
+				firstLevelConditions.push(1);
 
 			if (!filters.embedded)
 				conditions.push({ 'meta.aggregateId': { $exists: false } });
@@ -427,6 +452,9 @@ class CatapultDb {
 			const accountConditions = buildAccountConditions();
 			if (accountConditions)
 				conditions.push(accountConditions);
+
+			if (firstLevelConditions.length > 0)
+				conditions.unshift({ 'key': 'firstLevel', 'value' : firstLevelConditions })
 
 			return conditions;
 		};

@@ -75,7 +75,8 @@ module.exports = {
 				recipientAddress: params.recipientAddress ? routeUtils.parseArgument(params, 'recipientAddress', 'address') : undefined,
 				transactionTypes: params.type ? routeUtils.parseArgumentAsArray(params, 'type', 'uint') : undefined,
 				embedded: params.embedded ? routeUtils.parseArgument(params, 'embedded', 'boolean') : undefined,
-				publicKey: params.publicKey ? routeUtils.parseArgument(params, 'publicKey', 'publicKey') : undefined
+				publicKey: params.publicKey ? routeUtils.parseArgument(params, 'publicKey', 'publicKey') : undefined,
+				firstLevel: params.firstLevel ? routeUtils.parseArgument(params, 'firstLevel', 'boolean') : undefined
 			};
 
 			const options = routeUtils.parsePaginationArguments(params, services.config.pageSize, { id: 'objectId' });
