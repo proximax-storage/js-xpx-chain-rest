@@ -44,7 +44,7 @@
 							assetId = mosaicId;
 						return db.exchangesdaByMosaicIdGive([assetId], pagingOptions.id, pagingOptions.pageSize, ordering);
 					})
-					.then(routeUtils.createSender('sdaOfferBalances').sendArray('mosaicId', res, next));
+					.then(routeUtils.createSender('sdaExchangeEntry.sdaOfferBalances').sendArray('mosaicId', res, next));
 			}
 
 			if (params.type == 'get') {
@@ -54,7 +54,7 @@
 							assetId = mosaicId;
 						return db.exchangesdaByMosaicIdGet([assetId], pagingOptions.id, pagingOptions.pageSize, ordering);
 					})
-					.then(routeUtils.createSender('sdaOfferBalances').sendArray('mosaicId', res, next));
+					.then(routeUtils.createSender('sdaExchangeEntry.sdaOfferBalances').sendArray('mosaicId', res, next));
 			}
         });
     }

@@ -34,7 +34,6 @@ const extractSdaOfferBalances = (dbObjects, fieldName, fieldId, fieldAmountType,
             offers.forEach(offer => {
                 if (mosaicId.toString() === eval("offer."+fieldId+".toString()")) {
                     offer.owner = exchangeSdaInfo.owner;
-
                     result.push(offer);
                 }
             });
@@ -93,7 +92,7 @@ class ExchangeSdaDb {
         };
 
         const options = {
-            sortByField: `${fieldName}.${fieldAmountType}`,
+            sortByField: `exchangesda.${fieldName}.${fieldAmountType}`,
             sortOrder: ordering
         };
 
@@ -117,7 +116,7 @@ class ExchangeSdaDb {
         };
 
         const options = {
-            sortByField: `${fieldName}.${fieldAmountType}`,
+            sortByField: `exchangesda.${fieldName}.${fieldAmountType}`,
             sortOrder: ordering
         };
 

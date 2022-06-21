@@ -54,7 +54,7 @@ describe('exchange sda db', () => {
             const expectedSdaOffers = [];
             for (let i = 0; i < expectedIndexes.length; ++i) 
                 expectedSdaOffers.push(extractSdaOffer(entries, 'sdaOfferBalances', expectedIndexes[i][0], expectedIndexes[i][1]));
-            expectedSdaOffers.sort((offer1, offer2) => sortSdaOffers(offer1, offer2, 'currentMosaicGive', ordering));
+            expectedSdaOffers.sort((offer1, offer2) => sortSdaOffers(offer1, offer2, 'currentMosaicGiveAmount', ordering));
 
             // Assert:
             return test.db.runDbTest(
@@ -98,7 +98,7 @@ describe('exchange sda db', () => {
                 const expectedSdaOffers = [];
                 for (let i = (0 < ordering ? 10 : 0); i < (0 < ordering ? 100 : 9); ++i)
                     expectedSdaOffers.push(extractSdaOffer(entries, 'sdaOfferBalances', i, 0));
-                expectedSdaOffers.sort((offer1, offer2) =>  sortSdaOffers(offer1, offer2, 'currentMosaicGive', ordering));
+                expectedSdaOffers.sort((offer1, offer2) =>  sortSdaOffers(offer1, offer2, 'currentMosaicGiveAmount', ordering));
                 const id = entries[9]._id.toString();
 
                 // Assert:
@@ -159,7 +159,7 @@ describe('exchange sda db', () => {
             const expectedSdaOffers = [];
             for (let i = 0; i < expectedIndexes.length; ++i) 
                 expectedSdaOffers.push(extractSdaOffer(entries, 'sdaOfferBalances', expectedIndexes[i][0], expectedIndexes[i][1]));
-            expectedSdaOffers.sort((offer1, offer2) => sortSdaOffers(offer1, offer2, 'currentMosaicGet', ordering));
+            expectedSdaOffers.sort((offer1, offer2) => sortSdaOffers(offer1, offer2, 'currentMosaicGetAmount', ordering));
 
             // Assert:
             return test.db.runDbTest(
@@ -203,7 +203,7 @@ describe('exchange sda db', () => {
                 const expectedSdaOffers = [];
                 for (let i = (0 < ordering ? 10 : 0); i < (0 < ordering ? 100 : 9); ++i)
                     expectedSdaOffers.push(extractSdaOffer(entries, 'sdaOfferBalances', i, 0));
-                expectedSdaOffers.sort((offer1, offer2) => sortSdaOffers(offer1, offer2, 'currentMosaicGet', ordering));
+                expectedSdaOffers.sort((offer1, offer2) => sortSdaOffers(offer1, offer2, 'currentMosaicGetAmount', ordering));
                 const id = entries[9]._id.toString();
 
                 // Assert:

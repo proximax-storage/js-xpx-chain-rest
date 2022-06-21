@@ -92,7 +92,7 @@ const { convert, uint64 } = catapult.utils;
 				factory.createSdaExchangePagingRouteInfo('/exchangesda/:type/:mosaicId', 'get', traits.mosaicId),
 				traits.params,
 				traits.expected,
-				'sdaOfferBalances'
+				'sdaExchangeEntry.sdaOfferBalances'
 			);
 
             pagingTestsFactory.addDefault();

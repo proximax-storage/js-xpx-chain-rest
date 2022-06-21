@@ -56,14 +56,14 @@ describe('exchange sda plugin', () => {
             expect(Object.keys(modelSchema['sdaExchangeEntry.exchangesda']).length).to.equal(3);
             expect(modelSchema['sdaExchangeEntry.exchangesda']).to.contain.all.keys(['owner', 'ownerAddress', 'sdaOfferBalances']);
 
-            expect(Object.keys(modelSchema['sdaExchangeEntry.sdaOfferBalances']).length).to.equal(7);
-            expect(modelSchema['sdaExchangeEntry.sdaOfferBalances']).to.contain.all.keys(['mosaicIdGive', 'mosaicIdGet', 'currentMosaicGiveAmount', 'currentMosaicGetAmount', 'initialMosaicGiveAmount', 'initialMosaicGetAmount', 'deadline']);
+            expect(Object.keys(modelSchema['sdaExchangeEntry.sdaOfferBalances']).length).to.equal(8);
+            expect(modelSchema['sdaExchangeEntry.sdaOfferBalances']).to.contain.all.keys(['mosaicIdGive', 'mosaicIdGet', 'currentMosaicGiveAmount', 'currentMosaicGetAmount', 'initialMosaicGiveAmount', 'initialMosaicGetAmount', 'deadline', 'owner']);
 
-            expect(Object.keys(modelSchema['sdaOfferGroupEntry']).length).to.equal(1);
-            expect(modelSchema['sdaOfferGroupEntry']).to.contain.all.keys(['sdaoffergroups']);
+            expect(Object.keys(modelSchema['sdaOfferGroupEntry']).length).to.equal(2);
+            expect(modelSchema['sdaOfferGroupEntry']).to.contain.all.keys(['sdaoffergroups', 'groupHash']);
 
-            expect(Object.keys(modelSchema['sdaOfferGroupEntry.sdaoffergroups']).length).to.equal(2);
-            expect(modelSchema['sdaOfferGroupEntry.sdaoffergroups']).to.contain.all.keys(['groupHash', 'sdaOfferGroup']);
+            expect(Object.keys(modelSchema['sdaOfferGroupEntry.sdaoffergroups']).length).to.equal(1);
+            expect(modelSchema['sdaOfferGroupEntry.sdaoffergroups']).to.contain.all.keys(['sdaOfferGroup']);
 
             expect(Object.keys(modelSchema['sdaOfferGroupEntry.sdaOfferGroup']).length).to.equal(3);
             expect(modelSchema['sdaOfferGroupEntry.sdaOfferGroup']).to.contain.all.keys(['owner', 'mosaicGiveAmount', 'deadline']);

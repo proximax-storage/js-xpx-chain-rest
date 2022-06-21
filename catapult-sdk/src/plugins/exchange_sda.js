@@ -56,14 +56,15 @@ const exchangeSdaPlugin = {
          initialMosaicGiveAmount:  ModelType.uint64,
          initialMosaicGetAmount:   ModelType.uint64,
          deadline:                 ModelType.uint64,
+         owner:                    ModelType.binary,
       });
 
       builder.addSchema('sdaOfferGroupEntry', {
          sdaoffergroups:   { type: ModelType.object, schemaName: 'sdaOfferGroupEntry.sdaoffergroups' },
+         groupHash:        ModelType.binary,
       });
 
       builder.addSchema('sdaOfferGroupEntry.sdaoffergroups', {
-         groupHash:     ModelType.binary,
          sdaOfferGroup: { type: ModelType.array, schemaName: 'sdaOfferGroupEntry.sdaOfferGroup' },
       });
 

@@ -19,14 +19,14 @@ const randomInt = () => {
     return Math.floor(randomDouble());
 };
 
-const createSdaOfferBalance = (mosaicIdGive, mosaicIdGet) => {
+const createSdaOfferBalance = (mosaicIdGive, mosaicIdGet, amountGive, amountGet) => {
     const offer = {
         mosaicIdGive: Long.fromNumber(mosaicIdGive),
         mosaicIdGet: Long.fromNumber(mosaicIdGet),
-        currentMosaicGiveAmount: Long.fromNumber(randomInt()),
-        currentMosaicGetAmount: Long.fromNumber(randomInt()),
-        initialMosaicGiveAmount: Long.fromNumber(randomInt()),
-        initialMosaicGetAmount: Long.fromNumber(randomInt()),
+        currentMosaicGiveAmount: amountGive,
+        currentMosaicGetAmount: amountGet,
+        initialMosaicGiveAmount: amountGive,
+        initialMosaicGetAmount: amountGet,
         deadline: Long.fromNumber(randomInt()),
     };
 
@@ -36,7 +36,7 @@ const createSdaOfferBalance = (mosaicIdGive, mosaicIdGet) => {
 const createSdaOfferBalances = (mosaicIdGive, mosaicIdGet) => {
     const sdaOffers = [];
     for (let i = 0; i < mosaicIdGive.length; ++i)
-        sdaOffers.push(createSdaOfferBalance(mosaicIdGive[i], mosaicIdGet[i]));
+        sdaOffers.push(createSdaOfferBalance(mosaicIdGive[i], mosaicIdGet[i], i * 100 + 1, i * 100 + 5));
 
     return sdaOffers;
 };
