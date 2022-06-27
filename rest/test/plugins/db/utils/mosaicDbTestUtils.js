@@ -25,31 +25,42 @@ const test = require('../../../testUtils');
 
 const { Binary, Long } = MongoDb;
 
-const createMosaic = (id, mosaicId, owner, parentId) => {
+const createMosaic = (id, mosaicId, owner, parentId, supply, properties) => {
 	// mosaic data
 	const mosaic = {
 		owner: new Binary(owner),
 		mosaicId: Long.fromNumber(mosaicId),
-		namespaceId: Long.fromNumber(parentId)
+		namespaceId: Long.fromNumber(parentId),
+		supply: Long.fromNumber(supply),
+		properties : properties
 	};
 
 	return { _id: dbTestUtils.db.createObjectId(id), mosaic, meta: {} };
 };
 
-const createMosaics = (owner, numNamespaces, numMosaicsPerNamespace) => {
+const createMosaics = (owner, numNamespaces, numMosaicsPerNamespace, supply) => {
 	// mosaic ids start at 10000, namespace ids start at 20000 in order to differentiate from db _id
 	const mosaics = [];
 	let dbId = 0;
 	let mosaicId = 10000;
 	for (let namespaceId = 0; namespaceId < numNamespaces; ++namespaceId) {
 		for (let i = 0; i < numMosaicsPerNamespace; ++i)
-			mosaics.push(createMosaic(dbId++, mosaicId++, owner, 20000 + namespaceId));
+			mosaics.push(createMosaic(dbId++, mosaicId++, owner, 20000 + namespaceId, supply, {}));
 	}
 
 	return mosaics;
 };
 
 const mosaicDbTestUtils = {
+	consts : {
+		FlagsIndex: 0,
+		Flags : {
+			None: 0,
+			Supply_Mutable: 1,
+			Transferable: 2,
+			All: 3,
+		}
+	},
 	db: {
 		createMosaic,
 		createMosaics,

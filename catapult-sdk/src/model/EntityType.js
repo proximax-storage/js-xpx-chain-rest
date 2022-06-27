@@ -159,6 +159,12 @@ const EntityType = {
 	/** Deactivate super contract. */
 	deactivate: 0x4560,
 
+	/** Add harvester. */
+	addHarvester: 0x4161,
+
+	/** Remove harvester. */
+	removeHarvester: 0x4261,
+
 	/** Account metadata transaction */
 	accountMetadata: 0x413F,
 
@@ -166,7 +172,67 @@ const EntityType = {
 	mosaicMetadata: 0x423F,
 
 	/** Namespace metadata transaction */
-	namespaceMetadata: 0x433F
+	namespaceMetadata: 0x433F,
+
+	/** Prepare drive transaction */
+	prepareBcDrive: 0x4162,
+
+	/** Data modification transaction */
+	dataModification: 0x4262,
+
+	/** Download transaction */
+	download: 0x4362,
+
+	/** Data modification approval transaction */
+	dataModificationApproval: 0x4462,
+
+	/** Data modification cancel transaction */
+	dataModificationCancel: 0x4562,
+
+	/** Replicator onboarding transaction */
+	replicatorOnboarding: 0x4662,
+
+	/** Replicator offboarding transaction */
+	replicatorOffboarding: 0x4762,
+
+	/** Finish download transaction */
+	finishDownload: 0x4862,
+
+	/** Download payment transaction */
+	downloadPayment: 0x4962,
+
+	/** Storage payment transaction */
+	storagePayment: 0x4A62,
+
+	/** Data modification single approval transaction */
+	dataModificationSingleApproval: 0x4B62,
+
+	/** Verification payment transaction */
+	verificationPayment: 0x4C62,
+
+	/** Download approval transaction */
+	downloadApproval: 0x4D62,
+
+	/** Drive closure transaction */
+	driveClosure: 0x4E62,
+
+	/** End drive verification transaction */
+	endDriveVerificationV2: 0x4F62,
+
+	/** Stream start transaction. */
+	streamStart: 0x4167,
+
+	/** Stream finish transaction. */
+	streamFinish: 0x4267,
+
+	/** Stream payment transaction. */
+	streamPayment: 0x4367,
+
+	/** Create liquidity provider transaction. */
+	createLiquidityProvider: 0x4168,
+
+	/** Manual rate change transaction. (LP) */
+	manualRateChange: 0x4268,
 };
 
 module.exports = EntityType;
