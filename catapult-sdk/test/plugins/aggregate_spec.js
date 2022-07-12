@@ -84,7 +84,7 @@ describe('aggregate plugin', () => {
 
 			// Assert: codec was registered
 			expect(Object.keys(codecs).length).to.equal(2);
-			expect(codecs).to.contain.all.keys([EntityType.aggregateComplete.toString(), EntityType.aggregateBonded.toString()]);
+			expect(codecs).to.contain.all.keys([EntityType.aggregateCompleteV1.toString(), EntityType.aggregateBondedV1.toString(), EntityType.aggregateCompleteV2.toString(), EntityType.aggregateBondedV2.toString()]);
 		});
 
 		const getSubTxCodecs = () => {
@@ -357,7 +357,9 @@ describe('aggregate plugin', () => {
 			});
 		};
 
-		addAggregateTests('complete', () => getCodecs()[EntityType.aggregateComplete]);
-		addAggregateTests('bonded', () => getCodecs()[EntityType.aggregateBonded]);
+		addAggregateTests('completeV1', () => getCodecs()[EntityType.aggregateCompleteV1]);
+		addAggregateTests('bondedV1', () => getCodecs()[EntityType.aggregateBondedV1]);
+		addAggregateTests('completeV2', () => getCodecs()[EntityType.aggregateCompleteV2]);
+		addAggregateTests('bondedV2', () => getCodecs()[EntityType.aggregateBondedV2]);
 	});
 });

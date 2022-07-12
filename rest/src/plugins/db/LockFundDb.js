@@ -33,7 +33,7 @@ class LockFundDb {
 	 * @returns {Promise.<object>} The lock fund height indexed record group.
 	 */
 	getLockFundRecordGroupByHeight(height) {
-		return this.catapultDb.queryDocument('lockFundHeightRecords', { ["lockFundRecordGroup.identifier"]: new Long(height) });
+		return this.catapultDb.queryDocument('lockFundHeightRecords', { ["lockFundRecordGroup.identifier"]: new Long(height[0], height[1]) });
 	}
 
 	// endregion

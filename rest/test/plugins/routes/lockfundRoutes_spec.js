@@ -30,7 +30,7 @@ describe('lockfund routes', () => {
 			response => {
 				// Assert:
 				expect(keyGroups).to.deep.equal([[14202, 0]]);
-				expect(response).to.deep.equal({payload: [{value: 'this is nonsense'}], type: 'lockFundRecordGroupEntry_height'});
+				expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'lockFundRecordGroupEntry_height'});
 			}
 		);
 	});
@@ -52,7 +52,7 @@ describe('lockfund routes', () => {
 			response => {
 				// Assert:
 				expect(keyGroups).to.deep.equal([convert.hexToUint8(publicKeys.valid[0])]);
-				expect(response).to.deep.equal({payload: [{value: 'this is nonsense'}], type: 'lockFundRecordGroupEntry_key'});
+				expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'lockFundRecordGroupEntry_key'});
 			}
 		);
 	});

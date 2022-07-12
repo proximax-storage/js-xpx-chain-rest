@@ -38,9 +38,11 @@ const supercontract = require('./supercontract');
 const upgrade = require('./upgrade');
 const service = require('./service');
 const lockfund = require('./lockfund');
+const mosaicRestriction = require('./mosaicRestriction');
+const accountRestriction = require('./accountRestriction');
 
 const plugins = {
-	accountLink: empty, nodeKeyLink: empty, vrfKeyLink: empty, accountProperties, aggregate, exchange, config, contract, lockfund, lock, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, supercontract, transfer: empty, upgrade
+	accountLink: empty, nodeKeyLink: empty, vrfKeyLink: empty, accountProperties, aggregate, exchange, config, contract, lockfund, lock, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, supercontract, transfer: empty, upgrade, accountRestriction, mosaicRestriction
 };
 
 module.exports = {

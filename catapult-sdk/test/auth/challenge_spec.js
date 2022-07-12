@@ -19,7 +19,7 @@
  */
 
 const handler = require('../../src/auth/challenge');
-const PacketType = require('../../src/packet/PacketType');
+const { PacketType, StatePathPacketTypes } = require('../../src/packet/PacketType');
 const test = require('./utils/authUtils');
 const { expect } = require('chai');
 const { verify } = require('../../src/crypto/keyPair');

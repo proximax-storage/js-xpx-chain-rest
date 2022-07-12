@@ -46,8 +46,12 @@ module.exports = {
 		]
 	}),
 
-	createAggregateTransaction: (options, transactions) => Object.assign(
-		createTransaction(options, catapult.model.EntityType.aggregateComplete),
+	createAggregateTransactionV1: (options, transactions) => Object.assign(
+		createTransaction(options, catapult.model.EntityType.aggregateCompleteV1),
+		{ transactions }
+	),
+	createAggregateTransactionV2: (options, transactions) => Object.assign(
+		createTransaction(options, catapult.model.EntityType.aggregateCompleteV2),
 		{ transactions }
 	)
 };

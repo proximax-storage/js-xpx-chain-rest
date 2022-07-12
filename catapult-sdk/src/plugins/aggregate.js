@@ -29,7 +29,8 @@ const constants = { sizes: {} };
 Object.assign(constants.sizes, sizes, {
 	aggregate: 122 + 4, // size passed into deserialize includes full transaction size (even previously processed parts)
 	embedded: 42,
-	cosignature: sizes.signer + sizes.signature
+	cosignature: sizes.signer + sizes.signature,
+	extendedCosignature: sizes.signer + sizes.extendedSignature
 });
 
 const createSubTransactionCodec = txCodecs => {
@@ -96,8 +97,11 @@ const aggregatePlugin = {
 			cosignatures: { type: ModelType.array, schemaName: 'aggregate.cosignature' }
 		};
 
-		builder.addTransactionSupport(EntityType.aggregateComplete, aggregateSchema);
-		builder.addTransactionSupport(EntityType.aggregateBonded, aggregateSchema);
+		builder.addTransactionSupport(EntityType.aggregateCompleteV1, aggregateSchema);
+		builder.addTransactionSupport(EntityType.aggregateBondedV1, aggregateSchema);
+		builder.addTransactionSupport(EntityType.aggregateCompleteV2, aggregateSchema);
+		builder.addTransactionSupport(EntityType.aggregateBondedV2, aggregateSchema);
+
 
 		builder.addSchema('aggregate.cosignature', {
 			signer: ModelType.binary,
@@ -114,7 +118,7 @@ const aggregatePlugin = {
 	},
 
 	registerCodecs: codecBuilder => {
-		const aggregateBuilder = {
+		const aggregateBuilder = (extendedCosignature) => { return {
 			deserialize: (parser, size, txCodecs) => {
 				requireCodecs(txCodecs);
 
@@ -143,7 +147,7 @@ const aggregatePlugin = {
 				}
 
 				// 2. deserialize cosignatures
-				const numCosignatures = (size - payloadSize - constants.sizes.aggregate) / constants.sizes.cosignature;
+				const numCosignatures = (size - payloadSize - constants.sizes.aggregate) / (extendedCosignature ? constants.sizes.extendedCosignature : constants.sizes.cosignature);
 				if (numCosignatures !== (numCosignatures | 0))
 					throw Error('aggregate cannot have partial cosignatures');
 
@@ -152,7 +156,7 @@ const aggregatePlugin = {
 					for (let i = 0; i < numCosignatures; ++i) {
 						const cosignature = {};
 						cosignature.signer = parser.buffer(constants.sizes.signer);
-						cosignature.signature = parser.buffer(constants.sizes.signature);
+						cosignature.signature = parser.buffer(extendedCosignature ? constants.size.extendedSignature : constants.sizes.signature);
 						transaction.cosignatures.push(cosignature);
 					}
 				}
@@ -193,10 +197,12 @@ const aggregatePlugin = {
 					});
 				}
 			}
-		};
+		}};
 
-		codecBuilder.addTransactionSupport(EntityType.aggregateComplete, aggregateBuilder);
-		codecBuilder.addTransactionSupport(EntityType.aggregateBonded, aggregateBuilder);
+		codecBuilder.addTransactionSupport(EntityType.aggregateCompleteV1, aggregateBuilder(false));
+		codecBuilder.addTransactionSupport(EntityType.aggregateBondedV1, aggregateBuilder(false));
+		codecBuilder.addTransactionSupport(EntityType.aggregateCompleteV2, aggregateBuilder(true));
+		codecBuilder.addTransactionSupport(EntityType.aggregateBondedV2, aggregateBuilder(true));
 	}
 };
 

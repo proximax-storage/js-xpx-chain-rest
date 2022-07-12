@@ -18,23 +18,22 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/** @module plugins/mosaic */
+const AccountRestrictionDb = require('./db/AccountRestrictionDb');
+const mosaicRestrictionRoutes = require('./routes/accountRestrictionRoutes');
+
+/**
+ * Creates a mosaic plugin.
+ * @type {module:plugins/CatapultRestPlugin}
+ */
 module.exports = {
-	// with meta data
-	account: 'accountWithMetadata',
-	block: 'blockHeaderWithMetadata',
-	transaction: 'transactionWithMetadata',
+	createDb: db => new AccountRestrictionDb(db),
 
-	// other
-	chainInfo: 'chainInfo',
-	merkleProofInfo: 'merkleProofInfo',
-	receipts: 'receipts',
-	stateTree: 'stateTree',
-	transactionStatus: 'transactionStatus',
-	nodeInfo: 'nodeInfo',
-	nodeTime: 'nodeTime',
-	mosaicRestrictions: 'mosaicRestrictions',
+	registerTransactionStates: () => {},
 
-	// diagnostic
-	serverInfo: 'serverInfo',
-	storageInfo: 'storageInfo'
+	registerMessageChannels: () => {},
+
+	registerRoutes: (...args) => {
+		mosaicRestrictionRoutes.register(...args);
+	}
 };

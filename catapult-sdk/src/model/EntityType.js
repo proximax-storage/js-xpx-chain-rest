@@ -64,10 +64,16 @@ const EntityType = {
 	modifyContract: 0x4157,
 
 	/** Aggregate complete transaction. */
-	aggregateComplete: 0x4141,
+	aggregateCompleteV1: 0x4141,
 
 	/** Aggregate bonded transaction. */
-	aggregateBonded: 0x4241,
+	aggregateBondedV1: 0x4241,
+
+	/** Aggregate complete transaction. */
+	aggregateCompleteV2: 0x4341,
+
+	/** Aggregate bonded transaction. */
+	aggregateBondedV2: 0x4441,
 
 	/** Network Config transaction. */
 	networkConfig: 0x4159,
@@ -181,7 +187,23 @@ const EntityType = {
 	lockFundTransfer: 0x4162,
 
 	/** Lock fund cancel unlock transaction */
-	lockFundCancelUnlock: 0x4262
+	lockFundCancelUnlock: 0x4262,
+
+	/** Account address restriction transaction */
+	accountAddressRestriction: 0x4163,
+
+	/** Account mosaic restriction transaction */
+	accountMosaicRestriction: 0x4263,
+
+	/** Account operation restriction transaction */
+	accountOperationRestriction: 0x4363,
+
+	/** Mosaic global restriction transaction */
+	mosaicGlobalRestriction: 0x4164,
+
+	/** Mosaic address restriction transaction */
+	mosaicAddressRestriction: 0x4264,
+
 };
 
 module.exports = EntityType;

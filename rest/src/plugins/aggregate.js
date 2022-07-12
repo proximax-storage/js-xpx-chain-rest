@@ -45,11 +45,12 @@ module.exports = {
 
 			const signer = parser.buffer(catapult.constants.sizes.signer);
 			const signature = parser.buffer(catapult.constants.sizes.signature);
+			const scheme = parser.uint8();
 			const parentHash = parser.buffer(catapult.constants.sizes.hash256);
 
 			const meta = { channelName: 'cosignature', address };
 
-			emit({ type: 'aggregate.cosignatureWithMetadata', payload: { signer, signature, parentHash, meta } });
+			emit({ type: 'aggregate.cosignatureWithMetadata', payload: { signer, signature, scheme, parentHash, meta } });
 		});
 	},
 

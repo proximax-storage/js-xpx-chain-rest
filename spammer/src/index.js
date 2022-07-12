@@ -180,7 +180,7 @@ const loadConfig = (options) => {
 			uint64.fromUint(random.uint32(1000000))
 		));
 
-		const aggregate = transactionFactory.createAggregateTransaction(
+		const aggregate = transactionFactory.createAggregateTransactionV1(
 			{ signerPublicKey: keyPairSender.publicKey, networkId: Mijin_Test_Network },
 			transfers
 		);

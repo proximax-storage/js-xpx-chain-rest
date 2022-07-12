@@ -410,7 +410,7 @@ describe('catapult db', () => {
 
 	const createTransactionHash = id => catapult.utils.convert.hexToUint8(`${'00'.repeat(16)}${id.toString(16)}`.slice(-32));
 
-	const createSeedTransactions = (numTransactionsPerHeight, heights, options) => {
+	const createSeedTransactionsV1 = (numTransactionsPerHeight, heights, options) => {
 		// notice that generated transactions only contain what was used by transactionsAtHeight for filtering (meta.height)
 		let id = 1;
 		const transactions = [];
@@ -427,7 +427,30 @@ describe('catapult db', () => {
 
 		for (let i = 0; i < numTransactionsPerHeight; ++i) {
 			// transactionsAtHeight only worked for both aggregates, so pick each type alteratively
-			const type = 0 === i % 2 ? EntityType.aggregateComplete : EntityType.aggregateBonded;
+			const type = 0 === i % 2 ? EntityType.aggregateCompleteV1 : EntityType.aggregateBondedV1;
+			heights.forEach(height => { addTransactionAtHeight(height, type); });
+		}
+
+		return transactions;
+	};
+	const createSeedTransactionsV2 = (numTransactionsPerHeight, heights, options) => {
+		// notice that generated transactions only contain what was used by transactionsAtHeight for filtering (meta.height)
+		let id = 1;
+		const transactions = [];
+		const addTransactionAtHeight = (height, type) => {
+			const aggregateId = test.db.createObjectId(id);
+			const hash = new Binary(Buffer.from(createTransactionHash(id++)));
+			const meta = { height, hash, addresses: [] };
+			transactions.push({ _id: aggregateId, meta, transaction: { type } });
+
+			const numDependentDocuments = (options || {}).numDependentDocuments || 0;
+			for (let j = 0; j < numDependentDocuments; ++j)
+				transactions.push({ _id: test.db.createObjectId(id++), meta: { height, aggregateId }, transaction: {} });
+		};
+
+		for (let i = 0; i < numTransactionsPerHeight; ++i) {
+			// transactionsAtHeight only worked for both aggregates, so pick each type alteratively
+			const type = 0 === i % 2 ? EntityType.aggregateCompleteV2 : EntityType.aggregateBondedV2;
 			heights.forEach(height => { addTransactionAtHeight(height, type); });
 		}
 
@@ -438,7 +461,7 @@ describe('catapult db', () => {
 		const addTestsWithId = (traits, idTraits) => {
 			it('can retrieve each transaction by id', () => {
 				// Arrange:
-				const seedTransactions = traits.createSeedTransactions();
+				const seedTransactions = traits.createSeedTransactionsV1();
 				const allIds = traits.allIds.map(idTraits.convertToId);
 
 				// Act + Assert:
@@ -451,7 +474,7 @@ describe('catapult db', () => {
 
 			it('can retrieve transaction using known id', () => {
 				// Arrange:
-				const seedTransactions = traits.createSeedTransactions();
+				const seedTransactions = traits.createSeedTransactionsV1();
 				const documentId = idTraits.convertToId(traits.validId);
 
 				// Act + Assert:
@@ -464,7 +487,7 @@ describe('catapult db', () => {
 
 			it('cannot retrieve transaction using unknown id', () => {
 				// Arrange:
-				const seedTransactions = traits.createSeedTransactions();
+				const seedTransactions = traits.createSeedTransactionsV1();
 				const documentId = idTraits.convertToId(traits.invalidId);
 
 				// Act + Assert:
@@ -477,7 +500,61 @@ describe('catapult db', () => {
 
 			it('can retrieve only known transactions by id', () => {
 				// Arrange:
-				const seedTransactions = traits.createSeedTransactions();
+				const seedTransactions = traits.createSeedTransactionsV1();
+				const allIds = traits.allIds.map(idTraits.convertToId);
+				// make a copy and insert invalid id in the middle
+				const mixedIds = allIds.slice();
+				mixedIds.splice(mixedIds.length / 2, 0, idTraits.convertToId(traits.invalidId));
+
+				// Act + Assert:
+				return runDbTest(
+					{ [idTraits.collectionName]: seedTransactions },
+					db => idTraits.transactionsByIds(db, mixedIds),
+					transactions => assertEqualDocuments(traits.expected(seedTransactions, traits.allIds), transactions)
+				);
+			});
+			it('can retrieve each transaction by id v2', () => {
+				// Arrange:
+				const seedTransactions = traits.createSeedTransactionsV2();
+				const allIds = traits.allIds.map(idTraits.convertToId);
+
+				// Act + Assert:
+				return runDbTest(
+					{ [idTraits.collectionName]: seedTransactions },
+					db => idTraits.transactionsByIds(db, allIds),
+					transactions => assertEqualDocuments(traits.expected(seedTransactions, traits.allIds), transactions)
+				);
+			});
+
+			it('can retrieve transaction using known id v2', () => {
+				// Arrange:
+				const seedTransactions = traits.createSeedTransactionsV2();
+				const documentId = idTraits.convertToId(traits.validId);
+
+				// Act + Assert:
+				return runDbTest(
+					{ [idTraits.collectionName]: seedTransactions },
+					db => idTraits.transactionsByIds(db, [documentId]),
+					transactions => assertEqualDocuments(traits.expected(seedTransactions, [traits.validId]), transactions)
+				);
+			});
+
+			it('cannot retrieve transaction using unknown id v2', () => {
+				// Arrange:
+				const seedTransactions = traits.createSeedTransactionsV2();
+				const documentId = idTraits.convertToId(traits.invalidId);
+
+				// Act + Assert:
+				return runDbTest(
+					{ [idTraits.collectionName]: seedTransactions },
+					db => idTraits.transactionsByIds(db, [documentId]),
+					transactions => expect(transactions).to.deep.equal([])
+				);
+			});
+
+			it('can retrieve only known transactions by id v2', () => {
+				// Arrange:
+				const seedTransactions = traits.createSeedTransactionsV2();
 				const allIds = traits.allIds.map(idTraits.convertToId);
 				// make a copy and insert invalid id in the middle
 				const mixedIds = allIds.slice();
@@ -524,7 +601,8 @@ describe('catapult db', () => {
 
 		describe('for transactions', () => {
 			addTests({
-				createSeedTransactions: () => createSeedTransactions(3, [21, 34]),
+				createSeedTransactionsV1: () => createSeedTransactionsV1(3, [21, 34]),
+				createSeedTransactionsV2: () => createSeedTransactionsV2(3, [21, 34]),
 				expected: (transactions, ids) => ids.map(id => transactions[id - 1]),
 				allIds: [1, 2, 3, 4, 5, 6],
 				validId: 2,
@@ -538,7 +616,8 @@ describe('catapult db', () => {
 				// 4 (5, 6)  (height 34)
 				// 7 (8, 9)  (height 21)
 				// ...
-				createSeedTransactions: () => createSeedTransactions(3, [21, 34], { numDependentDocuments: 2 }),
+				createSeedTransactionsV1: () => createSeedTransactionsV1(3, [21, 34], { numDependentDocuments: 2 }),
+				createSeedTransactionsV2: () => createSeedTransactionsV2(3, [21, 34], { numDependentDocuments: 2 }),
 				expected: (transactions, ids) => ids.map(id => {
 					const index = id - 1;
 					const stitchedAggregate = Object.assign({}, transactions[index]);
@@ -559,7 +638,26 @@ describe('catapult db', () => {
 				// 1 (2, 3)  (height 21)
 				// 4 (5, 6)  (height 34)
 				// ...
-				const seedTransactions = createSeedTransactions(3, [21, 34], { numDependentDocuments: 2 });
+				const seedTransactions = createSeedTransactionsV1(3, [21, 34], { numDependentDocuments: 2 });
+				const documentId = test.db.createObjectId(5);
+
+				// Act + Assert:
+				return runDbTest(
+					{ transactions: seedTransactions },
+					db => db.transactionsByIds(TransactionGroups.confirmed, [documentId]),
+					transactions => assertEqualDocuments([seedTransactions[4]], transactions)
+				);
+			});
+		});
+
+		describe('for a dependent document v2', () => {
+			it('can retrieve dependent document by id', () => {
+				// Arrange:
+				// transaction with id 5 is a dependent document
+				// 1 (2, 3)  (height 21)
+				// 4 (5, 6)  (height 34)
+				// ...
+				const seedTransactions = createSeedTransactionsV2(3, [21, 34], { numDependentDocuments: 2 });
 				const documentId = test.db.createObjectId(5);
 
 				// Act + Assert:
@@ -931,20 +1029,44 @@ describe('catapult db', () => {
 			// Arrange:
 			const dbTransactions = [
 				// Aggregate
-				createTransaction(10, [], 1, 0, 0, EntityType.aggregateComplete),
+				createTransaction(10, [], 1, 0, 0, EntityType.aggregateCompleteV1),
 				createInnerTransaction(100, 30, 0, 0, EntityType.mosaicDefinition),
 				createInnerTransaction(200, 30, 0, 0, EntityType.mosaicSupplyChange),
 
-				createTransaction(20, [], 1, 0, 0, EntityType.aggregateBonded),
+				createTransaction(20, [], 1, 0, 0, EntityType.aggregateBondedV1),
 				createInnerTransaction(300, 30, 0, 0, EntityType.transfer),
 				createInnerTransaction(400, 30, 0, 0, EntityType.mosaicDefinition),
 
-				createTransaction(30, [], 1, 0, 0, EntityType.aggregateComplete),
+				createTransaction(30, [], 1, 0, 0, EntityType.aggregateCompleteV1),
 				createInnerTransaction(500, 30, 0, 0, EntityType.registerNamespace)
 			];
 
 			const filters = {
-				transactionTypes: [EntityType.transfer, EntityType.mosaicDefinition, EntityType.aggregateComplete]
+				transactionTypes: [EntityType.transfer, EntityType.mosaicDefinition, EntityType.aggregateCompleteV1]
+			};
+
+			// Act + Assert:
+			return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [10, 30]);
+		});
+
+		it('ignores inner aggregate transactions in the results V2', () => {
+			// Arrange:
+			const dbTransactions = [
+				// Aggregate
+				createTransaction(10, [], 1, 0, 0, EntityType.aggregateCompleteV2),
+				createInnerTransaction(100, 30, 0, 0, EntityType.mosaicDefinition),
+				createInnerTransaction(200, 30, 0, 0, EntityType.mosaicSupplyChange),
+
+				createTransaction(20, [], 1, 0, 0, EntityType.aggregateBondedV2),
+				createInnerTransaction(300, 30, 0, 0, EntityType.transfer),
+				createInnerTransaction(400, 30, 0, 0, EntityType.mosaicDefinition),
+
+				createTransaction(30, [], 1, 0, 0, EntityType.aggregateCompleteV2),
+				createInnerTransaction(500, 30, 0, 0, EntityType.registerNamespace)
+			];
+
+			const filters = {
+				transactionTypes: [EntityType.transfer, EntityType.mosaicDefinition, EntityType.aggregateCompleteV2]
 			};
 
 			// Act + Assert:
@@ -1214,21 +1336,50 @@ describe('catapult db', () => {
 					createTransaction(20, [], 1, 0, 0, EntityType.accountLink),
 
 					// Aggregate
-					createTransaction(30, [], 1, 0, 0, EntityType.aggregateBonded),
+					createTransaction(30, [], 1, 0, 0, EntityType.aggregateBondedV1),
 					createInnerTransaction(100, 30, 0, 0, EntityType.mosaicDefinition),
 					createInnerTransaction(200, 30, 0, 0, EntityType.mosaicSupplyChange),
 
-					createTransaction(40, [], 1, 0, 0, EntityType.aggregateComplete),
+					createTransaction(40, [], 1, 0, 0, EntityType.aggregateCompleteV1),
 					createInnerTransaction(300, 40, 0, 0, EntityType.transfer),
 					createInnerTransaction(400, 40, 0, 0, EntityType.transfer),
 
-					createTransaction(50, [], 1, 0, 0, EntityType.aggregateBonded),
+					createTransaction(50, [], 1, 0, 0, EntityType.aggregateBondedV1),
 					createInnerTransaction(500, 50, 0, 0, EntityType.registerNamespace),
 					createInnerTransaction(600, 50, 0, 0, EntityType.aliasAddress)
 				];
 
 				const filters = {
-					transactionTypes: [EntityType.mosaicDefinition, EntityType.aggregateComplete, EntityType.transfer]
+					transactionTypes: [EntityType.mosaicDefinition, EntityType.aggregateCompleteV1, EntityType.transfer]
+				};
+
+				// Act + Assert:
+				return runTestAndVerifyIds(dbTransactions, filters, paginationOptions, [10, 40]);
+			});
+
+			it('transactionTypes v2', () => {
+				// Arrange:
+				const dbTransactions = [
+					// Non aggregate
+					createTransaction(10, [], 1, 0, 0, EntityType.transfer),
+					createTransaction(20, [], 1, 0, 0, EntityType.accountLink),
+
+					// Aggregate
+					createTransaction(30, [], 1, 0, 0, EntityType.aggregateBondedV2),
+					createInnerTransaction(100, 30, 0, 0, EntityType.mosaicDefinition),
+					createInnerTransaction(200, 30, 0, 0, EntityType.mosaicSupplyChange),
+
+					createTransaction(40, [], 1, 0, 0, EntityType.aggregateCompleteV2),
+					createInnerTransaction(300, 40, 0, 0, EntityType.transfer),
+					createInnerTransaction(400, 40, 0, 0, EntityType.transfer),
+
+					createTransaction(50, [], 1, 0, 0, EntityType.aggregateBondedV2),
+					createInnerTransaction(500, 50, 0, 0, EntityType.registerNamespace),
+					createInnerTransaction(600, 50, 0, 0, EntityType.aliasAddress)
+				];
+
+				const filters = {
+					transactionTypes: [EntityType.mosaicDefinition, EntityType.aggregateCompleteV2, EntityType.transfer]
 				};
 
 				// Act + Assert:

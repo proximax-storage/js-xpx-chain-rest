@@ -28,8 +28,9 @@ const { convertToLong } = require('./dbUtils');
 const { EntityType } = catapult.model;
 const { ObjectId } = MongoDb;
 
-const isAggregateType = document => EntityType.aggregateComplete === document.transaction.type
-	|| EntityType.aggregateBonded === document.transaction.type;
+const isAggregateType = document => EntityType.aggregateCompleteV1 === document.transaction.type
+|| EntityType.aggregateCompleteV2 === document.transaction.type || EntityType.aggregateBondedV1 === document.transaction.type
+	|| EntityType.aggregateBondedV2 === document.transaction.type;
 
 const createAccountTransactionsAllConditions = (publicKey, networkId) => {
 	const decodedAddress = address.publicKeyToAddress(publicKey, networkId);
@@ -63,6 +64,23 @@ const createSanitizer = () => ({
 		}
 
 		return dbObject;
+	},
+
+	renameId: dbObject => {
+		if (dbObject) {
+			dbObject.id = dbObject._id;
+			delete dbObject._id;
+		}
+
+		return dbObject;
+	},
+
+	renameIds: dbObjects => {
+		dbObjects.forEach(dbObject => {
+			dbObject.id = dbObject._id;
+			delete dbObject._id;
+		});
+		return dbObjects;
 	},
 
 	copyAndDeleteIds: dbObjects => {
@@ -219,6 +237,42 @@ class CatapultDb {
 			.sort(sorter)
 			.limit(getBoundedPageSize(pageSize, this.pagingOptions))
 			.toArray().then(this.sanitizer.sanitizerIds);
+	}
+
+	/**
+	 * Makes a paginated query with the provided arguments.
+	 * @param {array<object>} queryConditions The conditions that determine the query results, may be empty.
+	 * @param {array<string>} removedFields Field names to be hidden from the query results, may be empty.
+	 * @param {object} sortConditions Condition that describes the order of the results, must be set.
+	 * @param {string} collectionName Name of the collection to be queried.
+	 * @param {object} options Pagination options, must contain `pageSize` and `pageNumber` (starting at 1).
+	 * @param {function} mapper to transform each element of the page.
+	 * @returns {Promise.<object>} Page result, contains the attributes `data` with the actual results, and `paging` with pagination
+	 * metadata - which is comprised of: `pageNumber`, and `pageSize`.
+	 */
+	queryPagedDocumentsExt(queryConditions, removedFields, sortConditions, collectionName, options, mapper) {
+		const { pageSize } = options;
+		const pageIndex = options.pageNumber - 1;
+
+		const projection = {};
+		removedFields.forEach(field => { projection[field] = 0; });
+
+		return this.database.collection(collectionName)
+			.find(queryConditions)
+			.project(projection)
+			.sort(sortConditions)
+			.skip(pageSize * pageIndex)
+			.limit(pageSize)
+			.toArray()
+			.then(this.sanitizer.renameIds)
+			.then(xs => (mapper ? xs.map(mapper) : xs))
+			.then(result => ({
+				data: result,
+				pagination: {
+					pageNumber: options.pageNumber,
+					pageSize
+				}
+			}));
 	}
 
 	// endregion

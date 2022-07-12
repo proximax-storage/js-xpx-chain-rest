@@ -90,7 +90,8 @@ describe('aggregate plugin', () => {
 			const buffer = Buffer.concat([
 				Buffer.alloc(test.constants.sizes.signer, 33),
 				Buffer.alloc(test.constants.sizes.signature, 44),
-				Buffer.alloc(test.constants.sizes.hash256, 55)
+				Buffer.alloc(1, 55),
+				Buffer.alloc(test.constants.sizes.hash256, 66)
 			]);
 			handler({}, eventData => emitted.push(eventData))([0, 22], buffer, 99);
 
@@ -103,7 +104,8 @@ describe('aggregate plugin', () => {
 				payload: {
 					signer: Buffer.alloc(test.constants.sizes.signer, 33),
 					signature: Buffer.alloc(test.constants.sizes.signature, 44),
-					parentHash: Buffer.alloc(test.constants.sizes.hash256, 55),
+					scheme: 55,
+					parentHash: Buffer.alloc(test.constants.sizes.hash256, 66),
 					meta: {
 						address: [22],
 						channelName: 'cosignature'

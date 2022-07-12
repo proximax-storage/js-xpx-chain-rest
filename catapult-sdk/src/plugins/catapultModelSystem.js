@@ -44,6 +44,9 @@ const supercontract = require('./supercontract');
 const transfer = require('./transfer');
 const upgrade = require('./upgrade');
 const lockfund = require('./lockfund');
+const accountrestriction = require('./accountRestriction');
+const mosaicrestriction = require('./mosaicRestriction');
+
 
 const plugins = {
 	accountLink, 
@@ -67,7 +70,9 @@ const plugins = {
 	supercontract, 
 	transfer, 
 	upgrade,
-	lockfund
+	lockfund,
+	accountrestriction,
+	mosaicrestriction
 };
 
 /**

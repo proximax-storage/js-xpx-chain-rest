@@ -11,13 +11,13 @@ module.exports = {
 		server.get('/lockfund/height/:height', (req, res, next) => {
 			const height = routeUtils.parseArgument(req.params, 'height', 'uint64');
 			return db.getLockFundRecordGroupByHeight(height)
-				.then(routeUtils.createSender('lockFundRecordGroupEntry_height').sendArray(req.params.height, res, next));
+				.then(routeUtils.createSender('lockFundRecordGroupEntry_height').sendOne(req.params.height, res, next));
 		});
 
 		server.get('/lockfund/account/:publicKey', (req, res, next) => {
 			const key = routeUtils.parseArgument(req.params, 'publicKey', 'publicKey');
 			return db.getLockFundRecordGroupByKey(key)
-				.then(routeUtils.createSender('lockFundRecordGroupEntry_key').sendArray(req.params.publicKey, res, next));
+				.then(routeUtils.createSender('lockFundRecordGroupEntry_key').sendOne(req.params.publicKey, res, next));
 		});
 	}
 };

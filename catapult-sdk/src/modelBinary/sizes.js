@@ -27,6 +27,11 @@ const sizes = {
 	signature: 64,
 
 	/**
+	 * @property {numeric} Size of a signature with embedded derivation scheme.
+	 */
+	extendedSignature: 65,
+
+	/**
 	 * @property {numeric} Size of a signer (public key).
 	 */
 	signer: 32,

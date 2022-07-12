@@ -44,11 +44,16 @@ const createBlockDescriptor = () => ({
 	}
 });
 
+const getTopicIdentifierBinaryBuffer = (topicIdentifier) => {
+	if(topicIdentifier.length == 2) return catapult.utils.convert.hexToUint8(topicIdentifier);
+	else return catapult.model.address.stringToAddress(topicIdentifier);
+}
+
 const createPolicyBasedAddressFilter = (markerByte, emptyAddressHandler) => topicParam => {
 	if (!topicParam)
 		return emptyAddressHandler(markerByte);
 
-	return Buffer.concat([Buffer.of(markerByte), Buffer.from(catapult.model.address.stringToAddress(topicParam))]);
+	return Buffer.concat([Buffer.of(markerByte), Buffer.from(getTopicIdentifierBinaryBuffer(topicParam))]);
 };
 
 const handlers = {

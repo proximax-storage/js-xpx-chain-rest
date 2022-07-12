@@ -71,7 +71,7 @@ describe('transaction factory', () => {
 			const transactions = [1, 2, 3];
 
 			// Act:
-			const transaction = transactionFactory.createAggregateTransaction(
+			const transaction = transactionFactory.createAggregateTransactionV1(
 				{ signerPublicKey: keyPair.publicKey, networkId: 0xA5 },
 				transactions
 			);

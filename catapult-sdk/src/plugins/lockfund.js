@@ -42,12 +42,12 @@ const lockFundPlugin = {
 
 		builder.addSchema('lockfundrecordgroup_height', {
 			identifier:			ModelType.uint64,
-			records:			{ type: ModelType.array, schemaName: 'lockfundrecord' }
+			records:			{ type: ModelType.array, schemaName: 'lockfundrecord_height' }
 		});
 
 		builder.addSchema('lockfundrecordgroup_key', {
 			identifier:			ModelType.binary,
-			records:			{ type: ModelType.array, schemaName: 'lockfundrecord' }
+			records:			{ type: ModelType.array, schemaName: 'lockfundrecord_key' }
 		});
 
 		builder.addSchema('lockfundrecord_height', {

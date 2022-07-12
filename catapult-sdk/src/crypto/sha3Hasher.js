@@ -37,6 +37,16 @@ const sha3Hasher = {
 		const hash = hasher.arrayBuffer(data);
 		arrayUtils.copy(dest, arrayUtils.uint8View(hash));
 	},
+	/**
+	 * Calculates the hash of data.
+	 * @param {Uint8Array} data Data to hash.
+	 * @param {numeric} length Hash length in bytes.
+	 */
+	calculate: (data, length) => {
+		const hasher = getHasher(length);
+		const hash = hasher.arrayBuffer(data);
+		return hash;
+	},
 
 	/**
 	 * Creates a hasher object.

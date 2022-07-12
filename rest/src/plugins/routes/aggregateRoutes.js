@@ -26,7 +26,9 @@ const { PacketType } = catapult.packet;
 
 module.exports = {
 	register: (server, db, services) => {
-		const parseHexParam = (params, key) => routeUtils.parseArgument(params, key, convert.hexToUint8);
+		const parseHexParam = (params, key) => {
+			return routeUtils.parseArgument(params, key, convert.hexToUint8);
+		}
 
 		routeUtils.addPutPacketRoute(
 			server,
@@ -40,7 +42,7 @@ module.exports = {
 			server,
 			services.connections,
 			{ routeName: '/transactions/cosignature', packetType: PacketType.pushDetachedCosignatures },
-			params => Buffer.concat(['signer', 'signature', 'parentHash'].map(key => parseHexParam(params, key))),
+			params => Buffer.concat(['signer', 'signature', 'scheme', 'parentHash'].map(key => parseHexParam(params, key))),
 			services.transactionCache
 		);
 	}

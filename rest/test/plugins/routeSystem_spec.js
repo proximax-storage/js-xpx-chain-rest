@@ -59,7 +59,10 @@ describe('route system', () => {
 			'service',
 			'supercontract',
 			'transfer',
-			'upgrade'
+			'upgrade',
+			"accountRestriction",
+			"mosaicRestriction"
+
 		]);
 	});
 

@@ -21,7 +21,7 @@
 /** @module auth/challenge */
 const crypto = require('crypto');
 const packetHeader = require('../packet/header');
-const PacketType = require('../packet/PacketType');
+const { PacketType, StatePathPacketTypes } = require('../packet/PacketType');
 const { sign, verify } = require('../crypto/keyPair');
 
 const sizes = {
