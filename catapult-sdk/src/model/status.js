@@ -229,6 +229,7 @@ const toStringInternal = code => {
 		case 0x806A0010: return 'Failure_ExchangeSda_No_Offered_Mosaics_To_Remove';
 		case 0x806A0011: return 'Failure_ExchangeSda_Plugin_Config_Malformed';
 		case 0x806A0012: return 'Failure_ExchangeSda_Exchanging_Same_Units_Is_Not_Allowed';
+		case 0x806A0013: return 'Failure_ExchangeSda_Mosaic_Not_Found';
 		case 0x805A0001: return 'Failure_Service_Drive_Duration_Is_Not_Multiple_Of_BillingPeriod';
 		case 0x805A0002: return 'Failure_Service_Wrong_Percent_Approvers';
 		case 0x805A0003: return 'Failure_Service_Min_Replicators_More_Than_Replicas';
