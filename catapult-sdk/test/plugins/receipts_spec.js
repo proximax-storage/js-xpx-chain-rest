@@ -37,7 +37,7 @@ describe('receipts plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 11);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 15);
 			expect(modelSchema).to.contain.all.keys([
 				'receipts',
 				'receipts.addressResolutionStatement',
@@ -49,6 +49,10 @@ describe('receipts plugin', () => {
 				'receipts.inflation',
 				'receipts.entry.address',
 				'receipts.entry.mosaic',
+				'receipts.offerCreation',
+				'receipts.offerExchange.exchangeDetails',
+				'receipts.offerExchange',
+				'receipts.offerRemoval',
 				'receipts.unknown'
 			]);
 
@@ -119,6 +123,44 @@ describe('receipts plugin', () => {
 				'amount'
 			]);
 
+			// - receipts.offerCreation
+			expect(Object.keys(modelSchema['receipts.offerCreation']).length).to.equal(5);
+			expect(modelSchema['receipts.offerCreation']).to.contain.all.keys([
+				'sender',
+				'mosaicIdGive',
+				'mosaicIdGet',
+				'mosaicAmountGive',
+				'mosaicAmountGet'
+			]);
+
+			// - receipts.offerExchange.exchangeDetails
+			expect(Object.keys(modelSchema['receipts.offerExchange.exchangeDetails']).length).to.equal(5);
+			expect(modelSchema['receipts.offerExchange.exchangeDetails']).to.contain.all.keys([
+				'recipient',
+				'mosaicIdGive',
+				'mosaicIdGet',
+				'mosaicAmountGive',
+				'mosaicAmountGet'
+			]);
+
+			// - receipts.offerExchange
+			expect(Object.keys(modelSchema['receipts.offerExchange']).length).to.equal(4);
+			expect(modelSchema['receipts.offerExchange']).to.contain.all.keys([
+				'sender',
+				'mosaicIdGive',
+				'mosaicIdGet',
+				'exchangeDetails'
+			]);
+
+			// - receipts.offerRemoval
+			expect(Object.keys(modelSchema['receipts.offerRemoval']).length).to.equal(4);
+			expect(modelSchema['receipts.offerRemoval']).to.contain.all.keys([
+				'sender',
+				'mosaicIdGive',
+				'mosaicIdGet',
+				'mosaicAmountGiveReturned'
+			]);
+
 			// - receipts.unknown
 			expect(Object.keys(modelSchema['receipts.unknown']).length).to.equal(0);
 		});
@@ -134,7 +176,8 @@ describe('receipts plugin', () => {
 					[ModelType.binary]: () => 'binary',
 					[ModelType.uint64]: () => 'uint64',
 					[ModelType.objectId]: () => 'objectId',
-					[ModelType.string]: () => 'string'
+					[ModelType.string]: () => 'string',
+					[ModelType.array]: () => 'array'
 				};
 				const transactionStatement = {
 					height: null,
@@ -245,6 +288,99 @@ describe('receipts plugin', () => {
 					'type',
 					'mosaicId',
 					'amount'
+				]);
+			});
+
+			it('formats offer creation receipt type', () => {
+				// Arrange:
+				const offerCreationReceipt = {
+					version: 1,
+					type: 0x6000,
+					sender: null,
+					mosaicIdGive: null,
+					mosaicIdGet: null,
+					mosaicAmountGive: null,
+					mosaicAmountGet: null
+				};
+
+				// Act:
+				const formattedReceipt = formatReceipt(offerCreationReceipt);
+
+				// Assert:
+				expect(formattedReceipt).to.contain.all.keys([
+					'version',
+					'type',
+					'sender',
+					'mosaicIdGive',
+					'mosaicIdGet',
+					'mosaicAmountGive',
+					'mosaicAmountGet'
+				]);
+			});
+
+			it('formats offer exchange receipt type', () => {
+				// Arrange:
+				const exchangeDetails = {
+					recipient: null,
+					mosaicIdGive: null,
+					mosaicIdGet: null,
+					mosaicAmountGive: null,
+					mosaicAmountGet: null
+				};
+
+				const offerExchangeReceipt = {
+					version: 1,
+					type: 0x7000,
+					sender: null,
+					mosaicIdGive: null,
+					mosaicIdGet: null,
+					exchangeDetails: [exchangeDetails]
+				};
+
+				// Act:
+				const formattedReceipt = formatReceipt(offerExchangeReceipt);
+
+				// Assert:
+				expect(formattedReceipt).to.contain.all.keys([
+					'version',
+					'type',
+					'sender',
+					'mosaicIdGive',
+					'mosaicIdGet',
+					'exchangeDetails'
+				]);
+
+				expect(formattedReceipt.exchangeDetails[0]).to.contain.all.keys([
+					'recipient',
+					'mosaicIdGive',
+					'mosaicIdGet',
+					'mosaicAmountGive',
+					'mosaicAmountGet'
+				]);
+			});
+
+			it('formats offer removal receipt type', () => {
+				// Arrange:
+				const offerRemovalReceipt = {
+					version: 1,
+					type: 0x8000,
+					sender: null,
+					mosaicIdGive: null,
+					mosaicIdGet: null,
+					mosaicAmountGiveReturned: null
+				};
+
+				// Act:
+				const formattedReceipt = formatReceipt(offerRemovalReceipt);
+
+				// Assert:
+				expect(formattedReceipt).to.contain.all.keys([
+					'version',
+					'type',
+					'sender',
+					'mosaicIdGive',
+					'mosaicIdGet',
+					'mosaicAmountGiveReturned'
 				]);
 			});
 
