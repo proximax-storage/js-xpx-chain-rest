@@ -96,4 +96,30 @@ describe('receipts db', () => {
 				entities => { expect(entities).to.deep.equal([transactionStatement1, transactionStatement2]); }
 			));
 	});
+
+	describe('transaction statements by height and receipt type', () => {
+		// Arrange:
+		const knownHeight = 4668;
+		const transactionStatement1 = test.transactionStatementDb.createTransactionStatement(knownHeight);
+		const transactionStatement2 = test.transactionStatementDb.createTransactionStatement(knownHeight);
+		const transactionStatement3 = test.transactionStatementDb.createTransactionStatement(knownHeight + 1);
+
+		it('returns empty array for non-existing transaction statements in block', () =>
+			// Assert:
+			test.transactionStatementDb.runDbTest(
+				[transactionStatement1, transactionStatement2, transactionStatement3],
+				'transactionStatements',
+				db => db.getReceiptsAtHeightByReceiptType(Long.fromNumber(knownHeight + 10), 1),
+				entities => { expect(entities).to.deep.equal([]); }
+			));
+
+		it('returns transaction statements of receipt type in block at height', () =>
+			// Assert:
+			test.transactionStatementDb.runDbTest(
+				[transactionStatement1, transactionStatement2, transactionStatement3],
+				'transactionStatements',
+				db => db.getReceiptsAtHeightByReceiptType(Long.fromNumber(knownHeight), 1),
+				entities => { expect(entities).to.deep.equal([transactionStatement1, transactionStatement2]); }
+			));
+	});
 });

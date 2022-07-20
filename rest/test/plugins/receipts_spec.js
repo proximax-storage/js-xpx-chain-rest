@@ -40,7 +40,10 @@ describe('receipts plugin', () => {
 			// Assert:
 			test.assert.assertRoutes(routes, [
 				'/block/:height/receipts',
-				'/block/:height/receipt/:hash/merkle'
+				'/block/:height/receipt/:hash/merkle',
+				'/block/:height/receipts/:receiptType',
+				'/block/:height/receipts/exchangesda',
+				'/block/:height/receipts/:publicKey/exchangesda'		
 			]);
 		});
 	});

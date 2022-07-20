@@ -68,5 +68,31 @@ module.exports = {
 			'/block/:height/receipt/:hash/merkle',
 			routeUtils.blockRouteMerkleProcessor(db.catapultDb, 'numStatements', 'statementMerkleTree')
 		);
+
+		server.get('/block/:height/receipts/:receiptType', (req, res, next) => {
+			const { params } = req;
+			const height = parseHeight(params);
+			const receiptType = routeUtils.parseArgument(params, 'receiptType', 'uint');
+			
+			return dbFacade.runHeightDependentOperation(db.catapultDb, height, () => db.getReceiptsAtHeightByReceiptType(height, receiptType));
+		});
+
+		server.get('/block/:height/receipts/exchangesda', (req, res, next) => {
+			const { params } = req;
+			const height = parseHeight(params);
+
+			return dbFacade.runHeightDependentOperation(db.catapultDb, height, () => db.getSdaExchangeReceiptsAtHeight(height, accountId)).then(routeUtils.createSender('exchangesdaReceiptInfo').sendArray('receiptsAtHeight', res, next));
+		});
+
+		server.get('/block/:height/receipts/:publicKey/exchangesda', (req, res, next) => {
+			const { params } = req;
+			const height = parseHeight(params);
+			const [publicKey] = routeUtils.parseArgument(params, 'publicKey', 'publicKey');
+			const filters = {
+				receiptType: params.receiptType ? routeUtils.parseArgument(params, 'receiptType', 'uint') : undefined
+			};
+			return db.getSdaExchangeReceiptsByPublicKeyAtHeight(height, publicKey, filters)
+				.then(routeUtils.createSender('exchangesdaAccountReceiptInfo').sendArray('publicKey', res, next));
+		});
 	}
 };

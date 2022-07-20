@@ -20,6 +20,19 @@
 
 const { convertToLong } = require('../../db/dbUtils');
 
+const ReceiptType = {
+	1: 'receipts.balanceTransfer',
+	2: 'receipts.balanceChange',
+	3: 'receipts.balanceChange',
+	4: 'receipts.artifactExpiry',
+	5: 'receipts.inflation',
+	6: 'receipts.offerCreation',
+	7: 'receipts.offerExchange',
+	8: 'receipts.offerRemoval'
+};
+
+const getBasicReceiptType = type => ReceiptType[(type & 0xF000) >> 12] || 'receipts.unknown';
+
 class ReceiptsDb {
 	/**
 	* Creates ReceiptsDb around CatapultDb.
@@ -38,6 +51,54 @@ class ReceiptsDb {
 	statementsAtHeight(height, statementsCollection) {
 		return this.catapultDb.queryDocuments(statementsCollection, { height: convertToLong(height) });
 	}
+
+	/**
+	 * Retrieves the receipts by receipt type and height.
+	 * @param {module:catapult.utils/uint64~uint64} height Given block height.
+	 * @param {int} receiptType Receipt type.
+	 * @returns {Promise.<array>} The receipts.
+	 */
+	getReceiptsAtHeightByReceiptType(height, receiptType) {
+		let receiptType = getBasicReceiptType(receiptType);
+		const fieldName = 'receipts.type';
+		const conditions = { $and: [ { height: convertToLong(height) }, { [fieldName]: receiptType } ] };
+		return this.catapultDb.queryDocuments('transactionStatements', conditions);
+	}
+
+	/**
+	 * Retrieves the exchangesda receipts.
+	 * @param {module:catapult.utils/uint64~uint64} height Given block height.
+	 * @param {module:catapult.utils/uint64~uint64} publicKey The account public key.
+	 * @returns {Promise.<array>} The exchangesda receipts.
+	 */
+	getSdaExchangeReceiptsAtHeight(height, publicKey) {
+		const buffer = Buffer.from(publicKey);
+		let [offerCreation, offerExchange, offerRemoval] = [getBasicReceiptType(6), getBasicReceiptType(7), getBasicReceiptType(8)];
+		const fieldName = 'receipts.type';
+		const conditions = { $and: [ { height: convertToLong(height) },  { 'receipts.sender': buffer}, { $or: [ { [fieldName]: offerCreation }, { [fieldName]: offerExchange }, { [fieldName]: offerRemoval } ] } ] };
+		return this.catapultDb.queryDocuments('transactionStatements', conditions);
+	};
+
+	/**
+	 * Retrieves the exchangesda receipts by account.
+	 * @param {module:catapult.utils/uint64~uint64} height Given block height.
+	 * @param {module:catapult.utils/uint64~uint64} publicKey The account public key.
+	 * @returns {Promise.<array>} The exchangesda receipts for the account.
+	 */
+	 getSdaExchangeReceiptsByPublicKeyAtHeight(height, publicKey, filters) {
+		const buffer = Buffer.from(publicKey);
+		let [offerCreation, offerExchange, offerRemoval] = [getBasicReceiptType(6), getBasicReceiptType(7), getBasicReceiptType(8)];
+		const fieldName = 'receipts.type';
+		const conditions = { $and: [ { height: convertToLong(height) }, { 'receipts.sender': buffer}, { $or: [ { [fieldName]: offerCreation }, { [fieldName]: offerExchange }, { [fieldName]: offerRemoval } ] } ] };
+
+		if (filters.receiptType !== undefined) {
+			let receiptType = getBasicReceiptType(filters.receiptType);
+			conditions = { $and: [ { 'receipts.sender': buffer, [fieldName]: receiptType } ] };
+			return this.catapultDb.queryDocuments('transactionStatements', conditions);
+		}
+
+		return this.catapultDb.queryDocuments('transactionStatements', conditions);
+	};
 }
 
 module.exports = ReceiptsDb;
