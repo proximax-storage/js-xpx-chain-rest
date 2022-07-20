@@ -91,6 +91,7 @@ const toStringInternal = code => {
 		case 0x804D00A2: return 'Failure_Mosaic_Supply_Negative';
 		case 0x804D00A3: return 'Failure_Mosaic_Supply_Exceeded';
 		case 0x804D00A4: return 'Failure_Mosaic_Non_Transferable';
+		case 0x804D00A5: return 'Failure_Mosaic_Offer_Duration_Exceeds_Mosaic_Duration';
 		case 0x804D00AA: return 'Failure_Mosaic_Max_Mosaics_Exceeded';
 		case 0x804D00AB: return 'Failure_Mosaic_Plugin_Config_Malformed';
 		case 0x804D0007: return 'Failure_Mosaic_Insufficient_Levy_Balance';
@@ -217,7 +218,7 @@ const toStringInternal = code => {
 		case 0x806A0004: return 'Failure_ExchangeSda_Duplicated_Offer_In_Request';
 		case 0x806A0005: return 'Failure_ExchangeSda_Zero_Offer_Duration';
 		case 0x806A0006: return 'Failure_ExchangeSda_Offer_Duration_Too_Large';
-		case 0x806A0007: return 'Failure_ExchangeSda_Offer_Duration_Exceeds_Mosaic_Duration';
+		case 0x806A0007: return 'Failure_ExchangeSda_Mosaic_Not_Found';
 		case 0x806A0008: return 'Failure_ExchangeSda_Zero_Amount';
 		case 0x806A0009: return 'Failure_ExchangeSda_Zero_Price';
 		case 0x806A000A: return 'Failure_ExchangeSda_Offer_Exists';
@@ -229,7 +230,6 @@ const toStringInternal = code => {
 		case 0x806A0010: return 'Failure_ExchangeSda_No_Offered_Mosaics_To_Remove';
 		case 0x806A0011: return 'Failure_ExchangeSda_Plugin_Config_Malformed';
 		case 0x806A0012: return 'Failure_ExchangeSda_Exchanging_Same_Units_Is_Not_Allowed';
-		case 0x806A0013: return 'Failure_ExchangeSda_Mosaic_Not_Found';
 		case 0x805A0001: return 'Failure_Service_Drive_Duration_Is_Not_Multiple_Of_BillingPeriod';
 		case 0x805A0002: return 'Failure_Service_Wrong_Percent_Approvers';
 		case 0x805A0003: return 'Failure_Service_Min_Replicators_More_Than_Replicas';
