@@ -156,7 +156,7 @@ const aggregatePlugin = {
 					for (let i = 0; i < numCosignatures; ++i) {
 						const cosignature = {};
 						cosignature.signer = parser.buffer(constants.sizes.signer);
-						cosignature.signature = parser.buffer(extendedCosignature ? constants.size.extendedSignature : constants.sizes.signature);
+						cosignature.signature = parser.buffer(extendedCosignature ? constants.sizes.extendedSignature : constants.sizes.signature);
 						transaction.cosignatures.push(cosignature);
 					}
 				}
