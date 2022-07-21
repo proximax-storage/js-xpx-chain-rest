@@ -108,8 +108,7 @@ describe('receipts db', () => {
 			// Assert:
 			test.transactionStatementDb.runDbTest(
 				[transactionStatement1, transactionStatement2, transactionStatement3],
-				'transactionStatements',
-				db => db.getReceiptsAtHeightByReceiptType(Long.fromNumber(knownHeight + 10), 1),
+				db => db.getReceiptsAtHeightByReceiptType(Long.fromNumber(knownHeight + 10), 8515),
 				entities => { expect(entities).to.deep.equal([]); }
 			));
 
@@ -117,9 +116,8 @@ describe('receipts db', () => {
 			// Assert:
 			test.transactionStatementDb.runDbTest(
 				[transactionStatement1, transactionStatement2, transactionStatement3],
-				'transactionStatements',
-				db => db.getReceiptsAtHeightByReceiptType(Long.fromNumber(knownHeight), 1),
-				entities => { expect(entities).to.deep.equal([transactionStatement1, transactionStatement2]); }
+				db => db.getReceiptsAtHeightByReceiptType(Long.fromNumber(knownHeight), 8515),
+				entities => { expect(entities).to.deep.equal([transactionStatement1, transactionStatement2, transactionStatement3]); }
 			));
 	});
 });
