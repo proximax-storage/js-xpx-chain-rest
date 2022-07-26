@@ -26,9 +26,9 @@ const ReceiptType = {
 	3: 'receipts.balanceChange',
 	4: 'receipts.artifactExpiry',
 	5: 'receipts.inflation',
-	6: 'receipts.offerCreation',
-	7: 'receipts.offerExchange',
-	8: 'receipts.offerRemoval'
+	10: 'receipts.offerCreation',
+	11: 'receipts.offerExchange',
+	12: 'receipts.offerRemoval'
 };
 
 const getBasicReceiptType = type => ReceiptType[(type & 0xF000) >> 12] || 'receipts.unknown';
@@ -59,9 +59,9 @@ class ReceiptsDb {
 	 * @returns {Promise.<array>} The receipts.
 	 */
 	getReceiptsAtHeightByReceiptType(height, receiptType) {
-		let receiptType = getBasicReceiptType(receiptType);
+		let type = getBasicReceiptType(receiptType);
 		const fieldName = 'receipts.type';
-		const conditions = { $and: [ { height: convertToLong(height) }, { [fieldName]: receiptType } ] };
+		const conditions = { $and: [ { height: convertToLong(height) }, { [fieldName]: type } ] };
 		return this.catapultDb.queryDocuments('transactionStatements', conditions);
 	}
 
