@@ -65,7 +65,7 @@ const createTransactionStatement = height => ({
 		// offerCreation
 		{
 			version: 1,
-			type: 8519,
+			type: 41322,
 			sender: new Binary(test.random.publicKey()),
 			mosaicIdGive: Long.fromNumber(678),
 			mosaicIdGet: Long.fromNumber(789),
@@ -75,7 +75,7 @@ const createTransactionStatement = height => ({
 		// offerExchange
 		{
 			version: 1,
-			type: 8520,
+			type: 45674,
 			sender: new Binary(test.random.publicKey()),
 			mosaicIdGive: Long.fromNumber(678),
 			mosaicIdGet: Long.fromNumber(789),
@@ -97,7 +97,7 @@ const createTransactionStatement = height => ({
 		// offerRemoval
 		{
 			version: 1,
-			type: 8521,
+			type: 50026,
 			sender: new Binary(test.random.publicKey()),
 			mosaicIdGive: Long.fromNumber(678),
 			mosaicIdGet: Long.fromNumber(789),
