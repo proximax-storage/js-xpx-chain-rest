@@ -211,6 +211,11 @@ const toStringInternal = code => {
 		case 0x805D000D: return 'Failure_Exchange_Duplicated_Offer_In_Request';
 		case 0x805D000E: return 'Failure_Exchange_Offer_Exists';
 		case 0x805D000F: return 'Failure_Exchange_Zero_Offer_Duration';
+		case 0x805D0010: return 'Failure_Exchange_Offer_Expired';
+		case 0x805D0011: return 'Failure_Exchange_Cant_Remove_Offer_At_Height';
+		case 0x805D0012: return 'Failure_Exchange_Offer_Duration_Exceeds_Mosaic_Duration';
+		case 0x805D0013: return 'Failure_Exchange_Incorrect_Offer_Type';
+		case 0x805D0014: return 'Failure_Exchange_Mosaic_Does_Not_Exist';
 		case 0x805A0001: return 'Failure_Service_Drive_Duration_Is_Not_Multiple_Of_BillingPeriod';
 		case 0x805A0002: return 'Failure_Service_Wrong_Percent_Approvers';
 		case 0x805A0003: return 'Failure_Service_Min_Replicators_More_Than_Replicas';
