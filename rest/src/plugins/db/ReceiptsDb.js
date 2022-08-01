@@ -20,19 +20,6 @@
 
 const { convertToLong } = require('../../db/dbUtils');
 
-const ReceiptType = {
-	1: 'receipts.balanceTransfer',
-	2: 'receipts.balanceChange',
-	3: 'receipts.balanceChange',
-	4: 'receipts.artifactExpiry',
-	5: 'receipts.inflation',
-	10: 'receipts.offerCreation',
-	11: 'receipts.offerExchange',
-	12: 'receipts.offerRemoval'
-};
-
-const getBasicReceiptType = type => ReceiptType[(type & 0xF000) >> 12] || 'receipts.unknown';
-
 class ReceiptsDb {
 	/**
 	* Creates ReceiptsDb around CatapultDb.
@@ -59,24 +46,16 @@ class ReceiptsDb {
 	 * @returns {Promise.<array>} The receipts.
 	 */
 	getReceiptsAtHeightByReceiptType(height, receiptType) {
-		let type = getBasicReceiptType(receiptType);
-		const fieldName = 'receipts.type';
-		const conditions = { $and: [ { height: convertToLong(height) }, { [fieldName]: type } ] };
-		return this.catapultDb.queryDocuments('transactionStatements', conditions);
+		return this.catapultDb.queryTransactionStatementsReceipts('transactionStatements', height, receiptType, []);
 	}
 
 	/**
 	 * Retrieves the exchangesda receipts.
 	 * @param {module:catapult.utils/uint64~uint64} height Given block height.
-	 * @param {module:catapult.utils/uint64~uint64} publicKey The account public key.
 	 * @returns {Promise.<array>} The exchangesda receipts.
 	 */
-	getSdaExchangeReceiptsAtHeight(height, publicKey) {
-		const buffer = Buffer.from(publicKey);
-		let [offerCreation, offerExchange, offerRemoval] = [getBasicReceiptType(6), getBasicReceiptType(7), getBasicReceiptType(8)];
-		const fieldName = 'receipts.type';
-		const conditions = { $and: [ { height: convertToLong(height) },  { 'receipts.sender': buffer}, { $or: [ { [fieldName]: offerCreation }, { [fieldName]: offerExchange }, { [fieldName]: offerRemoval } ] } ] };
-		return this.catapultDb.queryDocuments('transactionStatements', conditions);
+	getSdaExchangeReceiptsAtHeight(height) {
+		return this.catapultDb.queryTransactionStatementsReceipts('transactionStatements', height, 0, []);
 	};
 
 	/**
@@ -87,17 +66,7 @@ class ReceiptsDb {
 	 */
 	 getSdaExchangeReceiptsByPublicKeyAtHeight(height, publicKey, filters) {
 		const buffer = Buffer.from(publicKey);
-		let [offerCreation, offerExchange, offerRemoval] = [getBasicReceiptType(6), getBasicReceiptType(7), getBasicReceiptType(8)];
-		const fieldName = 'receipts.type';
-		const conditions = { $and: [ { height: convertToLong(height) }, { 'receipts.sender': buffer}, { $or: [ { [fieldName]: offerCreation }, { [fieldName]: offerExchange }, { [fieldName]: offerRemoval } ] } ] };
-
-		if (filters.receiptType !== undefined) {
-			let receiptType = getBasicReceiptType(filters.receiptType);
-			conditions = { $and: [ { 'receipts.sender': buffer, [fieldName]: receiptType } ] };
-			return this.catapultDb.queryDocuments('transactionStatements', conditions);
-		}
-
-		return this.catapultDb.queryDocuments('transactionStatements', conditions);
+		return this.catapultDb.queryTransactionStatementsReceipts('transactionStatements', height, 0, buffer);
 	};
 }
 

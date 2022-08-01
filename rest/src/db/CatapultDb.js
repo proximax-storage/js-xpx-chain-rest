@@ -275,6 +275,42 @@ class CatapultDb {
 		});
 	}
 
+	queryTransactionStatementsReceipts(collectionName, height, receiptType, publicKey) {
+		const unwind = { $unwind: "$receipts" };
+
+		const matching1 = {
+			$match: { $and: [{"height": convertToLong(height)}, {"receipts.type": receiptType}] }
+		};
+
+		const matching2 = {
+			$match: { $and: [{"height": convertToLong(height)}, {"receipts.type": {$in:[41322, 45674, 50026]}}] }
+		};
+
+		const matching3 = {
+			$match: { $and: [{"height": convertToLong(height)}, {"receipts.type": {$in:[41322, 45674, 50026]}},
+				{ $or: [{"receipts.sender": publicKey}, {"receipts.exchangeDetails.recipient": publicKey}] }] }
+		};
+
+		const project = {
+			$project: { _id: 0, height: "$height", source: "$source", receipt: "$receipts" }
+		};
+
+		const aggregateExpressions = [];
+		aggregateExpressions.push(unwind);
+		if (height && receiptType && !publicKey)
+			aggregateExpressions.push(matching1);
+		else if (height && !receiptType && !publicKey)
+			aggregateExpressions.push(matching2);
+		else if (height && !receiptType && publicKey)
+			aggregateExpressions.push(matching3);
+		aggregateExpressions.push(project);
+
+		return this.database.collection(collectionName)
+			.aggregate(aggregateExpressions)
+			.toArray()
+			.then(data => { return data; });
+	}
+
 	queryDependentDocuments(collectionName, aggregateIds) {
 		if (0 === aggregateIds.length)
 			return Promise.resolve([]);
