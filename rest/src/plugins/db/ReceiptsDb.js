@@ -46,7 +46,7 @@ class ReceiptsDb {
 	 * @returns {Promise.<array>} The receipts.
 	 */
 	getReceiptsAtHeightByReceiptType(height, receiptType) {
-		return this.catapultDb.queryTransactionStatementsReceipts('transactionStatements', height, receiptType, []);
+		return this.catapultDb.queryTransactionStatementsReceipts('transactionStatements', height, receiptType, null);
 	}
 
 	/**
@@ -55,7 +55,7 @@ class ReceiptsDb {
 	 * @returns {Promise.<array>} The exchangesda receipts.
 	 */
 	getSdaExchangeReceiptsAtHeight(height) {
-		return this.catapultDb.queryTransactionStatementsReceipts('transactionStatements', height, 0, []);
+		return this.catapultDb.queryTransactionStatementsReceipts('transactionStatements', height, 0, null);
 	};
 
 	/**
