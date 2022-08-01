@@ -21,6 +21,7 @@
 const MongoDb = require('mongodb');
 const test = require('./utils/receiptsDbTestUtils');
 const { expect } = require('chai');
+const { convertToLong } = require('../../../src/db/dbUtils');
 
 const { Long } = MongoDb;
 
@@ -100,14 +101,21 @@ describe('receipts db', () => {
 	describe('transaction statements by height and receipt type', () => {
 		// Arrange:
 		const knownHeight = 4668;
-		const transactionStatement1 = test.transactionStatementDb.createTransactionStatement(knownHeight);
-		const transactionStatement2 = test.transactionStatementDb.createTransactionStatement(knownHeight);
-		const transactionStatement3 = test.transactionStatementDb.createTransactionStatement(knownHeight + 1);
+		const transactionStatements = [];
+		for (let t=0; t<3; t++) {
+			transactionStatements.push(test.transactionStatementDb.createTransactionStatement(knownHeight+t));
+		}
+
+		const expectedResult = [{
+				height: transactionStatements[0].height, 
+				source: transactionStatements[0].source, 
+				receipt: transactionStatements[0].receipts[0]
+			}];
 
 		it('returns empty array for non-existing transaction statements in block', () =>
 			// Assert:
 			test.transactionStatementDb.runDbTest(
-				[transactionStatement1, transactionStatement2, transactionStatement3],
+				transactionStatements,
 				db => db.getReceiptsAtHeightByReceiptType(Long.fromNumber(knownHeight + 10), 8515),
 				entities => { expect(entities).to.deep.equal([]); }
 			));
@@ -115,9 +123,75 @@ describe('receipts db', () => {
 		it('returns transaction statements of receipt type in block at height', () =>
 			// Assert:
 			test.transactionStatementDb.runDbTest(
-				[transactionStatement1, transactionStatement2, transactionStatement3],
+				transactionStatements,
 				db => db.getReceiptsAtHeightByReceiptType(Long.fromNumber(knownHeight), 8515),
-				entities => { expect(entities).to.deep.equal([transactionStatement1, transactionStatement2, transactionStatement3]); }
+				entities => { expect(entities).to.deep.equal([expectedResult]); }
+			));
+	});
+
+	describe('transaction statements of exchangesda at height', () => {
+		// Arrange:
+		const knownHeight = 4668;
+		const transactionStatements = [];
+		for (let t=0; t<3; t++) {
+			transactionStatements.push(test.transactionStatementDb.createTransactionStatement(knownHeight+t));
+		}
+
+		const expectedResult = [];
+		for (let r=4; r<7; r++) {
+			expectedResult.push({height: transactionStatements[0].height, 
+				source: transactionStatements[0].source, 
+				receipt: transactionStatements[0].receipts[r]})
+		};
+
+		it('returns empty array for non-existing transaction statements in block', () =>
+			// Assert:
+			test.transactionStatementDb.runDbTest(
+				transactionStatements,
+				db => db.getSdaExchangeReceiptsAtHeight(Long.fromNumber(knownHeight + 10)),
+				entities => { expect(entities).to.deep.equal([]); }
+			));
+
+		it('returns transaction statements of exchangesda receipt types in block at height', () =>
+			// Assert:
+			test.transactionStatementDb.runDbTest(
+				transactionStatements,
+				db => db.getSdaExchangeReceiptsAtHeight(Long.fromNumber(knownHeight)),
+				entities => { expect(entities).to.deep.equal(expectedResult); }
+			));
+	});
+
+	describe('transaction statements of exchangesda by public key at height', () => {
+		// Arrange:
+		const knownHeight = 4668;
+		const account = test.random.publicKey();
+		const transactionStatements = [];
+		for (let t=0; t<3; t++) {
+			transactionStatements.push(test.transactionStatementDb.createTransactionStatement(knownHeight));
+		}
+		transactionStatements[0].account = account;
+
+		const expectedResults = [];
+		for (let t=0, r=4; t<3, r<7; t++, r++) {
+			expectedResults.push({height: transactionStatements[t].height, 
+				source: transactionStatements[t].source, 
+				receipt: transactionStatements[t].receipts[r]})
+		};
+
+		it('returns empty array for non-existing transaction statements in block', () =>
+			// Assert:
+			test.transactionStatementDb.runDbTest(
+				transactionStatements,
+				db => db.getSdaExchangeReceiptsAtHeight(Long.fromNumber(knownHeight + 10)),
+				entities => { expect(entities).to.deep.equal([]); }
+			));
+
+		it('returns transaction statements of exchangesda receipt types in block by public key at height', () =>
+			// Assert:
+			test.transactionStatementDb.runDbTest(
+				transactionStatements,
+				db => db.getSdaExchangeReceiptsAtHeight(Long.fromNumber(knownHeight)),
+				entities => { expect(entities).to.deep.equal(expectedResults); }
 			));
 	});
 });
