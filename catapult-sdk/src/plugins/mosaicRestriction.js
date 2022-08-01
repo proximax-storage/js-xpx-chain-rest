@@ -19,8 +19,8 @@ const mosaicRestrictionPlugin = {
 	registerSchema: builder => {
 		// MosaicAddressRestrictionTransaction transaction schema
 		builder.addTransactionSupport(EntityType.mosaicAddressRestriction, {
-			mosaicId: ModelType.uint64HexIdentifier,
-			restrictionKey: ModelType.uint64HexIdentifier,
+			mosaicId: ModelType.uint64,
+			restrictionKey: ModelType.uint64,
 			targetAddress: ModelType.binary,
 			previousRestrictionValue: ModelType.uint64,
 			newRestrictionValue: ModelType.uint64
@@ -28,9 +28,9 @@ const mosaicRestrictionPlugin = {
 
 		// MosaicGlobalRestrictionTransaction transaction schema
 		builder.addTransactionSupport(EntityType.mosaicGlobalRestriction, {
-			mosaicId: ModelType.uint64HexIdentifier,
-			referenceMosaicId: ModelType.uint64HexIdentifier,
-			restrictionKey: ModelType.uint64HexIdentifier,
+			mosaicId: ModelType.uint64,
+			referenceMosaicId: ModelType.uint64,
+			restrictionKey: ModelType.uint64,
 			previousRestrictionValue: ModelType.uint64,
 			newRestrictionValue: ModelType.uint64,
 			previousRestrictionType: ModelType.uint8,
