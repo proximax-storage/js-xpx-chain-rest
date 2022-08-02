@@ -229,7 +229,7 @@ describe('receipts routes', () => {
 				response => {
 					// Assert:
 					expect(keyGroups).to.deep.equal(traits.expected);
-					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'publicKey'});
+					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'exchangesdaAccountReceiptInfo'});
 				}
 			);
 		};
