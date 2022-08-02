@@ -21,8 +21,16 @@
 const receiptsRoutes = require('../../../src/plugins/routes/receiptsRoutes');
 const routeUtils = require('../../../src/routes/routeUtils');
 const sinon = require('sinon');
+const catapult = require('catapult-sdk');
+const MongoDb = require('mongodb');
 
+const { test } = require('../../routes/utils/routeTestUtils');
 const { expect } = require('chai');
+
+const { publicKeys } = test.sets;
+const { convert } = catapult.utils;
+
+const { Long } = MongoDb;
 
 describe('receipts routes', () => {
 	describe('get transaction statements by height', () => {
@@ -143,5 +151,92 @@ describe('receipts routes', () => {
 			expect(blockRouteMerkleProcessorSpy.firstCall.args[2]).to.equal('statementMerkleTree');
 			blockRouteMerkleProcessorSpy.restore();
 		});
+	});
+
+	describe('get transaction statements', () => {
+		const addGetReceiptsAtHeightByReceiptType = traits => {
+			// Arrange:
+			const keyGroups = [];
+			const db = test.setup.createCapturingDb('getReceiptsAtHeightByReceiptType', keyGroups, [{value: 'this is nonsense'}]);
+
+			// Act:
+			const registerRoutes = receiptsRoutes.register;
+			return test.route.executeSingle(
+				registerRoutes,
+				'/block/:height/receipts/:receiptType',
+				'get',
+				{height: traits.params.height, receiptType: traits.params.receiptType},
+				db,
+				null,
+				response => {
+					// Assert:
+					expect(keyGroups).to.deep.equal(traits.expected);
+					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'receiptTypeAtHeight'});
+				}
+			);
+		};
+
+		it('by height and receipt type', () => addGetReceiptsAtHeightByReceiptType({
+			params: {height: 4668, receiptType: 8515},
+			expected: {height: Long.fromNumber(4668), receiptType: 8515}
+		}));
+	});
+
+	describe('get exchangesda transaction statements', () => {
+		const addGetSdaExchangeReceiptsAtHeight = traits => {
+			// Arrange:
+			const keyGroups = [];
+			const db = test.setup.createCapturingDb('getSdaExchangeReceiptsAtHeight', keyGroups, [{value: 'this is nonsense'}]);
+		
+			// Act:
+			const registerRoutes = receiptsRoutes.register;
+			return test.route.executeSingle(
+				registerRoutes,
+				'/block/:height/receipts/exchangesda',
+				'get',
+				{height: traits.height},
+				db,
+				null,
+				response => {
+					// Assert:
+					expect(keyGroups).to.deep.equal(traits.expected);
+					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'exchangeSdaReceipts'});
+				}
+			);
+		};
+
+		it('by height', () => addGetSdaExchangeReceiptsAtHeight({
+			height: Long.fromNumber(4668),
+			expected: ['height',  Long.fromNumber(4668)]
+		}));
+	});
+
+	describe('get transaction statements of exchangesda', () => {
+		const addGetSdaExchangeReceiptsByPublicKeyAtHeight = traits => {
+			// Arrange:
+			const keyGroups = [];
+			const db = test.setup.createCapturingDb('getSdaExchangeReceiptsByPublicKeyAtHeight', keyGroups, [{value: 'this is nonsense'}]);
+
+			// Act:
+			const registerRoutes = receiptsRoutes.register;
+			return test.route.executeSingle(
+				registerRoutes,
+				'/block/:height/receipts/:publicKey/exchangesda',
+				'get',
+				{height: traits.params.height, publicKey: traits.params.publicKey},
+				db,
+				null,
+				response => {
+					// Assert:
+					expect(keyGroups).to.deep.equal(traits.expected);
+					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'publicKey'});
+				}
+			);
+		};
+
+		it('by public key at height', () => addGetSdaExchangeReceiptsByPublicKeyAtHeight({
+			params: {height: 4668, publicKey: publicKeys.valid[0]},
+			expected: {height: Long.fromNumber(4668), publicKey: convert.hexToUint8(publicKeys.valid[0])}
+		}));
 	});
 });

@@ -74,13 +74,13 @@ module.exports = {
 			const height = parseHeight(params);
 			const receiptType = routeUtils.parseArgument(params, 'receiptType', 'uint');
 			
-			return db.getReceiptsAtHeightByReceiptType(height, receiptType).then(routeUtils.createSender('receiptTypeAtHeight').sendArray('receiptAtHeight', res, next));
+			return db.getReceiptsAtHeightByReceiptType(height, receiptType).then(routeUtils.createSender('receiptTypeAtHeight').sendArray('height', res, next));
 		});
 
 		server.get('/block/:height/receipts/exchangesda', (req, res, next) => {
 			const height = parseHeight(req.params);
 
-			return db.getSdaExchangeReceiptsAtHeight(height).then(routeUtils.createSender('exchangeSdaReceipts').sendArray('exchangeSdaReceiptsAtHeight', res, next));
+			return db.getSdaExchangeReceiptsAtHeight(height).then(routeUtils.createSender('exchangeSdaReceipts').sendArray('height', res, next));
 		});
 
 		server.get('/block/:height/receipts/:publicKey/exchangesda', (req, res, next) => {
@@ -88,7 +88,7 @@ module.exports = {
 			const height = parseHeight(params);
 			const [publicKey] = routeUtils.parseArgument(params, 'publicKey', 'publicKey');
 			return db.getSdaExchangeReceiptsByPublicKeyAtHeight(height, publicKey)
-				.then(routeUtils.createSender('exchangesdaAccountReceiptInfo').sendArray('publicKey', res, next));
+				.then(routeUtils.createSender('exchangesdaAccountReceiptInfo').sendArray('height', res, next));
 		});
 	}
 };
