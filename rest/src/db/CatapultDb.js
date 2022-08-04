@@ -283,11 +283,7 @@ class CatapultDb {
 		};
 
 		const matching2 = {
-			$match: { $and: [{"height": convertToLong(height)}, {"receipts.type": {$in:[41322, 45674, 50026]}}] }
-		};
-
-		const matching3 = {
-			$match: { $and: [{"height": convertToLong(height)}, {"receipts.type": {$in:[41322, 45674, 50026]}},
+			$match: { $and: [{"height": convertToLong(height)}, {"receipts.type": receiptType},
 				{ $or: [{"receipts.sender": publicKey}, {"receipts.exchangeDetails.recipient": publicKey}] }] }
 		};
 
@@ -299,10 +295,8 @@ class CatapultDb {
 		aggregateExpressions.push(unwind);
 		if (height && receiptType && !publicKey)
 			aggregateExpressions.push(matching1);
-		else if (height && !receiptType && !publicKey)
+		else if (height && receiptType && publicKey)
 			aggregateExpressions.push(matching2);
-		else if (height && !receiptType && publicKey)
-			aggregateExpressions.push(matching3);
 		aggregateExpressions.push(project);
 
 		return this.database.collection(collectionName)
