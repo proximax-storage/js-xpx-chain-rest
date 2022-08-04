@@ -300,7 +300,7 @@ class CatapultDb {
 		aggregateExpressions.push(project);
 
 		return this.database.collection(collectionName)
-			.aggregate(aggregateExpressions)
+			.aggregate(aggregateExpressions, { promoteLongs: false , allowDiskUse: true })
 			.toArray()
 			.then(data => { return data; });
 	}
