@@ -276,22 +276,21 @@ class CatapultDb {
 	}
 
 	queryTransactionStatementsReceipts(collectionName, height, receiptType, publicKey) {
+		const matchHeight = { $match: {"height": convertToLong(height)} };
 		const unwind = { $unwind: "$receipts" };
 
-		const matching1 = {
-			$match: { $and: [{"height": convertToLong(height)}, {"receipts.type": receiptType}] }
-		};
+		const matching1 = { $match: {"receipts.type": receiptType} };
 
 		const matching2 = {
-			$match: { $and: [{"height": convertToLong(height)}, {"receipts.type": receiptType},
-				{ $or: [{"receipts.sender": publicKey}, {"receipts.exchangeDetails.recipient": publicKey}] }] }
+			$match: { $and: [{"receipts.type": receiptType}, { $or: [{"receipts.sender": publicKey}, {"receipts.exchangeDetails.recipient": publicKey}] }] }
 		};
 
 		const project = {
-			$project: { _id: 0, height: "$height", source: "$source", receipt: "$receipts" }
+			$project: { _id: 0, height: "$height", source: "$source", receipts: "$receipts" }
 		};
 
 		const aggregateExpressions = [];
+		aggregateExpressions.push(matchHeight);
 		aggregateExpressions.push(unwind);
 		if (height && receiptType && !publicKey)
 			aggregateExpressions.push(matching1);
