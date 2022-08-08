@@ -127,7 +127,23 @@ class MosaicDb {
 		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
 		const conditions = buildConditions();
 
+		// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
+		// in fact, offset logic should be moved to `queryPagedDocuments`
+		if (options.offset !== undefined)
+			conditions.push({[options.sortField]: {[1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset)}});
+
 		return this.catapultDb.queryPagedDocuments_2(conditions, removedFields, sortConditions, "mosaics", options);
+	}
+
+	/**
+	 * Retrieves all mosaics.
+	 * @returns {Promise.<array>} Mosaics.
+	 */
+	allMosaics() {
+		const collection = this.catapultDb.database.collection('mosaics');
+		return collection.find({}, { 'mosaic.mosaicId': 1, 'mosaic.properties': 0, 'meta': 0 })
+			.toArray()
+			.then(entities => Promise.resolve(this.catapultDb.sanitizer.copyAndDeleteIds(entities)));
 	}
 
 	// endregion
