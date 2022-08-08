@@ -349,14 +349,31 @@ class CatapultDb {
 
 				if (firstLevelConditions.length) {
 					const promises = [];
-					formattedResult.data.forEach(item => {
-						promises.push(
-							this.transactionsByIdsImpl(
-								collectionName, { 'meta.hash': { $in: [item.meta.hash] } }));
-					})
+					let replaceIndex = [];
+					let currentCount = 0;
+
+					for(const item of formattedResult.data){
+
+						if(isAggregateType(item)){
+							replaceIndex.push(currentCount);
+							promises.push(
+								this.transactionsByIdsImpl(
+									collectionName, { 'meta.hash': { $in: [item.meta.hash] } }));
+						}
+
+						currentCount++;
+					}
 
 					return Promise.all(promises).then( finalResult => {
-						formattedResult.data = finalResult.map(i => { return i[0]; });
+
+						currentCount = 0;
+						
+						for(const replacingIndex of replaceIndex){
+
+							formattedResult.data[replacingIndex] = finalResult[currentCount][0];
+							currentCount++;
+						}
+
 						return formattedResult;
 					});
 				} else {
@@ -439,7 +456,7 @@ class CatapultDb {
 				conditions.push({ 'meta.height': { $gte: convertToLong(filters.fromHeight) } });
 			else if (filters.toHeight !== undefined)
 				conditions.push({ 'meta.height': { $lte: convertToLong(filters.toHeight) } });
-				
+			
 			if (filters.firstLevel !== undefined && !filters.firstLevel)
 				firstLevelConditions.push(1);
 
