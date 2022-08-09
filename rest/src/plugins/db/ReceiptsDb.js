@@ -44,7 +44,7 @@ class ReceiptsDb {
 		const unwind = { $unwind: "$receipts" };
 		const matching1 = { $match: {"receipts.type": receiptType} };
 		const matching2 = {
-			$match: { $and: [{"receipts.type": receiptType}, { $or: [{"receipts.sender": [publicKey]}, {"receipts.exchangeDetails.recipient": publicKey}] }] }
+			$match: { $and: [{"receipts.type": receiptType}, { $or: [{"receipts.sender": publicKey}, {"receipts.exchangeDetails.recipient": publicKey}] }] }
 		};
 
 		const project = {
