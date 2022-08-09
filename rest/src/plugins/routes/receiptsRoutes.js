@@ -94,14 +94,32 @@ module.exports = {
 
 			if (type == 'receipts.unknown')
 				throw errors.createInvalidArgumentError('receipt type not recognized');
-			
-			return db.getReceiptsAtHeightByReceiptType(height, receiptType)
-				.then(routeUtils.createSender(type).sendArray('receiptInfo', res, next));
+
+			return Promise.all([
+				getReceiptsAtHeightByReceiptTypePromise(db, height, receiptType)
+			]).then(results => {
+				const [ receiptStatementsInfo ] = results;
+
+				if (results.some(result => !result.isRequestValid)) {
+					res.send(errors.createNotFoundError(height));
+					return next();
+				}
+
+				const result = {
+					receiptStatements: receiptStatementsInfo.payload
+				};
+
+				res.send({
+					payload: result,
+					type: 'receiptStatements'
+				});
+
+				return next();
+			});
 		});
 
 		server.get('/block/:height/receipts/exchangesda', (req, res, next) => {
 			const height = parseHeight(req.params);
-			const [create, exchange, remove] = [getBasicReceiptType(41322), getBasicReceiptType(45674), getBasicReceiptType(50026)];
 
 			return Promise.all([
 				getReceiptsAtHeightByReceiptTypePromise(db, height, 41322),
@@ -127,26 +145,17 @@ module.exports = {
 
 				res.send({
 					payload: result,
-					type: create
-				},
-				{
-					payload: result,
-					type: exchange
-				},
-				{
-					payload: result,
-					type: remove
+					type: 'receipts.exchangesda'
 				});
 
 				return next();
 			});
 		});
 
-		server.get('/block/:height/receipts/:publicKey/exchangesda', (req, res, next) => {
+		server.get('/block/:height/receipts/exchangesda/:publicKey', (req, res, next) => {
 			const { params } = req;
 			const height = parseHeight(params);
 			const publicKey = routeUtils.parseArgument(params, 'publicKey', 'publicKey');
-			const [create, exchange, remove] = [getBasicReceiptType(41322), getBasicReceiptType(45674), getBasicReceiptType(50026)];
 
 			return Promise.all([
 				getSdaExchangeReceiptsByPublicKeyAtHeightPromise(db, height, 41322, publicKey),
@@ -172,15 +181,7 @@ module.exports = {
 				
 				res.send({
 					payload: result,
-					type: create
-				},
-				{
-					payload: result,
-					type: exchange
-				},
-				{
-					payload: result,
-					type: remove
+					type: 'receipts.exchangesda'
 				});
 
 				return next();
