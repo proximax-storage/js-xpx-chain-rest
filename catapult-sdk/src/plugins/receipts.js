@@ -93,6 +93,16 @@ const receiptsPlugin = {
 			amount: ModelType.uint64
 		});
 
+		builder.addSchema('receiptStatements', {
+			receiptStatements: { type: ModelType.array, schemaName: 'receipts.transactionStatement' }
+		});
+
+		builder.addSchema('receipts.exchangesda', {
+			offerCreation: { type: ModelType.array, schemaName: 'receipts.transactionStatement' },
+			offerExchange: { type: ModelType.array, schemaName: 'receipts.transactionStatement' },
+			offerRemoval: { type: ModelType.array, schemaName: 'receipts.transactionStatement' }
+		});
+
 		builder.addSchema('receipts.offerCreation', {
 			sender: ModelType.binary,
 			mosaicIdGive: ModelType.uint64,

@@ -37,7 +37,7 @@ describe('receipts plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 15);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 17);
 			expect(modelSchema).to.contain.all.keys([
 				'receipts',
 				'receipts.addressResolutionStatement',
@@ -49,6 +49,8 @@ describe('receipts plugin', () => {
 				'receipts.inflation',
 				'receipts.entry.address',
 				'receipts.entry.mosaic',
+				'receiptStatements',
+				'receipts.exchangesda',
 				'receipts.offerCreation',
 				'receipts.offerExchange.exchangeDetails',
 				'receipts.offerExchange',
@@ -123,6 +125,20 @@ describe('receipts plugin', () => {
 				'amount'
 			]);
 
+			// - receiptStatements
+			expect(Object.keys(modelSchema['receiptStatements']).length).to.equal(1);
+			expect(modelSchema['receiptStatements']).to.contain.all.keys([
+				'receiptStatements'
+			]);
+
+			// - receipts.exchangesda
+			expect(Object.keys(modelSchema['receipts.exchangesda']).length).to.equal(3);
+			expect(modelSchema['receipts.exchangesda']).to.contain.all.keys([
+				'offerCreation',
+				'offerExchange',
+				'offerRemoval'
+			]);
+
 			// - receipts.offerCreation
 			expect(Object.keys(modelSchema['receipts.offerCreation']).length).to.equal(5);
 			expect(modelSchema['receipts.offerCreation']).to.contain.all.keys([
@@ -176,8 +192,7 @@ describe('receipts plugin', () => {
 					[ModelType.binary]: () => 'binary',
 					[ModelType.uint64]: () => 'uint64',
 					[ModelType.objectId]: () => 'objectId',
-					[ModelType.string]: () => 'string',
-					[ModelType.array]: () => 'array'
+					[ModelType.string]: () => 'string'
 				};
 				const transactionStatement = {
 					height: null,
@@ -348,14 +363,6 @@ describe('receipts plugin', () => {
 					'mosaicIdGive',
 					'mosaicIdGet',
 					'exchangeDetails'
-				]);
-
-				expect(formattedReceipt.exchangeDetails[0]).to.contain.all.keys([
-					'recipient',
-					'mosaicIdGive',
-					'mosaicIdGet',
-					'mosaicAmountGive',
-					'mosaicAmountGet'
 				]);
 			});
 
