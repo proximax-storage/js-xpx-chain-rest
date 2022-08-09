@@ -275,35 +275,6 @@ class CatapultDb {
 		});
 	}
 
-	queryTransactionStatementsReceipts(collectionName, height, receiptType, publicKey) {
-		const matchHeight = { $match: {"height": convertToLong(height)} };
-		const unwind = { $unwind: "$receipts" };
-
-		const matching1 = { $match: {"receipts.type": receiptType} };
-
-		const matching2 = {
-			$match: { $and: [{"receipts.type": receiptType}, { $or: [{"receipts.sender": publicKey}, {"receipts.exchangeDetails.recipient": publicKey}] }] }
-		};
-
-		const project = {
-			$project: { _id: 0, height: "$height", source: "$source", receipts: "$receipts" }
-		};
-
-		const aggregateExpressions = [];
-		aggregateExpressions.push(matchHeight);
-		aggregateExpressions.push(unwind);
-		if (height && receiptType && !publicKey)
-			aggregateExpressions.push(matching1);
-		else if (height && receiptType && publicKey)
-			aggregateExpressions.push(matching2);
-		aggregateExpressions.push(project);
-
-		return this.database.collection(collectionName)
-			.aggregate(aggregateExpressions, { promoteLongs: false , allowDiskUse: true })
-			.toArray()
-			.then(data => { return data; });
-	}
-
 	queryDependentDocuments(collectionName, aggregateIds) {
 		if (0 === aggregateIds.length)
 			return Promise.resolve([]);
