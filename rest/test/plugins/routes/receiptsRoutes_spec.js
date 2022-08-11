@@ -158,7 +158,7 @@ describe('receipts routes', () => {
 
 		const transactionStatementData = ['dummyStatement'];
 		const statementsFake = sinon.stub();
-		statementsFake.withArgs(correctQueriedHeight, 'receiptStatements').returns(transactionStatementData);
+		statementsFake.withArgs(correctQueriedHeight, receiptType).returns(transactionStatementData);
 
 		const routes = {};
 		const server = {
@@ -249,10 +249,9 @@ describe('receipts routes', () => {
 		const offerRemovalData = ['dummyStatement'];
 		const statementsFake = sinon.stub();
 		const orderedSdaExchangeEntityTypes = [41322, 45674, 50026];
-		const orderedSdaExchangeData = ['offerCreation', 'offerExchange', 'offerRemoval'];
-		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeData[0]).returns(offerCreationData);
-		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeData[1]).returns(offerExchangeData);
-		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeData[2]).returns(offerRemovalData);
+		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeEntityTypes[0]).returns(offerCreationData);
+		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeEntityTypes[1]).returns(offerExchangeData);
+		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeEntityTypes[2]).returns(offerRemovalData);
 
 		const routes = {};
 		const server = {
@@ -348,10 +347,9 @@ describe('receipts routes', () => {
 		const offerRemovalData = ['dummyStatement'];
 		const statementsFake = sinon.stub();
 		const orderedSdaExchangeEntityTypes = [41322, 45674, 50026];
-		const orderedSdaExchangeData = ['offerCreation', 'offerExchange', 'offerRemoval'];
-		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeData[0]).returns(offerCreationData);
-		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeData[1]).returns(offerExchangeData);
-		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeData[2]).returns(offerRemovalData);
+		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeEntityTypes[0]).returns(offerCreationData);
+		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeEntityTypes[1]).returns(offerExchangeData);
+		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeEntityTypes[2]).returns(offerRemovalData);
 
 		const routes = {};
 		const server = {
