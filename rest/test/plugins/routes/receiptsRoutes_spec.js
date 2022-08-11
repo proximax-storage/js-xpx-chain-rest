@@ -196,7 +196,7 @@ describe('receipts routes', () => {
 			return route(req, res, next).then(() => {
 				// Assert:
 				expect(statementsFake.calledOnce).to.equal(true);
-				expect(statementsFake.calledWith(correctQueriedHeight, transactionStatementData), `failed at index 0`).to.equal(true);
+				expect(statementsFake.calledWith(correctQueriedHeight, receiptType), `failed at index 0`).to.equal(true);
 
 				expect(sentResponse).to.deep.equal({
 					payload: {
@@ -248,6 +248,7 @@ describe('receipts routes', () => {
 		const offerExchangeData = ['dummyStatement', 'dummyStatement'];
 		const offerRemovalData = ['dummyStatement'];
 		const statementsFake = sinon.stub();
+		const orderedSdaExchangeEntityTypes = [41322, 45674, 50026];
 		const orderedSdaExchangeData = ['offerCreation', 'offerExchange', 'offerRemoval'];
 		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeData[0]).returns(offerCreationData);
 		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeData[1]).returns(offerExchangeData);
@@ -289,7 +290,7 @@ describe('receipts routes', () => {
 			return route(req, res, next).then(() => {
 				// Assert:
 				expect(statementsFake.calledThrice).to.equal(true);
-				orderedSdaExchangeData.forEach((sdaExchangeData, index) => expect(
+				orderedSdaExchangeEntityTypes.forEach((sdaExchangeData, index) => expect(
 					statementsFake.calledWith(correctQueriedHeight, sdaExchangeData),
 					`failed at index ${index}`
 				).to.equal(true));
@@ -346,6 +347,7 @@ describe('receipts routes', () => {
 		const offerExchangeData = ['dummyStatement', 'dummyStatement'];
 		const offerRemovalData = ['dummyStatement'];
 		const statementsFake = sinon.stub();
+		const orderedSdaExchangeEntityTypes = [41322, 45674, 50026];
 		const orderedSdaExchangeData = ['offerCreation', 'offerExchange', 'offerRemoval'];
 		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeData[0]).returns(offerCreationData);
 		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeData[1]).returns(offerExchangeData);
@@ -387,7 +389,7 @@ describe('receipts routes', () => {
 			return route(req, res, next).then(() => {
 				// Assert:
 				expect(statementsFake.calledThrice).to.equal(true);
-				orderedSdaExchangeData.forEach((sdaExchangeData, index) => expect(
+				orderedSdaExchangeEntityTypes.forEach((sdaExchangeData, index) => expect(
 					statementsFake.calledWith(correctQueriedHeight, sdaExchangeData),
 					`failed at index ${index}`
 				).to.equal(true));
