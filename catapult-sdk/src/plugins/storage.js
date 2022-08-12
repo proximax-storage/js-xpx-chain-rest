@@ -145,10 +145,6 @@ const storagePlugin = {
 			downloadChannels: { type: ModelType.array, schemaName: ModelType.binary }
 		});
 
-		builder.addSchema('replicator.downloadChannel', {
-			downloadChannel: { type: ModelType.binary, schemaName: 'downloadChannel' },
-		});
-
 		builder.addSchema('downloadChannelEntry', {
 			downloadChannelInfo: { type: ModelType.object, schemaName: 'downloadChannelInfo' }
 		});
