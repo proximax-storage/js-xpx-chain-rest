@@ -74,11 +74,11 @@ class ReceiptsDb {
 	/**
 	 * Retrieves the exchangesda receipts by account.
 	 * @param {module:catapult.utils/uint64~uint64} height Given block height.
-	 * @param {module:catapult.utils/uint64~uint64} publicKey The account public key.
+	 * @param {array<object>} accountId Account id.
 	 * @returns {Promise.<array>} The exchangesda receipts for the account.
 	 */
-	 getSdaExchangeReceiptsByPublicKeyAtHeight(height, receiptType, publicKey) {
-		const buffer = Buffer.from(publicKey);
+	 getSdaExchangeReceiptsByAccountIdAtHeight(height, receiptType, accountId) {
+		const buffer = Buffer.from(accountId);
 		return this.queryTransactionStatementsReceipts('transactionStatements', height, receiptType, buffer);
 	};
 }

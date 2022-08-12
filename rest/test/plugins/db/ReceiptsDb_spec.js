@@ -144,7 +144,7 @@ describe('receipts db', () => {
 	describe('transaction statements of exchangesda by public key at height', () => {
 		// Arrange:
 		const knownHeight = 4668;
-		const [senderAccount, recipientAccount] = [test.random.publicKey(), test.random.publicKey()];
+		const [senderAccount, recipientAccount] = [test.random.publicKey(), test.random.address()];
 		const transactionStatements = [];
 		for (let t=0; t<3; t++) {
 			transactionStatements.push(test.transactionStatementDb.createTransactionStatement(knownHeight));
@@ -168,7 +168,7 @@ describe('receipts db', () => {
 			// Assert:
 			test.transactionStatementDb.runDbTest(
 				transactionStatements,
-				db => db.getSdaExchangeReceiptsByPublicKeyAtHeight(Long.fromNumber(knownHeight + 10), 45674, senderAccount),
+				db => db.getSdaExchangeReceiptsByAccountIdAtHeight(Long.fromNumber(knownHeight + 10), 45674, senderAccount),
 				entities => { expect(entities).to.deep.equal([]); }
 		));
 
@@ -176,7 +176,7 @@ describe('receipts db', () => {
 			// Assert:
 			test.transactionStatementDb.runDbTest(
 				transactionStatements,
-				db => db.getSdaExchangeReceiptsByPublicKeyAtHeight(Long.fromNumber(knownHeight), 45674, senderAccount),
+				db => db.getSdaExchangeReceiptsByAccountIdAtHeight(Long.fromNumber(knownHeight), 45674, senderAccount),
 				entities => { expect(entities).to.deep.equal([expectedResults[0]]); }
 		));
 
@@ -184,7 +184,7 @@ describe('receipts db', () => {
 			// Assert:
 			test.transactionStatementDb.runDbTest(
 				transactionStatements,
-				db => db.getSdaExchangeReceiptsByPublicKeyAtHeight(Long.fromNumber(knownHeight), 45674, recipientAccount),
+				db => db.getSdaExchangeReceiptsByAccountIdAtHeight(Long.fromNumber(knownHeight), 45674, recipientAccount),
 				entities => { expect(entities).to.deep.equal([expectedResults[1]]); }
 		));
 	});

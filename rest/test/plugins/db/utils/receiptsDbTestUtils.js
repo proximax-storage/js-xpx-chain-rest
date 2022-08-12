@@ -80,14 +80,14 @@ const createTransactionStatement = height => ({
 			mosaicIdGive: Long.fromNumber(678),
 			mosaicIdGet: Long.fromNumber(789),
 			exchangeDetails: [{
-				recipient: new Binary(test.random.publicKey()),
+				recipient: new Binary(test.random.address()),
 				mosaicIdGive: Long.fromNumber(789),
 				mosaicIdGet: Long.fromNumber(678),
 				mosaicAmountGive: Long.fromNumber(400),
 				mosaicAmountGet: Long.fromNumber(100)
 			},
 			{
-				recipient: new Binary(test.random.publicKey()),
+				recipient: new Binary(test.random.address()),
 				mosaicIdGive: Long.fromNumber(789),
 				mosaicIdGet: Long.fromNumber(678),
 				mosaicAmountGive: Long.fromNumber(200),

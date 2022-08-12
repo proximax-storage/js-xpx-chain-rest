@@ -22,7 +22,6 @@ const dbFacade = require('../../routes/dbFacade');
 const errors = require('../../server/errors');
 const routeResultTypes = require('../../routes/routeResultTypes');
 const routeUtils = require('../../routes/routeUtils');
-const { exchange } = require('catapult-sdk/_build/model/EntityType');
 
 const ReceiptType = {
 	1: 'receipts.balanceTransfer',
@@ -42,8 +41,8 @@ const getStatementsPromise = (db, height, statementsCollection) =>
 	dbFacade.runHeightDependentOperation(db.catapultDb, height, () => db.statementsAtHeight(height, statementsCollection));
 const getReceiptsAtHeightByReceiptTypePromise =  (db, height, receiptType) =>
 	dbFacade.runHeightDependentOperation(db.catapultDb, height, () => db.getReceiptsAtHeightByReceiptType(height, receiptType));
-const getSdaExchangeReceiptsByPublicKeyAtHeightPromise =  (db, height, receiptType, publicKey) =>
-	dbFacade.runHeightDependentOperation(db.catapultDb, height, () => db.getSdaExchangeReceiptsByPublicKeyAtHeight(height, receiptType, publicKey));
+const getSdaExchangeReceiptsByAccountIdAtHeightPromise =  (db, height, receiptType, accountId) =>
+	dbFacade.runHeightDependentOperation(db.catapultDb, height, () => db.getSdaExchangeReceiptsByAccountIdAtHeight(height, receiptType, accountId));
 
 module.exports = {
 	register: (server, db) => {
@@ -152,15 +151,15 @@ module.exports = {
 			});
 		});
 
-		server.get('/block/:height/receipts/exchangesda/:publicKey', (req, res, next) => {
+		server.get('/block/:height/receipts/exchangesda/:accountId', (req, res, next) => {
 			const { params } = req;
 			const height = parseHeight(params);
-			const publicKey = routeUtils.parseArgument(params, 'publicKey', 'publicKey');
+			const [type, accountId] = routeUtils.parseArgument(params, 'accountId', 'accountId');
 
 			return Promise.all([
-				getSdaExchangeReceiptsByPublicKeyAtHeightPromise(db, height, 41322, publicKey),
-				getSdaExchangeReceiptsByPublicKeyAtHeightPromise(db, height, 45674, publicKey),
-				getSdaExchangeReceiptsByPublicKeyAtHeightPromise(db, height, 50026, publicKey),
+				getSdaExchangeReceiptsByAccountIdAtHeightPromise(db, height, 41322, accountId),
+				getSdaExchangeReceiptsByAccountIdAtHeightPromise(db, height, 45674, accountId),
+				getSdaExchangeReceiptsByAccountIdAtHeightPromise(db, height, 50026, accountId),
 			]).then(results => {
 				const [
 					offerCreationInfo,
@@ -169,7 +168,7 @@ module.exports = {
 				] = results;
 
 				if (results.some(result => !result.isRequestValid)) {
-					res.send(errors.createNotFoundError(publicKey));
+					res.send(errors.createNotFoundError(accountId));
 					return next();
 				}
 

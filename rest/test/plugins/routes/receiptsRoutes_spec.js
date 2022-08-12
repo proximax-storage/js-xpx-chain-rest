@@ -25,8 +25,15 @@ const catapult = require('catapult-sdk');
 const { test } = require('../../routes/utils/routeTestUtils');
 const { expect } = require('chai');
 
-const { publicKeys } = test.sets;
+const { address } = catapult.model;
+const { publicKeys, addresses } = test.sets;
 const { convert } = catapult.utils;
+const constants = {
+	sizes: {
+		hexPublicKey: 64,
+		addressEncoded: 40
+	}
+};
 
 describe('receipts routes', () => {
 	describe('get transaction statements by height', () => {
@@ -336,8 +343,8 @@ describe('receipts routes', () => {
 		});
 	});
 
-	describe('get exchangesda transaction statements by public key', () => {
-		const endpointUnderTest = '/block/:height/receipts/exchangesda/:publicKey';
+	describe('get exchangesda transaction statements by account id', () => {
+		const endpointUnderTest = '/block/:height/receipts/exchangesda/:accountId';
 
 		const highestHeight = 50;
 		const correctQueriedHeight = highestHeight - 10;
@@ -360,9 +367,9 @@ describe('receipts routes', () => {
 
 		receiptsRoutes.register(server, {
 			catapultDb: {
-				chainInfo: () => Promise.resolve({ height: highestHeight, publicKey: publicKeys.valid[0] })
+				chainInfo: () => Promise.resolve({ height: highestHeight, accountId: publicKeys.valid[0] || addresses.valid[0] })
 			},
-			getSdaExchangeReceiptsByPublicKeyAtHeight: statementsFake
+			getSdaExchangeReceiptsByAccountIdAtHeight: statementsFake
 		});
 		
 		let sentResponse;
@@ -378,59 +385,92 @@ describe('receipts routes', () => {
 
 		beforeEach(() => statementsFake.resetHistory());
 
-		it('returns result if provided height is valid', () => {
-			// Arrange:
-			const req = { params: { height: correctQueriedHeight.toString(), publicKey: publicKeys.valid[0] } };
+		describe('returns result if provided height is valid', () => {
+			const assertGetSdaExchangeReceiptsByAccountIdAtHeight = traits => {
+				// Arrange:
+				const req = { params: { height: correctQueriedHeight.toString(), accountId: traits.accountId } };
 
-			// Act:
-			const route = routes[endpointUnderTest];
-			return route(req, res, next).then(() => {
-				// Assert:
-				expect(statementsFake.calledThrice).to.equal(true);
-				orderedSdaExchangeEntityTypes.forEach((sdaExchangeData, index) => expect(
-					statementsFake.calledWith(correctQueriedHeight, sdaExchangeData),
-					`failed at index ${index}`
-				).to.equal(true));
+				// Act:
+				const route = routes[endpointUnderTest];
+				return route(req, res, next).then(() => {
+					// Assert:
+					expect(statementsFake.calledThrice).to.equal(true);
+					orderedSdaExchangeEntityTypes.forEach((sdaExchangeData, index) => expect(
+						statementsFake.calledWith(correctQueriedHeight, sdaExchangeData),
+						`failed at index ${index}`
+					).to.equal(true));
 
-				expect(sentResponse).to.deep.equal({
-					payload: {
-						offerCreation: offerCreationData,
-						offerExchange: offerExchangeData,
-						offerRemoval: offerRemovalData
-					},
-					type: 'receipts.exchangesda'
+					expect(sentResponse).to.deep.equal({
+						payload: {
+							offerCreation: offerCreationData,
+							offerExchange: offerExchangeData,
+							offerRemoval: offerRemovalData
+						},
+						type: 'receipts.exchangesda'
+					});
 				});
-			});
+			};
+
+			it('with public key', () => assertGetSdaExchangeReceiptsByAccountIdAtHeight({
+				accountId: publicKeys.valid[0]
+			}));
+
+			it('with address', () => assertGetSdaExchangeReceiptsByAccountIdAtHeight({
+				accountId: addresses.valid[0]
+			}));
 		});
 
-		it('returns 404 if not found in the database', () => {
-			// Arrange:
-			const queriedHeight = highestHeight + 10;
-			const req = { params: { height: queriedHeight.toString(), publicKey: publicKeys.valid[0] } };
+		describe('returns 404 if not found in the database', () => {
+			const assertGetSdaExchangeReceiptsByAccountIdAtHeight = traits => {
+				// Arrange:
+				const queriedHeight = highestHeight + 10;
+				const req = { params: { height: queriedHeight.toString(), accountId: traits.accountId } };
 
-			// Act:
-			const route = routes[endpointUnderTest];
-			return route(req, res, next).then(() => {
+				// Act:
+				const route = routes[endpointUnderTest];
+				return route(req, res, next).then(() => {
+					// Assert:
+					expect(statementsFake.calledThrice).to.equal(true);
+					expect(sentResponse.statusCode).to.equal(404);
+					if (traits.accountId==constants.sizes.hexPublicKey)
+						expect(sentResponse.message).to.equal(`no resource exists with id '${convert.hexToUint8(publicKeys.valid[0])}'`);
+					else if (traits.accountId==constants.sizes.addressEncoded) 
+						expect(sentResponse.message).to.equal(`no resource exists with id '${address.stringToAddress(addresses.valid[0])}'`);
+				});
+			};
+
+			it('with public key', () => assertGetSdaExchangeReceiptsByAccountIdAtHeight({
+				accountId: publicKeys.valid[0]
+			}));
+
+			it('with address', () => assertGetSdaExchangeReceiptsByAccountIdAtHeight({
+				accountId: addresses.valid[0]
+			}));
+		});
+
+		describe('returns 409 if height is invalid', () => {
+			const assertGetSdaExchangeReceiptsByAccountIdAtHeight = traits => {
+				// Arrange:
+				const req = { params: { height: '10A' } };
+
+				// Act:
+				const route = routes[endpointUnderTest];
+				const apiResponse = expect(() => route(req, res, next).then(() => {})).to;
+
 				// Assert:
-				expect(statementsFake.calledThrice).to.equal(true);
-				expect(sentResponse.statusCode).to.equal(404);
-				expect(sentResponse.message).to.equal(`no resource exists with id '${convert.hexToUint8(publicKeys.valid[0])}'`);
-			});
-		});
+				apiResponse.throw('height has an invalid format');
+				apiResponse.with.property('statusCode', 409);
+				apiResponse.with.property('message', 'height has an invalid format');
+				expect(statementsFake.notCalled).to.equal(true);
+			};
 
-		it('returns 409 if height is invalid', () => {
-			// Arrange:
-			const req = { params: { height: '10A' } };
+			it('with public key', () => assertGetSdaExchangeReceiptsByAccountIdAtHeight({
+				accountId: publicKeys.valid[0]
+			}));
 
-			// Act:
-			const route = routes[endpointUnderTest];
-			const apiResponse = expect(() => route(req, res, next).then(() => {})).to;
-
-			// Assert:
-			apiResponse.throw('height has an invalid format');
-			apiResponse.with.property('statusCode', 409);
-			apiResponse.with.property('message', 'height has an invalid format');
-			expect(statementsFake.notCalled).to.equal(true);
+			it('with address', () => assertGetSdaExchangeReceiptsByAccountIdAtHeight({
+				accountId: addresses.valid[0]
+			}));
 		});
 	});
 });

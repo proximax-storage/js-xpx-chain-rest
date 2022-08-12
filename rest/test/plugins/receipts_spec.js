@@ -43,7 +43,7 @@ describe('receipts plugin', () => {
 				'/block/:height/receipt/:hash/merkle',
 				'/block/:height/receipts/:receiptType',
 				'/block/:height/receipts/exchangesda',
-				'/block/:height/receipts/exchangesda/:publicKey'		
+				'/block/:height/receipts/exchangesda/:accountId'		
 			]);
 		});
 	});
