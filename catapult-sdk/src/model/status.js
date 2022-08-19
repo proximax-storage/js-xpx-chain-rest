@@ -95,6 +95,7 @@ const toStringInternal = code => {
 		case 0x804D00A4: return 'Failure_Mosaic_Non_Transferable';
 		case 0x804D00AA: return 'Failure_Mosaic_Max_Mosaics_Exceeded';
 		case 0x804D00AB: return 'Failure_Mosaic_Plugin_Config_Malformed';
+		case 0x804D00AC: return 'Failure_Mosaic_Required_Property_Flag_Unset';
 		case 0x804D0007: return 'Failure_Mosaic_Insufficient_Levy_Balance';
 		case 0x804D0008: return 'Failure_Mosaic_Recipient_Levy_Not_Exist';
 		case 0x804D0009: return 'Failure_Mosaic_Invalid_Levy_Fee';
@@ -312,7 +313,7 @@ const toStringInternal = code => {
 		case 0x803F0003: return 'Failure_Metadata_v2_Value_Size_Delta_Too_Large';
 		case 0x803F0004: return 'Failure_Metadata_v2_Value_Size_Delta_Mismatch';
 		case 0x803F0005: return 'Failure_Metadata_v2_Value_Change_Irreversible';
-		case 0x80620001: return 'Duration_Smaller_Than_Configured';
+		case 0x80620001: return 'Failure_LockFund_Duration_Smaller_Than_Configured';
 		case 0x80620002: return 'Failure_LockFund_Invalid_Sender';
 		case 0x80620003: return 'Failure_LockFund_Not_Enough_Funds';
 		case 0x80620004: return 'Failure_LockFund_Duplicate_Record';
@@ -321,6 +322,29 @@ const toStringInternal = code => {
 		case 0x80620007: return 'Failure_LockFund_Plugin_Config_Malformed';
 		case 0x80620008: return 'Failure_LockFund_Too_Many_Mosaics';
 		case 0x80620009: return 'Failure_LockFund_Zero_Amount';
+		case 0x8062000A: return 'Failure_LockFund_Maximum_Unlock_Records';
+		case 0x80630001: return 'Failure_RestrictionAccount_Invalid_Restriction_Flags';
+		case 0x80630002: return 'Failure_RestrictionAccount_Invalid_Modification_Action';
+		case 0x80630003: return 'Failure_RestrictionAccount_Invalid_Modification_Address';
+		case 0x80630004: return 'Failure_RestrictionAccount_Modification_Operation_Type_Incompatible';
+		case 0x80630005: return 'Failure_RestrictionAccount_Redundant_Modification';
+		case 0x80630006: return 'Failure_RestrictionAccount_Invalid_Modification';
+		case 0x80630007: return 'Failure_RestrictionAccount_Modification_Count_Exceeded';
+		case 0x80630008: return 'Failure_RestrictionAccount_No_Modifications';
+		case 0x80630009: return 'Failure_RestrictionAccount_Values_Count_Exceeded';
+		case 0x8063000A: return 'Failure_RestrictionAccount_Invalid_Value';
+		case 0x8063000B: return 'Failure_RestrictionAccount_Address_Interaction_Prohibited';
+		case 0x8063000C: return 'Failure_RestrictionAccount_Mosaic_Transfer_Prohibited';
+		case 0x8063000D: return 'Failure_RestrictionAccount_Operation_Type_Prohibited';
+		case 0x80640001: return 'Failure_RestrictionMosaic_Invalid_Restriction_Type';
+		case 0x80640002: return 'Failure_RestrictionMosaic_Previous_Value_Mismatch';
+		case 0x80640003: return 'Failure_RestrictionMosaic_Previous_Value_Must_Be_Zero';
+		case 0x80640004: return 'Failure_RestrictionMosaic_Max_Restrictions_Exceeded';
+		case 0x80640005: return 'Failure_RestrictionMosaic_Cannot_Delete_Nonexistent_Restriction';
+		case 0x80640006: return 'Failure_RestrictionMosaic_Unknown_Global_Restriction';
+		case 0x80640007: return 'Failure_RestrictionMosaic_Invalid_Global_Restriction';
+		case 0x80640008: return 'Failure_RestrictionMosaic_Account_Unauthorized';
+
 		default: return undefined;
 	}
 };
