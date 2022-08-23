@@ -25,7 +25,7 @@ const exchangePlugin = {
 			mosaicId: 		ModelType.uint64,
 			mosaicAmount: 	ModelType.uint64,
 			cost: 			ModelType.uint64,
-			duration: ModelType.uint64,
+			duration: 		ModelType.uint64,
 		});
 
 		builder.addTransactionSupport(EntityType.exchange, {

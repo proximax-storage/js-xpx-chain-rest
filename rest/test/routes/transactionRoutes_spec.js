@@ -239,10 +239,12 @@ describe('transaction routes', () => {
 								height: undefined,
 								fromHeight: undefined,
 								toHeight: undefined,
+								publicKey: undefined,
 								recipientAddress: undefined,
 								signerPublicKey: undefined,
 								embedded: undefined,
-								transactionTypes: undefined
+								transactionTypes: undefined,
+								firstLevel: undefined
 							};
 
 							expectedResult[filter] = value;
@@ -257,6 +259,7 @@ describe('transaction routes', () => {
 					const testCases = [
 						{ filter: 'height', param: '15', value: 15 },
 						{ filter: 'address', param: testAddressString, value: testAddress },
+						{ filter: 'publicKey', param: testPublickeyString, value: testPublickey },
 						{ filter: 'signerPublicKey', param: testPublickeyString, value: testPublickey },
 						{ filter: 'recipientAddress', param: testAddressString, value: testAddress },
 						{ filter: 'embedded', param: 'true', value: true },
@@ -278,10 +281,12 @@ describe('transaction routes', () => {
 								height: undefined,
 								fromHeight: undefined,
 								toHeight: undefined,
+								publicKey: undefined,
 								recipientAddress: undefined,
 								signerPublicKey: undefined,
 								embedded: undefined,
-								transactionTypes: [1, 5, 25]
+								transactionTypes: [1, 5, 25],
+								firstLevel: undefined
 							});
 						});
 					});
@@ -300,10 +305,12 @@ describe('transaction routes', () => {
 								height: undefined,
 								fromHeight: [1, 0],
 								toHeight: [10, 0],
+								publicKey: undefined,
 								recipientAddress: undefined,
 								signerPublicKey: undefined,
 								embedded: undefined,
-								transactionTypes: undefined
+								transactionTypes: undefined,
+								firstLevel: undefined
 							});
 						});
 					});
@@ -361,6 +368,37 @@ describe('transaction routes', () => {
 					});
 				});
 
+				describe('does not allow filtering by publicKey if address or signerPublicKey or recipientAddress are provided', () => {
+					const errorMessage = 'can\'t filter by publicKey if address or signerPublicKey or recipientAddress are already provided';
+
+					it('publicKey and address', () => {
+						const req = {
+							params: { group: TransactionGroups.confirmed, publicKey: testPublickeyString, address: testAddressString }
+						};
+
+						// Act + Assert
+						expect(() => mockServer.callRoute(route, req)).to.throw(errorMessage);
+					});
+
+					it('publicKey and signer public key', () => {
+						const req = {
+							params: { group: TransactionGroups.confirmed, publicKey: testPublickeyString, recipientAddress: testAddressString }
+						};
+
+						// Act + Assert
+						expect(() => mockServer.callRoute(route, req)).to.throw(errorMessage);
+					});
+
+					it('publicKey and recipient address', () => {
+						const req = {
+							params: { group: TransactionGroups.confirmed, publicKey: testPublickeyString, signerPublicKey: testPublickeyString }
+						};
+
+						// Act + Assert
+						expect(() => mockServer.callRoute(route, req)).to.throw(errorMessage);
+					});
+				});
+
 				describe('checks correct group is provided', () => {
 					const runValidGroupTest = group => {
 						it(group, () =>
@@ -371,10 +409,12 @@ describe('transaction routes', () => {
 									height: undefined,
 									fromHeight: undefined,
 									toHeight: undefined,
+									publicKey: undefined,
 									recipientAddress: undefined,
 									signerPublicKey: undefined,
 									embedded: undefined,
-									transactionTypes: undefined
+									transactionTypes: undefined,
+									firstLevel: undefined
 								});
 							}));
 					};

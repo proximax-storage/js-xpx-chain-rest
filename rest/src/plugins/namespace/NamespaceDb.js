@@ -102,6 +102,7 @@ class NamespaceDb {
 						{ 'namespace.endHeight': { $gt: stats.count } }]
 				});
 				conditions.$and.push({ 'namespace.alias.type': aliasType });
+				conditions.$and.push({ 'meta.active': true });
 				conditions.$and.push(aliasFilterCondition[aliasType]());
 
 				return this.catapultDb.queryDocuments('namespaces', conditions);

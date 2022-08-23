@@ -54,6 +54,12 @@ module.exports = {
 			if (!isValidTransactionGroup(params.group))
 				return next(new NotFoundError());
 
+			if (params.publicKey && (params.address || params.signerPublicKey || params.recipientAddress)) {
+				throw errors.createInvalidArgumentError(
+					'can\'t filter by publicKey if address or signerPublicKey or recipientAddress are already provided'
+				);
+			}
+
 			if (params.address && (params.signerPublicKey || params.recipientAddress)) {
 				throw errors.createInvalidArgumentError(
 					'can\'t filter by address if signerPublicKey or recipientAddress are already provided'
@@ -68,7 +74,9 @@ module.exports = {
 				signerPublicKey: params.signerPublicKey ? routeUtils.parseArgument(params, 'signerPublicKey', 'publicKey') : undefined,
 				recipientAddress: params.recipientAddress ? routeUtils.parseArgument(params, 'recipientAddress', 'address') : undefined,
 				transactionTypes: params.type ? routeUtils.parseArgumentAsArray(params, 'type', 'uint') : undefined,
-				embedded: params.embedded ? routeUtils.parseArgument(params, 'embedded', 'boolean') : undefined
+				embedded: params.embedded ? routeUtils.parseArgument(params, 'embedded', 'boolean') : undefined,
+				publicKey: params.publicKey ? routeUtils.parseArgument(params, 'publicKey', 'publicKey') : undefined,
+				firstLevel: params.firstLevel ? routeUtils.parseArgument(params, 'firstLevel', 'boolean') : undefined
 			};
 
 			const options = routeUtils.parsePaginationArguments(params, services.config.pageSize, { id: 'objectId' });

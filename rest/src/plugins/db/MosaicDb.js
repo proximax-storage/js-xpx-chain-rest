@@ -19,8 +19,19 @@
  */
 
 const MongoDb = require('mongodb');
+const { convertToLong } = require('../../db/dbUtils');
 
 const { Long } = MongoDb;
+
+const constants = {
+	FlagsIndex: 0,
+	Flags : {
+		None: 0,
+		Supply_Mutable: 1,
+		Transferable: 2,
+		All: 3,
+	}
+};
 
 class MosaicDb {
 	/**
@@ -56,7 +67,79 @@ class MosaicDb {
 	 * Retrieves all mosaics.
 	 * @returns {Promise.<array>} Mosaics.
 	 */
-	 mosaics() {
+	 mosaics(filters, options) {
+		const buildConditions = () => {
+			const conditions = [];
+
+			if (filters === undefined)
+				return undefined;
+
+			if (filters.ownerPubKey !== undefined) {
+				const ownerPubKeyCondition = { 'mosaic.owner': Buffer.from(filters.ownerPubKey) };
+				conditions.push(ownerPubKeyCondition);
+			}
+
+			if (filters.supply !== undefined) {
+				const supplyCondition = { 'mosaic.supply': convertToLong(filters.supply) };
+				conditions.push(supplyCondition);
+			}
+
+			if (filters.mutable !== undefined) {
+				let values = [];
+				if (filters.mutable) {
+					values = [constants.Flags.Supply_Mutable, constants.Flags.All];
+				} else {
+					values = [constants.Flags.None, constants.Flags.Transferable];
+				}
+
+				const mutableCondition = {
+					"mosaic.properties": { $elemMatch: {
+							"id": constants.FlagsIndex,
+							"value": { $in: values}
+						}}
+				};
+
+				conditions.push(mutableCondition);
+			}
+
+			if (filters.transferable !== undefined) {
+				let values = [];
+				if (filters.transferable) {
+					values = [constants.Flags.Transferable, constants.Flags.All];
+				} else {
+					values = [constants.Flags.None, constants.Flags.Supply_Mutable];
+				}
+
+				const mutableCondition = {
+					"mosaic.properties": { $elemMatch: {
+							"id": constants.FlagsIndex,
+							"value": { $in: values}
+						}}
+				};
+
+				conditions.push(mutableCondition);
+			}
+
+			return conditions;
+		};
+
+		const removedFields = ['meta.addresses'];
+		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
+		const conditions = buildConditions();
+
+		// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
+		// in fact, offset logic should be moved to `queryPagedDocuments`
+		if (options.offset !== undefined)
+			conditions.push({[options.sortField]: {[1 === options.sortDirection ? '$gt' : '$lt']: new ObjectId(options.offset)}});
+
+		return this.catapultDb.queryPagedDocuments_2(conditions, removedFields, sortConditions, "mosaics", options);
+	}
+
+	/**
+	 * Retrieves all mosaics.
+	 * @returns {Promise.<array>} Mosaics.
+	 */
+	allMosaics() {
 		const collection = this.catapultDb.database.collection('mosaics');
 		return collection.find({}, { 'mosaic.mosaicId': 1, 'mosaic.properties': 0, 'meta': 0 })
 			.toArray()
