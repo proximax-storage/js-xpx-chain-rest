@@ -26,7 +26,8 @@ const ReceiptType = {
 	2: 'receipts.balanceChange',
 	3: 'receipts.balanceChange',
 	4: 'receipts.artifactExpiry',
-	5: 'receipts.inflation'
+	5: 'receipts.inflation',
+	8: 'receipts.signerBalance'
 };
 
 const getBasicReceiptType = type => ReceiptType[(type & 0xF000) >> 12] || 'receipts.unknown';
@@ -40,7 +41,8 @@ const receiptsPlugin = {
 		builder.addSchema('receipts', {
 			transactionStatements: { type: ModelType.array, schemaName: 'receipts.transactionStatement' },
 			addressResolutionStatements: { type: ModelType.array, schemaName: 'receipts.addressResolutionStatement' },
-			mosaicResolutionStatements: { type: ModelType.array, schemaName: 'receipts.mosaicResolutionStatement' }
+			mosaicResolutionStatements: { type: ModelType.array, schemaName: 'receipts.mosaicResolutionStatement' },
+			publicKeyStatements: { type: ModelType.array, schemaName: 'receipts.publicKeyStatement' }
 		});
 
 		builder.addSchema('receipts.addressResolutionStatement', {
@@ -56,6 +58,11 @@ const receiptsPlugin = {
 		});
 
 		builder.addSchema('receipts.transactionStatement', {
+			height: ModelType.uint64,
+			receipts: { type: ModelType.array, schemaName: entity => getBasicReceiptType(entity.type) }
+		});
+
+		builder.addSchema('receipts.publicKeyStatement', {
 			height: ModelType.uint64,
 			receipts: { type: ModelType.array, schemaName: entity => getBasicReceiptType(entity.type) }
 		});
@@ -90,7 +97,10 @@ const receiptsPlugin = {
 			amount: ModelType.uint64
 		});
 
-		builder.addSchema('receipts.unknown', {});
+		builder.addSchema('receipts.signerBalance', {
+			amount: ModelType.uint64,
+			lockedAmount: ModelType.uint64
+		});
 	},
 
 	registerCodecs: () => {}

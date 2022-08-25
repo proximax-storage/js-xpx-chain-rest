@@ -36,12 +36,14 @@ module.exports = {
 			return Promise.all([
 				getStatementsPromise(db, height, 'transactionStatements'),
 				getStatementsPromise(db, height, 'addressResolutionStatements'),
-				getStatementsPromise(db, height, 'mosaicResolutionStatements')
+				getStatementsPromise(db, height, 'mosaicResolutionStatements'),
+				getStatementsPromise(db, height, 'publicKeyStatements')
 			]).then(results => {
 				const [
 					transactionStatementsInfo,
 					addressResolutionStatementsInfo,
-					mosaicResolutionStatementsInfo
+					mosaicResolutionStatementsInfo,
+					publicKeyStatementsInfo
 				] = results;
 
 				if (results.some(result => !result.isRequestValid)) {
@@ -52,7 +54,8 @@ module.exports = {
 				const result = {
 					transactionStatements: transactionStatementsInfo.payload,
 					addressResolutionStatements: addressResolutionStatementsInfo.payload,
-					mosaicResolutionStatements: mosaicResolutionStatementsInfo.payload
+					mosaicResolutionStatements: mosaicResolutionStatementsInfo.payload,
+					publicKeyStatements: publicKeyStatementsInfo.payload,
 				};
 
 				res.send({
