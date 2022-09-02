@@ -173,8 +173,9 @@ describe('storage plugin', () => {
 			expect(modelSchema['replicator']).to.contain.all.keys([
 				'key',
 				'version',
-				'capacity',
-				'drives'
+				// 'capacity',
+				'drives',
+				'downloadChannels'
 			]);
 
 			expect(Object.keys(modelSchema['driveInfo']).length).to.equal(5);
