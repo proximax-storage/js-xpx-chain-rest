@@ -300,7 +300,7 @@ class CatapultDb {
 			firstLevelConditions = queryConditions[preprocessingIndex].value;
 			queryConditions.splice(preprocessingIndex, 1);
 		}
-		
+
 		const countConditions = [];
 		if (queryConditions.length) {
 			conditions.push(1 === queryConditions.length ? { $match: queryConditions[0] } : { $match: { $and: queryConditions } });
@@ -456,12 +456,31 @@ class CatapultDb {
 				conditions.push({ 'meta.height': { $gte: convertToLong(filters.fromHeight) } });
 			else if (filters.toHeight !== undefined)
 				conditions.push({ 'meta.height': { $lte: convertToLong(filters.toHeight) } });
-			
+
 			if (filters.firstLevel !== undefined && !filters.firstLevel)
 				firstLevelConditions.push(1);
 
 			if (!filters.embedded)
 				conditions.push({ 'meta.aggregateId': { $exists: false } });
+
+			if(filters.transferMosaicId !== undefined){
+				
+				let transferElemMatch = {
+					id: convertToLong(filters.transferMosaicId)
+				};
+
+				if (filters.fromTransferAmount !== undefined && filters.toTransferAmount !== undefined){
+					transferElemMatch.amount = { $gte: convertToLong(filters.fromTransferAmount), $lte: convertToLong(filters.toTransferAmount)};
+				}
+				else if(filters.fromTransferAmount !== undefined)
+					transferElemMatch.amount = { $gte: convertToLong(filters.fromTransferAmount) };				
+				else if(filters.toTransferAmount !== undefined)
+					transferElemMatch.amount = { $lte: convertToLong(filters.toTransferAmount) };
+
+				conditions.push({"transaction.type": EntityType.transfer});
+				conditions.push({"transaction.mosaics.0": { $exists: true }});
+				conditions.push({"transaction.mosaics": { $elemMatch: transferElemMatch }});
+			}
 
 			if (filters.transactionTypes !== undefined)
 				conditions.push({ 'transaction.type': { $in: filters.transactionTypes } });
