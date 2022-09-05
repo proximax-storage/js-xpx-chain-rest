@@ -464,36 +464,25 @@ class CatapultDb {
 				conditions.push({ 'meta.aggregateId': { $exists: false } });
 
 			if(filters.transferMosaicId !== undefined){
-
-				let transferElemMatchConditions = [];
+				
 				let transferElemMatch = {
-					id: convertToLong(filters.transferMosaicId),
+					id: convertToLong(filters.transferMosaicId)
 				};
 
 				if (filters.fromTransferAmount !== undefined && filters.toTransferAmount !== undefined){
-					const transferElemMatch2 = {
-						id: transferElemMatch.id,
-						amount: {$lte: convertToLong(filters.toTransferAmount)}
-					};
-					transferElemMatchConditions.push({"transaction.mosaics": { $elemMatch: transferElemMatch2}});
-					transferElemMatch.amount = { $gte: convertToLong(filters.fromTransferAmount)};
+					transferElemMatch.amount = { $gte: convertToLong(filters.fromTransferAmount), $lte: convertToLong(filters.toTransferAmount)};
 				}
 				else if(filters.fromTransferAmount !== undefined)
 					transferElemMatch.amount = { $gte: convertToLong(filters.fromTransferAmount) };				
 				else if(filters.toTransferAmount !== undefined)
 					transferElemMatch.amount = { $lte: convertToLong(filters.toTransferAmount) };
-				
-				transferElemMatchConditions.push({"transaction.mosaics": { $elemMatch: transferElemMatch }});
 
 				conditions.push({"transaction.type": EntityType.transfer});
 				conditions.push({"transaction.mosaics.0": { $exists: true }});
-
-				for(let transferElemMatchCondition of transferElemMatchConditions){
-					conditions.push(transferElemMatchCondition);
-				}
+				conditions.push({"transaction.mosaics": { $elemMatch: transferElemMatch }});
 			}
 
-			if (filters.transactionTypes !== undefined && filters.transferMosaicId === undefined)
+			if (filters.transactionTypes !== undefined)
 				conditions.push({ 'transaction.type': { $in: filters.transactionTypes } });
 
 			const accountConditions = buildAccountConditions();
