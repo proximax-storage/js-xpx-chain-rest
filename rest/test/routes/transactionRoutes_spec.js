@@ -244,7 +244,10 @@ describe('transaction routes', () => {
 								signerPublicKey: undefined,
 								embedded: undefined,
 								transactionTypes: undefined,
-								firstLevel: undefined
+								firstLevel: undefined,
+								transferMosaicId: undefined,
+								toTransferAmount: undefined,
+								fromTransferAmount: undefined
 							};
 
 							expectedResult[filter] = value;
@@ -264,7 +267,8 @@ describe('transaction routes', () => {
 						{ filter: 'recipientAddress', param: testAddressString, value: testAddress },
 						{ filter: 'embedded', param: 'true', value: true },
 						{ filter: 'fromHeight', param: '1', value: [1,0] },
-						{ filter: 'toHeight', param: '5', value: [5,0] }
+						{ filter: 'toHeight', param: '5', value: [5,0] },
+						{ filter: 'transferMosaicId', param: '13bfc518e40549d7', value: [3825551831,331334936] }
 					];
 
 					testCases.forEach(testCase => {
@@ -286,7 +290,10 @@ describe('transaction routes', () => {
 								signerPublicKey: undefined,
 								embedded: undefined,
 								transactionTypes: [1, 5, 25],
-								firstLevel: undefined
+								firstLevel: undefined,
+								transferMosaicId: undefined,
+								toTransferAmount: undefined,
+								fromTransferAmount: undefined
 							});
 						});
 					});
@@ -310,7 +317,38 @@ describe('transaction routes', () => {
 								signerPublicKey: undefined,
 								embedded: undefined,
 								transactionTypes: undefined,
-								firstLevel: undefined
+								firstLevel: undefined,
+								transferMosaicId: undefined,
+								toTransferAmount: undefined,
+								fromTransferAmount: undefined
+							});
+						});
+					});
+
+					
+					it('transferMosaicIdAmount', () => {
+						const req = { params: {
+								group: TransactionGroups.confirmed,
+								transferMosaicId: "13bfc518e40549d7",
+								fromTransferAmount: "100",
+								toTransferAmount: "100"
+							} };
+
+						return mockServer.callRoute(route, req).then(() => {
+							expect(dbTransactionsFake.firstCall.args[1]).to.deep.equal({
+								address: undefined,
+								height: undefined,
+								fromHeight: undefined,
+								toHeight: undefined,
+								publicKey: undefined,
+								recipientAddress: undefined,
+								signerPublicKey: undefined,
+								embedded: undefined,
+								transactionTypes: undefined,
+								firstLevel: undefined,
+								transferMosaicId: [3825551831,331334936],
+								toTransferAmount: [100,0],
+								fromTransferAmount: [100,0]
 							});
 						});
 					});
@@ -399,6 +437,28 @@ describe('transaction routes', () => {
 					});
 				});
 
+				describe('does not allow filtering by transfer amount if transferMosaicId is not provided', () => {
+					const errorMessage = 'can\'t filter by transfer amount if `transferMosaicId` is not provided';
+
+					it('toTransferAmount', () => {
+						const req = {
+							params: { group: TransactionGroups.confirmed, toTransferAmount: 1 }
+						};
+
+						// Act + Assert
+						expect(() => mockServer.callRoute(route, req)).to.throw(errorMessage);
+					});
+
+					it('fromTransferAmount', () => {
+						const req = {
+							params: { group: TransactionGroups.confirmed, fromTransferAmount: 1 }
+						};
+
+						// Act + Assert
+						expect(() => mockServer.callRoute(route, req)).to.throw(errorMessage);
+					});
+				});
+
 				describe('checks correct group is provided', () => {
 					const runValidGroupTest = group => {
 						it(group, () =>
@@ -414,7 +474,10 @@ describe('transaction routes', () => {
 									signerPublicKey: undefined,
 									embedded: undefined,
 									transactionTypes: undefined,
-									firstLevel: undefined
+									firstLevel: undefined,
+									transferMosaicId: undefined,
+									toTransferAmount: undefined,
+									fromTransferAmount: undefined
 								});
 							}));
 					};
