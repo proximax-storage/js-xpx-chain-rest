@@ -72,6 +72,12 @@ module.exports = {
 				);
 			}
 
+			if (params.type !== undefined && params.transferMosaicId !== undefined) {
+				throw errors.createInvalidArgumentError(
+					'can\'t filter by both `transferMosaicId` and transaction `type` provided'
+				);
+			}
+
 			const filters = {
 				height: params.height ? routeUtils.parseArgument(params, 'height', 'uint') : undefined,
 				fromHeight: params.fromHeight ? routeUtils.parseArgument(params, 'fromHeight', 'uint64') : undefined,

@@ -459,6 +459,19 @@ describe('transaction routes', () => {
 					});
 				});
 
+				describe('does not allow filtering by both transferMosaicId and transaction type provided', () => {
+					const errorMessage = 'can\'t filter by both `transferMosaicId` and transaction `type` provided';
+
+					it('transferMosaicId and type', () => {
+						const req = {
+							params: { group: TransactionGroups.confirmed, transferMosaicId: "13bfc518e40549d7", type: [12345] }
+						};
+
+						// Act + Assert
+						expect(() => mockServer.callRoute(route, req)).to.throw(errorMessage);
+					});
+				});
+
 				describe('checks correct group is provided', () => {
 					const runValidGroupTest = group => {
 						it(group, () =>
