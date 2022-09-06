@@ -42,7 +42,8 @@ const receiptsPlugin = {
 			transactionStatements: { type: ModelType.array, schemaName: 'receipts.transactionStatement' },
 			addressResolutionStatements: { type: ModelType.array, schemaName: 'receipts.addressResolutionStatement' },
 			mosaicResolutionStatements: { type: ModelType.array, schemaName: 'receipts.mosaicResolutionStatement' },
-			publicKeyStatements: { type: ModelType.array, schemaName: 'receipts.publicKeyStatement' }
+			publicKeyStatements: { type: ModelType.array, schemaName: 'receipts.publicKeyStatement' },
+			blockchainStateStatements: { type: ModelType.array, schemaName: 'receipts.blockchainStateStatement' }
 		});
 
 		builder.addSchema('receipts.addressResolutionStatement', {
@@ -63,6 +64,11 @@ const receiptsPlugin = {
 		});
 
 		builder.addSchema('receipts.publicKeyStatement', {
+			height: ModelType.uint64,
+			receipts: { type: ModelType.array, schemaName: entity => getBasicReceiptType(entity.type) }
+		});
+
+		builder.addSchema('receipts.blockchainStateStatement', {
 			height: ModelType.uint64,
 			receipts: { type: ModelType.array, schemaName: entity => getBasicReceiptType(entity.type) }
 		});

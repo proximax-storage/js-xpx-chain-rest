@@ -37,13 +37,15 @@ module.exports = {
 				getStatementsPromise(db, height, 'transactionStatements'),
 				getStatementsPromise(db, height, 'addressResolutionStatements'),
 				getStatementsPromise(db, height, 'mosaicResolutionStatements'),
-				getStatementsPromise(db, height, 'publicKeyStatements')
+				getStatementsPromise(db, height, 'publicKeyStatements'),
+				getStatementsPromise(db, height, 'blockchainStateStatements')
 			]).then(results => {
 				const [
 					transactionStatementsInfo,
 					addressResolutionStatementsInfo,
 					mosaicResolutionStatementsInfo,
-					publicKeyStatementsInfo
+					publicKeyStatementsInfo,
+					blockchainStateStatementsInfo
 				] = results;
 
 				if (results.some(result => !result.isRequestValid)) {
@@ -56,6 +58,7 @@ module.exports = {
 					addressResolutionStatements: addressResolutionStatementsInfo.payload,
 					mosaicResolutionStatements: mosaicResolutionStatementsInfo.payload,
 					publicKeyStatements: publicKeyStatementsInfo.payload,
+					blockchainStateStatements: blockchainStateStatementsInfo.payload,
 				};
 
 				res.send({
