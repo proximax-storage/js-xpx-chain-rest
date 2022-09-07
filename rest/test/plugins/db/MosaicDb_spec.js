@@ -32,22 +32,26 @@ describe('mosaic db', () => {
 		return test.db.createMosaics(owner, numNamespaces, numMosaicsPerNamespace);
 	};
 
+	const createAccountWithMosaics = (ownerPublicKey, mosaicIds)=>{
+		return test.db.createAccountWithMosaics(ownerPublicKey, mosaicIds);
+	}
+
 	describe('mosaics by ids', () => {
+
+		// Arrange: mosaic ids: 10000, 10001, ... 10011
+		const mosaics = createMosaics(3, 4);
+
 		it('returns empty array for unknown mosaic ids', () => {
-			// Arrange: mosaic ids: 10000, 10001, ... 10011
-			const mosaics = createMosaics(3, 4);
 
 			// Assert:
 			return test.db.runDbTest(
 				mosaics,
-				db => db.mosaicsByIds([[123, 456]]),
-				entities => { expect(entities).to.deep.equal([]); }
+				db => db.mosaicsByIds([[123, 0]]),
+				entities => { expect(entities.length).to.equal(0); }
 			);
 		});
 
 		it('returns single matching mosaic', () => {
-			// Arrange: mosaic ids: 10000, 10001, ... 10011
-			const mosaics = createMosaics(3, 4);
 
 			// Assert:
 			return test.db.runDbTest(
@@ -58,8 +62,6 @@ describe('mosaic db', () => {
 		});
 
 		it('returns multiple matching mosaics', () => {
-			// Arrange: mosaic ids: 10000, 10001, ... 10011
-			const mosaics = createMosaics(3, 4);
 
 			// Assert:
 			return test.db.runDbTest(
@@ -70,8 +72,6 @@ describe('mosaic db', () => {
 		});
 
 		it('returns only known mosaics', () => {
-			// Arrange: mosaic ids: 10000, 10001, ... 10011
-			const mosaics = createMosaics(3, 4);
 
 			// Assert:
 			return test.db.runDbTest(
@@ -161,6 +161,47 @@ describe('mosaic db', () => {
 					mosaics,
 					db => db.mosaics(filters, options),
 					mosaicsPage => expect(mosaicsPage.data.length).to.equal(0)
+				);
+			});
+
+			// get mosaic ids: 10001, 10002, ... 10005
+			const mosaicIdsChunk = mosaics.slice(1, 6).map(x => x.mosaic.mosaicId);
+			const ownerBuffer = Buffer.from(mosaics[0].mosaic.owner.read(0, -1));
+			const newAccount = createAccountWithMosaics(ownerBuffer, mosaicIdsChunk);
+
+			it('returns mosaics owner holding', () => {
+	
+				return test.db.runDbTest(
+					[newAccount],
+					db => db.catapultDb.accountsByIds([{ "publicKey": ownerBuffer }]),
+					entities => { 
+						const filters = { ownerPubKey: ownerBuffer, holding: true };
+						
+						return test.db.runDbTest(
+							mosaics,
+							db => db.mosaics(filters, options),
+							mosaicsPage => expect(mosaicsPage.data.length).to.equal(mosaicIdsChunk.length)
+						);
+					},
+					"accounts"
+				);
+			});
+
+			it('returns mosaics owner not holding', () => {
+
+				return test.db.runDbTest(
+					[newAccount],
+					db => db.catapultDb.accountsByIds([{ "publicKey": ownerBuffer }]),
+					entities => { 
+						const filters = { ownerPubKey: ownerBuffer, holding: false };
+						
+						return test.db.runDbTest(
+							mosaics,
+							db => db.mosaics(filters, options),
+							mosaicsPage => expect(mosaicsPage.data.length).to.equal(mosaics.length - mosaicIdsChunk.length)
+						);
+					},
+					"accounts"
 				);
 			});
 		});
