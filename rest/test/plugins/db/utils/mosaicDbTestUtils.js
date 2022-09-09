@@ -51,6 +51,21 @@ const createMosaics = (owner, numNamespaces, numMosaicsPerNamespace, supply) => 
 	return mosaics;
 };
 
+const createAccountWithMosaics = (publicKey, mosaicIds) => {
+	let accounts = dbTestUtils.db.createAccounts(publicKey, { 
+		numAccounts: 0,
+		numImportances: 1,
+		numMosaics: 5,
+		savePublicKey: true
+	});
+
+	for(let i =0; i < accounts[0].account.mosaics.length; ++i){
+		accounts[0].account.mosaics[i].id = mosaicIds[i];
+	}
+
+	return accounts[0];
+};
+
 const mosaicDbTestUtils = {
 	consts : {
 		FlagsIndex: 0,
@@ -64,8 +79,9 @@ const mosaicDbTestUtils = {
 	db: {
 		createMosaic,
 		createMosaics,
-		runDbTest: (dbEntities, issueDbCommand, assertDbCommandResult) =>
-			dbTestUtils.db.runDbTest(dbEntities, 'mosaics', db => new MosaicDb(db), issueDbCommand, assertDbCommandResult)
+		createAccountWithMosaics,
+		runDbTest: (dbEntities, issueDbCommand, assertDbCommandResult, collectionName = "mosaics") =>
+			dbTestUtils.db.runDbTest(dbEntities, collectionName, db => new MosaicDb(db), issueDbCommand, assertDbCommandResult)
 	}
 };
 Object.assign(mosaicDbTestUtils, test);

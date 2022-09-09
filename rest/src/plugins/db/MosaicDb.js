@@ -67,8 +67,8 @@ class MosaicDb {
 	 * Retrieves all mosaics.
 	 * @returns {Promise.<array>} Mosaics.
 	 */
-	 mosaics(filters, options) {
-		const buildConditions = () => {
+	async mosaics(filters, options) {
+		const buildConditions = async () => {
 			const conditions = [];
 
 			if (filters === undefined)
@@ -77,6 +77,22 @@ class MosaicDb {
 			if (filters.ownerPubKey !== undefined) {
 				const ownerPubKeyCondition = { 'mosaic.owner': Buffer.from(filters.ownerPubKey) };
 				conditions.push(ownerPubKeyCondition);
+
+				if(filters.holding !== undefined){
+					const accountInfos = await this.catapultDb.accountsByIds([{ "publicKey": filters.ownerPubKey }]);
+					
+					if(accountInfos.length){
+						const holdingMosaics = accountInfos[0].account.mosaics.map(x=> x.id);
+
+						if(!filters.holding){
+							conditions.push({ 'mosaic.mosaicId': { $nin: holdingMosaics }});
+						}
+						else{
+							conditions.push({ 'mosaic.mosaicId': { $in: holdingMosaics }});
+						}
+					}
+					
+				}
 			}
 
 			if (filters.supply !== undefined) {
@@ -125,7 +141,7 @@ class MosaicDb {
 
 		const removedFields = ['meta.addresses'];
 		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
-		const conditions = buildConditions();
+		const conditions = await buildConditions();
 
 		// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
 		// in fact, offset logic should be moved to `queryPagedDocuments`
