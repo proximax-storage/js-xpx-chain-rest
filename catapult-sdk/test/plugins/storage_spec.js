@@ -183,8 +183,8 @@ describe('storage plugin', () => {
 				'lastCompletedCumulativeDownloadWork'
 			]);
 
-			// expect(Object.keys(modelSchema['downloadChannelEntry']).length).to.equal(1);
-			// expect(modelSchema['downloadChannelEntry']).to.contain.all.keys(['downloadChannelInfo']);
+			expect(Object.keys(modelSchema['downloadChannelEntry']).length).to.equal(1);
+			expect(modelSchema['downloadChannelEntry']).to.contain.all.keys(['downloadChannelInfo']);
 
 			expect(Object.keys(modelSchema['cumulativePayments']).length).to.equal(2);
 			expect(modelSchema['cumulativePayments']).to.contain.all.keys([
