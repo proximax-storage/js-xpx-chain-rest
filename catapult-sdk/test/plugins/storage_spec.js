@@ -23,7 +23,7 @@ describe('storage plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 30);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 31);
 			expect(modelSchema).to.contain.all.keys([
 				'prepareBcDrive',
 				'dataModification',
@@ -42,6 +42,7 @@ describe('storage plugin', () => {
 				'replicatorEntry',
 				'replicator',
 				'driveInfo',
+				'downloadChannelEntry',
 				'cumulativePayments',
 				'downloadChannelInfo',
 				'bcDriveEntry',
