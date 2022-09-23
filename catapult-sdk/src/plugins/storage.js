@@ -138,6 +138,10 @@ const storagePlugin = {
 			downloadChannels: { type: ModelType.array, schemaName: ModelType.binary }
 		});
 
+		builder.addSchema('downloadChannelEntry', {
+			downloadChannelInfo: { type: ModelType.object, schemaName: 'downloadChannelInfo' }
+		});
+
 		builder.addSchema('cumulativePayments', {
 			replicator:		ModelType.binary,
 			payment:		ModelType.uint64,
