@@ -365,6 +365,7 @@ const toStringInternal = code => {
 		case 0x80620034: return 'Failure_Storage_Already_Applied_For_Offboarding'
 		case 0x80620035: return 'Failure_Storage_Already_Initiated_Channel_Closure'
 		case 0x80620036: return 'Failure_Storage_Download_Channel_Is_Finished'
+		case 0x80620037: return 'Failure_Storage_Service_Unit_Transfer'
 		case 0x80690001: return 'Failure_LiquidityProvider_Liquidity_Provider_Already_Exists'
 		case 0x80690002: return 'Failure_LiquidityProvider_Invalid_Owner'
 		case 0x80690003: return 'Failure_LiquidityProvider_Invalid_Slashing_Period'
@@ -376,6 +377,7 @@ const toStringInternal = code => {
 		case 0x80690009: return 'Failure_LiquidityProvider_Plugin_Config_Malformed'
 		case 0x8069000a: return 'Failure_LiquidityProvider_Invalid_Mosaic_Amount'
 		case 0x8069000b: return 'Failure_LiquidityProvider_Invalid_Currency_Amount'
+		case 0x8069000c: return 'Failure_LiquidityProvider_Reserved_Mosaic_Id'
 		case 0x80610001: return 'Failure_Committee_Plugin_Config_Malformed';
 		case 0x80610002: return 'Failure_Committee_Redundant';
 		case 0x80610003: return 'Failure_Committee_Harvester_Ineligible';
