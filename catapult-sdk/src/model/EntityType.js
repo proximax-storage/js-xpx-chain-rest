@@ -229,10 +229,10 @@ const EntityType = {
 	streamPayment: 0x4367,
 
 	/** Create liquidity provider transaction. */
-	createLiquidityProvider: 0x4168,
+	createLiquidityProvider: 0x4169,
 
 	/** Manual rate change transaction. (LP) */
-	manualRateChange: 0x4268,
+	manualRateChange: 0x4269,
 
 	/** Place SDA-SDA exchange offer transaction. */
 	placeSdaExchangeOffer: 0x416A,

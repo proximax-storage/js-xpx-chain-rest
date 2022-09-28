@@ -93,8 +93,8 @@ describe('entity type enumeration', () => {
 			streamStart: 0x4167,
 			streamFinish: 0x4267,
 			streamPayment: 0x4367,
-			createLiquidityProvider: 0x4168,
-			manualRateChange: 0x4268,
+			createLiquidityProvider: 0x4169,
+			manualRateChange: 0x4269,
 			placeSdaExchangeOffer: 0x416A,
 			removeSdaExchangeOffer: 0x426A
 		});
