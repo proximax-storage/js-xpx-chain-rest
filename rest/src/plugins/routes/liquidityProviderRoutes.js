@@ -5,7 +5,6 @@
  **/
 
 const routeUtils = require('../../routes/routeUtils');
-const winston = require('winston');
 
 module.exports = {
     register: (server, db, service) => {
@@ -15,7 +14,7 @@ module.exports = {
 			const filters = {
 				mosaicId: params.mosaicId ? routeUtils.parseArgument(params, 'mosaicId', 'mosaicId') : undefined,
 				slashingAccount: params.slashingAccount ? routeUtils.parseArgument(params, 'slashingAccount', 'hash256') : undefined,
-				owner: params.owner ? routeUtils.parseArgument(params, 'owner', 'hash256') : undefined
+				owner: params.owner ? routeUtils.parseArgument(params, 'owner', 'publicKey') : undefined
 			};
 
 			const options = routeUtils.parsePaginationArguments(params, service.config.pageSize);
@@ -25,7 +24,7 @@ module.exports = {
 		});
 
         server.get('/liquidity_providers/:providerKey', (req, res, next) => {
-			const providerKey = routeUtils.parseArgument(req.params, 'providerKey', 'hash256');
+			const providerKey = routeUtils.parseArgument(req.params, 'providerKey', 'publicKey');
 			return db.getLiquidityProviderByProviderKey(providerKey)
 				.then(routeUtils.createSender('liquidityProviderEntry').sendOne(req.params.accountId, res, next));
 		});

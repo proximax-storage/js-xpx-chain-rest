@@ -59,6 +59,7 @@ const storagePlugin = {
 		});
 
 		builder.addTransactionSupport(EntityType.replicatorOnboarding, {
+			publicKey:				{ type: ModelType.binary, schemaName: 'dataModificationCancel.publicKey' },
 			capacity:				{ type: ModelType.uint64, schemaName: 'replicatorOnboarding.capacity' },
 		});
 

@@ -101,8 +101,9 @@ describe('storage plugin', () => {
 				'dataModificationId',
 			]);
 
-			expect(Object.keys(modelSchema.replicatorOnboarding).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
+			expect(Object.keys(modelSchema.replicatorOnboarding).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
 			expect(modelSchema.replicatorOnboarding).to.contain.all.keys([
+				'publicKey',
 				'capacity',
 			]);
 
