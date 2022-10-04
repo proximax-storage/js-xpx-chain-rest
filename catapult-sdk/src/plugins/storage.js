@@ -603,21 +603,17 @@ const storagePlugin = {
                 transaction.driveKey = parser.buffer(constants.sizes.signer);
                 transaction.verificationTrigger = parser.buffer(constants.sizes.hash256);
                 transaction.shardId = parser.uint16();
+				const publicKeysLength = parser.uint8();
+				const signaturesLength = parser.uint8();
+
 				transaction.publicKeys = [];
 				transaction.signatures = [];
 
-				// ignore last byte (opinions)
-				let count = (parser.buffer.length - 1);
-				if (count != 0) {
-					// single signature + public key length
-					count /= 96;
-				}
-
-				for (let i = 0; i < count; i++) {
+				for (let i = 0; i < publicKeysLength; i++) {
 					transaction.publicKeys.push(parser.buffer(constants.sizes.signer));
 				}
 
-				for (let i = 0; i < count; i++) {
+				for (let i = 0; i < signaturesLength; i++) {
 					transaction.signatures.push(parser.buffer(constants.sizes.signature));
 				}
 

@@ -687,7 +687,7 @@ describe('storage plugin', () => {
 			const trigger = createByteArray(0x02);
 			const shardId = Buffer.of(0x05, 0x0);
 			const keyCount = Buffer.of(0x02);
-			const judgingKeyCount = Buffer.of(0x02);
+			const signatureCount = Buffer.of(0x02);
 			const keyOne = createByteArray(0x11);
 			const keyTwo = createByteArray(0x20);
 			const signatureOne = createByteArray(0x11, 64);
@@ -700,8 +700,6 @@ describe('storage plugin', () => {
                     driveKey: driveKey,
                     verificationTrigger: trigger,
 					shardId: 0x05,
-					keyCount: 0x02,
-					judgingKeyCount: 0x02,
                     publicKeys: [keyOne, keyTwo],
                     signatures: [signatureOne, signatureTwo],
                     opinions: 0x4,
@@ -711,7 +709,7 @@ describe('storage plugin', () => {
                     trigger,
                     shardId,
                     keyCount,
-                    judgingKeyCount,
+                    signatureCount,
                     keyOne,
                     keyTwo,
                     signatureOne,
@@ -730,8 +728,6 @@ describe('storage plugin', () => {
                     driveKey: driveKey,
                     verificationTrigger: trigger,
                     shardId: 0x05,
-                    keyCount: 0x02,
-                    judgingKeyCount: 0x02,
                     publicKeys: [keyOne, keyTwo],
                     signatures: [signatureOne, signatureTwo],
                     opinions: 0x4,
@@ -741,7 +737,7 @@ describe('storage plugin', () => {
                     trigger,
                     shardId,
                     keyCount,
-                    judgingKeyCount,
+					signatureCount,
                     keyOne,
                     keyTwo,
                     signatureOne,
