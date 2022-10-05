@@ -26,6 +26,7 @@ const committee = require('./committee');
 const config = require('./config');
 const contract = require('./contract');
 const exchange = require('./exchange');
+const exchangesda = require('./exchange_sda');
 const lock = require('./lock');
 const liquidityProvider = require('./liquidityProvider');
 const ModelCodecBuilder = require('../modelBinary/ModelCodecBuilder');
@@ -46,7 +47,7 @@ const transfer = require('./transfer');
 const upgrade = require('./upgrade');
 
 const plugins = {
-	accountLink, accountProperties, aggregate, exchange, committee, config, contract, lock, liquidityProvider, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, transfer, upgrade
+	accountLink, accountProperties, aggregate, exchange, exchangesda, committee, config, contract, lock, liquidityProvider, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, transfer, upgrade
 };
 
 /**

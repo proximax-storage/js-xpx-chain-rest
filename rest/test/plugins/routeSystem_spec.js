@@ -42,6 +42,7 @@ describe('route system', () => {
 			'accountProperties',
 			'aggregate',
 			'exchange',
+			'exchangesda',
 			'committee',
 			'config',
 			'contract',

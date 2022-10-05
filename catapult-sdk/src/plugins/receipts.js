@@ -26,7 +26,10 @@ const ReceiptType = {
 	2: 'receipts.balanceChange',
 	3: 'receipts.balanceChange',
 	4: 'receipts.artifactExpiry',
-	5: 'receipts.inflation'
+	5: 'receipts.inflation',
+	10: 'receipts.offerCreation',
+	11: 'receipts.offerExchange',
+	12: 'receipts.offerRemoval'
 };
 
 const getBasicReceiptType = type => ReceiptType[(type & 0xF000) >> 12] || 'receipts.unknown';
@@ -88,6 +91,46 @@ const receiptsPlugin = {
 		builder.addSchema('receipts.inflation', {
 			mosaicId: ModelType.uint64,
 			amount: ModelType.uint64
+		});
+
+		builder.addSchema('receiptStatements', {
+			receiptStatements: { type: ModelType.array, schemaName: 'receipts.transactionStatement' }
+		});
+
+		builder.addSchema('receipts.exchangesda', {
+			offerCreation: { type: ModelType.array, schemaName: 'receipts.transactionStatement' },
+			offerExchange: { type: ModelType.array, schemaName: 'receipts.transactionStatement' },
+			offerRemoval: { type: ModelType.array, schemaName: 'receipts.transactionStatement' }
+		});
+
+		builder.addSchema('receipts.offerCreation', {
+			sender: ModelType.binary,
+			mosaicIdGive: ModelType.uint64,
+			mosaicIdGet: ModelType.uint64,
+			mosaicAmountGive: ModelType.uint64,
+			mosaicAmountGet: ModelType.uint64
+		});
+
+		builder.addSchema('receipts.offerExchange.exchangeDetails', {
+			recipient: ModelType.binary,
+			mosaicIdGive: ModelType.uint64,
+			mosaicIdGet: ModelType.uint64,
+			mosaicAmountGive: ModelType.uint64,
+			mosaicAmountGet: ModelType.uint64
+		});
+
+		builder.addSchema('receipts.offerExchange', {
+			sender: ModelType.binary,
+			mosaicIdGive: ModelType.uint64,
+			mosaicIdGet: ModelType.uint64,
+			exchangeDetails: { type: ModelType.array, schemaName: 'receipts.offerExchange.exchangeDetails' }
+		});
+
+		builder.addSchema('receipts.offerRemoval', {
+			sender: ModelType.binary,
+			mosaicIdGive: ModelType.uint64,
+			mosaicIdGet: ModelType.uint64,
+			mosaicAmountGiveReturned: ModelType.uint64
 		});
 
 		builder.addSchema('receipts.unknown', {});
