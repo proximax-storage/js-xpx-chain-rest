@@ -43,6 +43,7 @@ const storagePlugin = {
 			fileStructureCdi:		{ type: ModelType.binary, 	schemaName: 'dataModificationApproval.fileStructureCdi' },
 			fileStructureSizeBytes:	{ type: ModelType.uint64, 	schemaName: 'dataModificationApproval.fileStructureSizeBytes' },
 			metaFilesSizeBytes:		{ type: ModelType.uint64, 	schemaName: 'dataModificationApproval.metaFilesSizeBytes' },
+			modificationStatus:		{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.modificationStatus' },
 			usedDriveSizeBytes:		{ type: ModelType.uint64, 	schemaName: 'dataModificationApproval.usedDriveSizeBytes' },
 			judgingKeysCount:		{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.judgingKeysCount' },
 			overlappingKeysCount:	{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.overlappingKeysCount' },
@@ -310,6 +311,7 @@ const storagePlugin = {
 				transaction.driveKey = parser.buffer(constants.sizes.signer);
 				transaction.dataModificationId = parser.buffer(constants.sizes.hash256);
 				transaction.fileStructureCdi = parser.buffer(constants.sizes.hash256);
+				transaction.modificationStatus = parser.uint8();
 				transaction.fileStructureSizeBytes = parser.uint64();
 				transaction.metaFilesSizeBytes = parser.uint64();
 				transaction.usedDriveSizeBytes = parser.uint64();
@@ -351,6 +353,7 @@ const storagePlugin = {
 				serializer.writeBuffer(transaction.driveKey);
 				serializer.writeBuffer(transaction.dataModificationId);
 				serializer.writeBuffer(transaction.fileStructureCdi);
+				serializer.writeUint8(transaction.modificationStatus);
 				serializer.writeUint64(transaction.fileStructureSizeBytes);
 				serializer.writeUint64(transaction.metaFilesSizeBytes);
 				serializer.writeUint64(transaction.usedDriveSizeBytes);
