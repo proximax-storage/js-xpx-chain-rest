@@ -241,7 +241,7 @@ describe('storage plugin', () => {
 				'readyForApproval'
 			]);
 
-			expect(Object.keys(modelSchema['completedDataModification']).length).to.equal(8);
+			expect(Object.keys(modelSchema['completedDataModification']).length).to.equal(9);
 			expect(modelSchema['completedDataModification']).to.contain.all.keys([
 				'id',
 				'owner',
@@ -250,7 +250,8 @@ describe('storage plugin', () => {
 				'actualUploadSize',
 				'folderName',
 				'readyForApproval',
-				'state'
+				'state',
+				'success'
 			]);
 
 			expect(Object.keys(modelSchema['confirmedUsedSize']).length).to.equal(2);
