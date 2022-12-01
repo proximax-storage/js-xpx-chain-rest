@@ -78,11 +78,12 @@ describe('storage plugin', () => {
 				'listOfPublicKeys',
 			]);
 
-			expect(Object.keys(modelSchema.dataModificationApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 13);
+			expect(Object.keys(modelSchema.dataModificationApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 14);
 			expect(modelSchema.dataModificationApproval).to.contain.all.keys([
 				'driveKey',
 				'dataModificationId',
 				'fileStructureCdi',
+				'modificationStatus',
 				'fileStructureSizeBytes',
 				'metaFilesSizeBytes',
 				'usedDriveSizeBytes',
@@ -240,7 +241,7 @@ describe('storage plugin', () => {
 				'readyForApproval'
 			]);
 
-			expect(Object.keys(modelSchema['completedDataModification']).length).to.equal(8);
+			expect(Object.keys(modelSchema['completedDataModification']).length).to.equal(9);
 			expect(modelSchema['completedDataModification']).to.contain.all.keys([
 				'id',
 				'owner',
@@ -249,7 +250,8 @@ describe('storage plugin', () => {
 				'actualUploadSize',
 				'folderName',
 				'readyForApproval',
-				'state'
+				'state',
+				'success'
 			]);
 
 			expect(Object.keys(modelSchema['confirmedUsedSize']).length).to.equal(2);
@@ -406,6 +408,7 @@ describe('storage plugin', () => {
 			const driveKey = createByteArray(0x01);
 			const dataModificationId = createByteArray(0x02);
 			const fileStructureCdi = createByteArray(0x03);
+			const modificationStatus = Buffer.of(0x05);
 			const fileStructureSizeBytes = Buffer.of(0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 			const metaFilesSizeBytes = Buffer.of(0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 			const usedDriveSizeBytes = Buffer.of(0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
@@ -426,11 +429,12 @@ describe('storage plugin', () => {
 			);
 
 
-			test.binary.test.addAll(codec, 3 * 32 + 3 * 8 + 5 + 3 * 32 + 2 * 64 + 1 + 3 * 8, () => ({
+			test.binary.test.addAll(codec, 3 * 32 + 1 + 3 * 8 + 5 + 3 * 32 + 2 * 64 + 1 + 3 * 8, () => ({
 				buffer: Buffer.concat([
 					driveKey,
 					dataModificationId,
 					fileStructureCdi,
+					modificationStatus,
 					fileStructureSizeBytes,
 					metaFilesSizeBytes,
 					usedDriveSizeBytes,
@@ -450,6 +454,7 @@ describe('storage plugin', () => {
 					driveKey,
 					dataModificationId,
 					fileStructureCdi,
+					modificationStatus: 0x05,
 					fileStructureSizeBytes: [ 0x04, 0x0 ],
 					metaFilesSizeBytes: [ 0x05, 0x0 ],
 					usedDriveSizeBytes: [ 0x06, 0x0 ],
