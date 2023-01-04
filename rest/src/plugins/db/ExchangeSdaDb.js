@@ -133,6 +133,53 @@ class ExchangeSdaDb {
         const fieldName = 'sdaoffergroups.groupHash';
         return this.catapultDb.queryDocuments('sdaoffergroups', { [fieldName]: buffer });
     }
+
+    /**
+	 * Retrieves mosaic ids present in give/get offers.
+	 * @param {Array.<Long>} mosaics Required mosaics.
+     * @param {string} offerType give/get.
+	 * @returns {Promise.<array>} Mosaic ids.
+	 */
+	mosaicsParticipatingInOffers(mosaics, offerType) {
+		var promises = [];
+
+		const mainHandler = new Promise((resolve) => {
+			if (Array.isArray(mosaics) && mosaics.length) {
+				mosaics.forEach((entity) => {
+					const id = entity.mosaic.mosaicId;
+					const singleHandler = new Promise(resolve => {
+						this.catapultDb.queryDocument('exchangesda', offerType == 'give' ?  { "exchangesda.sdaOfferBalances.mosaicIdGive": id } : { "exchangesda.sdaOfferBalances.mosaicIdGet": id })
+							.then(exchangesda => {
+								resolve({ 'mosaicId': entity.mosaic.mosaicId.toString(), 'isMatched': exchangesda ? true : false });
+								return;
+							});
+					});
+
+					promises.push(singleHandler);
+				});
+
+				Promise.all(promises)
+					.then((items) => {
+						var sdaOffers = [];
+						items.forEach((item) => {
+							if (item.isMatched) {
+								const hex = uint64.toHex(uint64.fromString(item.mosaicId));
+								const json = { "mosaicId": hex };
+								sdaOffers.push(json);
+							}
+						});
+
+						resolve(sdaOffers);
+						return;
+					});
+			} else {
+				resolve([]);
+				return;
+			}
+		});
+
+		return mainHandler.then(data => { return data; });
+	}
 }
 
 module.exports = ExchangeSdaDb;

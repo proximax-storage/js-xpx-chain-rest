@@ -8,6 +8,7 @@
  const routeUtils = require('../../routes/routeUtils');
  const errors = require('../../server/errors');
  const NamespaceDb = require('../namespace/NamespaceDb');
+ const MosaicDb = require('../db/MosaicDb');
 
  module.exports = {
     register: (server, db) => {
@@ -57,5 +58,18 @@
 					.then(routeUtils.createSender('sdaExchangeEntry.sdaOfferBalances').sendArray('mosaicId', res, next));
 			}
         });
+
+		server.get(`/exchangesda/:type`, (req, res, next) => {
+			const { params } = req;
+			if (params.type !== 'give' && params.type !== 'get')
+				throw errors.createInvalidArgumentError(`type has an invalid format`);
+
+			const mosaicDb = new MosaicDb(db.getCatapultDb());
+			return mosaicDb.allMosaics()
+				.then(mosaics => {
+					db.mosaicsParticipatingInOffers(mosaics, params.type)
+						.then(routeUtils.createSender('mosaics').sendArray('mosaicId', res, next));
+				});
+		});
     }
  };
