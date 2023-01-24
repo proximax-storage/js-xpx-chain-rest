@@ -52,6 +52,7 @@ describe('catapult model system', () => {
 				'committee',
 				'config',
 				'contract',
+				'dbrb',
 				'lock',
 				'liquidityProvider',
 				'metadata',

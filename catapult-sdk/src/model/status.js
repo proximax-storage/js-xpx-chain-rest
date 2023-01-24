@@ -403,6 +403,11 @@ const toStringInternal = code => {
 		case 0x80610004: return 'Failure_Committee_Account_Does_Not_Exist';
 		case 0x80610005: return 'Failure_Committee_Signer_Is_Not_Owner';
 		case 0x80610006: return 'Failure_Committee_Harvester_Already_Disabled';
+		case 0x806C0001: return 'Failure_Dbrb_View_Sequence_Already_Exists';
+		case 0x806C0002: return 'Failure_Dbrb_View_Sequence_Size_Insufficient';
+		case 0x806C0003: return 'Failure_Dbrb_Invalid_Replaced_View';
+		case 0x806C0004: return 'Failure_Dbrb_Signatures_Count_Insufficient';
+		case 0x806C0005: return 'Failure_Dbrb_Invalid_Signature';
 		default: return undefined;
 	}
 };

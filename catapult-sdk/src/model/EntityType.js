@@ -238,7 +238,10 @@ const EntityType = {
 	placeSdaExchangeOffer: 0x416A,
 
 	/** Remove SDA-SDA exchange offer transaction. */
-	removeSdaExchangeOffer: 0x426A
+	removeSdaExchangeOffer: 0x426A,
+
+	/** Install message transaction body. */
+	installMessage: 0x416C
 
 };
 

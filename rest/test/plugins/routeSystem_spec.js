@@ -46,6 +46,7 @@ describe('route system', () => {
 			'committee',
 			'config',
 			'contract',
+			'dbrb',
 			'lock',
 			'liquidityProvider',
 			'metadata',
