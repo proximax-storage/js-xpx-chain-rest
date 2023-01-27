@@ -18,15 +18,23 @@ const constants = { sizes };
 const dbrbPlugin = {
 	registerSchema: builder => {
 		builder.addTransactionSupport(EntityType.installMessage, {
-			messageHash: 			{ type: ModelType.binary, schemaName: 'installMessage.messageHash' },
-			viewsCount: 			{ type: ModelType.uint32, schemaName: 'installMessage.viewsCount' },
-			mostRecentViewSize: 	{ type: ModelType.uint32, schemaName: 'installMessage.mostRecentViewSize' },
-			signaturesCount: 		{ type: ModelType.uint32, schemaName: 'installMessage.signaturesCount' },
-			viewSizes: 				{ type: ModelType.array,  schemaName:  ModelType.uint16 },
-			viewProcessIds: 		{ type: ModelType.array,  schemaName:  ModelType.binary },
-			membershipChanges: 		{ type: ModelType.array,  schemaName:  ModelType.boolean },
-			signaturesProcessIds: 	{ type: ModelType.array,  schemaName:  ModelType.binary },
-			signatures: 			{ type: ModelType.array,  schemaName:  ModelType.binary },
+			messageHash: 	{ type: ModelType.binary, schemaName: 'installMessage.messageHash' },
+			sequence: 		{ type: ModelType.array,  schemaName: 'sequenceEntry' },
+			certificate: 	{ type: ModelType.array,  schemaName: 'certificateEntry' },
+		});
+
+		builder.addSchema('sequenceEntry', {
+			view:	{ type: ModelType.array, schemaName: 'viewEntry' }
+		});
+
+		builder.addSchema('viewEntry', {
+			processId:			ModelType.binary,
+			membershipChange:	ModelType.boolean
+		});
+
+		builder.addSchema('certificateEntry', {
+			processId:				ModelType.binary,
+			signature:				ModelType.binary,
 		});
 	},
 
@@ -35,38 +43,31 @@ const dbrbPlugin = {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.messageHash = parser.buffer(constants.sizes.hash256);
-				transaction.viewsCount = parser.uint32();
-				transaction.mostRecentViewSize = parser.uint32();
-				transaction.signaturesCount = parser.uint32();
+				transaction.payloadSize = parser.uint32();
+				transaction.sequenceSize = parser.uint32();
+				transaction.sequence = [];
+				let sequenceCounter = transaction.sequenceSize;
+				while (sequenceCounter-- > 0) {
+					let viewsCount = parser.uint32();
+					let views = [];
+					while (viewsCount-- > 0) {
+						const viewData = {};
+						viewData.processId = parser.buffer(constants.sizes.signer);
+						viewData.membershipChange = parser.uint32();
+						views.push(viewData);
+					}
 
-				transaction.viewSizes = [];
-				let count = transaction.viewsCount;
-				while (count-- > 0) {
-					transaction.viewSizes.push(parser.uint16());
+					transaction.sequence.push(views);
 				}
 
-				transaction.viewProcessIds = [];
-				count = transaction.mostRecentViewSize;
-				while (count-- > 0) {
-					transaction.viewProcessIds.push(parser.buffer(constants.sizes.signer));
-				}
-
-				transaction.membershipChanges = [];
-				count = transaction.mostRecentViewSize;
-				while (count-- > 0) {
-					transaction.membershipChanges.push(parser.uint8());
-				}
-
-				transaction.signaturesProcessIds = [];
-				count = transaction.signaturesCount;
-				while (count-- > 0) {
-					transaction.signaturesProcessIds.push(parser.buffer(constants.sizes.signer));
-				}
-
-				transaction.signatures = [];
-				count = transaction.signaturesCount;
-				while (count-- > 0) {
-					transaction.signatures.push(parser.buffer(constants.sizes.signature));
+				transaction.certificateSize = parser.uint32();
+				transaction.certificate = [];
+				let certificateCounter = transaction.certificateSize;
+				while (certificateCounter-- > 0) {
+					const certificateData = {};
+					certificateData.processId = parser.buffer(constants.sizes.signer);
+					certificateData.signature = parser.buffer(constants.sizes.signature);
+					transaction.certificate.push(certificateData);
 				}
 
 				return transaction;
@@ -74,28 +75,28 @@ const dbrbPlugin = {
 
 			serialize: (transaction, serializer) => {
 				serializer.writeBuffer(transaction.messageHash);
-				serializer.writeUint32(transaction.viewsCount);
-				serializer.writeUint32(transaction.mostRecentViewSize);
-				serializer.writeUint32(transaction.signaturesCount);
 
-				transaction.viewSizes.forEach(viewSize => {
-					serializer.writeUint16(viewSize);
+				var payloadSize = 4;
+				transaction.sequence.forEach(views => {
+					payloadSize += 4 + views.length * (constants.sizes.signer + 4);
 				});
 
-				transaction.viewProcessIds.forEach(id => {
-					serializer.writeBuffer(id);
+				payloadSize += 4 + transaction.certificate.length * (constants.sizes.signer + constants.sizes.signature);
+
+				serializer.writeUint32(payloadSize);
+				serializer.writeUint32(transaction.sequence.length);
+				transaction.sequence.forEach(views => {
+					serializer.writeUint32(views.length);
+					views.forEach(viewData => {
+						serializer.writeBuffer(viewData.processId);
+						serializer.writeUint32(viewData.membershipChange);
+					})
 				});
 
-				transaction.membershipChanges.forEach(isMembershipChange => {
-					serializer.writeUint8(isMembershipChange);
-				});
-
-				transaction.signaturesProcessIds.forEach(id => {
-					serializer.writeBuffer(id);
-				});
-
-				transaction.signatures.forEach(signature => {
-					serializer.writeBuffer(signature);
+				serializer.writeUint32(transaction.certificate.length);
+				transaction.certificate.forEach(c => {
+					serializer.writeBuffer(c.processId);
+					serializer.writeBuffer(c.signature);
 				});
 			}
 		});

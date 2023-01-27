@@ -11,6 +11,7 @@ const { expect } = require('chai');
 
 const dbrbPlugin = require('../../src/plugins/dbrb');
 const { uint16 } = require('../../src/model/ModelType');
+const { signature } = require('../../src/modelBinary/sizes');
 
 describe('dbrb plugin', () => {
 	describe('register schema', () => {
@@ -24,22 +25,19 @@ describe('dbrb plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 1);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 4);
 			expect(modelSchema).to.contain.all.keys([
 				'installMessage',
+				'sequenceEntry',
+				'viewEntry',
+				'certificateEntry',
 			]);
 
-			expect(Object.keys(modelSchema.installMessage).length).to.equal(Object.keys(modelSchema.transaction).length + 9);
+			expect(Object.keys(modelSchema.installMessage).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
 			expect(modelSchema.installMessage).to.contain.all.keys([
 				'messageHash',
-				'viewsCount',
-				'mostRecentViewSize',
-				'signaturesCount',
-				'viewSizes',
-				'viewProcessIds',
-				'membershipChanges',
-				'signaturesProcessIds',
-				'signatures',
+				'sequence',
+				'certificate',
 			]);
 		});
 	});
@@ -74,54 +72,72 @@ describe('dbrb plugin', () => {
 
 		describe('supports install message transaction', () => {
 			const codec = getCodecs()[EntityType.installMessage];
-			const msgHash = createByteArray(0x01, 32);
-			const messageHash = msgHash;
-			const viewsCount = Buffer.of(0x03, 0x00, 0x00, 0x00);
-			const mostRecentViewSize = Buffer.of(0x03, 0x00, 0x00, 0x00);
-			const signaturesCount = Buffer.of(0x03, 0x00, 0x00, 0x00);
-			const viewSizes = Buffer.of(0x04, 0x00 , 0x04, 0x00, 0x04, 0x00);
-			const membershipChanges = Buffer.of(0x01, 0x01 , 0x01);
+			const messageHash = createByteArray(0x01, 32);
+			const payloadSize = Buffer.of(0x0DC, 0x00, 0x00, 0x00);
+			const sequenceSize = Buffer.of(0x02, 0x00 , 0x00, 0x00);
 
-			const viewProcessId1 = createByteArray(0x05, 32);
-			const viewProcessId2 = createByteArray(0x06, 32);
-			const viewProcessId3 = createByteArray(0x07, 32);
+			const viewSize1 = Buffer.of(0x01, 0x00 , 0x00, 0x00);
+			const processId1 = createByteArray(0x01, 32);
+			const membershipChange1 = Buffer.of(0x00, 0x00 , 0x00, 0x00);
 
-			const signaturesProcessId1 = createByteArray(0x05, 32);
-			const signaturesProcessId2 = createByteArray(0x06, 32);
-			const signaturesProcessId3 = createByteArray(0x07, 32);
+			const viewSize2 = Buffer.of(0x02, 0x00 , 0x00, 0x00);
+			const processId2 = createByteArray(0x02, 32);
+			const membershipChange2 = Buffer.of(0x01, 0x00 , 0x00, 0x00);
 
-			const signature1 = createByteArray(0x05, 64);
-			const signature2 = createByteArray(0x06, 64);
-			const signature3 = createByteArray(0x07, 64);
+			const processId3 = createByteArray(0x03, 32);
+			const membershipChange3 = Buffer.of(0x00, 0x00 , 0x00, 0x00);
 
-			test.binary.test.addAll(codec, 32 + 3 * 4 + 2 * 3 + 32 * 3 + 3 + 32 * 3 + 64 * 3, () => ({
+			const certificateSize = Buffer.of(0x01, 0x00 , 0x00, 0x00);
+
+			const processId4 = createByteArray(0x04, 32);
+			const signature1 = createByteArray(0x01, 64);
+
+			test.binary.test.addAll(codec, 32 + 4 + 120 + 4 + 32 + 64, () => ({
 				buffer: Buffer.concat([
 					messageHash,
-					viewsCount,
-					mostRecentViewSize,
-					signaturesCount,
-					viewSizes,
-					viewProcessId1,
-					viewProcessId2,
-					viewProcessId3,
-					membershipChanges,
-					signaturesProcessId1,
-					signaturesProcessId2,
-					signaturesProcessId3,
+					payloadSize,
+					sequenceSize,
+					viewSize1,
+					processId1,
+					membershipChange1,
+					viewSize2,
+					processId2,
+					membershipChange2,
+					processId3,
+					membershipChange3,
+					certificateSize,
+					processId4,
 					signature1,
-					signature2,
-					signature3
 				]),
 				object: {
-					messageHash: msgHash,
-					viewsCount: 0x03,
-					mostRecentViewSize: 0x03,
-					signaturesCount: 0x03,
-					viewSizes: [0x04, 0x04, 0x04],
-					viewProcessIds: [viewProcessId1, viewProcessId2, viewProcessId3],
-					membershipChanges: [0x01, 0x01, 0x01],
-					signaturesProcessIds: [signaturesProcessId1, signaturesProcessId2, signaturesProcessId3],
-					signatures: [signature1, signature2, signature3]
+					messageHash: messageHash,
+					payloadSize: 220,
+					sequenceSize: 2, // 120
+					sequence: [
+						[
+							{
+								processId: processId1,
+								membershipChange: 0x00
+							}
+						],
+						[
+							{
+								processId: processId2,
+								membershipChange: 0x01
+							},
+							{
+								processId: processId3,
+								membershipChange: 0x00
+							}
+						]
+					],
+					certificateSize: 1,
+					certificate: [
+						{
+							processId: processId4,
+							signature: signature1
+						}
+					],
 				}
 			}));
 		});
