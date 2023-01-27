@@ -53,7 +53,7 @@ const dbrbPlugin = {
 					while (viewsCount-- > 0) {
 						const viewData = {};
 						viewData.processId = parser.buffer(constants.sizes.signer);
-						viewData.membershipChange = parser.uint32();
+						viewData.membershipChange = parser.uint8();
 						views.push(viewData);
 					}
 
@@ -78,7 +78,7 @@ const dbrbPlugin = {
 
 				var payloadSize = 4;
 				transaction.sequence.forEach(views => {
-					payloadSize += 4 + views.length * (constants.sizes.signer + 4);
+					payloadSize += 4 + views.length * (constants.sizes.signer + 1);
 				});
 
 				payloadSize += 4 + transaction.certificate.length * (constants.sizes.signer + constants.sizes.signature);
@@ -89,7 +89,7 @@ const dbrbPlugin = {
 					serializer.writeUint32(views.length);
 					views.forEach(viewData => {
 						serializer.writeBuffer(viewData.processId);
-						serializer.writeUint32(viewData.membershipChange);
+						serializer.writeUint8(viewData.membershipChange);
 					})
 				});
 

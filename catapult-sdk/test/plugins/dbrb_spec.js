@@ -73,26 +73,26 @@ describe('dbrb plugin', () => {
 		describe('supports install message transaction', () => {
 			const codec = getCodecs()[EntityType.installMessage];
 			const messageHash = createByteArray(0x01, 32);
-			const payloadSize = Buffer.of(0x0DC, 0x00, 0x00, 0x00);
+			const payloadSize = Buffer.of(0x0D3, 0x00, 0x00, 0x00);
 			const sequenceSize = Buffer.of(0x02, 0x00 , 0x00, 0x00);
 
 			const viewSize1 = Buffer.of(0x01, 0x00 , 0x00, 0x00);
 			const processId1 = createByteArray(0x01, 32);
-			const membershipChange1 = Buffer.of(0x00, 0x00 , 0x00, 0x00);
+			const membershipChange1 = Buffer.of(0x00);
 
 			const viewSize2 = Buffer.of(0x02, 0x00 , 0x00, 0x00);
 			const processId2 = createByteArray(0x02, 32);
-			const membershipChange2 = Buffer.of(0x01, 0x00 , 0x00, 0x00);
+			const membershipChange2 = Buffer.of(0x01);
 
 			const processId3 = createByteArray(0x03, 32);
-			const membershipChange3 = Buffer.of(0x00, 0x00 , 0x00, 0x00);
+			const membershipChange3 = Buffer.of(0x00);
 
 			const certificateSize = Buffer.of(0x01, 0x00 , 0x00, 0x00);
 
 			const processId4 = createByteArray(0x04, 32);
 			const signature1 = createByteArray(0x01, 64);
 
-			test.binary.test.addAll(codec, 32 + 4 + 120 + 4 + 32 + 64, () => ({
+			test.binary.test.addAll(codec, 32 + 4 + 111 + 4 + 32 + 64, () => ({
 				buffer: Buffer.concat([
 					messageHash,
 					payloadSize,
@@ -111,8 +111,8 @@ describe('dbrb plugin', () => {
 				]),
 				object: {
 					messageHash: messageHash,
-					payloadSize: 220,
-					sequenceSize: 2, // 120
+					payloadSize: 211,
+					sequenceSize: 2, // 111
 					sequence: [
 						[
 							{
