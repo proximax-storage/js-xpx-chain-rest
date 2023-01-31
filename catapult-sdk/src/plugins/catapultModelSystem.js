@@ -25,6 +25,7 @@ const aggregate = require('./aggregate');
 const committee = require('./committee');
 const config = require('./config');
 const contract = require('./contract');
+const dbrb = require('./dbrb');
 const exchange = require('./exchange');
 const exchangesda = require('./exchange_sda');
 const lock = require('./lock');
@@ -47,7 +48,7 @@ const transfer = require('./transfer');
 const upgrade = require('./upgrade');
 
 const plugins = {
-	accountLink, accountProperties, aggregate, exchange, exchangesda, committee, config, contract, lock, liquidityProvider, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, transfer, upgrade
+	accountLink, accountProperties, aggregate, exchange, exchangesda, committee, config, contract, dbrb, lock, liquidityProvider, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, transfer, upgrade
 };
 
 /**

@@ -96,7 +96,8 @@ describe('entity type enumeration', () => {
 			createLiquidityProvider: 0x4169,
 			manualRateChange: 0x4269,
 			placeSdaExchangeOffer: 0x416A,
-			removeSdaExchangeOffer: 0x426A
+			removeSdaExchangeOffer: 0x426A,
+			installMessage: 0x416C
 		});
 	});
 

@@ -43,7 +43,7 @@ const service = require('./service');
 const storage = require('./storage');
 
 const plugins = {
-	accountLink: empty, accountProperties, aggregate, exchange, exchangesda, committee, config, contract, lock, liquidityProvider, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, transfer: empty, upgrade
+	accountLink: empty, accountProperties, aggregate, exchange, exchangesda, committee, config, contract, dbrb: empty, lock, liquidityProvider, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, transfer: empty, upgrade
 };
 
 module.exports = {
