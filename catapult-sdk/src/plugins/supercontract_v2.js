@@ -19,7 +19,6 @@ const constants = { sizes };
 const superContractV2Plugin = {
     registerSchema: builder => {
         builder.addTransactionSupport(EntityType.deployContract, {
-            signer:                             ModelType.binary,
             driveKey:                           ModelType.binary,
             assignee:                           ModelType.binary,
             automaticExecutionFileName:         ModelType.string,
@@ -34,7 +33,6 @@ const superContractV2Plugin = {
         });
 
         builder.addTransactionSupport(EntityType.manualCall, {
-            signer:                 ModelType.binary,
             contractKey:            ModelType.binary,
             fileName:               ModelType.string,
             functionName:           ModelType.string,
@@ -47,7 +45,6 @@ const superContractV2Plugin = {
         builder.addTransactionSupport(EntityType.automaticExecutionsPayment, {
             contractKey:                ModelType.binary,
             automaticExecutionsNumber:  ModelType.uint32,
-            signer:                     ModelType.binary,
         });
 
         builder.addTransactionSupport(EntityType.successfulEndBatchExecution, {
@@ -74,7 +71,6 @@ const superContractV2Plugin = {
         builder.addTransactionSupport(EntityType.endBatchExecutionSingle, {
             contractKey:    ModelType.binary,
             batchId:        ModelType.uint64,
-            signer:         ModelType.binary,
             poEx:           { type: ModelType.array, schemaName: 'poEx' },
         });
 
