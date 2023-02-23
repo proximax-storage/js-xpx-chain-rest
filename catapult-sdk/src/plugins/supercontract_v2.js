@@ -108,6 +108,12 @@ const superContractV2Plugin = {
             callPayments:   { type: ModelType.array, schemaName: 'callPayments' },
         });
 
+        builder.addSchema('shortPoEx', {
+            startBatchId:   ModelType.uint64,
+            T:              ModelType.binary,
+            R:              ModelType.binary,
+        });
+
         builder.addSchema('poEx', {
             startBatchId:   ModelType.uint64,
             T:              ModelType.binary,
@@ -119,6 +125,70 @@ const superContractV2Plugin = {
         builder.addSchema('callPayment', {
             executionPayment:   ModelType.uint64,
             downloadPayment:    ModelType.uint64,
+        });
+
+        builder.addSchema('automaticExecutionsInfo', {
+            automaticExecutionFileName:                 ModelType.string,
+            automaticExecutionsFunctionName:            ModelType.string,
+            automaticExecutionsNextBlockToCheck:        ModelType.uint64,
+            automaticExecutionCallPayment:              ModelType.uint64,
+            automaticDownloadCallPayment:               ModelType.uint64,
+            automatedExecutionsNumber:                  ModelType.uint32,
+            automaticExecutionsPrepaidSinceHasValue:    ModelType.uint8,
+            automaticExecutionsPrepaidSince:            ModelType.uint64,
+        });
+
+        builder.addSchema('requestedCall', {
+            callId:                 ModelType.binary,
+            caller:                 ModelType.binary,
+            fileName:               ModelType.string,
+            functionName:           ModelType.string,
+            actualArguments:        ModelType.string,
+            executionCallPayment:   ModelType.uint64,
+            downloadCallPayment:    ModelType.uint64,
+            servicePayments:        { type: ModelType.array, schemaName: 'servicePayment' },
+            blockHeight:            ModelType.uint64,
+        });
+
+        builder.addSchema('executorsInfo', {
+            replicatorKey:      ModelType.binary,
+            nextBatchToApprove: ModelType.uint64,
+            poEx:               { type: ModelType.object, schemaName: 'shortPoEx' },
+        });
+
+        builder.addSchema('completedCall', {
+            callId:         ModelType.binary,
+            caller:         ModelType.binary,
+            status:         ModelType.uint16,
+            executionWork:  ModelType.uint64,
+            downloadWork:   ModelType.uint64,
+        });
+
+        builder.addSchema('batch', {
+            batchId:                        ModelType.uint64,
+            success:                        ModelType.boolean,
+            poExVerificationInformation:    ModelType.binary,
+            completedCalls:                 { type: ModelType.array, schemaName: 'completedCall' },
+        });
+
+        builder.addSchema('supercontract', {
+            multisig:                   ModelType.binary,
+            multisigAddress:            ModelType.binary,
+            driveKey:                   ModelType.binary,
+            executionPaymentKey:        ModelType.binary,
+            assignee:                   ModelType.binary,
+            automaticExecutionsInfo:    { type: ModelType.object, schemaName: 'automaticExecutionsInfo' },
+            servicePayments:            { type: ModelType.array, schemaName: 'servicePayment' },
+            requestedCalls:             { type: ModelType.array, schemaName: 'requestedCall' },
+            executorsInfo:              { type: ModelType.array, schemaName: 'executorsInfo' },
+            batches:                    { type: ModelType.array, schemaName: 'batch' },
+            releasedTransactions:       { type: ModelType.array, schemaName: ModelType.binary },
+        });
+
+        builder.addSchema('drivecontract', {
+            multisig:			        ModelType.binary,
+            multisigAddress:	        ModelType.binary,
+            contractKey:                ModelType.binary,
         });
     },
 
