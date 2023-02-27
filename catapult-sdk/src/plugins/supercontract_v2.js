@@ -12,6 +12,10 @@ const sizes = require('../modelBinary/sizes');
 
 const constants = { sizes };
 
+const parseString = (parser, size) => parser.buffer(size).toString('ascii');
+
+const writeString = (serializer, str) => { serializer.writeBuffer(Buffer.from(str, 'ascii')); };
+
 /**
  * Creates a super contract plugin.
  * @type {module:plugins/CatapultPlugin}
@@ -189,6 +193,135 @@ const superContractV2Plugin = {
     },
 
     registerCodecs: codecBuilder => {
+        codecBuilder.addTransactionSupport(EntityType.deployContract, {
+            deserialize: parser => {
+                const transaction = {};
+                transaction.driveKey = parser.buffer(constants.sizes.signer);
+                transaction.assignee = parser.buffer(constants.sizes.signer);
+                const automaticExecutionFileNameSize = parser.uint8();
+                transaction.automaticExecutionFileName = parseString(parser, automaticExecutionFileNameSize);
+                const automaticExecutionsFunctionNameSize = parser.uint8();
+                transaction.automaticExecutionsFunctionNameSize = parseString(parser, automaticExecutionsFunctionNameSize);
+                transaction.automaticExecutionCallPayment = parser.uint64();
+                transaction.automaticDownloadCallPayment = parser.uint64();
+                const actualArgumentsSize = parser.uint8();
+                transaction.actualArguments = parseString(parser, actualArgumentsSize);
+                transaction.servicePayments = [];
+                let count = transaction.servicePaymentsCount;
+                while (count--) {
+                    const servicePayment = {};
+                    servicePayment.id = parser.uint64();
+                    servicePayment.amount = parser.uint64();
+                    transaction.servicePayments.push(servicePayment);
+                }
+                transaction.automaticExecutionsNumber = parser.uint32();
+                transaction.executionCallPayment = parser.uint64();
+                transaction.downloadCallPayment = parser.uint64();
+
+                return transaction;
+            },
+
+            serialize: (transaction, serializer) => {
+                serializer.writeBuffer(transaction.driveKey);
+                serializer.writeBuffer(transaction.assignee);
+                serializer.writeUint8(transaction.automaticExecutionFileName.length);
+                writeString(serializer, transaction.automaticExecutionFileName);
+                serializer.writeUint8(transaction.automaticExecutionsFunctionName.length);
+                writeString(serializer, transaction.automaticExecutionsFunctionName);
+                serializer.writeUint64(transaction.automaticExecutionCallPayment);
+                serializer.writeUint64(transaction.automaticDownloadCallPayment);
+                serializer.writeUint8(transaction.actualArguments.length);
+                writeString(serializer, transaction.actualArguments);
+                serializer.writeUint8(transaction.servicePaymentsCount);
+                transaction.offers.forEach(servicePayment => {
+                    serializer.writeUint64(servicePayment.id);
+                    serializer.writeUint64(servicePayment.amount);
+                });
+                serializer.writeUint32(transaction.automaticExecutionsNumber);
+                serializer.writeUint64(transaction.executionCallPayment);
+                serializer.writeUint64(transaction.downloadCallPayment);
+            }
+        });
+
+        codecBuilder.addTransactionSupport(EntityType.manualCall, {
+            deserialize: parser => {
+                const transaction = {};
+                transaction.contractKey = parser.buffer(constants.sizes.signer);
+                const fileNameSize = parser.uint8();
+                transaction.fileName = parseString(parser, fileNameSize);
+                const functionNameSize = parser.uint8();
+                transaction.functionName = parseString(parser, functionNameSize);
+                const actualArgumentsSize = parser.uint8();
+                transaction.actualArguments = parseString(parser, actualArgumentsSize);
+                transaction.servicePayments = [];
+                let count = transaction.servicePaymentsCount;
+                while (count--) {
+                    const servicePayment = {};
+                    servicePayment.id = parser.uint64();
+                    servicePayment.amount = parser.uint64();
+                    transaction.servicePayments.push(servicePayment);
+                }
+                transaction.executionCallPayment = parser.uint64();
+                transaction.downloadCallPayment = parser.uint64();
+            },
+            
+            serialize: (transaction, serializer) => {
+                serializer.writeBuffer(transaction.contractKey);
+                serializer.writeUint8(transaction.fileName.length);
+                writeString(serializer, transaction.fileName);
+                serializer.writeUint8(transaction.functionName.length);
+                writeString(serializer, transaction.functionName);
+                serializer.writeUint8(transaction.actualArguments.length);
+                writeString(serializer, transaction.actualArguments);
+                serializer.writeUint8(transaction.servicePaymentsCount);
+                transaction.offers.forEach(servicePayment => {
+                    serializer.writeUint64(servicePayment.id);
+                    serializer.writeUint64(servicePayment.amount);
+                });
+                serializer.writeUint64(transaction.executionCallPayment);
+                serializer.writeUint64(transaction.downloadCallPayment);
+            }
+        });
+
+        codecBuilder.addTransactionSupport(EntityType.automaticExecutionsPayment, {
+            deserialize: parser => {
+                const transaction = {};
+                transaction.contractKey = parser.buffer(constants.sizes.signer);
+                transaction.automaticExecutionsNumber = parser.uint32();
+
+                return transaction;
+            },
+
+            serialize: (transaction, serializer) => {
+                serializer.writeBuffer(transaction.contractKey);
+                serializer.writeUint32(transaction.automaticExecutionsNumber);
+            }
+        });
+
+        codecBuilder.addTransactionSupport(EntityType.successfulEndBatchExecution, {
+            deserialize: parser => {
+                const transaction = {};
+                transaction.contractKey = parser.buffer(constants.sizes.signer);
+                transaction.batchId = parser.uint64();
+                transaction.automaticExecutionsNextBlockToCheck = parser.uint64();
+                transaction.storageHash = parser.buffer(constants.sizes.hash256);
+                transaction.usedSizeBytes = parser.uint64();
+                transaction.metaFilesSizeBytes = parser.uint64();
+                // transaction.proofOfExecutionVerificationInformation = parser.buffer();
+                transaction.extendedCallDigests = [];
+                let count = transaction.CallsNumber;
+                while (count--) {
+                    
+                }
+
+                return transaction;
+            },
+
+            serialize: (transaction, serializer) => {
+                serializer.writeBuffer(transaction.contractKey);
+                serializer.writeUint32(transaction.automaticExecutionsNumber);
+            }
+        });
     }
 };
 
