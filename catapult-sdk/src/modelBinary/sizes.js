@@ -60,6 +60,11 @@ const sizes = {
 	 * @property {numeric} Size of a BLS signature.
 	 */
 	blsSignature: 96,
+
+	/**
+	 * @property {numeric} Size of a CurvePoint.
+	 */
+	curvePoint: 32,
 };
 
 module.exports = sizes;

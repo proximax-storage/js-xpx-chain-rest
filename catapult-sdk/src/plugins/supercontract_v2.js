@@ -104,8 +104,10 @@ const superContractV2Plugin = {
         });
 
         builder.addSchema('opinion', {
-            poEx:           { type: ModelType.array, schemaName: 'poEx' },
-            callPayments:   { type: ModelType.array, schemaName: 'callPayments' },
+            publicKey:      ModelType.binary,
+            signature:      ModelType.binary,
+            poEx:           { type: ModelType.object, schemaName: 'poEx' },
+            callPayments:   { type: ModelType.array, schemaName: 'callPayment' },
         });
 
         builder.addSchema('shortPoEx', {
@@ -233,7 +235,7 @@ const superContractV2Plugin = {
                 serializer.writeUint8(transaction.actualArguments.length);
                 writeString(serializer, transaction.actualArguments);
                 serializer.writeUint8(transaction.servicePaymentsCount);
-                transaction.offers.forEach(servicePayment => {
+                transaction.servicePayments.forEach(servicePayment => {
                     serializer.writeUint64(servicePayment.id);
                     serializer.writeUint64(servicePayment.amount);
                 });
@@ -274,7 +276,7 @@ const superContractV2Plugin = {
                 serializer.writeUint8(transaction.actualArguments.length);
                 writeString(serializer, transaction.actualArguments);
                 serializer.writeUint8(transaction.servicePaymentsCount);
-                transaction.offers.forEach(servicePayment => {
+                transaction.servicePayments.forEach(servicePayment => {
                     serializer.writeUint64(servicePayment.id);
                     serializer.writeUint64(servicePayment.amount);
                 });
@@ -307,11 +309,38 @@ const superContractV2Plugin = {
                 transaction.storageHash = parser.buffer(constants.sizes.hash256);
                 transaction.usedSizeBytes = parser.uint64();
                 transaction.metaFilesSizeBytes = parser.uint64();
-                // transaction.proofOfExecutionVerificationInformation = parser.buffer();
+                transaction.proofOfExecutionVerificationInformation = parser.buffer(constants.sizes.curvePoint);
                 transaction.extendedCallDigests = [];
-                let count = transaction.CallsNumber;
-                while (count--) {
-                    
+                let callCount = transaction.CallsNumber;
+                while (callCount--) {
+                    const extendedCallDigest = {};
+                    extendedCallDigest.callId = parser.buffer(constants.sizes.hash256);
+                    extendedCallDigest.manual = parser.uint8();
+                    extendedCallDigest.block = parser.uint64();
+                    extendedCallDigest.status = parser.uint16();
+                    extendedCallDigest.releasedTransactionHash = parser.buffer(constants.sizes.hash256);
+                    transaction.extendedCallDigests.push(extendedCallDigest);
+                }
+                transaction.opinions = [];
+                let cosignersCount = transaction.CosignersNumber;
+                while (cosignersCount--) {
+                    const opinion = {};
+                    opinion.publicKey = parser.buffer(constants.sizes.signer);
+                    opinion.signature = parser.buffer(constants.sizes.signature);
+                    opinion.poEx.startBatchId = parser.uint64();
+                    opinion.poEx.T = parser.buffer(constants.sizes.curvePoint);
+                    opinion.poEx.R = parser.buffer(constants.sizes.curvePoint);
+                    opinion.poEx.F = parser.buffer(constants.sizes.curvePoint);
+                    opinion.poEx.K = parser.buffer(constants.sizes.curvePoint);
+                    opinion.callPayments = [];
+                    let callCount = transaction.CallsNumber;
+                    while (callCount--) {
+                        const callPayment = {};
+                        callPayment.executionPayment = parser.uint64();
+                        callPayment.downloadPayment = parser.uint64();
+                        opinion.callPayments.push(callPayment);
+                    }
+                    transaction.opinions.push(opinion);
                 }
 
                 return transaction;
@@ -319,7 +348,99 @@ const superContractV2Plugin = {
 
             serialize: (transaction, serializer) => {
                 serializer.writeBuffer(transaction.contractKey);
-                serializer.writeUint32(transaction.automaticExecutionsNumber);
+                serializer.writeUint64(transaction.batchId);
+                serializer.writeUint64(transaction.automaticExecutionsNextBlockToCheck);
+                serializer.writeBuffer(transaction.storageHash);
+                serializer.writeUint64(transaction.usedSizeBytes);
+                serializer.writeUint64(transaction.metaFilesSizeBytes);
+                serializer.writeBuffer(transaction.storageHash);
+                serializer.writeUint8(transaction.CallsNumber);
+                transaction.extendedCallDigests.forEach(extendedCallDigest => {
+                    serializer.writeBuffer(extendedCallDigest.callId);
+                    serializer.writeUint8(extendedCallDigest.manual);
+                    serializer.writeUint64(extendedCallDigest.block);
+                    serializer.writeUint16(extendedCallDigest.status);
+                    serializer.writeBuffer(extendedCallDigest.releasedTransactionHash);
+                });
+                transaction.opinions.forEach(opinion => {
+                    serializer.writeBuffer(opinion.publicKey);
+                    serializer.writeBuffer(opinion.signature);
+                    serializer.writeUint64(opinion.poEx.startBatchId);
+                    serializer.writeBuffer(opinion.poEx.T);
+                    serializer.writeBuffer(opinion.poEx.R);
+                    serializer.writeBuffer(opinion.poEx.F);
+                    serializer.writeBuffer(opinion.poEx.K);
+                    serializer.writeUint8(transaction.CallsNumber);
+                    opinion.callPayments.forEach(callPayment => {
+                        serializer.writeUint64(callPayment.executionPayment);
+                        serializer.writeUint64(callPayment.downloadPayment);
+                    });
+                });
+            }
+        });
+
+        codecBuilder.addTransactionSupport(EntityType.unsuccessfulEndBatchExecution, {
+            deserialize: parser => {
+                const transaction = {};
+                transaction.contractKey = parser.buffer(constants.sizes.signer);
+                transaction.batchId = parser.uint64();
+                transaction.automaticExecutionsNextBlockToCheck = parser.uint64();
+                transaction.shortCallDigests = [];
+                let callCount = transaction.CallsNumber;
+                while (callCount--) {
+                    const shortCallDigest = {};
+                    shortCallDigest.callId = parser.buffer(constants.sizes.hash256);
+                    shortCallDigest.manual = parser.uint8();
+                    shortCallDigest.block = parser.uint64();
+                    transaction.shortCallDigests.push(shortCallDigest);
+                }
+                transaction.opinions = [];
+                let cosignersCount = transaction.CosignersNumber;
+                while (cosignersCount--) {
+                    const opinion = {};
+                    opinion.publicKey = parser.buffer(constants.sizes.signer);
+                    opinion.signature = parser.buffer(constants.sizes.signature);
+                    opinion.poEx.startBatchId = parser.uint64();
+                    opinion.poEx.T = parser.buffer(constants.sizes.curvePoint);
+                    opinion.poEx.R = parser.buffer(constants.sizes.curvePoint);
+                    opinion.poEx.F = parser.buffer(constants.sizes.curvePoint);
+                    opinion.poEx.K = parser.buffer(constants.sizes.curvePoint);
+                    opinion.callPayments = [];
+                    let callCount = transaction.CallsNumber;
+                    while (callCount--) {
+                        const callPayment = {};
+                        callPayment.executionPayment = parser.uint64();
+                        callPayment.downloadPayment = parser.uint64();
+                        opinion.callPayments.push(callPayment);
+                    }
+                    transaction.opinions.push(opinion);
+                }
+            },
+
+            serialize: (transaction, serializer) => {
+                serializer.writeBuffer(transaction.contractKey);
+                serializer.writeUint64(transaction.batchId);
+                serializer.writeUint64(transaction.automaticExecutionsNextBlockToCheck);
+                serializer.writeUint8(transaction.CallsNumber);
+                transaction.shortCallDigests.forEach(shortCallDigest => {
+                    serializer.writeBuffer(shortCallDigest.callId);
+                    serializer.writeUint8(shortCallDigest.manual);
+                    serializer.writeUint64(shortCallDigest.block);
+                });
+                transaction.opinions.forEach(opinion => {
+                    serializer.writeBuffer(opinion.publicKey);
+                    serializer.writeBuffer(opinion.signature);
+                    serializer.writeUint64(opinion.poEx.startBatchId);
+                    serializer.writeBuffer(opinion.poEx.T);
+                    serializer.writeBuffer(opinion.poEx.R);
+                    serializer.writeBuffer(opinion.poEx.F);
+                    serializer.writeBuffer(opinion.poEx.K);
+                    serializer.writeUint8(transaction.CallsNumber);
+                    opinion.callPayments.forEach(callPayment => {
+                        serializer.writeUint64(callPayment.executionPayment);
+                        serializer.writeUint64(callPayment.downloadPayment);
+                    });
+                });
             }
         });
     }
