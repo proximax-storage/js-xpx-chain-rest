@@ -81,7 +81,6 @@ const superContractV2Plugin = {
         builder.addTransactionSupport(EntityType.synchronizationSingle, {
             contractKey:    ModelType.binary,
             batchId:        ModelType.uint64,
-            signer:         ModelType.binary,
         });
 
         builder.addSchema('servicePayment', {
@@ -441,6 +440,42 @@ const superContractV2Plugin = {
                         serializer.writeUint64(callPayment.downloadPayment);
                     });
                 });
+            }
+        });
+
+        codecBuilder.addTransactionSupport(EntityType.endBatchExecutionSingle, {
+            deserialize: parser => {
+                const transaction = {};
+                transaction.contractKey = parser.buffer(constants.sizes.signer);
+                transaction.batchId = parser.uint64();
+                transaction.poEx.startBatchId = parser.uint64();
+                transaction.poEx.T = parser.buffer(constants.sizes.curvePoint);
+                transaction.poEx.R = parser.buffer(constants.sizes.curvePoint);
+                transaction.poEx.F = parser.buffer(constants.sizes.curvePoint);
+                transaction.poEx.K = parser.buffer(constants.sizes.curvePoint);
+            },
+
+            serialize: (transaction, serializer) => {
+                serializer.writeBuffer(transaction.contractKey);
+                serializer.writeUint64(transaction.batchId);
+                serializer.writeUint64(transaction.poEx.startBatchId);
+                serializer.writeBuffer(transaction.poEx.T);
+                serializer.writeBuffer(transaction.poEx.R);
+                serializer.writeBuffer(transaction.poEx.F);
+                serializer.writeBuffer(transaction.poEx.K);
+            }
+        });
+
+        codecBuilder.addTransactionSupport(EntityType.synchronizationSingle, {
+            deserialize: parser => {
+                const transaction = {};
+                transaction.contractKey = parser.buffer(constants.sizes.signer);
+                transaction.batchId = parser.uint64();
+            },
+
+            serialize: (transaction, serializer) => {
+                serializer.writeBuffer(transaction.contractKey);
+                serializer.writeUint64(transaction.batchId);
             }
         });
     }
