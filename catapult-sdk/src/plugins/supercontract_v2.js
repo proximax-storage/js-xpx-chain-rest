@@ -4,10 +4,9 @@
  *** license that can be found in the LICENSE file.
  **/
 
-/** @module plugins/mosaic */
+/** @module plugins/supercontractV2 */
 const EntityType = require('../model/EntityType');
 const ModelType = require('../model/ModelType');
-const uint64 = require('../utils/uint64');
 const sizes = require('../modelBinary/sizes');
 
 const constants = { sizes };
@@ -17,7 +16,7 @@ const parseString = (parser, size) => parser.buffer(size).toString('ascii');
 const writeString = (serializer, str) => { serializer.writeBuffer(Buffer.from(str, 'ascii')); };
 
 /**
- * Creates a super contract plugin.
+ * Creates a supercontractV2 plugin.
  * @type {module:plugins/CatapultPlugin}
  */
 const superContractV2Plugin = {
