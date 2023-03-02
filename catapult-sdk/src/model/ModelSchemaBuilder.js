@@ -143,6 +143,17 @@ class ModelSchemaBuilder {
 			accountMeta: {
 			},
 
+			stakingRecord: {
+				address: ModelType.binary,
+				publicKey: ModelType.binary,
+				registryHeight: ModelType.uint64,
+				totalStaked: ModelType.uint64,
+				refHeight: ModelType.uint64,
+			},
+
+			stakingRecordWithMetadata: {
+				stakingAccount:  { type: ModelType.object, schemaName: 'stakingRecord' }
+			},
 			accountWithMetadata: {
 				meta: { type: ModelType.object, schemaName: 'accountMeta' },
 				account: { type: ModelType.object, schemaName: 'account' }

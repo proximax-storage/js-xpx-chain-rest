@@ -22,21 +22,24 @@
 const ModelType = require('../model/ModelType');
 
 const ReceiptType = {
-	1: 'receipts.balanceTransfer',
-	2: 'receipts.balanceChange',
-	3: 'receipts.balanceChange',
-	4: 'receipts.artifactExpiry',
-	5: 'receipts.inflation',
-	8: 'receipts.signerBalance'
+	0x1143: 'receipts.balanceTransfer',
+	0x124E: 'receipts.balanceTransfer',
+	0x414E: 'receipts.artifactExpiry',
+	0x2143: 'receipts.balanceChange',
+	0x3143: 'receipts.balanceChange',
+	0x4143: 'receipts.artifactExpiry',
+	0x5143: 'receipts.inflation',
+	0x8143: 'receipts.signerImportance',
+	0x8243: 'receipts.globalStateTracking',
+	0x8162: 'receipts.totalStaked'
 };
-
-const getBasicReceiptType = type => ReceiptType[(type & 0xF000) >> 12] || 'receipts.unknown';
 
 /**
  * Creates a receipts plugin.
  * @type {module:plugins/CatapultPlugin}
  */
 const receiptsPlugin = {
+	getBasicReceiptType: type => ReceiptType[type] || 'receipts.unknown',
 	registerSchema: builder => {
 		builder.addSchema('receipts', {
 			transactionStatements: { type: ModelType.array, schemaName: 'receipts.transactionStatement' },
@@ -60,17 +63,29 @@ const receiptsPlugin = {
 
 		builder.addSchema('receipts.transactionStatement', {
 			height: ModelType.uint64,
-			receipts: { type: ModelType.array, schemaName: entity => getBasicReceiptType(entity.type) }
+			receipts: { type: ModelType.array, schemaName: entity => this.getBasicReceiptType(entity.type) }
 		});
 
 		builder.addSchema('receipts.publicKeyStatement', {
 			height: ModelType.uint64,
-			receipts: { type: ModelType.array, schemaName: entity => getBasicReceiptType(entity.type) }
+			receipts: { type: ModelType.array, schemaName: entity => this.getBasicReceiptType(entity.type) }
 		});
 
 		builder.addSchema('receipts.blockchainStateStatement', {
 			height: ModelType.uint64,
-			receipts: { type: ModelType.array, schemaName: entity => getBasicReceiptType(entity.type) }
+			receipts: { type: ModelType.array, schemaName: entity => this.getBasicReceiptType(entity.type) }
+		});
+
+		builder.addSchema('receipts.anonymousReceipt', {
+			meta: {type: ModelType.object, schemaName: 'receipts.anonymousReceiptMetadata' },
+			data: ModelType.binary
+		});
+
+		builder.addSchema('receipts.anonymousReceiptMetadata', {
+			height: ModelType.uint64,
+			type: ModelType.uint16,
+			version: ModelType.uint32,
+			size: ModelType.uint32
 		});
 
 		builder.addSchema('receipts.entry.address', {
@@ -82,12 +97,16 @@ const receiptsPlugin = {
 		});
 
 		builder.addSchema('receipts.balanceChange', {
+			type: ModelType.uint16,
+			version: ModelType.uint32,
 			account: ModelType.binary,
 			mosaicId: ModelType.uint64,
 			amount: ModelType.uint64
 		});
 
 		builder.addSchema('receipts.balanceTransfer', {
+			type: ModelType.uint16,
+			version: ModelType.uint32,
 			sender: ModelType.binary,
 			recipient: ModelType.binary,
 			mosaicId: ModelType.uint64,
@@ -95,17 +114,35 @@ const receiptsPlugin = {
 		});
 
 		builder.addSchema('receipts.artifactExpiry', {
+			type: ModelType.uint16,
+			version: ModelType.uint32,
 			artifactId: ModelType.uint64
 		});
 
 		builder.addSchema('receipts.inflation', {
+			type: ModelType.uint16,
+			version: ModelType.uint32,
 			mosaicId: ModelType.uint64,
 			amount: ModelType.uint64
 		});
 
-		builder.addSchema('receipts.signerBalance', {
+		builder.addSchema('receipts.signerImportance', {
+			type: ModelType.uint16,
+			version: ModelType.uint32,
 			amount: ModelType.uint64,
 			lockedAmount: ModelType.uint64
+		});
+
+		builder.addSchema('receipts.totalStaked', {
+			type: ModelType.uint16,
+			version: ModelType.uint32,
+			amount: ModelType.uint64,
+		});
+
+		builder.addSchema('receipts.globalStateChange', {
+			type: ModelType.uint16,
+			version: ModelType.uint32,
+			flags: ModelType.uint64,
 		});
 	},
 

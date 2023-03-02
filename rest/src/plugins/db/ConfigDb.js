@@ -4,7 +4,7 @@
  *** license that can be found in the LICENSE file.
  * */
 
-const { convertToLong } = require('../../db/dbUtils');
+const { convertToLong, buildOffsetCondition} = require('../../db/dbUtils');
 
 class ConfigDb {
 	/**
@@ -38,6 +38,28 @@ class ConfigDb {
 				limit
 			}
 		);
+	}
+	/**
+	 * Retrieves filtered and paginated networkConfig configurations.
+	 * @param {object} heightCondition Conditions that describes how to filter based on the height field
+	 * @param {object} options Options for ordering and pagination. Can have an `offset`, and must contain the `sortField`, `sortDirection`,
+	 * `pageSize` and `pageNumber`. 'sortField' must be within allowed 'sortingOptions'.
+	 * @returns {Promise.<object>} Network configuration page.
+	 */
+	networkConfigurations(heightCondition, options) {
+		const sortingOptions = { id: '_id' };
+
+		let conditions = {};
+
+		const offsetCondition = buildOffsetCondition(options, sortingOptions);
+		if (offsetCondition)
+			conditions = Object.assign(conditions, offsetCondition);
+
+		if (undefined !== height)
+			conditions['networkConfig.height'] = heightCondition;
+
+		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };
+		return this.catapultDb.queryPagedDocumentsExt(conditions, [], sortConditions, 'networkConfigs', options);
 	}
 
 	// endregion

@@ -23,9 +23,10 @@ const { expect } = require('chai');
 
 describe('routeResultTypes', () => {
 	it('has correct links to schema', () => {
-		expect(Object.keys(routeResultTypes).length).to.equal(13);
+		expect(Object.keys(routeResultTypes).length).to.equal(14);
 		expect(routeResultTypes).to.deep.equal({
 			account: 'accountWithMetadata',
+			stakingRecordWithMetadata: 'stakingRecordWithMetadata',
 			block: 'blockHeaderWithMetadata',
 			transaction: 'transactionWithMetadata',
 			chainInfo: 'chainInfo',

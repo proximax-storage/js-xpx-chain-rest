@@ -19,6 +19,11 @@ const configPlugin = {
 			networkConfig:			{ type: ModelType.string, schemaName: 'networkConfig.networkConfig' },
 			supportedEntityVersions:	{ type: ModelType.string, schemaName: 'networkConfig.supportedEntityVersions' },
 		});
+		builder.addTransactionSupport(EntityType.networkConfigAbsoluteHeight, {
+			applyHeight: 			{ type: ModelType.uint64, schemaName: 'networkConfigAbsoluteHeight.applyHeight' },
+			networkConfig:			{ type: ModelType.string, schemaName: 'networkConfigAbsoluteHeight.networkConfig' },
+			supportedEntityVersions:	{ type: ModelType.string, schemaName: 'networkConfigAbsoluteHeight.supportedEntityVersions' },
+		});
 
 		builder.addSchema('networkConfigEntry', {
 			networkConfig: { type: ModelType.object, schemaName: 'networkConfigEntry.height' }
@@ -46,6 +51,27 @@ const configPlugin = {
 
 			serialize: (transaction, serializer) => {
 				serializer.writeUint64(transaction.applyHeightDelta);
+				serializer.writeUint16(transaction.networkConfigSize);
+				serializer.writeUint16(transaction.supportedEntityVersionsSize);
+				serializer.writeBuffer(transaction.networkConfig);
+				serializer.writeBuffer(transaction.supportedEntityVersions);
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.networkConfigAbsoluteHeight, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.applyHeight = parser.uint64();
+				transaction.networkConfigSize = parser.uint16();
+				transaction.supportedEntityVersionsSize = parser.uint16();
+				transaction.networkConfig = parser.buffer(transaction.networkConfigSize);
+				transaction.supportedEntityVersions = parser.buffer(transaction.supportedEntityVersionsSize);
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeUint64(transaction.applyHeight);
 				serializer.writeUint16(transaction.networkConfigSize);
 				serializer.writeUint16(transaction.supportedEntityVersionsSize);
 				serializer.writeBuffer(transaction.networkConfig);

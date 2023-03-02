@@ -21,6 +21,7 @@
 module.exports = {
 	// with meta data
 	account: 'accountWithMetadata',
+	stakingRecordWithMetadata: 'stakingRecordWithMetadata',
 	block: 'blockHeaderWithMetadata',
 	transaction: 'transactionWithMetadata',
 

@@ -46,7 +46,7 @@ describe('message channel builder', () => {
 			const filter = createFilter(new MessageChannelBuilder());
 
 			// Act:
-			expect(() => filter('')).to.throw('address param missing from address subscription');
+			expect(() => filter('')).to.throw('address or entity type param missing from address subscription');
 		});
 
 		it('accepts marker without topic param with allowOptionalAddress', () => {
@@ -146,7 +146,7 @@ describe('message channel builder', () => {
 			const defaultChannelNames = Object.keys(channels);
 
 			// Assert:
-			expect(defaultChannelNames).to.deep.equal(['block', 'confirmedAdded', 'unconfirmedAdded', 'unconfirmedRemoved', 'status']);
+			expect(defaultChannelNames).to.deep.equal(['block', 'confirmedAdded', 'unconfirmedAdded', 'unconfirmedRemoved', 'status', "stateStatement", "publicKeyStatement"]);
 		});
 
 		describe('block', () => {

@@ -27,11 +27,39 @@ const routeUtils = require('./routeUtils');
 const { convert } = catapult.utils;
 
 module.exports = {
-	register: (server, db) => {
+	register: (server, db, services) => {
 		server.get('/account/:accountId', (req, res, next) => {
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
 			const sender = routeUtils.createSender(routeResultTypes.account);
 			return db.accountsByIds([{ [type]: accountId }])
+				.then(sender.sendOne(req.params.accountId, res, next));
+		});
+
+		server.post('/stakingRecord', (req, res, next) => {
+			const { params } = req;
+			let type;
+			let accountId;
+			if(params.accountId) {
+				[type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
+			}
+			const filters = {
+				address: params.accountId ? type == "publicKey" ? catapult.model.address.publicKeyToAddress(accountId, this.networkId) : accountId : undefined,
+				height: params.refHeight ? routeUtils.parseArgument(req.params, 'refHeight', 'uint64') : undefined,
+			};
+			const options = routeUtils.parsePaginationArguments(params, services.config.pageSize, { id: 'objectId' });
+			return db.stakingRecords(filters, options)
+				.then(result => routeUtils.createSender(routeResultTypes.stakingRecordWithMetadata).sendPage(res, next)(result));
+		});
+
+		server.get('/stakingRecord/:accountId/:refHeight', (req, res, next) => {
+			const { params } = req;
+			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
+			const filters = {
+				address: type == "publicKey" ? catapult.model.address.publicKeyToAddress(accountId, this.networkId) : accountId,
+				height: routeUtils.parseArgument(req.params, 'refHeight', 'uint64'),
+			};
+			const sender = routeUtils.createSender(routeResultTypes.stakingRecordWithMetadata);
+			return db.stakingRecordById(filters.address, filters.height)
 				.then(sender.sendOne(req.params.accountId, res, next));
 		});
 

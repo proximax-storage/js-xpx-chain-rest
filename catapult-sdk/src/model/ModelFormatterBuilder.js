@@ -37,7 +37,7 @@ class ModelFormatterBuilder {
 			'accountWithMetadata',
 			'blockHeaderWithMetadata',
 			'transactionWithMetadata',
-
+			'stakingRecordWithMetadata',
 			'chainInfo',
 			'merkleProofInfo',
 			'nodeInfo',

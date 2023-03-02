@@ -676,6 +676,38 @@ class CatapultDb {
 			}));
 	}
 
+	// region staking Record retrieval
+
+	stakingRecordById(address, refHeight) {
+		return this.queryDocuments('stakingRecords', { $and: [{ 'stakingAccount.address': Buffer.from(address) }, { 'stakingAccount.refHeight': convertToLong(refHeight) }] })
+			.then(this.sanitizer.deleteId);
+	}
+	stakingRecords(filters, options) {
+		const buildConditions = () => {
+			const conditions = [];
+			if (filters.address) {
+				const addressCondition = { 'stakingAccount.address': Buffer.from(filters.address) };
+				conditions.push(addressCondition);
+			}
+
+			if (filters.refHeight) {
+				const refHeightCondition = { 'stakingAccount.refHeight': convertToLong(filters.refHeight) };
+				conditions.push(refHeightCondition);
+			}
+
+			if (Object.keys(conditions).length)
+				return 1 < Object.keys(conditions).length ? { $and: conditions } : conditions[0];
+
+			return undefined;
+		};
+
+		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
+		return this.queryPagedDocuments_2(buildConditions(), [], sortConditions,'stakingRecords',  options)
+			.then(entities => entities.map(stakingRecord => {
+				return stakingRecord;
+			}));
+	}
+
 	// endregion
 
 	// region failed transaction

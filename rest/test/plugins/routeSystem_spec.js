@@ -60,8 +60,8 @@ describe('route system', () => {
 			'supercontract',
 			'transfer',
 			'upgrade',
-			"accountRestriction",
-			"mosaicRestriction"
+			"accountrestriction",
+			"mosaicrestriction"
 
 		]);
 	});
@@ -143,7 +143,7 @@ describe('route system', () => {
 
 			// Assert:
 			expect(Object.keys(messageChannelDescriptors)).to.deep.equal([
-				'block', 'confirmedAdded', 'unconfirmedAdded', 'unconfirmedRemoved', 'status'
+				'block', 'confirmedAdded', 'unconfirmedAdded', 'unconfirmedRemoved', 'status', "stateStatement", "publicKeyStatement"
 			]);
 		});
 
@@ -153,7 +153,7 @@ describe('route system', () => {
 
 			// Assert:
 			expect(Object.keys(messageChannelDescriptors)).to.deep.equal([
-				'block', 'confirmedAdded', 'unconfirmedAdded', 'unconfirmedRemoved', 'status',
+				'block', 'confirmedAdded', 'unconfirmedAdded', 'unconfirmedRemoved', 'status', "stateStatement", "publicKeyStatement",
 				'partialAdded', 'partialRemoved', 'cosignature'
 			]);
 		});
@@ -165,7 +165,7 @@ describe('route system', () => {
 			const { filter } = messageChannelDescriptors.partialAdded;
 
 			// Act:
-			expect(() => filter('')).to.throw('address param missing from address subscription');
+			expect(() => filter('')).to.throw('address or entity type param missing from address subscription');
 		});
 
 		it('extension filter accepts marker without topic param with allowOptionalAddress', () => {

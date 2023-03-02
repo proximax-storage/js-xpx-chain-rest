@@ -78,6 +78,9 @@ const EntityType = {
 	/** Network Config transaction. */
 	networkConfig: 0x4159,
 
+	/** Network Config transaction. */
+	networkConfigAbsoluteHeight: 0x4259,
+
 	/** Blockchain Upgrade transaction. */
 	blockchainUpgrade: 0x4158,
 

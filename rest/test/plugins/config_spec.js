@@ -25,7 +25,8 @@ describe('config plugin', () => {
 
 			// Assert:
 			test.assert.assertRoutes(routes, [
-				'/config/:height'
+				'/config/:height',
+				'/config'
 			]);
 		});
 	});

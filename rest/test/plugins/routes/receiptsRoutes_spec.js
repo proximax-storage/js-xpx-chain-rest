@@ -34,12 +34,15 @@ describe('receipts routes', () => {
 		const transactionStatementData = ['dummyStatement'];
 		const addressResolutionStatementData = ['dummyStatement', 'dummyStatement'];
 		const mosaicResolutionStatementData = ['dummyStatement'];
+		const publicKeyStatementData = ['dummyStatement'];
+		const blockchainStateStatementData = ['dummyStatement'];
 		const statementsFake = sinon.stub();
-		const orderedStatementsCollections = ['transactionStatements', 'addressResolutionStatements', 'mosaicResolutionStatements'];
+		const orderedStatementsCollections = ['transactionStatements', 'addressResolutionStatements', 'mosaicResolutionStatements', 'publicKeyStatements', 'blockchainStateStatements'];
 		statementsFake.withArgs(correctQueriedHeight, orderedStatementsCollections[0]).returns(transactionStatementData);
 		statementsFake.withArgs(correctQueriedHeight, orderedStatementsCollections[1]).returns(addressResolutionStatementData);
 		statementsFake.withArgs(correctQueriedHeight, orderedStatementsCollections[2]).returns(mosaicResolutionStatementData);
-
+		statementsFake.withArgs(correctQueriedHeight, orderedStatementsCollections[3]).returns(publicKeyStatementData);
+		statementsFake.withArgs(correctQueriedHeight, orderedStatementsCollections[4]).returns(blockchainStateStatementData);
 		const routes = {};
 		const server = {
 			get: (path, handler) => {
@@ -75,7 +78,7 @@ describe('receipts routes', () => {
 			const route = routes[endpointUnderTest];
 			return route(req, res, next).then(() => {
 				// Assert:
-				expect(statementsFake.calledThrice).to.equal(true);
+				sinon.assert.callCount(statementsFake, 5);
 				orderedStatementsCollections.forEach((statementCollection, index) => expect(
 					statementsFake.calledWith(correctQueriedHeight, statementCollection),
 					`failed at index ${index}`
@@ -85,7 +88,9 @@ describe('receipts routes', () => {
 					payload: {
 						transactionStatements: transactionStatementData,
 						addressResolutionStatements: addressResolutionStatementData,
-						mosaicResolutionStatements: mosaicResolutionStatementData
+						mosaicResolutionStatements: mosaicResolutionStatementData,
+						publicKeyStatements: publicKeyStatementData,
+						blockchainStateStatements: blockchainStateStatementData
 					},
 					type: 'receipts'
 				});
@@ -101,7 +106,7 @@ describe('receipts routes', () => {
 			const route = routes[endpointUnderTest];
 			return route(req, res, next).then(() => {
 				// Assert:
-				expect(statementsFake.calledThrice).to.equal(true);
+				sinon.assert.callCount(statementsFake, 5);
 				expect(sentResponse.statusCode).to.equal(404);
 				expect(sentResponse.message).to.equal(`no resource exists with id '${highestHeight + 10}'`);
 			});

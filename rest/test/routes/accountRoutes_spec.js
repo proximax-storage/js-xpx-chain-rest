@@ -22,8 +22,10 @@ const accountRoutes = require('../../src/routes/accountRoutes');
 const catapult = require('catapult-sdk');
 const { test } = require('./utils/routeTestUtils');
 const { expect } = require('chai');
+const accountRestrictionRoutes = require("../../src/plugins/routes/accountRestrictionRoutes");
+const lockfundRoutes = require("../../src/plugins/routes/lockFundRoutes");
 
-const { address } = catapult.model;
+const { address, networkInfo } = catapult.model;
 const { convert } = catapult.utils;
 const { addresses, publicKeys } = test.sets;
 
@@ -87,5 +89,94 @@ describe('account routes', () => {
 			);
 		});
 	});
+	describe('staking record routes', () => {
+		it('/stakingRecord/:accountId/:refHeight with valid address', () => {
+			// Arrange:
+			const keyGroups = [];
+			const db = test.setup.createCapturingDb('stakingRecordById', keyGroups, [{value: 'this is nonsense'}]);
 
+			// Act:
+			const registerRoutes = accountRoutes.register;
+			return test.route.executeSingle(
+				registerRoutes,
+				'/stakingRecord/:accountId/:refHeight',
+				'get',
+				{accountId: addresses.valid[0], refHeight: "50", pageSize: 50},
+				db,
+				null,
+				response => {
+					// Assert:
+					expect(keyGroups).to.deep.equal([
+						address.stringToAddress(addresses.valid[0]),
+						[50, 0]
+					]);
+					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'stakingRecordWithMetadata'});
+				}
+			);
+		});
+
+		it('/stakingRecord/:accountId/:refHeight with invalid address', () => {
+			// Arrange:
+			const keyGroups = [];
+			const db = test.setup.createCapturingDb('stakingRecordById', keyGroups, [{value: 'this is nonsense'}]);
+
+			// Act:
+			const registerRoutes = accountRoutes.register;
+			return test.route.executeThrows(
+				registerRoutes,
+				'/stakingRecord/:accountId/:refHeight',
+				'get',
+				{accountId: addresses.invalid, refHeight: "50"},
+				db,
+				null,
+				'accountId has an invalid format',
+				409
+			);
+		});
+
+		it('/stakingRecord/:accountId/:refHeight with valid public key', () => {
+			// Arrange:
+			const keyGroups = [];
+			const db = test.setup.createCapturingDb('stakingRecordById', keyGroups, [{value: 'this is nonsense'}]);
+			let validAddress = address.publicKeyToAddress(convert.hexToUint8(publicKeys.valid[0]), networkInfo.networks.mijin)
+			// Act:
+			const registerRoutes = accountRoutes.register;
+			return test.route.executeSingle(
+				registerRoutes,
+				'/stakingRecord/:accountId/:refHeight',
+				'get',
+				{accountId: publicKeys.valid[0], refHeight: "50"},
+				db,
+				null,
+				response => {
+					// Assert:
+					expect(keyGroups).to.deep.equal([
+						validAddress,
+						[50, 0]
+					]);
+					expect(response).to.deep.equal({payload: {value: 'this is nonsense'}, type: 'stakingRecordWithMetadata'});
+				}
+			);
+		});
+
+		it('/stakingRecord/:accountId/:refHeight with invalid public key', () => {
+			// Arrange:
+			const keyGroups = [];
+			const db = test.setup.createCapturingDb('stakingRecordById', keyGroups, [{value: 'this is nonsense'}]);
+
+			// Act:
+			const registerRoutes = accountRoutes.register;
+			return test.route.executeThrows(
+				registerRoutes,
+				'/stakingRecord/:accountId/:refHeight',
+				'get',
+				{accountId: addresses.invalid, refHeight: "50"},
+				db,
+				null,
+				'accountId has an invalid format',
+				409
+			);
+		});
+	});
 });
+

@@ -45,15 +45,29 @@ const createBlockDescriptor = () => ({
 });
 
 const getTopicIdentifierBinaryBuffer = (topicIdentifier) => {
-	if(topicIdentifier.length == 2) return catapult.utils.convert.hexToUint8(topicIdentifier);
+	if(topicIdentifier.length == 4) return catapult.utils.convert.hexToUint8(topicIdentifier);
 	else return catapult.model.address.stringToAddress(topicIdentifier);
 }
 
-const createPolicyBasedAddressFilter = (markerByte, emptyAddressHandler) => topicParam => {
-	if (!topicParam)
-		return emptyAddressHandler(markerByte);
+const getTopicIdentifierEntityTypeBinaryBuffer = (topicIdentifier) => {
+	if (topicIdentifier.length != 4)
+		throw new Error('unexpected param does not match a receipt type hex designation');
+	return catapult.utils.convert.hexToUint8(topicIdentifier);
+}
+const receiptResolver = (markerByte) => (topic, buffer) => {
+	const parser = new BinaryParser();
+	parser.push(buffer);
 
-	return Buffer.concat([Buffer.of(markerByte), Buffer.from(getTopicIdentifierBinaryBuffer(topicParam))]);
+	const size = parser.uint32();
+	const version = parser.uint32();
+
+	return Buffer.concat([Buffer.of(markerByte), Buffer.of(parser.uint16())]);
+}
+const createPolicyBasedFilter = (markerByte, emptyHandler, processor) => topicParam => {
+	if (!topicParam)
+		return emptyHandler(markerByte);
+
+	return Buffer.concat([Buffer.of(markerByte), Buffer.from(processor(topicParam))]);
 };
 
 const handlers = {
@@ -69,7 +83,7 @@ const handlers = {
 	transactionHash: channelName => (codec, emit) => (topic, hash) => {
 		const address = topic.slice(1);
 		emit({ type: 'transactionWithMetadata', payload: { meta: { hash, channelName, address } } });
-	}
+	},
 };
 
 /**
@@ -87,25 +101,25 @@ class MessageChannelBuilder {
 
 		const emptyAddressHandler = config && config.allowOptionalAddress
 			? markerByte => Buffer.of(markerByte)
-			: () => { throw new Error('address param missing from address subscription'); };
-		this.createAddressFilter = markerChar => createPolicyBasedAddressFilter(markerChar.charCodeAt(0), emptyAddressHandler);
+			: () => { throw new Error('address or entity type param missing from address subscription'); };
+
+		const emptyEntityTypeHandler = config && config.allowOptionalType
+			? markerByte => Buffer.of(markerByte)
+			: () => { throw new Error('entity type param missing from subscription'); };
+
+		this.createPolicyFilter = markerChar => createPolicyBasedFilter(markerChar.charCodeAt(0), emptyAddressHandler, getTopicIdentifierBinaryBuffer);
+
+		this.createReceiptFilter = markerChar => createPolicyBasedFilter(markerChar.charCodeAt(0), emptyEntityTypeHandler, getTopicIdentifierEntityTypeBinaryBuffer);
 
 		// add basic descriptors
 		this.descriptors.block = createBlockDescriptor();
 		this.add('confirmedAdded', 'a', 'transaction');
 		this.add('unconfirmedAdded', 'u', 'transaction');
 		this.add('unconfirmedRemoved', 'r', 'transactionHash');
-		this.addResolver('b', function (topic, buffer) {
-			const parser = new BinaryParser();
-			parser.push(buffer);
-
-			const size = parser.uint32();
-			const version = parser.uint32();
-
-			return parser.uint16();
-		});
+		this.addResolver('b', receiptResolver('b'.charCodeAt(0)));
+		this.addResolver('c', receiptResolver('c'.charCodeAt(0)));
 		this.descriptors.status = {
-			filter: this.createAddressFilter('s'),
+			filter: this.createPolicyFilter('s'),
 			handler: (codec, emit) => (topic, buffer) => {
 				const address = topic.slice(1);
 				const parser = new BinaryParser();
@@ -117,6 +131,36 @@ class MessageChannelBuilder {
 
 				const meta = { channelName: 'status', address };
 				emit({ type: 'transactionStatus', payload: { hash, status, deadline, meta } });
+			}
+		};
+
+		this.descriptors.stateStatement = {
+			filter: this.createReceiptFilter('c'),
+			handler: (codec, emit) => (topic, receipt) => {
+				const parser = new BinaryParser();
+				parser.push(buffer);
+
+				const height = parser.uint64();
+				const size = parser.uint32();
+				const version = parser.uint32();
+				const type = parser.uint16();
+				const data = parser.buffer(size-4-4-2);
+				emit({ type: 'receipts.anonymousReceipt', payload: { meta: { height, size, version, type}, data } });
+			}
+		};
+
+		this.descriptors.publicKeyStatement = {
+			filter: this.createReceiptFilter('b'),
+			handler: (codec, emit) => (topic, receipt) => {
+				const parser = new BinaryParser();
+				parser.push(buffer);
+
+				const height = parser.uint64();
+				const size = parser.uint32();
+				const version = parser.uint32();
+				const type = parser.uint16();
+				const data = parser.buffer(size-4-4-2);
+				emit({ type: 'receipts.anonymousReceipt', payload: { meta: { height, size, version, type}, data } });
 			}
 		};
 	}
@@ -146,7 +190,7 @@ class MessageChannelBuilder {
 			channelHandler = handlers[handler](name);
 		}
 
-		this.descriptors[name] = { filter: this.createAddressFilter(markerChar), handler: channelHandler };
+		this.descriptors[name] = { filter: this.createPolicyFilter(markerChar), handler: channelHandler };
 		this.channelMarkers[markerChar] = 1;
 	}
 
