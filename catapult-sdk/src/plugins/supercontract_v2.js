@@ -173,17 +173,18 @@ const superContractV2Plugin = {
         });
 
         builder.addSchema('supercontract', {
-            multisig:                   ModelType.binary,
-            multisigAddress:            ModelType.binary,
-            driveKey:                   ModelType.binary,
-            executionPaymentKey:        ModelType.binary,
-            assignee:                   ModelType.binary,
-            automaticExecutionsInfo:    { type: ModelType.object, schemaName: 'automaticExecutionsInfo' },
-            servicePayments:            { type: ModelType.array, schemaName: 'servicePayment' },
-            requestedCalls:             { type: ModelType.array, schemaName: 'requestedCall' },
-            executorsInfo:              { type: ModelType.array, schemaName: 'executorsInfo' },
-            batches:                    { type: ModelType.array, schemaName: 'batch' },
-            releasedTransactions:       { type: ModelType.array, schemaName: ModelType.binary },
+            contractKey:                    ModelType.binary,
+            contractAddress:                ModelType.binary,
+            driveKey:                       ModelType.binary,
+            executionPaymentKey:            ModelType.binary,
+            assignee:                       ModelType.binary,
+            creator:                        ModelType.binary,
+            deploymentBaseModificationId:   ModelType.binary,
+            automaticExecutionsInfo:        { type: ModelType.object, schemaName: 'automaticExecutionsInfo' },
+            requestedCalls:                 { type: ModelType.array, schemaName: 'requestedCall' },
+            executorsInfo:                  { type: ModelType.array, schemaName: 'executorsInfo' },
+            batches:                        { type: ModelType.array, schemaName: 'batch' },
+            releasedTransactions:           { type: ModelType.array, schemaName: ModelType.binary },
         });
 
         builder.addSchema('drivecontract', {
