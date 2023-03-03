@@ -24,10 +24,12 @@ const nodeKeyLink = require('./nodeKeyLink');
 const vrfKeyLink = require('./vrfKeyLink');
 const accountProperties = require('./accountProperties');
 const aggregate = require('./aggregate');
+const committee = require('./committee');
 const config = require('./config');
 const contract = require('./contract');
 const exchange = require('./exchange');
 const lock = require('./lock');
+const liquidityProvider = require('./liquidityProvider');
 const ModelCodecBuilder = require('../modelBinary/ModelCodecBuilder');
 const ModelFormatterBuilder = require('../model/ModelFormatterBuilder');
 const ModelSchemaBuilder = require('../model/ModelSchemaBuilder');
@@ -40,6 +42,7 @@ const operation = require('./operation');
 const receipts = require('./receipts');
 const richlist = require('./richlist');
 const service = require('./service');
+const storage = require('./storage');
 const supercontract = require('./supercontract');
 const transfer = require('./transfer');
 const upgrade = require('./upgrade');
@@ -54,7 +57,8 @@ const plugins = {
 	vrfKeyLink,
 	accountProperties, 
 	aggregate, 
-	exchange, 
+	exchange,
+	committee,
 	config, 
 	contract, 
 	lock, 
@@ -66,7 +70,8 @@ const plugins = {
 	operation, 
 	receipts, 
 	richlist, 
-	service, 
+	service,
+	storage,
 	supercontract, 
 	transfer, 
 	upgrade,

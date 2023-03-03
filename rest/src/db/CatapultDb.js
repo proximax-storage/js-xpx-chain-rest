@@ -347,19 +347,26 @@ class CatapultDb {
 	 * metadata - which is comprised of: `totalEntries`, `pageNumber`, and `pageSize`.
 	 */
 	queryPagedDocuments_2(queryConditions, removedFields, sortConditions, collectionName, options) {
-		const conditions = [];
-		if (queryConditions.length)
+		let conditions = [];
+		let firstLevelConditions = [];
+		let preprocessingIndex = queryConditions.findIndex(i => i.key === 'firstLevel')
+		if (preprocessingIndex !== -1) {
+			firstLevelConditions = queryConditions[preprocessingIndex].value;
+			queryConditions.splice(preprocessingIndex, 1);
+		}
+
+		const countConditions = [];
+		if (queryConditions.length) {
 			conditions.push(1 === queryConditions.length ? { $match: queryConditions[0] } : { $match: { $and: queryConditions } });
+			countConditions.push(1 === queryConditions.length ? queryConditions[0] : { $and: queryConditions });
+		}
 
 		conditions.push(sortConditions);
 
 		const { pageSize } = options;
 		const pageIndex = options.pageNumber - 1;
 
-		const facet = [
-			{ $skip: pageSize * pageIndex },
-			{ $limit: pageSize }
-		];
+		const facet = [];
 
 		// rename _id to id
 		facet.push({ $set: { "meta.id": '$_id' } });
@@ -368,39 +375,80 @@ class CatapultDb {
 		if (0 < Object.keys(removedFields).length)
 			facet.push({ $unset: removedFields });
 
-		conditions.push({
-			$facet: {
-				data: facet,
-				pagination: [
-					{ $count: 'totalEntries' },
-					{
-						$set: {
-							pageNumber: options.pageNumber,
-							pageSize
-						}
-					}
-				]
-			}
-		});
+		conditions.push({ $skip: pageSize * pageIndex });
+		conditions.push({ $limit: pageSize });
+		
+		let collection = this.database.collection(collectionName);
+		var aggregateResult = function (totalEntries) {
+			conditions.push({
+				$facet: {
+					data: facet
+				}
+			},
+			{ $addFields: {
+				'pagination.totalEntries': totalEntries, 
+				'pagination.pageNumber': options.pageNumber,
+				'pagination.pageSize': pageSize,
+				'pagination.totalPages': 0
+			} });
 
-		return this.database.collection(collectionName)
+			return collection
 			.aggregate(conditions, { promoteLongs: false , allowDiskUse: true })
 			.toArray()
 			.then(result => {
 				const formattedResult = result[0];
-
-				// when query is empty, mongodb does not fill the pagination info
-				if (!formattedResult.pagination.length)
-					formattedResult.pagination = { totalEntries: 0, pageNumber: options.pageNumber, pageSize };
-				else
-					formattedResult.pagination = formattedResult.pagination[0];
-
 				formattedResult.pagination.totalPages = Math.ceil(
 					formattedResult.pagination.totalEntries / formattedResult.pagination.pageSize
 				);
 
-				return formattedResult;
+				if (firstLevelConditions.length) {
+					const promises = [];
+					let replaceIndex = [];
+					let currentCount = 0;
+
+					for(const item of formattedResult.data){
+
+						if(isAggregateType(item)){
+							replaceIndex.push(currentCount);
+							promises.push(
+								this.transactionsByIdsImpl(
+									collectionName, { 'meta.hash': { $in: [item.meta.hash] } }));
+						}
+
+						currentCount++;
+					}
+
+					return Promise.all(promises).then( finalResult => {
+
+						currentCount = 0;
+						
+						for(const replacingIndex of replaceIndex){
+
+							formattedResult.data[replacingIndex] = finalResult[currentCount][0];
+							currentCount++;
+						}
+
+						return formattedResult;
+					});
+				} else {
+					return formattedResult;
+				}
 			});
+		}.bind(this);
+
+		if (countConditions.length) {
+			return collection
+				.countDocuments(countConditions[0])
+				.then(totalEntries => {
+					return aggregateResult(totalEntries);
+				});
+		} else {
+			return collection
+				.estimatedDocumentCount()
+				.then(totalEntries => {
+					return aggregateResult(totalEntries);
+				});
+		}
 	}
 
 	/**
@@ -432,11 +480,22 @@ class CatapultDb {
 			if (Object.keys(accountConditions).length)
 				return 1 < Object.keys(accountConditions).length ? { $and: accountConditions } : accountConditions[0];
 
+			if (filters.publicKey) {
+				accountConditions.push({ 'transaction.signer': Buffer.from(filters.publicKey) });
+
+				const address = catapult.model.address.publicKeyToAddress(filters.publicKey, this.networkId);
+				accountConditions.push({ 'transaction.recipient': Buffer.from(address) });
+				accountConditions.push({ 'meta.addresses': Buffer.from(address) });
+
+				return { $or: accountConditions }
+			}
+
 			return undefined;
 		};
 
 		const buildConditions = () => {
-			const conditions = [];
+			let conditions = []
+			let firstLevelConditions = []
 
 			// it is assumed that sortField will always be an `id` for now - this will need to be redesigned when it gets upgraded
 			// in fact, offset logic should be moved to `queryPagedDocuments`
@@ -452,8 +511,30 @@ class CatapultDb {
 			else if (filters.toHeight !== undefined)
 				conditions.push({ 'meta.height': { $lte: convertToLong(filters.toHeight) } });
 
+			if (filters.firstLevel !== undefined && !filters.firstLevel)
+				firstLevelConditions.push(1);
+
 			if (!filters.embedded)
 				conditions.push({ 'meta.aggregateId': { $exists: false } });
+
+			if(filters.transferMosaicId !== undefined){
+				
+				let transferElemMatch = {
+					id: convertToLong(filters.transferMosaicId)
+				};
+
+				if (filters.fromTransferAmount !== undefined && filters.toTransferAmount !== undefined){
+					transferElemMatch.amount = { $gte: convertToLong(filters.fromTransferAmount), $lte: convertToLong(filters.toTransferAmount)};
+				}
+				else if(filters.fromTransferAmount !== undefined)
+					transferElemMatch.amount = { $gte: convertToLong(filters.fromTransferAmount) };				
+				else if(filters.toTransferAmount !== undefined)
+					transferElemMatch.amount = { $lte: convertToLong(filters.toTransferAmount) };
+
+				conditions.push({"transaction.type": EntityType.transfer});
+				conditions.push({"transaction.mosaics.0": { $exists: true }});
+				conditions.push({"transaction.mosaics": { $elemMatch: transferElemMatch }});
+			}
 
 			if (filters.transactionTypes !== undefined)
 				conditions.push({ 'transaction.type': { $in: filters.transactionTypes } });
@@ -461,6 +542,9 @@ class CatapultDb {
 			const accountConditions = buildAccountConditions();
 			if (accountConditions)
 				conditions.push(accountConditions);
+
+			if (firstLevelConditions.length > 0)
+				conditions.unshift({ 'key': 'firstLevel', 'value' : firstLevelConditions })
 
 			return conditions;
 		};

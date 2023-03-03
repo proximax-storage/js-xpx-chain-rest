@@ -8,7 +8,7 @@
   "crossDomainHttpMethods": ["GET", "POST", "PUT", "OPTIONS"],
   "cors": "*",
   "clientPrivateKey": "659D289A30D436DBBC80A5C1B0A4919FB6626A434FE1DB42DC0461D8015A5DAC",
-  "extensions": ["accountLink", "nodeKeyLink", "vrfKeyLink", "accountProperties", "aggregate", "exchange", "config", "lock", "metadata", "metadata_v2", "mosaic", "multisig", "namespace", "operation", "receipts", "richlist", "service", "supercontract", "transfer", "upgrade", "lockfund", "accountrestriction", "mosaicrestriction"],
+  "extensions": ["accountLink", "nodeKeyLink", "vrfKeyLink", "accountProperties", "aggregate", "exchange", "config", "lock", "liquidityProvider", "metadata", "metadata_v2", "mosaic", "multisig", "namespace", "operation", "receipts", "richlist", "service", "storage", "supercontract", "transfer", "upgrade", "lockfund", "accountrestriction", "mosaicrestriction"],
 
   "https": {
     "ca": "",

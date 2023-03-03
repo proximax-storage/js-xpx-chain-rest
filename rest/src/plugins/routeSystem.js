@@ -20,11 +20,13 @@
 
 const accountProperties = require('./accountProperties');
 const aggregate = require('./aggregate');
+const committee = require('./committee');
 const config = require('./config');
 const contract = require('./contract');
 const empty = require('./empty');
 const exchange = require('./exchange');
 const lock = require('./lock');
+const liquidityProvider = require('./liquidityProvider');
 const MessageChannelBuilder = require('../connection/MessageChannelBuilder');
 const metadata = require('./metadata');
 const metadata_v2 = require('./metadata_v2');
@@ -40,9 +42,10 @@ const service = require('./service');
 const lockfund = require('./lockfund');
 const mosaicrestriction = require('./mosaicRestriction');
 const accountrestriction = require('./accountRestriction');
+const storage = require('./storage');
 
 const plugins = {
-	accountLink: empty, nodeKeyLink: empty, vrfKeyLink: empty, accountProperties, aggregate, exchange, config, contract, lockfund, lock, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, supercontract, transfer: empty, upgrade, accountrestriction, mosaicrestriction
+	accountLink: empty, nodeKeyLink: empty, vrfKeyLink: empty, accountProperties, aggregate, exchange, committee, config, contract, lockfund, lock,liquidityProvider, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, transfer: empty, upgrade, accountrestriction, mosaicrestriction
 };
 
 module.exports = {

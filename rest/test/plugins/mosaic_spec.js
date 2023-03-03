@@ -40,7 +40,8 @@ describe('mosaic plugin', () => {
 			// Assert:
 			test.assert.assertRoutes(routes, [
 				'/mosaic/:mosaicId',
-				'/mosaic/:mosaicId/levy'
+				'/mosaic/:mosaicId/levy',
+				'/mosaics'
 			]);
 		});
 
@@ -54,7 +55,7 @@ describe('mosaic plugin', () => {
 
 			// Assert:
 			test.assert.assertRoutes(routes, [
-				'/mosaic'
+				'/mosaic',
 			]);
 		});
 	});

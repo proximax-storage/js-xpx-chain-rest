@@ -42,11 +42,13 @@ module.exports = {
 	[ModelType.objectId]: value => (undefined === value ? '' : value.toHexString().toUpperCase()),
 	[ModelType.statusCode]: value => status.toString(value >>> 0),
 	[ModelType.string]: value => value.toString(),
+	[ModelType.uint8]: value => (value instanceof Binary ? Buffer.from(value.buffer).readUInt8(0) : value >>> 0),
 	[ModelType.uint16]: value => (value instanceof Binary ? Buffer.from(value.buffer).readUInt16LE(0) : value >>> 0),
 	[ModelType.uint32]: value => (value instanceof Binary ? Buffer.from(value.buffer).readUInt32LE(0) : value >>> 0),
 	[ModelType.uint64]: value => (value instanceof Binary ? uint64.fromBytes(value.buffer) : longToUint64(value)),
 	// `uint64HexIdentifier` requires branching accountRestrictions->restrictionAdditions provides uint64 as binary
 	[ModelType.uint64HexIdentifier]: value => uint64.toHex(value instanceof Binary ? uint64.fromBytes(value.buffer) : longToUint64(value)),
 	[ModelType.int]: value => value.valueOf(),
-	[ModelType.boolean]: value => value
+	[ModelType.boolean]: value => (value instanceof Binary ? Boolean(value.buffer[0]) : value),
+	[ModelType.double]: value => (value instanceof Binary ? Buffer.from(value.buffer).readDoubleLE(0) : value),
 };
