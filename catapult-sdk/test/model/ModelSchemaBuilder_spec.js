@@ -83,7 +83,12 @@ describe('model schema builder', () => {
 				'transactionStatus',
 
 				'account',
+				"supplementalAccountKeys",
+				"supplementalAccountKey",
 				'accountMeta',
+				"stakingRecord",
+				"stakingRecordWithMetadata",
+
 				'accountWithMetadata',
 
 				'levy',
@@ -150,6 +155,11 @@ describe('model schema builder', () => {
 				'transactionWithMetadata.meta',
 				'transactionWithMetadata.transaction',
 				'transactionStatus.meta',
+				"account.supplementalAccountKeys",
+				"supplementalAccountKeys.linked",
+				"supplementalAccountKeys.node",
+				"supplementalAccountKeys.vrf",
+				"stakingRecordWithMetadata.stakingAccount",
 
 				'accountWithMetadata.meta',
 				'accountWithMetadata.account',
@@ -170,6 +180,7 @@ describe('model schema builder', () => {
 				'blockHeaderMetadata.subCacheMerkleRoots',
 				'merkleProofInfo.merklePath',
 				'account.mosaics',
+				"account.lockedMosaics",
 				'levy.history'
 			]);
 		});
@@ -213,7 +224,9 @@ describe('model schema builder', () => {
 
 				'account.address',
 				'account.publicKey',
-				'account.linkedAccountKey',
+				"supplementalAccountKey.publicKey",
+				"stakingRecord.address",
+				"stakingRecord.publicKey",
 
 				'nodeInfo.publicKey',
 			]);
@@ -249,7 +262,9 @@ describe('model schema builder', () => {
 
 				'account.addressHeight',
 				'account.publicKeyHeight',
-
+				"stakingRecord.registryHeight",
+				"stakingRecord.totalStaked",
+				"stakingRecord.refHeight",
 				'levy.mosaicId',
 				'levy.history.schemaName',
 

@@ -63,17 +63,17 @@ const receiptsPlugin = {
 
 		builder.addSchema('receipts.transactionStatement', {
 			height: ModelType.uint64,
-			receipts: { type: ModelType.array, schemaName: entity => this.getBasicReceiptType(entity.type) }
+			receipts: { type: ModelType.array, schemaName: entity => receiptsPlugin.getBasicReceiptType(entity.type) }
 		});
 
 		builder.addSchema('receipts.publicKeyStatement', {
 			height: ModelType.uint64,
-			receipts: { type: ModelType.array, schemaName: entity => this.getBasicReceiptType(entity.type) }
+			receipts: { type: ModelType.array, schemaName: entity => receiptsPlugin.getBasicReceiptType(entity.type) }
 		});
 
 		builder.addSchema('receipts.blockchainStateStatement', {
 			height: ModelType.uint64,
-			receipts: { type: ModelType.array, schemaName: entity => this.getBasicReceiptType(entity.type) }
+			receipts: { type: ModelType.array, schemaName: entity => receiptsPlugin.getBasicReceiptType(entity.type) }
 		});
 
 		builder.addSchema('receipts.anonymousReceipt', {

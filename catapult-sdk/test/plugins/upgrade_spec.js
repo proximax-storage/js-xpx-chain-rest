@@ -55,8 +55,8 @@ describe('upgrade plugin', () => {
 			const codecs = getCodecs();
 
 			// Assert: codec was registered
-			expect(Object.keys(codecs).length).to.equal(1);
-			expect(codecs).to.contain.all.keys([EntityType.blockchainUpgrade.toString()]);
+			expect(Object.keys(codecs).length).to.equal(2);
+			expect(codecs).to.contain.all.keys([EntityType.blockchainUpgrade.toString(), EntityType.accountV2Upgrade.toString()]);
 		});
 
 		const codec = getCodecs()[EntityType.blockchainUpgrade];
@@ -80,13 +80,13 @@ describe('upgrade plugin', () => {
 		describe('supports account V2 upgrade transaction', () => {
 			const Key_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.signer));
 
-			test.binary.test.addAll(codec, 32, () => ({
+			test.binary.test.addAll(getCodecs()[EntityType.accountV2Upgrade], 32, () => ({
 				buffer: Buffer.concat([
 					Key_Buffer,
 				]),
 
 				object: {
-					newAccountPublicKey: Recipient_Buffer
+					newAccountPublicKey: Key_Buffer
 				}
 			}));
 		});

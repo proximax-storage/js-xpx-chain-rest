@@ -33,7 +33,7 @@ describe('node key link plugin', () => {
 			const numDefaultKeys = Object.keys(builder.build()).length;
 
 			// Act:
-			accountLinkPlugin.registerSchema(builder);
+			nodeKeyLinkPlugin.registerSchema(builder);
 			const modelSchema = builder.build();
 
 			// Assert:
@@ -41,15 +41,15 @@ describe('node key link plugin', () => {
 			expect(modelSchema).to.contain.all.keys(['nodeKeyLink']);
 
 			// - accountLink
-			expect(Object.keys(modelSchema.accountLink).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
-			expect(modelSchema.accountLink).to.contain.all.keys(['remoteAccountKey']);
+			expect(Object.keys(modelSchema.nodeKeyLink).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
+			expect(modelSchema.nodeKeyLink).to.contain.all.keys(['remoteAccountKey']);
 		});
 	});
 
 	describe('register codecs', () => {
 		const getCodecs = () => {
 			const codecs = {};
-			accountLinkPlugin.registerCodecs({
+			nodeKeyLinkPlugin.registerCodecs({
 				addTransactionSupport: (type, codec) => { codecs[type] = codec; }
 			});
 
@@ -62,12 +62,12 @@ describe('node key link plugin', () => {
 
 			// Assert: codec was registered
 			expect(Object.keys(codecs).length).to.equal(1);
-			expect(codecs).to.contain.all.keys([EntityType.accountLink.toString()]);
+			expect(codecs).to.contain.all.keys([EntityType.nodeKeyLink.toString()]);
 		});
 
-		const codec = getCodecs()[EntityType.accountLink];
+		const codec = getCodecs()[EntityType.nodeKeyLink];
 
-		describe('supports account link transaction', () => {
+		describe('supports node key link transaction', () => {
 			const remoteAccountKey = Buffer.of(
 				0x77, 0xBE, 0xE1, 0xCA, 0xD0, 0x8E, 0x6E, 0x48, 0x95, 0xE8, 0x18, 0xB2, 0x7B, 0xD8, 0xFA, 0xC9,
 				0x47, 0x0D, 0xB8, 0xFD, 0x2D, 0x81, 0x47, 0x6A, 0xC5, 0x61, 0xA4, 0xCE, 0xE1, 0x81, 0x40, 0x83

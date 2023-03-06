@@ -21,7 +21,7 @@ const constants = {
 
 describe('lockfund plugin', () => {
 	describe('register schema', () => {
-		it('adds supercontract system schema', () => {
+		it('adds lock fund system schema', () => {
 			// Arrange:
 			const builder = new ModelSchemaBuilder();
 			const numDefaultKeys = Object.keys(builder.build()).length;
@@ -57,25 +57,25 @@ describe('lockfund plugin', () => {
 			expect(Object.keys(modelSchema['lockfundrecord_height']).length).to.equal(3);
 			expect(modelSchema['lockfundrecord_height']).to.contain.all.keys([
 				'key',
-				'activeRecord',
+				"activeMosaics",
 				'inactiveRecords'
 			]);
 
 			expect(Object.keys(modelSchema['lockfundrecord_key']).length).to.equal(3);
 			expect(modelSchema['lockfundrecord_key']).to.contain.all.keys([
 				'key',
-				'activeRecord',
+				'activeMosaics',
 				'inactiveRecords'
 			]);
 
 			expect(Object.keys(modelSchema['lockFundRecordGroupEntry_height']).length).to.equal(1);
 			expect(modelSchema['lockFundRecordGroupEntry_height']).to.contain.all.keys([
-				'lockfundrecordgroup',
+				'lockFundRecordGroup',
 			]);
 
 			expect(Object.keys(modelSchema['lockFundRecordGroupEntry_key']).length).to.equal(1);
 			expect(modelSchema['lockFundRecordGroupEntry_key']).to.contain.all.keys([
-				'lockfundrecordgroup',
+				'lockFundRecordGroup',
 			]);
 
 			expect(Object.keys(modelSchema['lockfundrecordgroup_height']).length).to.equal(2);
@@ -88,12 +88,6 @@ describe('lockfund plugin', () => {
 			expect(modelSchema['lockfundrecordgroup_key']).to.contain.all.keys([
 				'identifier',
 				'records',
-			]);
-
-			expect(Object.keys(modelSchema['uploadFile.addfiles']).length).to.equal(2);
-			expect(modelSchema['uploadFile.addfiles']).to.contain.all.keys([
-				'fileHash',
-				'fileSize'
 			]);
 		});
 	});
@@ -120,7 +114,7 @@ describe('lockfund plugin', () => {
 			const codecs = getCodecs();
 
 			// Assert: codec was registered
-			expect(Object.keys(codecs).length).to.equal(5);
+			expect(Object.keys(codecs).length).to.equal(2);
 			expect(codecs).to.contain.all.keys([
 				EntityType.lockFundCancelUnlock.toString(),
 				EntityType.lockFundTransfer.toString(),
@@ -153,7 +147,7 @@ describe('lockfund plugin', () => {
 					0x12, 0xE0, 0x2D, 0x82, 0x8E, 0x54, 0x86, 0xF3, 0x03, 0x81, 0x70, 0xA9, 0xFE, 0x33, 0x12, 0x2F
 				]);
 				data.buffer.writeUInt8(5, constants.sizes.lockFundTransfer - 1);
-				data.buffer.writeUInt8(1, constants.sizes.lockFundTransfer - 2);
+				data.buffer.writeUInt8(0, constants.sizes.lockFundTransfer - 2);
 				data.buffer = Buffer.concat([
 					data.buffer,
 					Mosaics_Buffer
@@ -166,7 +160,7 @@ describe('lockfund plugin', () => {
 			const codec = getCodecs()[EntityType.lockFundCancelUnlock];
 
 			test.binary.test.addAll(codec, constants.sizes.lockFundCancel, () => ({
-				buffer: Buffer.concat([
+				buffer: Buffer.from([
 					0xED, 0x3E, 0x8A, 0xAD, 0xEC, 0xAD, 0xDA, 0x3F
 				]),
 				object: {

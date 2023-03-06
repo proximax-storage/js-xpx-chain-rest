@@ -23,7 +23,7 @@ describe('config plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 3);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 4);
 			expect(modelSchema).to.contain.all.keys(['networkConfig', 'networkConfigEntry', 'networkConfigEntry.height']);
 
 			expect(Object.keys(modelSchema['networkConfigEntry.height']).length).to.equal(3);
@@ -51,7 +51,7 @@ describe('config plugin', () => {
 			const codecs = getCodecs();
 
 			// Assert: codec was registered
-			expect(Object.keys(codecs).length).to.equal(1);
+			expect(Object.keys(codecs).length).to.equal(2);
 			expect(codecs).to.contain.all.keys([EntityType.networkConfig.toString()]);
 		});
 

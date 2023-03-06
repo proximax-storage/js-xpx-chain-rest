@@ -47,7 +47,7 @@ describe('model formatter builder', () => {
 				'accountWithMetadata',
 				'blockHeaderWithMetadata',
 				'transactionWithMetadata',
-
+				"stakingRecordWithMetadata",
 				'chainInfo',
 				'merkleProofInfo',
 				'nodeInfo',
@@ -172,11 +172,19 @@ describe('model formatter builder', () => {
 					publicKey: 0,
 					publicKeyHeight: 0,
 					accountType: 0,
-					linkedAccountKey: 0,
 					mosaics: [
 						{ id: 0, amount: 0 },
 						{ id: 0, amount: 0 }
-					]
+					],
+					lockedMosaics: [
+						{ id: 0, amount: 0 },
+						{ id: 0, amount: 0 }
+					],
+					supplementalAccountKeys: {
+						linked: { publicKey: 0 },
+						node:  { publicKey: 0 },
+						vrf:  { publicKey: 0 },
+					}
 				}
 			});
 
@@ -190,11 +198,25 @@ describe('model formatter builder', () => {
 					publicKey: 'binary',
 					publicKeyHeight: 'uint64',
 					accountType: 'none',
-					linkedAccountKey: 'binary',
 					mosaics: [
-						{ id: 'uint64', amount: 'uint64' },
-						{ id: 'uint64', amount: 'uint64' }
-					]
+						{id: 'uint64', amount: 'uint64'},
+						{id: 'uint64', amount: 'uint64'}
+					],
+					lockedMosaics: [
+						{id: 'uint64', amount: 'uint64'},
+						{id: 'uint64', amount: 'uint64'}
+					],
+					supplementalAccountKeys: {
+						linked: {
+							publicKey: "binary"
+						},
+						node: {
+							publicKey: "binary"
+						},
+						vrf: {
+							publicKey: "binary"
+						}
+					}
 				}
 			});
 		});

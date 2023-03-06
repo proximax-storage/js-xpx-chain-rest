@@ -68,7 +68,9 @@ describe('catapult model system', () => {
 				'supercontract',
 				'transfer',
 				'upgrade',
-				'lockfund'
+				'lockfund',
+				"accountrestriction",
+				"mosaicrestriction"
 			]);
 		});
 	});
@@ -102,7 +104,7 @@ describe('catapult model system', () => {
 			expect(system.schema).to.contain.key('blockHeader');
 			expect(system.schema).to.contain.key('transfer');
 			expect(system.schema).to.contain.key('registerNamespace');
-			expect(system.schema).to.contain.key('aggregateComplete');
+			expect(system.schema).to.contain.key('aggregateCompleteV1');
 		});
 	});
 

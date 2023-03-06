@@ -37,7 +37,7 @@ describe('receipts plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 11);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 17);
 			expect(modelSchema).to.contain.all.keys([
 				'receipts',
 				'receipts.addressResolutionStatement',
@@ -48,16 +48,24 @@ describe('receipts plugin', () => {
 				'receipts.artifactExpiry',
 				'receipts.inflation',
 				'receipts.entry.address',
-				'receipts.entry.mosaic',
-				'receipts.unknown'
+				"receipts.anonymousReceipt",
+				"receipts.blockchainStateStatement",
+				"receipts.globalStateChange",
+				"receipts.publicKeyStatement",
+				"receipts.signerImportance",
+				"receipts.totalStaked",
+				"receipts.anonymousReceiptMetadata",
+				'receipts.entry.mosaic'
 			]);
 
 			// -  receipts
-			expect(Object.keys(modelSchema.receipts).length).to.equal(3);
+			expect(Object.keys(modelSchema.receipts).length).to.equal(5);
 			expect(modelSchema.receipts).to.contain.all.keys([
 				'addressResolutionStatements',
 				'mosaicResolutionStatements',
-				'transactionStatements'
+				'transactionStatements',
+				'publicKeyStatements',
+				'blockchainStateStatements'
 			]);
 
 			// - receipts.addressResolutionStatement
@@ -96,11 +104,11 @@ describe('receipts plugin', () => {
 			]);
 
 			// - receipts.balanceChange
-			expect(Object.keys(modelSchema['receipts.balanceChange']).length).to.equal(3);
+			expect(Object.keys(modelSchema['receipts.balanceChange']).length).to.equal(5);
 			expect(modelSchema['receipts.balanceChange']).to.contain.all.keys(['account', 'mosaicId', 'amount']);
 
 			// - receipts.balanceTransfer
-			expect(Object.keys(modelSchema['receipts.balanceTransfer']).length).to.equal(4);
+			expect(Object.keys(modelSchema['receipts.balanceTransfer']).length).to.equal(6);
 			expect(modelSchema['receipts.balanceTransfer']).to.contain.all.keys([
 				'sender',
 				'recipient',
@@ -109,18 +117,15 @@ describe('receipts plugin', () => {
 			]);
 
 			// - receipts.artifactExpiry
-			expect(Object.keys(modelSchema['receipts.artifactExpiry']).length).to.equal(1);
+			expect(Object.keys(modelSchema['receipts.artifactExpiry']).length).to.equal(3);
 			expect(modelSchema['receipts.artifactExpiry']).to.contain.all.keys(['artifactId']);
 
 			// - receipts.inflation
-			expect(Object.keys(modelSchema['receipts.inflation']).length).to.equal(2);
+			expect(Object.keys(modelSchema['receipts.inflation']).length).to.equal(4);
 			expect(modelSchema['receipts.inflation']).to.contain.all.keys([
 				'mosaicId',
 				'amount'
 			]);
-
-			// - receipts.unknown
-			expect(Object.keys(modelSchema['receipts.unknown']).length).to.equal(0);
 		});
 	});
 
@@ -164,7 +169,7 @@ describe('receipts plugin', () => {
 				// Arrange:
 				const balanceChangeReceipt = {
 					version: 1,
-					type: 0x1000,
+					type: 0x2143,
 					account: null,
 					mosaicId: null,
 					amount: null
@@ -175,8 +180,6 @@ describe('receipts plugin', () => {
 
 				// Assert:
 				expect(formattedReceipt).to.contain.all.keys([
-					'version',
-					'type',
 					'account',
 					'mosaicId',
 					'amount'
@@ -187,7 +190,7 @@ describe('receipts plugin', () => {
 				// Arrange:
 				const balanceTransferReceipt = {
 					version: 1,
-					type: 0x2000,
+					type: 0x124E,
 					sender: null,
 					recipient: null,
 					mosaicId: null,
@@ -199,8 +202,6 @@ describe('receipts plugin', () => {
 
 				// Assert:
 				expect(formattedReceipt).to.contain.all.keys([
-					'version',
-					'type',
 					'sender',
 					'recipient',
 					'mosaicId',
@@ -212,7 +213,7 @@ describe('receipts plugin', () => {
 				// Arrange:
 				const artifactExpiryReceipt = {
 					version: 1,
-					type: 0x3000,
+					type: 0x4143,
 					artifactId: null
 				};
 
@@ -221,8 +222,6 @@ describe('receipts plugin', () => {
 
 				// Assert:
 				expect(formattedReceipt).to.contain.all.keys([
-					'version',
-					'type',
 					'artifactId'
 				]);
 			});
@@ -231,7 +230,7 @@ describe('receipts plugin', () => {
 				// Arrange:
 				const inflationReceipt = {
 					version: 1,
-					type: 0x5000,
+					type: 0x5143,
 					mosaicId: null,
 					amount: null
 				};
@@ -241,29 +240,8 @@ describe('receipts plugin', () => {
 
 				// Assert:
 				expect(formattedReceipt).to.contain.all.keys([
-					'version',
-					'type',
 					'mosaicId',
 					'amount'
-				]);
-			});
-
-			it('formats unknown receipt type', () => {
-				// Arrange:
-				const unknownReceipt = {
-					version: null,
-					type: 82356235,
-					unknownProperty1: null,
-					unknownProperty2: null
-				};
-
-				// Act:
-				const formattedReceipt = formatReceipt(unknownReceipt);
-
-				// Assert:
-				expect(formattedReceipt).to.contain.all.keys([
-					'version',
-					'type'
 				]);
 			});
 		});

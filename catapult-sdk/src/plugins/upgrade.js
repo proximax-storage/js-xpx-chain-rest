@@ -7,7 +7,9 @@
 /** @module plugins/upgrade */
 const EntityType = require('../model/EntityType');
 const ModelType = require('../model/ModelType');
+const sizes = require('../modelBinary/sizes');
 
+const constants = { sizes };
 /**
  * Creates a upgrade plugin.
  * @type {module:plugins/CatapultPlugin}

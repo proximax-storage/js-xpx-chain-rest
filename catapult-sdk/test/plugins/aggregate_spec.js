@@ -33,7 +33,8 @@ const constants = {
 		aggregate: 122 + 4, // includes transaction header
 		transaction: 122,
 		embedded: 42 + 8,
-		cosignature: 96
+		cosignature: 96,
+		extendedCosignature: 97,
 	}
 };
 
@@ -49,8 +50,8 @@ describe('aggregate plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 4);
-			expect(modelSchema).to.contain.all.keys(['aggregateComplete', 'aggregateBonded', 'aggregate.cosignature']);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 6);
+			expect(modelSchema).to.contain.all.keys(['aggregateCompleteV1', 'aggregateBondedV1', 'aggregateCompleteV2', 'aggregateBondedV2', 'aggregate.cosignature']);
 
 			// - aggregate
 			expect(Object.keys(modelSchema[schemaName]).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
@@ -64,8 +65,10 @@ describe('aggregate plugin', () => {
 			});
 		};
 
-		it('adds aggregateComplete system schema', () => assertAddsSchema('aggregateComplete'));
-		it('adds aggregateBonded system schema', () => assertAddsSchema('aggregateBonded'));
+		it('adds aggregateCompleteV1 system schema', () => assertAddsSchema('aggregateCompleteV1'));
+		it('adds aggregateBondedV1 system schema', () => assertAddsSchema('aggregateBondedV1'));
+		it('adds aggregateCompleteV2 system schema', () => assertAddsSchema('aggregateCompleteV2'));
+		it('adds aggregateBondedV2 system schema', () => assertAddsSchema('aggregateBondedV2'));
 	});
 
 	describe('register codecs', () => {
@@ -83,7 +86,7 @@ describe('aggregate plugin', () => {
 			const codecs = getCodecs();
 
 			// Assert: codec was registered
-			expect(Object.keys(codecs).length).to.equal(2);
+			expect(Object.keys(codecs).length).to.equal(4);
 			expect(codecs).to.contain.all.keys([EntityType.aggregateCompleteV1.toString(), EntityType.aggregateBondedV1.toString(), EntityType.aggregateCompleteV2.toString(), EntityType.aggregateBondedV2.toString()]);
 		});
 
@@ -169,9 +172,10 @@ describe('aggregate plugin', () => {
 			return data;
 		};
 
-		const addCosignature = generator => {
+		const addCosignature = (generator, extended = false) => {
 			const Signer_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.signer));
-			const Signature_Buffer = Buffer.from(test.random.bytes(test.constants.sizes.signature));
+
+			const Signature_Buffer = Buffer.from(test.random.bytes(extended ?  test.constants.sizes.extendedSignature : test.constants.sizes.signature));
 
 			return () => {
 				const data = generator();
@@ -192,7 +196,7 @@ describe('aggregate plugin', () => {
 			};
 		};
 
-		const addAggregateTests = (aggregateName, getCodec) => {
+		const addAggregateTests = (aggregateName, extendedCosignature, getCodec) => {
 			describe(`supports ${aggregateName} aggregate`, () => {
 				const addAll = (size, dataGenerator) => {
 					// notice that the transaction header is preprocessed before deserialize is called on the codec
@@ -226,15 +230,15 @@ describe('aggregate plugin', () => {
 
 				describe('with cosignatures', () => {
 					addAll(
-						constants.sizes.aggregate + (2 * constants.sizes.cosignature),
-						addCosignature(addCosignature(generateAggregate))
+						constants.sizes.aggregate + (2 * (extendedCosignature ? constants.sizes.extendedCosignature : constants.sizes.cosignature)),
+						addCosignature(addCosignature(generateAggregate, extendedCosignature), extendedCosignature)
 					);
 				});
 
 				describe('with multiple transactions and cosignatures', () => {
 					addAll(
-						constants.sizes.aggregate + (3 * constants.sizes.embedded) + (2 * constants.sizes.cosignature),
-						addCosignature(addCosignature(addTransaction(addTransaction(addTransaction(generateAggregate)))))
+						constants.sizes.aggregate + (3 * constants.sizes.embedded) + (2 * (extendedCosignature ? constants.sizes.extendedCosignature : constants.sizes.cosignature)),
+						addCosignature(addCosignature(addTransaction(addTransaction(addTransaction(generateAggregate))), extendedCosignature), extendedCosignature)
 					);
 				});
 			});
@@ -275,8 +279,8 @@ describe('aggregate plugin', () => {
 						[-1, 1].forEach(delta => {
 							// Assert:
 							assertDeserializationError(
-								addCosignature(addTransaction(generateAggregate))().buffer,
-								constants.sizes.aggregate + constants.sizes.embedded + constants.sizes.cosignature + delta,
+								addCosignature(addTransaction(generateAggregate), extendedCosignature)().buffer,
+								constants.sizes.aggregate + constants.sizes.embedded + (extendedCosignature ? constants.sizes.extendedCosignature : constants.sizes.cosignature) + delta,
 								'aggregate cannot have partial cosignatures',
 								`delta ${delta}`
 							);
@@ -305,7 +309,7 @@ describe('aggregate plugin', () => {
 						[0, 1, constants.sizes.aggregate - 1].forEach(size => {
 							// Assert:
 							assertDeserializationError(
-								addCosignature(addTransaction(generateAggregate))().buffer,
+								addCosignature(addTransaction(generateAggregate), extendedCosignature)().buffer,
 								size,
 								'aggregate must contain complete aggregate header',
 								`size ${size}`
@@ -357,9 +361,9 @@ describe('aggregate plugin', () => {
 			});
 		};
 
-		addAggregateTests('completeV1', () => getCodecs()[EntityType.aggregateCompleteV1]);
-		addAggregateTests('bondedV1', () => getCodecs()[EntityType.aggregateBondedV1]);
-		addAggregateTests('completeV2', () => getCodecs()[EntityType.aggregateCompleteV2]);
-		addAggregateTests('bondedV2', () => getCodecs()[EntityType.aggregateBondedV2]);
+		addAggregateTests('completeV1', false, () => getCodecs()[EntityType.aggregateCompleteV1]);
+		addAggregateTests('bondedV1', false, () => getCodecs()[EntityType.aggregateBondedV1]);
+		addAggregateTests('completeV2', true,() => getCodecs()[EntityType.aggregateCompleteV2]);
+		addAggregateTests('bondedV2', true,() => getCodecs()[EntityType.aggregateBondedV2]);
 	});
 });
