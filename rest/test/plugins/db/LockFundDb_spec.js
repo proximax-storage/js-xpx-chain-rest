@@ -6,7 +6,7 @@
 
 const test = require('./utils/lockfundDbTestUtils');
 const { expect } = require('chai');
-
+const catapult = require('catapult-sdk');
 describe('lockfund db', () => {
 	const genAccount = test.random.account;
 
@@ -14,9 +14,9 @@ describe('lockfund db', () => {
 		// Arrange:
 		const entries = [];
 		let i = 0;
-		for (; i < 5; ++i)
-			entries.push(i, test.db.createLockFundKeyRecordEntry(i, genAccount().publicKey));
-
+		for (; i < 4; ++i)
+			entries.push(test.db.createLockFundKeyRecordEntry(i, genAccount().publicKey));
+		entries.push(test.db.createLockFundKeyRecordEntry(5, account));
 		const expectedEntry = test.db.createLockFundKeyRecordEntry(5, account);
 		// Assert:
 		return test.db.runDbKeyTest(
@@ -31,13 +31,13 @@ describe('lockfund db', () => {
 		const entries = [];
 		let i = 0;
 		for (; i < 5; ++i)
-			entries.push(i, test.db.createLockFundHeightRecordEntry(i, 100+i));
-
+			entries.push(test.db.createLockFundHeightRecordEntry(i, catapult.utils.uint64.fromUint(1000+i)));
+		entries.push(test.db.createLockFundHeightRecordEntry(5, height));
 		const expectedEntry = test.db.createLockFundHeightRecordEntry(5, height);
 		// Assert:
 		return test.db.runDbHeightTest(
 			entries,
-			db => db.getLockFundRecordGroupByKey(height),
+			db => db.getLockFundRecordGroupByHeight(height),
 			entity => expect(entity).to.deep.equal(expectedEntry)
 		);
 	};
@@ -47,6 +47,6 @@ describe('lockfund db', () => {
 	});
 
 	describe('lockfund by key id', () => {
-		describe('by public key', () => assertGetLockFundRecordGroupsByHeight(150));
+		describe('by public key', () => assertGetLockFundRecordGroupsByHeight(catapult.utils.uint64.fromUint(150)));
 	});
 });

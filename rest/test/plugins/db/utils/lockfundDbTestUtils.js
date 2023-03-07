@@ -8,7 +8,7 @@ const dbTestUtils = require('../../../db/utils/dbTestUtils');
 const MongoDb = require('mongodb');
 const LockFundDb = require('../../../../src/plugins/db/LockFundDb');
 const test = require('../../../testUtils');
-
+const { convertToLong } = require('../../../../src/db/dbUtils');
 const { Binary, Long } = MongoDb;
 
 const createLockFundKeyRecordEntry = (id, identifierKey) => ({
@@ -57,10 +57,10 @@ const createLockFundKeyRecordEntry = (id, identifierKey) => ({
 const createLockFundHeightRecordEntry = (id, height) => ({
 	_id: dbTestUtils.db.createObjectId(id),
 	lockFundRecordGroup: {
-		identifier: new Long(height),
+		identifier: convertToLong(height),
 		records: [
 			{
-				key: new Binary(test.random.account().publicKey),
+				key: new Binary("6d28cf8e17e4682fbe6285e72b21aa26f094d8dbd18f7828358f822b428d069f"),
 				activeMosaics: [
 					{
 						id: Long.fromNumber(100),
@@ -77,7 +77,7 @@ const createLockFundHeightRecordEntry = (id, height) => ({
 				]
 			},
 			{
-				key: new Binary(test.random.account().publicKey),
+				key: new Binary("6d28cf8e17e4682fbe6285e72b21aa26f094d8dbd18f7828358f822b428d069d"),
 				activeMosaics: [
 					{
 						id: Long.fromNumber(100),
