@@ -28,9 +28,11 @@ const superContractV2Plugin = {
             automaticExecutionsFunctionName:    ModelType.string,
             automaticExecutionCallPayment:      ModelType.uint64,
             automaticDownloadCallPayment:       ModelType.uint64,
+            automaticExecutionsNumber:          ModelType.uint32,
+            fileName:                           ModelType.string,
+            functionName:                       ModelType.string,
             actualArguments:                    ModelType.string,
             servicePayments:                    { type: ModelType.array, schemaName: 'servicePayment' },
-            automaticExecutionsNumber:          ModelType.uint32,
             executionCallPayment:               ModelType.uint64,
             downloadCallPayment:                ModelType.uint64,
         });
@@ -58,7 +60,7 @@ const superContractV2Plugin = {
             usedSizeBytes:                              ModelType.uint64,
             metaFilesSizeBytes:                         ModelType.uint64,
             proofOfExecutionVerificationInformation:    ModelType.binary,
-            extendedCallDigests:                        { type: ModelType.array, schemaName: 'extendedCallDigest' },
+            callDigests:                                { type: ModelType.array, schemaName: 'extendedCallDigest' },
             opinions:                                   { type: ModelType.array, schemaName: 'opinion' },
             cosignersList:                              { type: ModelType.array, schemaName: ModelType.binary },
         });
@@ -67,7 +69,7 @@ const superContractV2Plugin = {
             contractKey:                            ModelType.binary,
             batchId:                                ModelType.uint64,
             automaticExecutionsNextBlockToCheck:    ModelType.uint64,
-            shortCallDigests:                       { type: ModelType.array, schemaName: 'shortCallDigest' },
+            callDigests:                            { type: ModelType.array, schemaName: 'shortCallDigest' },
             opinions:                               { type: ModelType.array, schemaName: 'opinion' },
         });
 
@@ -184,12 +186,6 @@ const superContractV2Plugin = {
             executorsInfo:                  { type: ModelType.array, schemaName: 'executorsInfo' },
             batches:                        { type: ModelType.array, schemaName: 'batch' },
             releasedTransactions:           { type: ModelType.array, schemaName: ModelType.binary },
-        });
-
-        builder.addSchema('drivecontract', {
-            multisig:			        ModelType.binary,
-            multisigAddress:	        ModelType.binary,
-            contractKey:                ModelType.binary,
         });
     },
 
