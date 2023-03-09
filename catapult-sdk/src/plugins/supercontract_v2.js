@@ -201,6 +201,11 @@ const superContractV2Plugin = {
                 transaction.automaticExecutionsFunctionNameSize = parseString(parser, automaticExecutionsFunctionNameSize);
                 transaction.automaticExecutionCallPayment = parser.uint64();
                 transaction.automaticDownloadCallPayment = parser.uint64();
+                transaction.automaticExecutionsNumber = parser.uint32();
+                const fileNameSize = parser.uint8();
+                transaction.fileName = parseString(parser, fileNameSize);
+                const functionNameSize = parser.uint8();
+                transaction.functionName = parseString(parser, functionNameSize);
                 const actualArgumentsSize = parser.uint8();
                 transaction.actualArguments = parseString(parser, actualArgumentsSize);
                 transaction.servicePayments = [];
@@ -210,8 +215,7 @@ const superContractV2Plugin = {
                     servicePayment.id = parser.uint64();
                     servicePayment.amount = parser.uint64();
                     transaction.servicePayments.push(servicePayment);
-                }
-                transaction.automaticExecutionsNumber = parser.uint32();
+                }    
                 transaction.executionCallPayment = parser.uint64();
                 transaction.downloadCallPayment = parser.uint64();
 
@@ -227,14 +231,18 @@ const superContractV2Plugin = {
                 writeString(serializer, transaction.automaticExecutionsFunctionName);
                 serializer.writeUint64(transaction.automaticExecutionCallPayment);
                 serializer.writeUint64(transaction.automaticDownloadCallPayment);
+                serializer.writeUint32(transaction.automaticExecutionsNumber);
+                serializer.writeUint8(transaction.fileName.length);
+                writeString(serializer, transaction.fileName);
+                serializer.writeUint8(transaction.functionName.length);
+                writeString(serializer, transaction.functionName);
                 serializer.writeUint8(transaction.actualArguments.length);
                 writeString(serializer, transaction.actualArguments);
                 serializer.writeUint8(transaction.servicePaymentsCount);
                 transaction.servicePayments.forEach(servicePayment => {
                     serializer.writeUint64(servicePayment.id);
                     serializer.writeUint64(servicePayment.amount);
-                });
-                serializer.writeUint32(transaction.automaticExecutionsNumber);
+                });             
                 serializer.writeUint64(transaction.executionCallPayment);
                 serializer.writeUint64(transaction.downloadCallPayment);
             }
@@ -305,16 +313,16 @@ const superContractV2Plugin = {
                 transaction.usedSizeBytes = parser.uint64();
                 transaction.metaFilesSizeBytes = parser.uint64();
                 transaction.proofOfExecutionVerificationInformation = parser.buffer(constants.sizes.curvePoint);
-                transaction.extendedCallDigests = [];
+                transaction.callDigests = [];
                 let callCount = transaction.CallsNumber;
                 while (callCount--) {
-                    const extendedCallDigest = {};
-                    extendedCallDigest.callId = parser.buffer(constants.sizes.hash256);
-                    extendedCallDigest.manual = parser.uint8();
-                    extendedCallDigest.block = parser.uint64();
-                    extendedCallDigest.status = parser.uint16();
-                    extendedCallDigest.releasedTransactionHash = parser.buffer(constants.sizes.hash256);
-                    transaction.extendedCallDigests.push(extendedCallDigest);
+                    const callDigest = {};
+                    callDigest.callId = parser.buffer(constants.sizes.hash256);
+                    callDigest.manual = parser.uint8();
+                    callDigest.block = parser.uint64();
+                    callDigest.status = parser.uint16();
+                    callDigest.releasedTransactionHash = parser.buffer(constants.sizes.hash256);
+                    transaction.callDigests.push(callDigest);
                 }
                 transaction.opinions = [];
                 let cosignersCount = transaction.CosignersNumber;
@@ -350,12 +358,12 @@ const superContractV2Plugin = {
                 serializer.writeUint64(transaction.metaFilesSizeBytes);
                 serializer.writeBuffer(transaction.storageHash);
                 serializer.writeUint8(transaction.CallsNumber);
-                transaction.extendedCallDigests.forEach(extendedCallDigest => {
-                    serializer.writeBuffer(extendedCallDigest.callId);
-                    serializer.writeUint8(extendedCallDigest.manual);
-                    serializer.writeUint64(extendedCallDigest.block);
-                    serializer.writeUint16(extendedCallDigest.status);
-                    serializer.writeBuffer(extendedCallDigest.releasedTransactionHash);
+                transaction.callDigests.forEach(callDigest => {
+                    serializer.writeBuffer(callDigest.callId);
+                    serializer.writeUint8(callDigest.manual);
+                    serializer.writeUint64(callDigest.block);
+                    serializer.writeUint16(callDigest.status);
+                    serializer.writeBuffer(callDigest.releasedTransactionHash);
                 });
                 transaction.opinions.forEach(opinion => {
                     serializer.writeBuffer(opinion.publicKey);
@@ -380,14 +388,14 @@ const superContractV2Plugin = {
                 transaction.contractKey = parser.buffer(constants.sizes.signer);
                 transaction.batchId = parser.uint64();
                 transaction.automaticExecutionsNextBlockToCheck = parser.uint64();
-                transaction.shortCallDigests = [];
+                transaction.callDigests = [];
                 let callCount = transaction.CallsNumber;
                 while (callCount--) {
-                    const shortCallDigest = {};
-                    shortCallDigest.callId = parser.buffer(constants.sizes.hash256);
-                    shortCallDigest.manual = parser.uint8();
-                    shortCallDigest.block = parser.uint64();
-                    transaction.shortCallDigests.push(shortCallDigest);
+                    const callDigest = {};
+                    callDigest.callId = parser.buffer(constants.sizes.hash256);
+                    callDigest.manual = parser.uint8();
+                    callDigest.block = parser.uint64();
+                    transaction.callDigests.push(callDigest);
                 }
                 transaction.opinions = [];
                 let cosignersCount = transaction.CosignersNumber;
@@ -417,10 +425,10 @@ const superContractV2Plugin = {
                 serializer.writeUint64(transaction.batchId);
                 serializer.writeUint64(transaction.automaticExecutionsNextBlockToCheck);
                 serializer.writeUint8(transaction.CallsNumber);
-                transaction.shortCallDigests.forEach(shortCallDigest => {
-                    serializer.writeBuffer(shortCallDigest.callId);
-                    serializer.writeUint8(shortCallDigest.manual);
-                    serializer.writeUint64(shortCallDigest.block);
+                transaction.callDigests.forEach(callDigest => {
+                    serializer.writeBuffer(callDigest.callId);
+                    serializer.writeUint8(callDigest.manual);
+                    serializer.writeUint64(callDigest.block);
                 });
                 transaction.opinions.forEach(opinion => {
                     serializer.writeBuffer(opinion.publicKey);
