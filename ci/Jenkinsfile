@@ -21,7 +21,7 @@ pipeline {
     stage('Build') {
       steps {
         echo 'Starting Docker Container'
-        withDockerContainer(image: 'node:fermium-alpine3.17', args: '-u root') {
+        withDockerContainer(image: 'node:fermium-bullseye', args: '-u root') {
           echo 'Installing dependencies'
           sh 'apk add python3 python3-dev py3-pip alpine-sdk'
 
@@ -44,7 +44,7 @@ pipeline {
         echo 'Starting Docker Container'
         script {
           docker.image('mongo:4.4').withRun('-p 27017:27017') {
-            docker.image('node:fermium-alpine3.17').inside('-u root --network=host') {
+            docker.image('node:fermium-bullseye').inside('-u root --network=host') {
               echo 'Testing catapult-sdk'
               sh '(cd catapult-sdk; yarn run test)'
 
