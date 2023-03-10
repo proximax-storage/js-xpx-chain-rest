@@ -10,7 +10,7 @@
     "start": "node _build/index.js",
     "start:debug": "node src/index.js",
     "inspect": "node --inspect src/index.js",
-    "test": "mocha --full-trace --recursive --require ./test/setup-logging.js",
+    "test": "mocha --full-trace --recursive --require ./test/setup-logging.js --exit",
     "test:coverage": "nyc npm test && nyc report --reporter=text-lcov",
     "test:jenkins": "cross-env JUNIT_REPORT_PATH=test-results.xml mocha --reporter mocha-jenkins-reporter --mongoHost db --forbid-only --full-trace --recursive test || exit 0",
     "test:travis": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
