@@ -24,7 +24,7 @@ pipeline {
         withDockerContainer(image: 'node:fermium-bullseye', args: '-u root') {
           echo 'Installing dependencies'
           //sh 'apk add python3 python3-dev py3-pip alpine-sdk'
-
+          sh 'apt install cmake'
           echo 'Build Catapult SDK'
           sh '(cd catapult-sdk; yarn install; yarn run clean; yarn run build)'
 
