@@ -23,7 +23,7 @@ pipeline {
         echo 'Starting Docker Container'
         withDockerContainer(image: 'node:fermium-bullseye', args: '-u root') {
           echo 'Installing dependencies'
-          sh 'apk add python3 python3-dev py3-pip alpine-sdk'
+          //sh 'apk add python3 python3-dev py3-pip alpine-sdk'
 
           echo 'Build Catapult SDK'
           sh '(cd catapult-sdk; yarn install; yarn run clean; yarn run build)'
