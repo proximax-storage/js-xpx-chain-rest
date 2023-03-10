@@ -1,0 +1,9 @@
+PID 7422 received SIGSEGV for address: 0x1
+/home/nemesis/Documents/proximax/js-xpx-chain-rest/rest/node_modules/segfault-handler/build/Release/segfault-handler.node(+0x328d)[0x7fe94894328d]
+/usr/lib/libc.so.6(+0x38f50)[0x7fe948431f50]
+/home/nemesis/Documents/proximax/js-xpx-chain-rest/rest/node_modules/segfault-handler/build/Release/segfault-handler.node(_Z22segfault_stack_frame_1v+0x24)[0x7fe948943344]
+/home/nemesis/Documents/proximax/js-xpx-chain-rest/rest/node_modules/segfault-handler/build/Release/segfault-handler.node(+0x25ef)[0x7fe9489425ef]
+/home/nemesis/.nvm/versions/node/v14.21.3/bin/node[0xc2679b]
+/home/nemesis/.nvm/versions/node/v14.21.3/bin/node[0xc27d46]
+/home/nemesis/.nvm/versions/node/v14.21.3/bin/node(_ZN2v88internal21Builtin_HandleApiCallEiPmPNS0_7IsolateE+0x16)[0xc283c6]
+/home/nemesis/.nvm/versions/node/v14.21.3/bin/node[0x1449459]

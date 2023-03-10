@@ -21,7 +21,6 @@
 const MessageChannelBuilder = require('../../src/connection/MessageChannelBuilder');
 const test = require('../testUtils');
 const { expect } = require('chai');
-
 describe('message channel builder', () => {
 	const addressTemplate = {
 		encoded: 'NAR3W7B4BCOZSZMFIZRYB3N5YGOUSWIYJCJ6HDFG',
@@ -52,7 +51,6 @@ describe('message channel builder', () => {
 		it('accepts marker without topic param with allowOptionalAddress', () => {
 			// Arrange:
 			const filter = createFilter(new MessageChannelBuilder({ allowOptionalAddress: true }));
-
 			// Act:
 			const topic = filter('');
 
