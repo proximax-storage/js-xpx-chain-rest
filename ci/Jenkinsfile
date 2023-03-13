@@ -43,6 +43,7 @@ pipeline {
       steps {
         echo 'Starting Docker Container'
         script {
+          sh "if [[ \$(docker ps -q) ]]; then docker kill \$(docker ps -q); fi"
           docker.image('mongo:4.4').withRun('-p 27017:27017') {
             docker.image('node:fermium-bullseye').inside('-u root --network=host') {
               echo 'Testing catapult-sdk'
