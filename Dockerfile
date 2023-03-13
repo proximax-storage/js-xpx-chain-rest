@@ -1,7 +1,8 @@
-FROM node:14-alpine3.14
+FROM node:fermium-bullseye
 
 # Install dependencies
-RUN apk add --update alpine-sdk python3 python3-dev py3-pip
+# RUN apk add --update alpine-sdk python3 python3-dev py3-pip
+RUN apt update && apt install -y cmake
 
 # copy required libs from ./rest
 COPY ./rest/node_modules /node_modules
