@@ -23,7 +23,7 @@
 			const modelSchema = builder.build();
 
             // Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 21);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 20);
 			expect(modelSchema).to.contain.all.keys([
                 'deployContract',
                 'manualCall',
@@ -45,14 +45,13 @@
                 'completedCall',
                 'batch',
                 'supercontract',
-                'drivecontract'
 			]);
 
             expect(Object.keys(modelSchema.deployContract).length).to.equal(Object.keys(modelSchema.transaction).length + 13);
             expect(modelSchema.deployContract).to.contain.all.keys([
                 'driveKey',
                 'assignee',
-                'automaticExecutionFileName',
+                'automaticExecutionsFileName',
                 'automaticExecutionsFunctionName',
                 'automaticExecutionCallPayment',
                 'automaticDownloadCallPayment',
@@ -82,7 +81,7 @@
                 'automaticExecutionsNumber',
             ]);
 
-            expect(Object.keys(modelSchema.successfulEndBatchExecution).length).to.equal(Object.keys(modelSchema.transaction).length + 10);
+            expect(Object.keys(modelSchema.successfulEndBatchExecution).length).to.equal(Object.keys(modelSchema.transaction).length + 9);
             expect(modelSchema.successfulEndBatchExecution).to.contain.all.keys([
                 'contractKey',
                 'batchId',
@@ -93,7 +92,6 @@
                 'proofOfExecutionVerificationInformation',
                 'callDigests',
                 'opinions',
-                'cosignersList',
             ]);
 
             expect(Object.keys(modelSchema.unsuccessfulEndBatchExecution).length).to.equal(Object.keys(modelSchema.transaction).length + 5);
@@ -172,12 +170,12 @@
 
             expect(Object.keys(modelSchema['automaticExecutionsInfo']).length).to.equal(8);
             expect(modelSchema['automaticExecutionsInfo']).to.contain.all.keys([
-                'automaticExecutionFileName',
+                'automaticExecutionsFileName',
                 'automaticExecutionsFunctionName',
                 'automaticExecutionsNextBlockToCheck',
                 'automaticExecutionCallPayment',
                 'automaticDownloadCallPayment',
-                'automatedExecutionsNumber',
+                'automaticExecutionsNumber',
                 'automaticExecutionsPrepaidSinceHasValue',
                 'automaticExecutionsPrepaidSince',
             ]);
@@ -273,13 +271,24 @@
 
         describe('supports deploy contract transaction', () => {
             const codec = getCodecs()[EntityType.deployContract];
+
             const driveKey = createByteArray(0x01);
-            const assignee = createByteArray(0x02);
-            const automaticExecutionFileName = Buffer.of(0x65, 0x67, 0x46, 0x69, 0x6C, 0x065, 0x4E, 0x61, 0x6D, 0x65);
-            const automaticExecutionsFunctionName = Buffer.of(0x65, 0x67, 0x46, 0x75, 0x6E, 0x63, 0x4E, 0x61, 0x6D, 0x65);
+
+            const fileNameSize = Buffer.of(0x0A, 0x0);
+            const functionNameSize = Buffer.of(0x0A, 0x0);
+            const actualArgumentsSize = Buffer.of(0x0C, 0x0);
+            const executionCallPayment = Buffer.of(0x0A, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+            const downloadCallPayment = Buffer.of(0x0B, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+            const servicePaymentsCount = Buffer.of(0x02);
+
+            const automaticExecutionsFileNameSize = Buffer.of(0x0A, 0x00);
+            const automaticExecutionsFunctionNameSize = Buffer.of(0x0A, 0x00);
             const automaticExecutionCallPayment = Buffer.of(0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
             const automaticDownloadCallPayment = Buffer.of(0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
             const automaticExecutionsNumber = Buffer.of(0x05, 0x0, 0x0, 0x0);
+
+            const assignee = createByteArray(0x02);
+
             const fileName = Buffer.of(0x65, 0x67, 0x46, 0x69, 0x6C, 0x065, 0x4E, 0x61, 0x6D, 0x65);
             const functionName = Buffer.of(0x65, 0x67, 0x46, 0x75, 0x6E, 0x63, 0x4E, 0x61, 0x6D, 0x65);
             const actualArguments = Buffer.of(0x65, 0x67, 0x41, 0x72, 0x67, 0x73, 0x20, 0x2D, 0x41, 0x20, 0x2D, 0x4B);
@@ -287,18 +296,27 @@
             const servicePaymentAmount1 = Buffer.of(0x07, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
             const servicePaymentId2 = Buffer.of(0x08, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
             const servicePaymentAmount2 = Buffer.of(0x09, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
-            const executionCallPayment = Buffer.of(0x0A, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
-            const downloadCallPayment = Buffer.of(0x0B, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
 
-            test.binary.test.addAll(codec, 2 * 32 + 2 * 10 + 2 * 8 + 4 + 2 * 10 + 12 + 6 * 8, () => ({
+
+            const automaticExecutionsFileName = Buffer.of(0x65, 0x67, 0x46, 0x69, 0x6C, 0x065, 0x4E, 0x61, 0x6D, 0x65);
+            const automaticExecutionsFunctionName = Buffer.of(0x65, 0x67, 0x46, 0x75, 0x6E, 0x63, 0x4E, 0x61, 0x6D, 0x65);
+
+
+            test.binary.test.addAll(codec, 32 + 3 * 2 + 2 * 8 + 1 + 2 * 2 + 2 * 8 + 4 + 32 + 2 * 10 + 12 + 2 * (8 + 8) + 2 * 10, () => ({
                 buffer: Buffer.concat([
                     driveKey,
-                    assignee,
-                    automaticExecutionFileName,
-                    automaticExecutionsFunctionName,
+                    fileNameSize,
+                    functionNameSize,
+                    actualArgumentsSize,
+                    executionCallPayment,
+                    downloadCallPayment,
+                    servicePaymentsCount,
+                    automaticExecutionsFileNameSize,
+                    automaticExecutionsFunctionNameSize,
                     automaticExecutionCallPayment,
                     automaticDownloadCallPayment,
                     automaticExecutionsNumber,
+                    assignee,
                     fileName,
                     functionName,
                     actualArguments,
@@ -306,13 +324,13 @@
                     servicePaymentAmount1,
                     servicePaymentId2,
                     servicePaymentAmount2,
-                    executionCallPayment,
-                    downloadCallPayment,
+                    automaticExecutionsFileName,
+                    automaticExecutionsFunctionName,
                 ]),
                 object: {
                     driveKey,
                     assignee,
-                    automaticExecutionFileName: 'egFileName',
+                    automaticExecutionsFileName: 'egFileName',
                     automaticExecutionsFunctionName: 'egFuncName',
                     automaticExecutionCallPayment: [0x03, 0x0],
                     automaticDownloadCallPayment: [0x04, 0x0],
@@ -338,7 +356,16 @@
 
         describe('supports manual call transaction', () => {
             const codec = getCodecs()[EntityType.manualCall];
+
             const contractKey = createByteArray(0x01);
+
+            const fileNameSize = Buffer.of(0x0A, 0x0);
+            const functionNameSize = Buffer.of(0x0A, 0x0);
+            const actualArgumentsSize = Buffer.of(0x0C, 0x0);
+            const executionCallPayment = Buffer.of(0x06, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+            const downloadCallPayment = Buffer.of(0x07, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+            const servicePaymentsCount = Buffer.of(0x02);
+
             const fileName = Buffer.of(0x65, 0x67, 0x46, 0x69, 0x6C, 0x065, 0x4E, 0x61, 0x6D, 0x65);
             const functionName = Buffer.of(0x65, 0x67, 0x46, 0x75, 0x6E, 0x63, 0x4E, 0x61, 0x6D, 0x65);
             const actualArguments = Buffer.of(0x65, 0x67, 0x41, 0x72, 0x67, 0x73, 0x20, 0x2D, 0x41, 0x20, 0x2D, 0x4B);
@@ -346,12 +373,17 @@
             const servicePaymentAmount1 = Buffer.of(0x03, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
             const servicePaymentId2 = Buffer.of(0x04, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
             const servicePaymentAmount2 = Buffer.of(0x05, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
-            const executionCallPayment = Buffer.of(0x06, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
-            const downloadCallPayment = Buffer.of(0x07, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
 
-            test.binary.test.addAll(codec, 32 + 2 * 10 + 12 + 4 * 8 + 2 * 8, () => ({
+            test.binary.test.addAll(codec, 32 + 3 * 2 + 2 * 8 + 1 + 2 * 10 + 12 + 2 * (8 + 8), () => ({
                 buffer: Buffer.concat([
                     contractKey,
+
+                    fileNameSize,
+                    functionNameSize,
+                    actualArgumentsSize,
+                    executionCallPayment,
+                    downloadCallPayment,
+                    servicePaymentsCount,
                     fileName,
                     functionName,
                     actualArguments,
@@ -359,8 +391,6 @@
                     servicePaymentAmount1,
                     servicePaymentId2,
                     servicePaymentAmount2,
-                    executionCallPayment,
-                    downloadCallPayment,
                 ]),
                 object: {
                     contractKey,
@@ -592,36 +622,34 @@
         describe('supports end batch execution single transaction', () => {
             const codec = getCodecs()[EntityType.endBatchExecutionSingle];
             const contractKey = createByteArray(0x01);
-            const batchId = Buffer.of(0x02, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
-            const poEx1 = Buffer.of(
-                0x03, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x04, 0x0, 0x0, 0x0,
-                0x05, 0x0, 0x0, 0x0,
-                0x06, 0x0, 0x0, 0x0,
-                0x07, 0x0, 0x0, 0x0,
-            );
-            const poEx2 = Buffer.of(
-                0x08, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x09, 0x0, 0x0, 0x0,
-                0x0A, 0x0, 0x0, 0x0,
-                0x0B, 0x0, 0x0, 0x0,
-                0x0C, 0x0, 0x0, 0x0,
-            );
+            const batchId = Buffer.of(0x0B, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
 
-            test.binary.test.addAll(codec, 32 + 8 + 2 * (8 + 4 * 4), () => ({
+            const poExStartBatchId = Buffer.of(0x0A, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+            const poExT = createByteArray(0x02);
+            const poExR = createByteArray(0x03);
+            const poExF = createByteArray(0x04);
+            const poExK = createByteArray(0x05);
+
+            test.binary.test.addAll(codec, 32 + 8 + 8 + 4 * 32, () => ({
                 buffer: Buffer.concat([
                     contractKey,
                     batchId,
-                    poEx1,
-                    poEx2,
+                    poExStartBatchId,
+                    poExT,
+                    poExR,
+                    poExF,
+                    poExK
                 ]),
                 object: {
                     contractKey,
-                    batchId: [0x02, 0x00],
-                    poEx: [
-                        poEx1,
-                        poEx2,
-                    ]
+                    batchId: [0x0B, 0x00],
+                    poEx: {
+                        startBatchId: [0x0A, 0x00],
+                        T: poExT,
+                        R: poExR,
+                        F: poExF,
+                        K: poExK
+                    }
                 }
             }));
         });

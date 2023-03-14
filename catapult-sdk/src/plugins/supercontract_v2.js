@@ -9,11 +9,13 @@ const EntityType = require('../model/EntityType');
 const ModelType = require('../model/ModelType');
 const sizes = require('../modelBinary/sizes');
 
-const constants = { sizes };
+const constants = {sizes};
 
 const parseString = (parser, size) => parser.buffer(size).toString('ascii');
 
-const writeString = (serializer, str) => { serializer.writeBuffer(Buffer.from(str, 'ascii')); };
+const writeString = (serializer, str) => {
+    serializer.writeBuffer(Buffer.from(str, 'ascii'));
+};
 
 /**
  * Creates a supercontractV2 plugin.
@@ -22,170 +24,169 @@ const writeString = (serializer, str) => { serializer.writeBuffer(Buffer.from(st
 const superContractV2Plugin = {
     registerSchema: builder => {
         builder.addTransactionSupport(EntityType.deployContract, {
-            driveKey:                           ModelType.binary,
-            assignee:                           ModelType.binary,
-            automaticExecutionFileName:         ModelType.string,
-            automaticExecutionsFunctionName:    ModelType.string,
-            automaticExecutionCallPayment:      ModelType.uint64,
-            automaticDownloadCallPayment:       ModelType.uint64,
-            automaticExecutionsNumber:          ModelType.uint32,
-            fileName:                           ModelType.string,
-            functionName:                       ModelType.string,
-            actualArguments:                    ModelType.string,
-            servicePayments:                    { type: ModelType.array, schemaName: 'servicePayment' },
-            executionCallPayment:               ModelType.uint64,
-            downloadCallPayment:                ModelType.uint64,
+            driveKey: ModelType.binary,
+            assignee: ModelType.binary,
+            automaticExecutionsFileName: ModelType.string,
+            automaticExecutionsFunctionName: ModelType.string,
+            automaticExecutionCallPayment: ModelType.uint64,
+            automaticDownloadCallPayment: ModelType.uint64,
+            automaticExecutionsNumber: ModelType.uint32,
+            fileName: ModelType.string,
+            functionName: ModelType.string,
+            actualArguments: ModelType.string,
+            servicePayments: {type: ModelType.array, schemaName: 'servicePayment'},
+            executionCallPayment: ModelType.uint64,
+            downloadCallPayment: ModelType.uint64,
         });
 
         builder.addTransactionSupport(EntityType.manualCall, {
-            contractKey:            ModelType.binary,
-            fileName:               ModelType.string,
-            functionName:           ModelType.string,
-            actualArguments:        ModelType.string,
-            servicePayments:        { type: ModelType.array, schemaName: 'servicePayment' },
-            executionCallPayment:   ModelType.uint64,
-            downloadCallPayment:    ModelType.uint64,
+            contractKey: ModelType.binary,
+            fileName: ModelType.string,
+            functionName: ModelType.string,
+            actualArguments: ModelType.string,
+            servicePayments: {type: ModelType.array, schemaName: 'servicePayment'},
+            executionCallPayment: ModelType.uint64,
+            downloadCallPayment: ModelType.uint64,
         });
 
         builder.addTransactionSupport(EntityType.automaticExecutionsPayment, {
-            contractKey:                ModelType.binary,
-            automaticExecutionsNumber:  ModelType.uint32,
+            contractKey: ModelType.binary,
+            automaticExecutionsNumber: ModelType.uint32,
         });
 
         builder.addTransactionSupport(EntityType.successfulEndBatchExecution, {
-            contractKey:                                ModelType.binary,
-            batchId:                                    ModelType.uint64,
-            automaticExecutionsNextBlockToCheck:        ModelType.uint64,
-            storageHash:                                ModelType.binary,
-            usedSizeBytes:                              ModelType.uint64,
-            metaFilesSizeBytes:                         ModelType.uint64,
-            proofOfExecutionVerificationInformation:    ModelType.binary,
-            callDigests:                                { type: ModelType.array, schemaName: 'extendedCallDigest' },
-            opinions:                                   { type: ModelType.array, schemaName: 'opinion' },
-            cosignersList:                              { type: ModelType.array, schemaName: ModelType.binary },
+            contractKey: ModelType.binary,
+            batchId: ModelType.uint64,
+            automaticExecutionsNextBlockToCheck: ModelType.uint64,
+            storageHash: ModelType.binary,
+            usedSizeBytes: ModelType.uint64,
+            metaFilesSizeBytes: ModelType.uint64,
+            proofOfExecutionVerificationInformation: ModelType.binary,
+            callDigests: {type: ModelType.array, schemaName: 'extendedCallDigest'},
+            opinions: {type: ModelType.array, schemaName: 'opinion'},
         });
 
         builder.addTransactionSupport(EntityType.unsuccessfulEndBatchExecution, {
-            contractKey:                            ModelType.binary,
-            batchId:                                ModelType.uint64,
-            automaticExecutionsNextBlockToCheck:    ModelType.uint64,
-            callDigests:                            { type: ModelType.array, schemaName: 'shortCallDigest' },
-            opinions:                               { type: ModelType.array, schemaName: 'opinion' },
+            contractKey: ModelType.binary,
+            batchId: ModelType.uint64,
+            automaticExecutionsNextBlockToCheck: ModelType.uint64,
+            callDigests: {type: ModelType.array, schemaName: 'shortCallDigest'},
+            opinions: {type: ModelType.array, schemaName: 'opinion'},
         });
 
         builder.addTransactionSupport(EntityType.endBatchExecutionSingle, {
-            contractKey:    ModelType.binary,
-            batchId:        ModelType.uint64,
-            poEx:           { type: ModelType.array, schemaName: 'poEx' },
+            contractKey: ModelType.binary,
+            batchId: ModelType.uint64,
+            poEx: {type: ModelType.array, schemaName: 'poEx'},
         });
 
         builder.addTransactionSupport(EntityType.synchronizationSingle, {
-            contractKey:    ModelType.binary,
-            batchId:        ModelType.uint64,
+            contractKey: ModelType.binary,
+            batchId: ModelType.uint64,
         });
 
         builder.addSchema('servicePayment', {
-            id:     ModelType.uint64,
+            id: ModelType.uint64,
             amount: ModelType.uint64,
         });
 
         builder.addSchema('shortCallDigest', {
-            callId:                     ModelType.binary,
-            manual:                     ModelType.boolean,
-            block:                      ModelType.uint64,
+            callId: ModelType.binary,
+            manual: ModelType.boolean,
+            block: ModelType.uint64,
         });
 
         builder.addSchema('extendedCallDigest', {
-            callId:                     ModelType.binary,
-            manual:                     ModelType.boolean,
-            block:                      ModelType.uint64,
-            status:                     ModelType.uint16,
-            releasedTransactionHash:    ModelType.binary,
+            callId: ModelType.binary,
+            manual: ModelType.boolean,
+            block: ModelType.uint64,
+            status: ModelType.uint16,
+            releasedTransactionHash: ModelType.binary,
         });
 
         builder.addSchema('opinion', {
-            publicKey:      ModelType.binary,
-            signature:      ModelType.binary,
-            poEx:           { type: ModelType.object, schemaName: 'poEx' },
-            callPayments:   { type: ModelType.array, schemaName: 'callPayment' },
+            publicKey: ModelType.binary,
+            signature: ModelType.binary,
+            poEx: {type: ModelType.object, schemaName: 'poEx'},
+            callPayments: {type: ModelType.array, schemaName: 'callPayment'},
         });
 
         builder.addSchema('shortPoEx', {
-            startBatchId:   ModelType.uint64,
-            T:              ModelType.binary,
-            R:              ModelType.binary,
+            startBatchId: ModelType.uint64,
+            T: ModelType.binary,
+            R: ModelType.binary,
         });
 
         builder.addSchema('poEx', {
-            startBatchId:   ModelType.uint64,
-            T:              ModelType.binary,
-            R:              ModelType.binary,
-            F:              ModelType.binary,
-            K:              ModelType.binary,
+            startBatchId: ModelType.uint64,
+            T: ModelType.binary,
+            R: ModelType.binary,
+            F: ModelType.binary,
+            K: ModelType.binary,
         });
 
         builder.addSchema('callPayment', {
-            executionPayment:   ModelType.uint64,
-            downloadPayment:    ModelType.uint64,
+            executionPayment: ModelType.uint64,
+            downloadPayment: ModelType.uint64,
         });
 
         builder.addSchema('automaticExecutionsInfo', {
-            automaticExecutionFileName:                 ModelType.string,
-            automaticExecutionsFunctionName:            ModelType.string,
-            automaticExecutionsNextBlockToCheck:        ModelType.uint64,
-            automaticExecutionCallPayment:              ModelType.uint64,
-            automaticDownloadCallPayment:               ModelType.uint64,
-            automatedExecutionsNumber:                  ModelType.uint32,
-            automaticExecutionsPrepaidSinceHasValue:    ModelType.uint8,
-            automaticExecutionsPrepaidSince:            ModelType.uint64,
+            automaticExecutionsFileName: ModelType.string,
+            automaticExecutionsFunctionName: ModelType.string,
+            automaticExecutionsNextBlockToCheck: ModelType.uint64,
+            automaticExecutionCallPayment: ModelType.uint64,
+            automaticDownloadCallPayment: ModelType.uint64,
+            automaticExecutionsNumber: ModelType.uint32,
+            automaticExecutionsPrepaidSinceHasValue: ModelType.uint8,
+            automaticExecutionsPrepaidSince: ModelType.uint64,
         });
 
         builder.addSchema('requestedCall', {
-            callId:                 ModelType.binary,
-            caller:                 ModelType.binary,
-            fileName:               ModelType.string,
-            functionName:           ModelType.string,
-            actualArguments:        ModelType.string,
-            executionCallPayment:   ModelType.uint64,
-            downloadCallPayment:    ModelType.uint64,
-            servicePayments:        { type: ModelType.array, schemaName: 'servicePayment' },
-            blockHeight:            ModelType.uint64,
+            callId: ModelType.binary,
+            caller: ModelType.binary,
+            fileName: ModelType.string,
+            functionName: ModelType.string,
+            actualArguments: ModelType.string,
+            executionCallPayment: ModelType.uint64,
+            downloadCallPayment: ModelType.uint64,
+            servicePayments: {type: ModelType.array, schemaName: 'servicePayment'},
+            blockHeight: ModelType.uint64,
         });
 
         builder.addSchema('executorsInfo', {
-            replicatorKey:      ModelType.binary,
+            replicatorKey: ModelType.binary,
             nextBatchToApprove: ModelType.uint64,
-            poEx:               { type: ModelType.object, schemaName: 'shortPoEx' },
+            poEx: {type: ModelType.object, schemaName: 'shortPoEx'},
         });
 
         builder.addSchema('completedCall', {
-            callId:         ModelType.binary,
-            caller:         ModelType.binary,
-            status:         ModelType.uint16,
-            executionWork:  ModelType.uint64,
-            downloadWork:   ModelType.uint64,
+            callId: ModelType.binary,
+            caller: ModelType.binary,
+            status: ModelType.uint16,
+            executionWork: ModelType.uint64,
+            downloadWork: ModelType.uint64,
         });
 
         builder.addSchema('batch', {
-            batchId:                        ModelType.uint64,
-            success:                        ModelType.boolean,
-            poExVerificationInformation:    ModelType.binary,
-            completedCalls:                 { type: ModelType.array, schemaName: 'completedCall' },
+            batchId: ModelType.uint64,
+            success: ModelType.boolean,
+            poExVerificationInformation: ModelType.binary,
+            completedCalls: {type: ModelType.array, schemaName: 'completedCall'},
         });
 
         builder.addSchema('supercontract', {
-            contractKey:                    ModelType.binary,
-            contractAddress:                ModelType.binary,
-            driveKey:                       ModelType.binary,
-            executionPaymentKey:            ModelType.binary,
-            assignee:                       ModelType.binary,
-            creator:                        ModelType.binary,
-            deploymentBaseModificationId:   ModelType.binary,
-            automaticExecutionsInfo:        { type: ModelType.object, schemaName: 'automaticExecutionsInfo' },
-            requestedCalls:                 { type: ModelType.array, schemaName: 'requestedCall' },
-            executorsInfo:                  { type: ModelType.array, schemaName: 'executorsInfo' },
-            batches:                        { type: ModelType.array, schemaName: 'batch' },
-            releasedTransactions:           { type: ModelType.array, schemaName: ModelType.binary },
+            contractKey: ModelType.binary,
+            contractAddress: ModelType.binary,
+            driveKey: ModelType.binary,
+            executionPaymentKey: ModelType.binary,
+            assignee: ModelType.binary,
+            creator: ModelType.binary,
+            deploymentBaseModificationId: ModelType.binary,
+            automaticExecutionsInfo: {type: ModelType.object, schemaName: 'automaticExecutionsInfo'},
+            requestedCalls: {type: ModelType.array, schemaName: 'requestedCall'},
+            executorsInfo: {type: ModelType.array, schemaName: 'executorsInfo'},
+            batches: {type: ModelType.array, schemaName: 'batch'},
+            releasedTransactions: {type: ModelType.array, schemaName: ModelType.binary},
         });
     },
 
@@ -194,57 +195,91 @@ const superContractV2Plugin = {
             deserialize: parser => {
                 const transaction = {};
                 transaction.driveKey = parser.buffer(constants.sizes.signer);
-                transaction.assignee = parser.buffer(constants.sizes.signer);
-                const automaticExecutionFileNameSize = parser.uint8();
-                transaction.automaticExecutionFileName = parseString(parser, automaticExecutionFileNameSize);
-                const automaticExecutionsFunctionNameSize = parser.uint8();
-                transaction.automaticExecutionsFunctionNameSize = parseString(parser, automaticExecutionsFunctionNameSize);
+
+                // region manual call static data
+                const fileNameSize = parser.uint16();
+                const functionNameSize = parser.uint16();
+                const actualArgumentsSize = parser.uint16();
+                transaction.executionCallPayment = parser.uint64();
+                transaction.downloadCallPayment = parser.uint64();
+                const servicePaymentsCount = parser.uint8();
+                // endregion
+
+                // region automatic calls static data
+                const automaticExecutionsFileNameSize = parser.uint16();
+                const automaticExecutionsFunctionNameSize = parser.uint16();
                 transaction.automaticExecutionCallPayment = parser.uint64();
                 transaction.automaticDownloadCallPayment = parser.uint64();
                 transaction.automaticExecutionsNumber = parser.uint32();
-                const fileNameSize = parser.uint8();
+                // end region
+
+                transaction.assignee = parser.buffer(constants.sizes.signer);
+
+                // region manual call dynamic data
                 transaction.fileName = parseString(parser, fileNameSize);
-                const functionNameSize = parser.uint8();
                 transaction.functionName = parseString(parser, functionNameSize);
-                const actualArgumentsSize = parser.uint8();
                 transaction.actualArguments = parseString(parser, actualArgumentsSize);
                 transaction.servicePayments = [];
-                let count = transaction.servicePaymentsCount;
-                while (count--) {
+                for (let i = 0; i < servicePaymentsCount; i++) {
                     const servicePayment = {};
                     servicePayment.id = parser.uint64();
                     servicePayment.amount = parser.uint64();
                     transaction.servicePayments.push(servicePayment);
-                }    
-                transaction.executionCallPayment = parser.uint64();
-                transaction.downloadCallPayment = parser.uint64();
+                }
+                // endregion
+
+                // region automatic calls dynamic data
+                transaction.automaticExecutionsFileName = parseString(parser, automaticExecutionsFileNameSize);
+                transaction.automaticExecutionsFunctionName = parseString(parser, automaticExecutionsFunctionNameSize);
+                // endregion
 
                 return transaction;
             },
 
             serialize: (transaction, serializer) => {
                 serializer.writeBuffer(transaction.driveKey);
-                serializer.writeBuffer(transaction.assignee);
-                serializer.writeUint8(transaction.automaticExecutionFileName.length);
-                writeString(serializer, transaction.automaticExecutionFileName);
-                serializer.writeUint8(transaction.automaticExecutionsFunctionName.length);
-                writeString(serializer, transaction.automaticExecutionsFunctionName);
+
+                // region manual call static data
+
+                serializer.writeUint16(transaction.fileName.length);
+                serializer.writeUint16(transaction.functionName.length);
+                serializer.writeUint16(transaction.actualArguments.length);
+                serializer.writeUint64(transaction.executionCallPayment);
+                serializer.writeUint64(transaction.downloadCallPayment);
+                serializer.writeUint8(transaction.servicePayments.length)
+
+                // endregion
+
+                // region automatic calls static data
+
+                serializer.writeUint16(transaction.automaticExecutionsFileName.length);
+                serializer.writeUint16(transaction.automaticExecutionsFunctionName.length);
                 serializer.writeUint64(transaction.automaticExecutionCallPayment);
                 serializer.writeUint64(transaction.automaticDownloadCallPayment);
                 serializer.writeUint32(transaction.automaticExecutionsNumber);
-                serializer.writeUint8(transaction.fileName.length);
+
+                // endregion
+
+                serializer.writeBuffer(transaction.assignee);
+
+                // region manual call dynamic data
+
                 writeString(serializer, transaction.fileName);
-                serializer.writeUint8(transaction.functionName.length);
                 writeString(serializer, transaction.functionName);
-                serializer.writeUint8(transaction.actualArguments.length);
                 writeString(serializer, transaction.actualArguments);
-                serializer.writeUint8(transaction.servicePaymentsCount);
                 transaction.servicePayments.forEach(servicePayment => {
                     serializer.writeUint64(servicePayment.id);
                     serializer.writeUint64(servicePayment.amount);
-                });             
-                serializer.writeUint64(transaction.executionCallPayment);
-                serializer.writeUint64(transaction.downloadCallPayment);
+                });
+
+                // endregion
+
+                // region automatic calls dynamic data
+
+                writeString(serializer, transaction.automaticExecutionsFileName);
+                writeString(serializer, transaction.automaticExecutionsFunctionName);
+
+                // endregion
             }
         });
 
@@ -252,39 +287,57 @@ const superContractV2Plugin = {
             deserialize: parser => {
                 const transaction = {};
                 transaction.contractKey = parser.buffer(constants.sizes.signer);
-                const fileNameSize = parser.uint8();
+
+                // region manual call static data
+                const fileNameSize = parser.uint16();
+                const functionNameSize = parser.uint16();
+                const actualArgumentsSize = parser.uint16();
+                transaction.executionCallPayment = parser.uint64();
+                transaction.downloadCallPayment = parser.uint64();
+                const servicePaymentsCount = parser.uint8();
+                // endregion
+
+                // region manual call dynamic data
                 transaction.fileName = parseString(parser, fileNameSize);
-                const functionNameSize = parser.uint8();
                 transaction.functionName = parseString(parser, functionNameSize);
-                const actualArgumentsSize = parser.uint8();
                 transaction.actualArguments = parseString(parser, actualArgumentsSize);
                 transaction.servicePayments = [];
-                let count = transaction.servicePaymentsCount;
-                while (count--) {
+                for (let i = 0; i < servicePaymentsCount; i++) {
                     const servicePayment = {};
                     servicePayment.id = parser.uint64();
                     servicePayment.amount = parser.uint64();
                     transaction.servicePayments.push(servicePayment);
                 }
-                transaction.executionCallPayment = parser.uint64();
-                transaction.downloadCallPayment = parser.uint64();
+                // endregion
+
+                return transaction;
             },
-            
+
             serialize: (transaction, serializer) => {
                 serializer.writeBuffer(transaction.contractKey);
-                serializer.writeUint8(transaction.fileName.length);
+
+                // region manual call static data
+
+                serializer.writeUint16(transaction.fileName.length);
+                serializer.writeUint16(transaction.functionName.length);
+                serializer.writeUint16(transaction.actualArguments.length);
+                serializer.writeUint64(transaction.executionCallPayment);
+                serializer.writeUint64(transaction.downloadCallPayment);
+                serializer.writeUint8(transaction.servicePayments.length)
+
+                // endregion
+
+                // region manual call dynamic data
+
                 writeString(serializer, transaction.fileName);
-                serializer.writeUint8(transaction.functionName.length);
                 writeString(serializer, transaction.functionName);
-                serializer.writeUint8(transaction.actualArguments.length);
                 writeString(serializer, transaction.actualArguments);
-                serializer.writeUint8(transaction.servicePaymentsCount);
                 transaction.servicePayments.forEach(servicePayment => {
                     serializer.writeUint64(servicePayment.id);
                     serializer.writeUint64(servicePayment.amount);
                 });
-                serializer.writeUint64(transaction.executionCallPayment);
-                serializer.writeUint64(transaction.downloadCallPayment);
+
+                // endregion
             }
         });
 
@@ -452,11 +505,14 @@ const superContractV2Plugin = {
                 const transaction = {};
                 transaction.contractKey = parser.buffer(constants.sizes.signer);
                 transaction.batchId = parser.uint64();
+                transaction.poEx = {};
                 transaction.poEx.startBatchId = parser.uint64();
                 transaction.poEx.T = parser.buffer(constants.sizes.curvePoint);
                 transaction.poEx.R = parser.buffer(constants.sizes.curvePoint);
                 transaction.poEx.F = parser.buffer(constants.sizes.curvePoint);
                 transaction.poEx.K = parser.buffer(constants.sizes.curvePoint);
+
+                return transaction;
             },
 
             serialize: (transaction, serializer) => {
@@ -475,6 +531,8 @@ const superContractV2Plugin = {
                 const transaction = {};
                 transaction.contractKey = parser.buffer(constants.sizes.signer);
                 transaction.batchId = parser.uint64();
+
+                return transaction;
             },
 
             serialize: (transaction, serializer) => {

@@ -241,8 +241,28 @@ const EntityType = {
 	removeSdaExchangeOffer: 0x426A,
 
 	/** Install message transaction body. */
-	installMessage: 0x416C
+	installMessage: 0x416C,
 
+	/** Deploy contract transaction */
+	deployContract: 0x416E,
+
+	/** Manual call transaction */
+	manualCall: 0x426E,
+
+	/** Automatic executions payment transaction */
+	automaticExecutionsPayment: 0x436E,
+
+	/** Successful end batch execution transaction */
+	successfulEndBatchExecution: 0x446E,
+
+	/** Unsuccessful end batch execution transaction */
+	unsuccessfulEndBatchExecution: 0x456E,
+
+	/** End batch execution single  transaction */
+	endBatchExecutionSingle: 0x466E,
+
+	/** Synchronization Single */
+	synchronizationSingle: 0x476E
 };
 
 module.exports = EntityType;
