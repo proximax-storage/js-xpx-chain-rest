@@ -4,27 +4,27 @@
  *** license that can be found in the LICENSE file.
  * */
 
- const EntityType = require('../../src/model/EntityType');
- const ModelSchemaBuilder = require('../../src/model/ModelSchemaBuilder');
- const test = require('../binaryTestUtils');
- const { expect } = require('chai');
- 
- const supercontractV2Plugin = require('../../src/plugins/supercontract_v2');
+const EntityType = require('../../src/model/EntityType');
+const ModelSchemaBuilder = require('../../src/model/ModelSchemaBuilder');
+const test = require('../binaryTestUtils');
+const {expect} = require('chai');
 
- describe('supercontract v2 plugin', () => {
+const supercontractV2Plugin = require('../../src/plugins/supercontract_v2');
+
+describe('supercontract v2 plugin', () => {
     describe('register schema', () => {
         it('adds supercontract system schema', () => {
             // Arrange:
-			const builder = new ModelSchemaBuilder();
-			const numDefaultKeys = Object.keys(builder.build()).length;
+            const builder = new ModelSchemaBuilder();
+            const numDefaultKeys = Object.keys(builder.build()).length;
 
-			// Act:
-			supercontractV2Plugin.registerSchema(builder);
-			const modelSchema = builder.build();
+            // Act:
+            supercontractV2Plugin.registerSchema(builder);
+            const modelSchema = builder.build();
 
             // Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 20);
-			expect(modelSchema).to.contain.all.keys([
+            expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 20);
+            expect(modelSchema).to.contain.all.keys([
                 'deployContract',
                 'manualCall',
                 'automaticExecutionsPayment',
@@ -32,20 +32,20 @@
                 'unsuccessfulEndBatchExecution',
                 'endBatchExecutionSingle',
                 'synchronizationSingle',
-				'servicePayment',
-				'shortCallDigest',
-				'extendedCallDigest',
-				'opinion',
-				'shortPoEx',
-				'poEx',
-				'callPayment',
-				'automaticExecutionsInfo',
+                'servicePayment',
+                'shortCallDigest',
+                'extendedCallDigest',
+                'opinion',
+                'shortPoEx',
+                'poEx',
+                'callPayment',
+                'automaticExecutionsInfo',
                 'requestedCall',
                 'executorsInfo',
                 'completedCall',
                 'batch',
                 'supercontract',
-			]);
+            ]);
 
             expect(Object.keys(modelSchema.deployContract).length).to.equal(Object.keys(modelSchema.transaction).length + 13);
             expect(modelSchema.deployContract).to.contain.all.keys([
@@ -237,36 +237,38 @@
 
     describe('register codecs', () => {
         const getCodecs = () => {
-			const codecs = {};
+            const codecs = {};
             supercontractV2Plugin.registerCodecs({
-				addTransactionSupport: (type, codec) => { codecs[type] = codec; }
-			});
+                addTransactionSupport: (type, codec) => {
+                    codecs[type] = codec;
+                }
+            });
 
-			return codecs;
+            return codecs;
         };
 
-        const createByteArray = (number) => {
-			const hash = new Uint8Array(32);
-			hash[0] = number;
+        const createByteArray = (number, size = 32) => {
+            const hash = new Uint8Array(size);
+            hash[0] = number;
 
-			return hash;
-		};
+            return hash;
+        };
 
         it('adds supercontract codec', () => {
             // Act:
-			const codecs = getCodecs();
+            const codecs = getCodecs();
 
-			// Assert: codec was registered
-			expect(Object.keys(codecs).length).to.equal(7);
-			expect(codecs).to.contain.all.keys([
-				EntityType.deployContract.toString(),
-				EntityType.manualCall.toString(),
-				EntityType.automaticExecutionsPayment.toString(),
-				EntityType.successfulEndBatchExecution.toString(),
-				EntityType.unsuccessfulEndBatchExecution.toString(),
+            // Assert: codec was registered
+            expect(Object.keys(codecs).length).to.equal(7);
+            expect(codecs).to.contain.all.keys([
+                EntityType.deployContract.toString(),
+                EntityType.manualCall.toString(),
+                EntityType.automaticExecutionsPayment.toString(),
+                EntityType.successfulEndBatchExecution.toString(),
+                EntityType.unsuccessfulEndBatchExecution.toString(),
                 EntityType.endBatchExecutionSingle.toString(),
                 EntityType.synchronizationSingle.toString(),
-			]);
+            ]);
         });
 
         describe('supports deploy contract transaction', () => {
@@ -434,105 +436,206 @@
             const codec = getCodecs()[EntityType.successfulEndBatchExecution];
             const contractKey = createByteArray(0x01);
             const batchId = Buffer.of(0x02, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
-            const automaticExecutionsNextBlockToCheck = Buffer.of(0x03, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
-            const storageHash = Buffer.of(0x04, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+            const storageHash = createByteArray(0x03)
             const usedSizeBytes = Buffer.of(0x05, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
             const metaFilesSizeBytes = Buffer.of(0x06, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
-            const proofOfExecutionVerificationInformation = Buffer.of(0x07, 0x0, 0x0, 0x0);
-            const callDigest1 = Buffer.of(
-                0x08, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x09,
-                0x0A, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x0B, 0x0,
-                0x0C, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            );
-            const callDigest2 = Buffer.of(
-                0x0D, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x0E,
-                0x0F, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x10, 0x0,
-                0x11, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            );
-            const publicKey1 = createByteArray(0x12, 32);
-            const publicKey2 = createByteArray(0x13, 32);
-            const signature1 = createByteArray(0x14, 96);
-            const signature2 = createByteArray(0x15, 96);
-            const poEx1 = Buffer.of(
-                0x16, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x17, 0x0, 0x0, 0x0,
-                0x18, 0x0, 0x0, 0x0,
-                0x19, 0x0, 0x0, 0x0,
-                0x1A, 0x0, 0x0, 0x0,
-            );
-            const poEx2 = Buffer.of(
-                0x1B, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x1C, 0x0, 0x0, 0x0,
-                0x1D, 0x0, 0x0, 0x0,
-                0x1E, 0x0, 0x0, 0x0,
-                0x1F, 0x0, 0x0, 0x0,
-            );
-            const callPayment1 = Buffer.of(
-                0x20, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x21, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            );
-            const callPayment2 = Buffer.of(
-                0x22, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x23, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            );
-            const cosigner1 = createByteArray(0x24, 32);
-            const cosigner2 = createByteArray(0x25, 32);
+            const proofOfExecutionVerificationInformation = createByteArray(0x07)
+            const automaticExecutionsNextBlockToCheck = Buffer.of(0x03, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
 
-            test.binary.test.addAll(codec, 32 + 5 * 8 + 4 + 2 * (8 + 1 + 8 + 2 + 8) + 2 * 32 + 2 * 96 + 2 * (8 + 4 * 4) + 4 * 8 + 2 * 32, () => ({
-                buffer: Buffer.concat([
-                    contractKey,
-                    batchId,
-                    automaticExecutionsNextBlockToCheck,
-                    storageHash,
-                    usedSizeBytes,
-                    metaFilesSizeBytes,
-                    proofOfExecutionVerificationInformation,
-                    callDigest1,
-                    callDigest2,
-                    publicKey1,
-                    publicKey2,
-                    signature1,
-                    signature2,
-                    poEx1,
-                    poEx2,
-                    callPayment1,
-                    callPayment2,
-                    cosigner1,
-                    cosigner2,
-                ]),
-                object: {
-                    contractKey,
-                    batchId: [0x02, 0x00],
-                    automaticExecutionsNextBlockToCheck: [0x03, 0x00],
-                    storageHash: [0x04, 0x00],
-                    usedSizeBytes: [0x05, 0x00],
-                    metaFilesSizeBytes: [0x06, 0x00],
-                    proofOfExecutionVerificationInformation: 0x07,
-                    callDigests: [
-                        callDigest1,
-                        callDigest2
-                    ],
-                    opinions: [
-                        {
-                            publicKey1: [0x12, 0x00],
-                            signature1: [0x14, 0x00],
-                            poEx1,
-                            callPayment1,
-                        },
-                        {
-                            publicKey2: [0x13, 0x00],
-                            signature2: [0x15, 0x00],
-                            poEx2,
-                            callPayment2,
-                        }
-                    ],
-                    cosignersList: [cosigner1, cosigner2]
-                }
-            }));
+            const cosignersNumber = Buffer.of(0x03, 0x00);
+            const callsNumber = Buffer.of(0x02, 0x00);
+
+            const publicKey1 = createByteArray(0x01);
+            const publicKey2 = createByteArray(0x02);
+            const publicKey3 = createByteArray(0x03);
+
+            const signature1 = createByteArray(0x04, 64);
+            const signature2 = createByteArray(0x05, 64);
+            const signature3 = createByteArray(0x06, 64);
+
+            const proof1StartBatchId = Buffer.of(0x10, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+            const proof1T = createByteArray(0x11);
+            const proof1R = createByteArray(0x12);
+            const proof1F = createByteArray(0x13);
+            const proof1K = createByteArray(0x14);
+
+            const proof2StartBatchId = Buffer.of(0x20, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+            const proof2T = createByteArray(0x21);
+            const proof2R = createByteArray(0x22);
+            const proof2F = createByteArray(0x23);
+            const proof2K = createByteArray(0x24);
+
+            const proof3StartBatchId = Buffer.of(0x30, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+            const proof3T = createByteArray(0x31);
+            const proof3R = createByteArray(0x32);
+            const proof3F = createByteArray(0x33);
+            const proof3K = createByteArray(0x34);
+
+            const callDigest1callId = createByteArray(0x40)
+            const callDigest1manual = Buffer.of(0x01);
+            const callDigest1block = Buffer.of(0x41, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+            const callDigest1status = Buffer.of(0x42, 0x0);
+            const callDigest1releasedTransactionHash = createByteArray(0x43);
+
+            const callDigest2callId = createByteArray(0x50)
+            const callDigest2manual = Buffer.of(0x01);
+            const callDigest2block = Buffer.of(0x51, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+            const callDigest2status = Buffer.of(0x52, 0x0);
+            const callDigest2releasedTransactionHash = createByteArray(0x53);
+
+            const callExecutionPayment1 = createByteArray(0x71, 8);
+            const callDownloadPayment1 = createByteArray(0x72, 8);
+            const callExecutionPayment2 = createByteArray(0x73, 8);
+            const callDownloadPayment2 = createByteArray(0x74, 8);
+            const callExecutionPayment3 = createByteArray(0x75, 8);
+            const callDownloadPayment3 = createByteArray(0x76, 8);
+            const callExecutionPayment4 = createByteArray(0x77, 8);
+            const callDownloadPayment4 = createByteArray(0x78, 8);
+            const callExecutionPayment5 = createByteArray(0x79, 8);
+            const callDownloadPayment5 = createByteArray(0x7A, 8);
+            const callExecutionPayment6 = createByteArray(0x7B, 8);
+            const callDownloadPayment6 = createByteArray(0x7C, 8);
+
+            test.binary.test.addAll(codec,
+                32 + 8 + 32 + 2 * 8 + 32 + 8 + 2 + 2 + 3 * 32 + 3 * 64 + 3 * (8 + 4 * 32)
+                + 2 * (32 + 1 + 8 + 2 + 32) + 6 * (8 + 8), () => ({
+                    buffer: Buffer.concat([
+                        contractKey,
+                        batchId,
+                        storageHash,
+                        usedSizeBytes,
+                        metaFilesSizeBytes,
+                        proofOfExecutionVerificationInformation,
+                        automaticExecutionsNextBlockToCheck,
+                        cosignersNumber,
+                        callsNumber,
+                        publicKey1,
+                        publicKey2,
+                        publicKey3,
+                        signature1,
+                        signature2,
+                        signature3,
+                        proof1StartBatchId,
+                        proof1T,
+                        proof1R,
+                        proof1F,
+                        proof1K,
+                        proof2StartBatchId,
+                        proof2T,
+                        proof2R,
+                        proof2F,
+                        proof2K,
+                        proof3StartBatchId,
+                        proof3T,
+                        proof3R,
+                        proof3F,
+                        proof3K,
+                        callDigest1callId,
+                        callDigest1manual,
+                        callDigest1block,
+                        callDigest1status,
+                        callDigest1releasedTransactionHash,
+                        callDigest2callId,
+                        callDigest2manual,
+                        callDigest2block,
+                        callDigest2status,
+                        callDigest2releasedTransactionHash,
+                        callExecutionPayment1,
+                        callDownloadPayment1,
+                        callExecutionPayment2,
+                        callDownloadPayment2,
+                        callExecutionPayment3,
+                        callDownloadPayment3,
+                        callExecutionPayment4,
+                        callDownloadPayment4,
+                        callExecutionPayment5,
+                        callDownloadPayment5,
+                        callExecutionPayment6,
+                        callDownloadPayment6,
+                    ]),
+                    object: {
+                        contractKey,
+                        batchId: [0x02, 0x00],
+                        storageHash,
+                        usedSizeBytes: [0x05, 0x00],
+                        metaFilesSizeBytes: [0x06, 0x00],
+                        proofOfExecutionVerificationInformation,
+                        automaticExecutionsNextBlockToCheck: [0x03, 0x00],
+                        publicKeys: [
+                            publicKey1,
+                            publicKey2,
+                            publicKey3
+                        ],
+                        signatures: [
+                            signature1,
+                            signature2,
+                            signature3
+                        ],
+                        proofsOfExecution: [
+                            {
+                                startBatchId: [0x10, 0x00],
+                                T: proof1T,
+                                R: proof1R,
+                                F: proof1F,
+                                K: proof1K
+                            },
+                            {
+                                startBatchId: [0x20, 0x00],
+                                T: proof2T,
+                                R: proof2R,
+                                F: proof2F,
+                                K: proof2K
+                            }, {
+                                startBatchId: [0x30, 0x00],
+                                T: proof3T,
+                                R: proof3R,
+                                F: proof3F,
+                                K: proof3K
+                            }
+                        ],
+                        callDigests: [
+                            {
+                                callId: callDigest1callId,
+                                manual: 0x01,
+                                block: [0x41, 0x0],
+                                status: 0x42,
+                                releasedTransactionHash: callDigest1releasedTransactionHash
+                            },
+                            {
+                                callId: callDigest2callId,
+                                manual: 0x01,
+                                block: [0x51, 0x0],
+                                status: 0x52,
+                                releasedTransactionHash: callDigest2releasedTransactionHash
+                            }
+                        ],
+                        callPayments: [
+                            {
+                                executionPayment: [0x71, 0x00],
+                                downloadPayment: [0x72, 0x00]
+                            },
+                            {
+                                executionPayment: [0x73, 0x00],
+                                downloadPayment: [0x74, 0x00]
+                            },
+                            {
+                                executionPayment: [0x75, 0x00],
+                                downloadPayment: [0x76, 0x00]
+                            },
+                            {
+                                executionPayment: [0x77, 0x00],
+                                downloadPayment: [0x78, 0x00]
+                            },
+                            {
+                                executionPayment: [0x79, 0x00],
+                                downloadPayment: [0x7A, 0x00]
+                            }, {
+                                executionPayment: [0x7B, 0x00],
+                                downloadPayment: [0x7C, 0x00]
+                            }
+                        ]
+                    }
+                }));
         });
 
         describe('supports unsuccessful end batch execution transaction', () => {
@@ -540,83 +643,181 @@
             const contractKey = createByteArray(0x01);
             const batchId = Buffer.of(0x02, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
             const automaticExecutionsNextBlockToCheck = Buffer.of(0x03, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
-            const callDigest1 = Buffer.of(
-                0x04, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x05,
-                0x06, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            );
-            const callDigest2 = Buffer.of(
-                0x07, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x08,
-                0x09, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            );
-            const publicKey1 = createByteArray(0x0A, 32);
-            const publicKey2 = createByteArray(0x0B, 32);
-            const signature1 = createByteArray(0x0C, 96);
-            const signature2 = createByteArray(0x0D, 96);
-            const poEx1 = Buffer.of(
-                0x0E, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x0F, 0x0, 0x0, 0x0,
-                0x10, 0x0, 0x0, 0x0,
-                0x11, 0x0, 0x0, 0x0,
-                0x12, 0x0, 0x0, 0x0,
-            );
-            const poEx2 = Buffer.of(
-                0x13, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x14, 0x0, 0x0, 0x0,
-                0x15, 0x0, 0x0, 0x0,
-                0x16, 0x0, 0x0, 0x0,
-                0x17, 0x0, 0x0, 0x0,
-            );
-            const callPayment1 = Buffer.of(
-                0x18, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x19, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            );
-            const callPayment2 = Buffer.of(
-                0x1A, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-                0x1B, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            );
 
-            test.binary.test.addAll(codec, 32 + 2 * 8 + 2 * (8 + 1 + 8) + 2 * 32 + 2 * 96 + 2 * (8 + 4 * 4) + 4 * 8, () => ({
-                buffer: Buffer.concat([
-                    contractKey,
-                    batchId,
-                    automaticExecutionsNextBlockToCheck,
-                    callDigest1,
-                    callDigest2,
-                    publicKey1,
-                    publicKey2,
-                    signature1,
-                    signature2,
-                    poEx1,
-                    poEx2,
-                    callPayment1,
-                    callPayment2,
-                ]),
-                object: {
-                    contractKey,
-                    batchId: [0x02, 0x00],
-                    automaticExecutionsNextBlockToCheck: [0x03, 0x00],
-                    callDigests: [
-                        callDigest1,
-                        callDigest2
-                    ],
-                    opinions: [
-                        {
-                            publicKey1: [0x0A, 0x00],
-                            signature1: [0x0C, 0x00],
-                            poEx1,
-                            callPayment1,
-                        },
-                        {
-                            publicKey2: [0x0B, 0x00],
-                            signature2: [0x0D, 0x00],
-                            poEx2,
-                            callPayment2,
-                        }
-                    ]
-                }
-            }));
+            const cosignersNumber = Buffer.of(0x03, 0x00);
+            const callsNumber = Buffer.of(0x02, 0x00);
+
+            const publicKey1 = createByteArray(0x01);
+            const publicKey2 = createByteArray(0x02);
+            const publicKey3 = createByteArray(0x03);
+
+            const signature1 = createByteArray(0x04, 64);
+            const signature2 = createByteArray(0x05, 64);
+            const signature3 = createByteArray(0x06, 64);
+
+            const proof1StartBatchId = Buffer.of(0x10, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+            const proof1T = createByteArray(0x11);
+            const proof1R = createByteArray(0x12);
+            const proof1F = createByteArray(0x13);
+            const proof1K = createByteArray(0x14);
+
+            const proof2StartBatchId = Buffer.of(0x20, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+            const proof2T = createByteArray(0x21);
+            const proof2R = createByteArray(0x22);
+            const proof2F = createByteArray(0x23);
+            const proof2K = createByteArray(0x24);
+
+            const proof3StartBatchId = Buffer.of(0x30, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+            const proof3T = createByteArray(0x31);
+            const proof3R = createByteArray(0x32);
+            const proof3F = createByteArray(0x33);
+            const proof3K = createByteArray(0x34);
+
+            const callDigest1callId = createByteArray(0x40)
+            const callDigest1manual = Buffer.of(0x01);
+            const callDigest1block = Buffer.of(0x41, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+
+            const callDigest2callId = createByteArray(0x50)
+            const callDigest2manual = Buffer.of(0x01);
+            const callDigest2block = Buffer.of(0x51, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0);
+
+            const callExecutionPayment1 = createByteArray(0x71, 8);
+            const callDownloadPayment1 = createByteArray(0x72, 8);
+            const callExecutionPayment2 = createByteArray(0x73, 8);
+            const callDownloadPayment2 = createByteArray(0x74, 8);
+            const callExecutionPayment3 = createByteArray(0x75, 8);
+            const callDownloadPayment3 = createByteArray(0x76, 8);
+            const callExecutionPayment4 = createByteArray(0x77, 8);
+            const callDownloadPayment4 = createByteArray(0x78, 8);
+            const callExecutionPayment5 = createByteArray(0x79, 8);
+            const callDownloadPayment5 = createByteArray(0x7A, 8);
+            const callExecutionPayment6 = createByteArray(0x7B, 8);
+            const callDownloadPayment6 = createByteArray(0x7C, 8);
+
+            test.binary.test.addAll(codec,
+                32 + 8 + 8 + 2 + 2 + 3 * 32 + 3 * 64 + 3 * (8 + 4 * 32)
+                + 2 * (32 + 1 + 8) + 6 * (8 + 8), () => ({
+                    buffer: Buffer.concat([
+                        contractKey,
+                        batchId,
+                        automaticExecutionsNextBlockToCheck,
+                        cosignersNumber,
+                        callsNumber,
+                        publicKey1,
+                        publicKey2,
+                        publicKey3,
+                        signature1,
+                        signature2,
+                        signature3,
+                        proof1StartBatchId,
+                        proof1T,
+                        proof1R,
+                        proof1F,
+                        proof1K,
+                        proof2StartBatchId,
+                        proof2T,
+                        proof2R,
+                        proof2F,
+                        proof2K,
+                        proof3StartBatchId,
+                        proof3T,
+                        proof3R,
+                        proof3F,
+                        proof3K,
+                        callDigest1callId,
+                        callDigest1manual,
+                        callDigest1block,
+                        callDigest2callId,
+                        callDigest2manual,
+                        callDigest2block,
+                        callExecutionPayment1,
+                        callDownloadPayment1,
+                        callExecutionPayment2,
+                        callDownloadPayment2,
+                        callExecutionPayment3,
+                        callDownloadPayment3,
+                        callExecutionPayment4,
+                        callDownloadPayment4,
+                        callExecutionPayment5,
+                        callDownloadPayment5,
+                        callExecutionPayment6,
+                        callDownloadPayment6,
+                    ]),
+                    object: {
+                        contractKey,
+                        batchId: [0x02, 0x00],
+                        automaticExecutionsNextBlockToCheck: [0x03, 0x00],
+                        publicKeys: [
+                            publicKey1,
+                            publicKey2,
+                            publicKey3
+                        ],
+                        signatures: [
+                            signature1,
+                            signature2,
+                            signature3
+                        ],
+                        proofsOfExecution: [
+                            {
+                                startBatchId: [0x10, 0x00],
+                                T: proof1T,
+                                R: proof1R,
+                                F: proof1F,
+                                K: proof1K
+                            },
+                            {
+                                startBatchId: [0x20, 0x00],
+                                T: proof2T,
+                                R: proof2R,
+                                F: proof2F,
+                                K: proof2K
+                            }, {
+                                startBatchId: [0x30, 0x00],
+                                T: proof3T,
+                                R: proof3R,
+                                F: proof3F,
+                                K: proof3K
+                            }
+                        ],
+                        callDigests: [
+                            {
+                                callId: callDigest1callId,
+                                manual: 0x01,
+                                block: [0x41, 0x0],
+                            },
+                            {
+                                callId: callDigest2callId,
+                                manual: 0x01,
+                                block: [0x51, 0x0],
+                            }
+                        ],
+                        callPayments: [
+                            {
+                                executionPayment: [0x71, 0x00],
+                                downloadPayment: [0x72, 0x00]
+                            },
+                            {
+                                executionPayment: [0x73, 0x00],
+                                downloadPayment: [0x74, 0x00]
+                            },
+                            {
+                                executionPayment: [0x75, 0x00],
+                                downloadPayment: [0x76, 0x00]
+                            },
+                            {
+                                executionPayment: [0x77, 0x00],
+                                downloadPayment: [0x78, 0x00]
+                            },
+                            {
+                                executionPayment: [0x79, 0x00],
+                                downloadPayment: [0x7A, 0x00]
+                            }, {
+                                executionPayment: [0x7B, 0x00],
+                                downloadPayment: [0x7C, 0x00]
+                            }
+                        ]
+                    }
+                }));
         });
 
         describe('supports end batch execution single transaction', () => {
@@ -671,4 +872,4 @@
             }));
         });
     });
- });
+});

@@ -361,15 +361,39 @@ const superContractV2Plugin = {
                 const transaction = {};
                 transaction.contractKey = parser.buffer(constants.sizes.signer);
                 transaction.batchId = parser.uint64();
-                transaction.automaticExecutionsNextBlockToCheck = parser.uint64();
                 transaction.storageHash = parser.buffer(constants.sizes.hash256);
                 transaction.usedSizeBytes = parser.uint64();
                 transaction.metaFilesSizeBytes = parser.uint64();
                 transaction.proofOfExecutionVerificationInformation = parser.buffer(constants.sizes.curvePoint);
-                transaction.callDigests = [];
-                let callCount = transaction.CallsNumber;
-                while (callCount--) {
-                    const callDigest = {};
+                transaction.automaticExecutionsNextBlockToCheck = parser.uint64();
+
+                const cosignersNumber = parser.uint16();
+                const callsNumber = parser.uint16();
+
+                transaction.publicKeys = []
+                for(let i = 0; i < cosignersNumber; i++) {
+                    transaction.publicKeys.push(parser.buffer(constants.sizes.signer));
+                }
+
+                transaction.signatures = []
+                for (let i = 0; i < cosignersNumber; i++) {
+                    transaction.signatures.push(parser.buffer(constants.sizes.signature));
+                }
+
+                transaction.proofsOfExecution = []
+                for (let i = 0; i < cosignersNumber; i++) {
+                    let proof = {}
+                    proof.startBatchId = parser.uint64();
+                    proof.T = parser.buffer(constants.sizes.curvePoint);
+                    proof.R = parser.buffer(constants.sizes.scalar);
+                    proof.F = parser.buffer(constants.sizes.curvePoint);
+                    proof.K = parser.buffer(constants.sizes.scalar);
+                    transaction.proofsOfExecution.push(proof);
+                }
+
+                transaction.callDigests = []
+                for (let i = 0; i < callsNumber; i++) {
+                    let callDigest = {};
                     callDigest.callId = parser.buffer(constants.sizes.hash256);
                     callDigest.manual = parser.uint8();
                     callDigest.block = parser.uint64();
@@ -377,26 +401,15 @@ const superContractV2Plugin = {
                     callDigest.releasedTransactionHash = parser.buffer(constants.sizes.hash256);
                     transaction.callDigests.push(callDigest);
                 }
-                transaction.opinions = [];
-                let cosignersCount = transaction.CosignersNumber;
-                while (cosignersCount--) {
-                    const opinion = {};
-                    opinion.publicKey = parser.buffer(constants.sizes.signer);
-                    opinion.signature = parser.buffer(constants.sizes.signature);
-                    opinion.poEx.startBatchId = parser.uint64();
-                    opinion.poEx.T = parser.buffer(constants.sizes.curvePoint);
-                    opinion.poEx.R = parser.buffer(constants.sizes.curvePoint);
-                    opinion.poEx.F = parser.buffer(constants.sizes.curvePoint);
-                    opinion.poEx.K = parser.buffer(constants.sizes.curvePoint);
-                    opinion.callPayments = [];
-                    let callCount = transaction.CallsNumber;
-                    while (callCount--) {
-                        const callPayment = {};
+
+                transaction.callPayments = []
+                for (let i = 0; i < cosignersNumber; i++) {
+                    for (let j = 0; j < callsNumber; j++) {
+                        let callPayment = {}
                         callPayment.executionPayment = parser.uint64();
                         callPayment.downloadPayment = parser.uint64();
-                        opinion.callPayments.push(callPayment);
+                        transaction.callPayments.push(callPayment);
                     }
-                    transaction.opinions.push(opinion);
                 }
 
                 return transaction;
@@ -405,12 +418,31 @@ const superContractV2Plugin = {
             serialize: (transaction, serializer) => {
                 serializer.writeBuffer(transaction.contractKey);
                 serializer.writeUint64(transaction.batchId);
-                serializer.writeUint64(transaction.automaticExecutionsNextBlockToCheck);
                 serializer.writeBuffer(transaction.storageHash);
                 serializer.writeUint64(transaction.usedSizeBytes);
                 serializer.writeUint64(transaction.metaFilesSizeBytes);
-                serializer.writeBuffer(transaction.storageHash);
-                serializer.writeUint8(transaction.CallsNumber);
+                serializer.writeBuffer(transaction.proofOfExecutionVerificationInformation);
+                serializer.writeUint64(transaction.automaticExecutionsNextBlockToCheck);
+
+                serializer.writeUint16(transaction.publicKeys.length);
+                serializer.writeUint16(transaction.callDigests.length);
+
+                transaction.publicKeys.forEach(publicKey => {
+                   serializer.writeBuffer(publicKey);
+                });
+
+                transaction.signatures.forEach(signature => {
+                    serializer.writeBuffer(signature);
+                });
+
+                transaction.proofsOfExecution.forEach(proofOfExecution => {
+                    serializer.writeUint64(proofOfExecution.startBatchId);
+                    serializer.writeBuffer(proofOfExecution.T);
+                    serializer.writeBuffer(proofOfExecution.R);
+                    serializer.writeBuffer(proofOfExecution.F);
+                    serializer.writeBuffer(proofOfExecution.K);
+                });
+
                 transaction.callDigests.forEach(callDigest => {
                     serializer.writeBuffer(callDigest.callId);
                     serializer.writeUint8(callDigest.manual);
@@ -418,19 +450,10 @@ const superContractV2Plugin = {
                     serializer.writeUint16(callDigest.status);
                     serializer.writeBuffer(callDigest.releasedTransactionHash);
                 });
-                transaction.opinions.forEach(opinion => {
-                    serializer.writeBuffer(opinion.publicKey);
-                    serializer.writeBuffer(opinion.signature);
-                    serializer.writeUint64(opinion.poEx.startBatchId);
-                    serializer.writeBuffer(opinion.poEx.T);
-                    serializer.writeBuffer(opinion.poEx.R);
-                    serializer.writeBuffer(opinion.poEx.F);
-                    serializer.writeBuffer(opinion.poEx.K);
-                    serializer.writeUint8(transaction.CallsNumber);
-                    opinion.callPayments.forEach(callPayment => {
-                        serializer.writeUint64(callPayment.executionPayment);
-                        serializer.writeUint64(callPayment.downloadPayment);
-                    });
+
+                transaction.callPayments.forEach(callPayment => {
+                    serializer.writeUint64(callPayment.executionPayment);
+                    serializer.writeUint64(callPayment.downloadPayment);
                 });
             }
         });
@@ -441,61 +464,86 @@ const superContractV2Plugin = {
                 transaction.contractKey = parser.buffer(constants.sizes.signer);
                 transaction.batchId = parser.uint64();
                 transaction.automaticExecutionsNextBlockToCheck = parser.uint64();
-                transaction.callDigests = [];
-                let callCount = transaction.CallsNumber;
-                while (callCount--) {
-                    const callDigest = {};
+
+                const cosignersNumber = parser.uint16();
+                const callsNumber = parser.uint16();
+
+                transaction.publicKeys = []
+                for(let i = 0; i < cosignersNumber; i++) {
+                    transaction.publicKeys.push(parser.buffer(constants.sizes.signer));
+                }
+
+                transaction.signatures = []
+                for (let i = 0; i < cosignersNumber; i++) {
+                    transaction.signatures.push(parser.buffer(constants.sizes.signature));
+                }
+
+                transaction.proofsOfExecution = []
+                for (let i = 0; i < cosignersNumber; i++) {
+                    let proof = {}
+                    proof.startBatchId = parser.uint64();
+                    proof.T = parser.buffer(constants.sizes.curvePoint);
+                    proof.R = parser.buffer(constants.sizes.scalar);
+                    proof.F = parser.buffer(constants.sizes.curvePoint);
+                    proof.K = parser.buffer(constants.sizes.scalar);
+                    transaction.proofsOfExecution.push(proof);
+                }
+
+                transaction.callDigests = []
+                for (let i = 0; i < callsNumber; i++) {
+                    let callDigest = {};
                     callDigest.callId = parser.buffer(constants.sizes.hash256);
                     callDigest.manual = parser.uint8();
                     callDigest.block = parser.uint64();
                     transaction.callDigests.push(callDigest);
                 }
-                transaction.opinions = [];
-                let cosignersCount = transaction.CosignersNumber;
-                while (cosignersCount--) {
-                    const opinion = {};
-                    opinion.publicKey = parser.buffer(constants.sizes.signer);
-                    opinion.signature = parser.buffer(constants.sizes.signature);
-                    opinion.poEx.startBatchId = parser.uint64();
-                    opinion.poEx.T = parser.buffer(constants.sizes.curvePoint);
-                    opinion.poEx.R = parser.buffer(constants.sizes.curvePoint);
-                    opinion.poEx.F = parser.buffer(constants.sizes.curvePoint);
-                    opinion.poEx.K = parser.buffer(constants.sizes.curvePoint);
-                    opinion.callPayments = [];
-                    let callCount = transaction.CallsNumber;
-                    while (callCount--) {
-                        const callPayment = {};
+
+                transaction.callPayments = []
+                for (let i = 0; i < cosignersNumber; i++) {
+                    for (let j = 0; j < callsNumber; j++) {
+                        let callPayment = {}
                         callPayment.executionPayment = parser.uint64();
                         callPayment.downloadPayment = parser.uint64();
-                        opinion.callPayments.push(callPayment);
+                        transaction.callPayments.push(callPayment);
                     }
-                    transaction.opinions.push(opinion);
                 }
+
+                return transaction;
             },
 
             serialize: (transaction, serializer) => {
                 serializer.writeBuffer(transaction.contractKey);
                 serializer.writeUint64(transaction.batchId);
                 serializer.writeUint64(transaction.automaticExecutionsNextBlockToCheck);
-                serializer.writeUint8(transaction.CallsNumber);
+
+                serializer.writeUint16(transaction.publicKeys.length);
+                serializer.writeUint16(transaction.callDigests.length);
+
+                transaction.publicKeys.forEach(publicKey => {
+                    serializer.writeBuffer(publicKey);
+                });
+
+                transaction.signatures.forEach(signature => {
+                    serializer.writeBuffer(signature);
+                });
+
+                transaction.proofsOfExecution.forEach(proofOfExecution => {
+                    serializer.writeUint64(proofOfExecution.startBatchId);
+                    serializer.writeBuffer(proofOfExecution.T);
+                    serializer.writeBuffer(proofOfExecution.R);
+                    serializer.writeBuffer(proofOfExecution.F);
+                    serializer.writeBuffer(proofOfExecution.K);
+                });
+
                 transaction.callDigests.forEach(callDigest => {
                     serializer.writeBuffer(callDigest.callId);
                     serializer.writeUint8(callDigest.manual);
                     serializer.writeUint64(callDigest.block);
                 });
-                transaction.opinions.forEach(opinion => {
-                    serializer.writeBuffer(opinion.publicKey);
-                    serializer.writeBuffer(opinion.signature);
-                    serializer.writeUint64(opinion.poEx.startBatchId);
-                    serializer.writeBuffer(opinion.poEx.T);
-                    serializer.writeBuffer(opinion.poEx.R);
-                    serializer.writeBuffer(opinion.poEx.F);
-                    serializer.writeBuffer(opinion.poEx.K);
-                    serializer.writeUint8(transaction.CallsNumber);
-                    opinion.callPayments.forEach(callPayment => {
-                        serializer.writeUint64(callPayment.executionPayment);
-                        serializer.writeUint64(callPayment.downloadPayment);
-                    });
+
+                transaction.callPayments.forEach(callPayment => {
+                    serializer.writeUint64(callPayment.executionPayment);
+                    serializer.writeUint64(callPayment.downloadPayment);
                 });
             }
         });

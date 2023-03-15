@@ -65,6 +65,11 @@ const sizes = {
 	 * @property {numeric} Size of a CurvePoint.
 	 */
 	curvePoint: 32,
+
+	/**
+	 * @property {numeric} Size of a scalar.
+	 */
+	scalar: 32,
 };
 
 module.exports = sizes;
