@@ -119,8 +119,8 @@ module.exports = {
 		const subscriptions = {};
 		const handlers = {};
 
-		function handle(unresolvedTopic, buffer) {
-			const resolvedTopic = resolver ? resolver(unresolvedTopic, buffer) : unresolvedTopic;
+		function handle(unresolvedTopic, buffer, ...args) {
+			const resolvedTopic = resolver ? resolver(unresolvedTopic, buffer, ...args) : unresolvedTopic;
 			const handler = handlers[resolvedTopic.toString()];
 
 			if (handler)

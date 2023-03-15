@@ -54,11 +54,11 @@ module.exports.createZmqConnectionService = (zmqConfig, codec, channelDescriptor
 		() => createZmqSocket(zmqConfig, logger),
 		(key, emitter) => findSubscriptionInfo(key, emitter, codec, channelDescriptors),
 		logger,
-		function(topic, buffer) {
+		function(topic, buffer, ...args) {
 			let resolver = channelResolvers[topic.toString()];
 
 			while (resolver) {
-				topic = resolver(topic, buffer);
+				topic = resolver(topic, buffer, ...args);
 				resolver = channelResolvers[topic.toString()];
 			}
 

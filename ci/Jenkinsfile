@@ -21,7 +21,7 @@ pipeline {
     stage('Build') {
       steps {
         echo 'Starting Docker Container'
-        withDockerContainer(image: 'node:fermium-bullseye', args: '-u root') {
+        withDockerContainer(image: 'node:fermium-bullseye', args: ' ') {
           echo 'Installing dependencies'
           //sh 'apk add python3 python3-dev py3-pip alpine-sdk'
           sh 'apt update; apt install -y cmake'

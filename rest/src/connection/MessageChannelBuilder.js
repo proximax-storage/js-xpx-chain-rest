@@ -54,10 +54,11 @@ const getTopicIdentifierEntityTypeBinaryBuffer = (topicIdentifier) => {
 		throw new Error('unexpected param does not match a receipt type hex designation');
 	return catapult.utils.convert.hexToUint8(topicIdentifier);
 }
-const receiptResolver = (markerByte) => (topic, buffer) => {
+const receiptResolver = (markerByte) => (topic, heightBuffer, buffer) => {
 	const parser = new BinaryParser();
+	parser.push(heightBuffer);
 	parser.push(buffer);
-
+	const height = parser.uint64();
 	const size = parser.uint32();
 	const version = parser.uint32();
 
