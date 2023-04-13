@@ -125,12 +125,12 @@ class ModelSchemaBuilder {
 				addressHeight: ModelType.uint64,
 				publicKey: ModelType.binary,
 				publicKeyHeight: ModelType.uint64,
-				supplementalAccountKeys: { type: ModelType.object, schemaName: 'supplementalAccountKeys' },
+				supplementalPublicKeys: { type: ModelType.object, schemaName: 'supplementalPublicKeys' },
 				mosaics: { type: ModelType.array, schemaName: 'mosaic' },
 				lockedMosaics: { type: ModelType.array, schemaName: 'mosaic' },
 			},
 
-			supplementalAccountKeys: {
+			supplementalPublicKeys: {
 				linked: { type: ModelType.object, schemaName: 'supplementalAccountKey' },
 				node:{ type: ModelType.object, schemaName: 'supplementalAccountKey' },
 				vrf:{ type: ModelType.object, schemaName: 'supplementalAccountKey' }
