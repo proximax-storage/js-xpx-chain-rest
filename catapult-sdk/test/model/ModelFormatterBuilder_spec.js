@@ -180,7 +180,7 @@ describe('model formatter builder', () => {
 						{ id: 0, amount: 0 },
 						{ id: 0, amount: 0 }
 					],
-					supplementalAccountKeys: {
+					supplementalPublicKeys: {
 						linked: { publicKey: 0 },
 						node:  { publicKey: 0 },
 						vrf:  { publicKey: 0 },
@@ -206,7 +206,7 @@ describe('model formatter builder', () => {
 						{id: 'uint64', amount: 'uint64'},
 						{id: 'uint64', amount: 'uint64'}
 					],
-					supplementalAccountKeys: {
+					supplementalPublicKeys: {
 						linked: {
 							publicKey: "binary"
 						},

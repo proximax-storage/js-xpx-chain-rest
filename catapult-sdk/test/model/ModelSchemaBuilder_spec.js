@@ -83,7 +83,7 @@ describe('model schema builder', () => {
 				'transactionStatus',
 
 				'account',
-				"supplementalAccountKeys",
+				"supplementalPublicKeys",
 				"supplementalAccountKey",
 				'accountMeta',
 				"stakingRecord",
@@ -155,10 +155,10 @@ describe('model schema builder', () => {
 				'transactionWithMetadata.meta',
 				'transactionWithMetadata.transaction',
 				'transactionStatus.meta',
-				"account.supplementalAccountKeys",
-				"supplementalAccountKeys.linked",
-				"supplementalAccountKeys.node",
-				"supplementalAccountKeys.vrf",
+				"account.supplementalPublicKeys",
+				"supplementalPublicKeys.linked",
+				"supplementalPublicKeys.node",
+				"supplementalPublicKeys.vrf",
 				"stakingRecordWithMetadata.stakingAccount",
 
 				'accountWithMetadata.meta',
