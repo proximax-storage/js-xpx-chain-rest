@@ -201,7 +201,7 @@ const storagePlugin = {
 				const transaction = {};
 				transaction.driveKey = parser.buffer(constants.sizes.signer);
 				transaction.downloadDataCdi = parser.buffer(constants.sizes.hash256);
-				transaction.uploadSize = parser.uint64();
+				transaction.uploadSizeMegabytes = parser.uint64();
 				transaction.feedbackFeeAmount = parser.uint64();
 
 				return transaction;
@@ -210,7 +210,7 @@ const storagePlugin = {
 			serialize: (transaction, serializer) => {
 				serializer.writeBuffer(transaction.driveKey);
 				serializer.writeBuffer(transaction.downloadDataCdi);
-				serializer.writeUint64(transaction.uploadSize);
+				serializer.writeUint64(transaction.uploadSizeMegabytes);
 				serializer.writeUint64(transaction.feedbackFeeAmount);
 			}
 		});
