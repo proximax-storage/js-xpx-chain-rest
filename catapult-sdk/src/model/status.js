@@ -341,6 +341,7 @@ const toStringInternal = code => {
 		case 0x80620009: return 'Failure_Storage_Is_Not_Owner'
 		case 0x8062000a: return 'Failure_Storage_Drive_Not_Found'
 		case 0x8062000b: return 'Failure_Storage_Data_Modification_Already_Exists'
+		case 0x8062003b: return 'Failure_Storage_Modification_Invalid_Upload_Size'
 		case 0x8062000c: return 'Failure_Storage_No_Replicator'
 		case 0x8062000d: return 'Failure_Storage_Multiple_Replicators'
 		case 0x8062000e: return 'Failure_Storage_Replicator_Not_Found'
