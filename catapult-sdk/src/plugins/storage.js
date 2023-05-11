@@ -34,7 +34,6 @@ const storagePlugin = {
 			driveKey:				{ type: ModelType.binary, schemaName: 'download.driveKey' },
 			downloadSize:			{ type: ModelType.uint64, schemaName: 'download.downloadSize' },
 			feedbackFeeAmount:		{ type: ModelType.uint64, schemaName: 'download.feedbackFeeAmount' },
-			listOfPublicKeysSize:	{ type: ModelType.uint16, schemaName: 'download.listOfPublicKeysSize' },
 			listOfPublicKeys:		{ type: ModelType.array,  schemaName: ModelType.binary },
 		});
 
@@ -44,11 +43,11 @@ const storagePlugin = {
 			fileStructureCdi:		{ type: ModelType.binary, 	schemaName: 'dataModificationApproval.fileStructureCdi' },
 			fileStructureSizeBytes:	{ type: ModelType.uint64, 	schemaName: 'dataModificationApproval.fileStructureSizeBytes' },
 			metaFilesSizeBytes:		{ type: ModelType.uint64, 	schemaName: 'dataModificationApproval.metaFilesSizeBytes' },
+			modificationStatus:		{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.modificationStatus' },
 			usedDriveSizeBytes:		{ type: ModelType.uint64, 	schemaName: 'dataModificationApproval.usedDriveSizeBytes' },
 			judgingKeysCount:		{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.judgingKeysCount' },
 			overlappingKeysCount:	{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.overlappingKeysCount' },
 			judgedKeysCount:		{ type: ModelType.uint8, 	schemaName: 'dataModificationApproval.judgedKeysCount' },
-			opinionElementCount:	{ type: ModelType.uint16, 	schemaName: 'dataModificationApproval.opinionElementCount' },
 			publicKeys:				{ type: ModelType.array,  	schemaName: ModelType.binary },
 			signatures:				{ type: ModelType.array,  	schemaName: ModelType.binary },
 			presentOpinions:		{ type: ModelType.array,  	schemaName: ModelType.uint8 },
@@ -61,6 +60,7 @@ const storagePlugin = {
 		});
 
 		builder.addTransactionSupport(EntityType.replicatorOnboarding, {
+			publicKey:				{ type: ModelType.binary, schemaName: 'dataModificationCancel.publicKey' },
 			capacity:				{ type: ModelType.uint64, schemaName: 'replicatorOnboarding.capacity' },
 		});
 
@@ -103,7 +103,6 @@ const storagePlugin = {
 			judgingKeysCount:						{ type: ModelType.uint8,  schemaName: 'downloadApproval.judgingKeysCount' },
 			overlappingKeysCount:					{ type: ModelType.uint8,  schemaName: 'downloadApproval.overlappingKeysCount' },
 			judgedKeysCount:						{ type: ModelType.uint8,  schemaName: 'downloadApproval.judgedKeysCount' },
-			opinionElementCount:					{ type: ModelType.uint16, schemaName: 'downloadApproval.opinionElementCount' },
 			publicKeys:								{ type: ModelType.array,  schemaName: ModelType.binary },
 			signatures:								{ type: ModelType.array,  schemaName: ModelType.binary },
 			presentOpinions:						{ type: ModelType.array,  schemaName: ModelType.uint8 },
@@ -118,8 +117,6 @@ const storagePlugin = {
 			driveKey:               ModelType.binary,
 			verificationTrigger:    ModelType.binary,
 			shardId:                ModelType.uint16,
-			keyCount:	            ModelType.uint8,
-			judgingKeyCount:	    ModelType.uint8,
 			publicKeys:				{ type: ModelType.array,  	schemaName: ModelType.binary },
 			signatures:				{ type: ModelType.array,  	schemaName: ModelType.binary },
 			opinions: 				ModelType.uint8,
@@ -128,7 +125,6 @@ const storagePlugin = {
 		builder.addSchema('driveInfo', {
 			drive: 									ModelType.binary,
 			lastApprovedDataModificationId: 		ModelType.binary,
-			dataModificationIdIsValid: 				ModelType.boolean,
 			initialDownloadWork: 					ModelType.uint64,
 			lastCompletedCumulativeDownloadWork: 	ModelType.uint64,
 		});
@@ -140,7 +136,6 @@ const storagePlugin = {
 		builder.addSchema('replicator', {
 			key:			ModelType.binary,
 			version:		ModelType.uint32,
-			// :		ModelType.uint64,
 			drives: 		{ type: ModelType.array, schemaName: 'driveInfo' },
 			downloadChannels: { type: ModelType.array, schemaName: ModelType.binary }
 		});
@@ -178,6 +173,7 @@ const storagePlugin = {
 			actualUploadSize:		ModelType.uint64,
 			folderName:				ModelType.string,
 			readyForApproval:		ModelType.boolean,
+			isStream:				ModelType.boolean
 		});
 
 		builder.addSchema('completedDataModification', {
@@ -189,6 +185,7 @@ const storagePlugin = {
 			folderName:				ModelType.string,
 			readyForApproval:		ModelType.boolean,
 			state:					ModelType.uint8,
+			success:				ModelType.uint8,
 		});
 
 		builder.addSchema('confirmedUsedSize', {
@@ -316,6 +313,7 @@ const storagePlugin = {
 				transaction.driveKey = parser.buffer(constants.sizes.signer);
 				transaction.dataModificationId = parser.buffer(constants.sizes.hash256);
 				transaction.fileStructureCdi = parser.buffer(constants.sizes.hash256);
+				transaction.modificationStatus = parser.uint8();
 				transaction.fileStructureSizeBytes = parser.uint64();
 				transaction.metaFilesSizeBytes = parser.uint64();
 				transaction.usedDriveSizeBytes = parser.uint64();
@@ -357,13 +355,14 @@ const storagePlugin = {
 				serializer.writeBuffer(transaction.driveKey);
 				serializer.writeBuffer(transaction.dataModificationId);
 				serializer.writeBuffer(transaction.fileStructureCdi);
+				serializer.writeUint8(transaction.modificationStatus);
 				serializer.writeUint64(transaction.fileStructureSizeBytes);
 				serializer.writeUint64(transaction.metaFilesSizeBytes);
 				serializer.writeUint64(transaction.usedDriveSizeBytes);
 				serializer.writeUint8(transaction.judgingKeysCount);
 				serializer.writeUint8(transaction.overlappingKeysCount);
 				serializer.writeUint8(transaction.judgedKeysCount);
-				serializer.writeUint16(transaction.opinionElementCount);
+				serializer.writeUint16(transaction.opinions.length);
 
 				transaction.publicKeys.forEach(key => {
 					serializer.writeBuffer(key);
@@ -496,13 +495,15 @@ const storagePlugin = {
 			serialize: (transaction, serializer) => {
 				serializer.writeBuffer(transaction.driveKey);
 				serializer.writeBuffer(transaction.dataModificationId);
-				serializer.writeUint8(transaction.publicKeyCount);
 
-				for (let i = 0; i < transaction.publicKeyCount; ++i) {
+				const publicKeyCount = transaction.opinions.length;
+				serializer.writeUint8(publicKeyCount);
+
+				for (let i = 0; i < publicKeyCount; ++i) {
 					serializer.writeBuffer(transaction.publicKeys[i]);
 				}
 
-				for (let i = 0; i < transaction.publicKeyCount; ++i) {
+				for (let i = 0; i < publicKeyCount; ++i) {
 					serializer.writeUint64(transaction.opinions[i]);
 				}
 			}
@@ -568,7 +569,7 @@ const storagePlugin = {
 				serializer.writeUint8(transaction.judgingKeysCount);
 				serializer.writeUint8(transaction.overlappingKeysCount);
 				serializer.writeUint8(transaction.judgedKeysCount);
-				serializer.writeUint16(transaction.opinionElementCount);
+				serializer.writeUint16(transaction.opinions.length);
 
 				transaction.publicKeys.forEach(key => {
 					serializer.writeBuffer(key);
@@ -607,18 +608,21 @@ const storagePlugin = {
                 transaction.driveKey = parser.buffer(constants.sizes.signer);
                 transaction.verificationTrigger = parser.buffer(constants.sizes.hash256);
                 transaction.shardId = parser.uint16();
-				transaction.keyCount = parser.uint8();
-				transaction.judgingKeyCount = parser.uint8();
+
+				// Skip total number of replicators.
+				parser.uint8();
+
+				// Number of replicators that provided their opinions.
+				const judgingKeyCount = parser.uint8();
+
 				transaction.publicKeys = [];
 				transaction.signatures = [];
 
-				let count = transaction.keyCount;
-				while (count--) {
+				for (let i = 0; i < judgingKeyCount; i++) {
 					transaction.publicKeys.push(parser.buffer(constants.sizes.signer));
 				}
 
-				count = transaction.judgingKeyCount;
-				while (count--) {
+				for (let i = 0; i < judgingKeyCount; i++) {
 					transaction.signatures.push(parser.buffer(constants.sizes.signature));
 				}
 
@@ -631,6 +635,8 @@ const storagePlugin = {
                 serializer.writeBuffer(transaction.driveKey);
                 serializer.writeBuffer(transaction.verificationTrigger);
 				serializer.writeUint16(transaction.shardId);
+				serializer.writeUint8(transaction.publicKeys.length);
+				serializer.writeUint8(transaction.signatures.length);
 
 				transaction.publicKeys.forEach(key => {
 					serializer.writeBuffer(key);

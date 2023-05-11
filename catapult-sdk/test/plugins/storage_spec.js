@@ -70,12 +70,11 @@ describe('storage plugin', () => {
 				'feedbackFeeAmount',
 			]);
 
-			expect(Object.keys(modelSchema.download).length).to.equal(Object.keys(modelSchema.transaction).length + 5);
+			expect(Object.keys(modelSchema.download).length).to.equal(Object.keys(modelSchema.transaction).length + 4);
 			expect(modelSchema.download).to.contain.all.keys([
 				'driveKey',
 				'downloadSize',
 				'feedbackFeeAmount',
-				'listOfPublicKeysSize',
 				'listOfPublicKeys',
 			]);
 
@@ -84,13 +83,13 @@ describe('storage plugin', () => {
 				'driveKey',
 				'dataModificationId',
 				'fileStructureCdi',
+				'modificationStatus',
 				'fileStructureSizeBytes',
 				'metaFilesSizeBytes',
 				'usedDriveSizeBytes',
 				'judgingKeysCount',
 				'overlappingKeysCount',
 				'judgedKeysCount',
-				'opinionElementCount',
 				'publicKeys',
 				'signatures',
 				'presentOpinions',
@@ -103,8 +102,9 @@ describe('storage plugin', () => {
 				'dataModificationId',
 			]);
 
-			expect(Object.keys(modelSchema.replicatorOnboarding).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
+			expect(Object.keys(modelSchema.replicatorOnboarding).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
 			expect(modelSchema.replicatorOnboarding).to.contain.all.keys([
+				'publicKey',
 				'capacity',
 			]);
 
@@ -147,14 +147,13 @@ describe('storage plugin', () => {
 				'verificationFeeAmount',
 			]);
 
-			expect(Object.keys(modelSchema.downloadApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 10);
+			expect(Object.keys(modelSchema.downloadApproval).length).to.equal(Object.keys(modelSchema.transaction).length + 9);
 			expect(modelSchema.downloadApproval).to.contain.all.keys([
 				'downloadChannelId',
 				'approvalTrigger',
 				'judgingKeysCount',
 				'overlappingKeysCount',
 				'judgedKeysCount',
-				'opinionElementCount',
 				'publicKeys',
 				'signatures',
 				'presentOpinions',
@@ -178,17 +177,16 @@ describe('storage plugin', () => {
 				'downloadChannels'
 			]);
 
-			expect(Object.keys(modelSchema['driveInfo']).length).to.equal(5);
+			expect(Object.keys(modelSchema['driveInfo']).length).to.equal(4);
 			expect(modelSchema['driveInfo']).to.contain.all.keys([
 				'drive',
 				'lastApprovedDataModificationId',
-				'dataModificationIdIsValid',
 				'initialDownloadWork',
 				'lastCompletedCumulativeDownloadWork'
 			]);
 
-			expect(Object.keys(modelSchema['downloadChannelEntry']).length).to.equal(1);
-			expect(modelSchema['downloadChannelEntry']).to.contain.all.keys(['downloadChannelInfo']);
+			// expect(Object.keys(modelSchema['downloadChannelEntry']).length).to.equal(1);
+			// expect(modelSchema['downloadChannelEntry']).to.contain.all.keys(['downloadChannelInfo']);
 
 			expect(Object.keys(modelSchema['cumulativePayments']).length).to.equal(2);
 			expect(modelSchema['cumulativePayments']).to.contain.all.keys([
@@ -243,7 +241,7 @@ describe('storage plugin', () => {
 				'readyForApproval'
 			]);
 
-			expect(Object.keys(modelSchema['completedDataModification']).length).to.equal(8);
+			expect(Object.keys(modelSchema['completedDataModification']).length).to.equal(9);
 			expect(modelSchema['completedDataModification']).to.contain.all.keys([
 				'id',
 				'owner',
@@ -252,7 +250,8 @@ describe('storage plugin', () => {
 				'actualUploadSize',
 				'folderName',
 				'readyForApproval',
-				'state'
+				'state',
+				'success'
 			]);
 
 			expect(Object.keys(modelSchema['confirmedUsedSize']).length).to.equal(2);
@@ -275,13 +274,11 @@ describe('storage plugin', () => {
 				'replicators'
 			]);
 
-			expect(Object.keys(modelSchema.endDriveVerificationV2).length).to.equal(Object.keys(modelSchema.transaction).length + 8);
+			expect(Object.keys(modelSchema.endDriveVerificationV2).length).to.equal(Object.keys(modelSchema.transaction).length + 6);
 			expect(modelSchema.endDriveVerificationV2).to.contain.all.keys([
 				'driveKey',
 				'verificationTrigger',
 				'shardId',
-				'keyCount',
-				'judgingKeyCount',
 				'publicKeys',
 				'signatures',
 				'opinions',
@@ -411,6 +408,7 @@ describe('storage plugin', () => {
 			const driveKey = createByteArray(0x01);
 			const dataModificationId = createByteArray(0x02);
 			const fileStructureCdi = createByteArray(0x03);
+			const modificationStatus = Buffer.of(0x05);
 			const fileStructureSizeBytes = Buffer.of(0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 			const metaFilesSizeBytes = Buffer.of(0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
 			const usedDriveSizeBytes = Buffer.of(0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
@@ -431,11 +429,12 @@ describe('storage plugin', () => {
 			);
 
 
-			test.binary.test.addAll(codec, 3 * 32 + 3 * 8 + 5 + 3 * 32 + 2 * 64 + 1 + 3 * 8, () => ({
+			test.binary.test.addAll(codec, 3 * 32 + 1 + 3 * 8 + 5 + 3 * 32 + 2 * 64 + 1 + 3 * 8, () => ({
 				buffer: Buffer.concat([
 					driveKey,
 					dataModificationId,
 					fileStructureCdi,
+					modificationStatus,
 					fileStructureSizeBytes,
 					metaFilesSizeBytes,
 					usedDriveSizeBytes,
@@ -455,6 +454,7 @@ describe('storage plugin', () => {
 					driveKey,
 					dataModificationId,
 					fileStructureCdi,
+					modificationStatus: 0x05,
 					fileStructureSizeBytes: [ 0x04, 0x0 ],
 					metaFilesSizeBytes: [ 0x05, 0x0 ],
 					usedDriveSizeBytes: [ 0x06, 0x0 ],
@@ -692,7 +692,7 @@ describe('storage plugin', () => {
 			const trigger = createByteArray(0x02);
 			const shardId = Buffer.of(0x05, 0x0);
 			const keyCount = Buffer.of(0x02);
-			const judgingKeyCount = Buffer.of(0x02);
+			const signatureCount = Buffer.of(0x02);
 			const keyOne = createByteArray(0x11);
 			const keyTwo = createByteArray(0x20);
 			const signatureOne = createByteArray(0x11, 64);
@@ -704,7 +704,7 @@ describe('storage plugin', () => {
                 const serializationObject = {
                     driveKey: driveKey,
                     verificationTrigger: trigger,
-                    shardId: 0x05,
+					shardId: 0x05,
                     publicKeys: [keyOne, keyTwo],
                     signatures: [signatureOne, signatureTwo],
                     opinions: 0x4,
@@ -713,13 +713,15 @@ describe('storage plugin', () => {
                     driveKey,
                     trigger,
                     shardId,
+                    keyCount,
+                    signatureCount,
                     keyOne,
                     keyTwo,
                     signatureOne,
                     signatureTwo,
                     opinions
                 ])
-                const serializationSize = 32 + 32 + 2 + (2 * 32) + (2 * 64) + 1;
+                const serializationSize = 32 + 32 + 2 + 1 + 1 + (2 * 32) + (2 * 64) + 1;
 
                 // Assert:
                 test.binary.assertSerialization(codec, serializationSize, serializationObject, serializedBuffer);
@@ -731,8 +733,6 @@ describe('storage plugin', () => {
                     driveKey: driveKey,
                     verificationTrigger: trigger,
                     shardId: 0x05,
-                    keyCount: 0x02,
-                    judgingKeyCount: 0x02,
                     publicKeys: [keyOne, keyTwo],
                     signatures: [signatureOne, signatureTwo],
                     opinions: 0x4,
@@ -742,7 +742,7 @@ describe('storage plugin', () => {
                     trigger,
                     shardId,
                     keyCount,
-                    judgingKeyCount,
+					signatureCount,
                     keyOne,
                     keyTwo,
                     signatureOne,

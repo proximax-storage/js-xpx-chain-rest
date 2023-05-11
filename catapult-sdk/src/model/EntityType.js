@@ -233,6 +233,16 @@ const EntityType = {
 
 	/** Manual rate change transaction. (LP) */
 	manualRateChange: 0x4269,
+
+	/** Place SDA-SDA exchange offer transaction. */
+	placeSdaExchangeOffer: 0x416A,
+
+	/** Remove SDA-SDA exchange offer transaction. */
+	removeSdaExchangeOffer: 0x426A,
+
+	/** Install message transaction body. */
+	installMessage: 0x416C
+
 };
 
 module.exports = EntityType;

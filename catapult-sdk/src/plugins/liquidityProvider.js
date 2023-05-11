@@ -45,7 +45,6 @@ const liquidityProviderPlugin = {
 			providerKey:				ModelType.binary,
 			owner:						ModelType.binary,
 			additionallyMinted:			ModelType.uint64,
-			size:						ModelType.uint64,
 			slashingAccount:			ModelType.binary,
 			slashingPeriod:				ModelType.uint32,
 			windowSize:					ModelType.uint16,
