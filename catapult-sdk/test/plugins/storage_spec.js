@@ -230,7 +230,7 @@ describe('storage plugin', () => {
 				'dataModificationShards'
 			]);
 
-			expect(Object.keys(modelSchema['activeDataModification']).length).to.equal(7);
+			expect(Object.keys(modelSchema['activeDataModification']).length).to.equal(8);
 			expect(modelSchema['activeDataModification']).to.contain.all.keys([
 				'id',
 				'owner',
@@ -238,7 +238,8 @@ describe('storage plugin', () => {
 				'expectedUploadSize',
 				'actualUploadSize',
 				'folderName',
-				'readyForApproval'
+				'readyForApproval',
+				'isStream'
 			]);
 
 			expect(Object.keys(modelSchema['completedDataModification']).length).to.equal(9);
