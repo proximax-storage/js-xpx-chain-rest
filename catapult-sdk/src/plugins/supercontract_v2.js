@@ -188,6 +188,10 @@ const superContractV2Plugin = {
             batches: {type: ModelType.array, schemaName: 'batch'},
             releasedTransactions: {type: ModelType.array, schemaName: ModelType.binary},
         });
+
+        builder.addSchema('supercontractEntry', {
+            supercontract: { type: ModelType.object, schemaName: 'supercontract' }
+        });
     },
 
     registerCodecs: codecBuilder => {
