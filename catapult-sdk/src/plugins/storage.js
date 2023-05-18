@@ -173,6 +173,7 @@ const storagePlugin = {
 			actualUploadSize:		ModelType.uint64,
 			folderName:				ModelType.string,
 			readyForApproval:		ModelType.boolean,
+			isStream:				ModelType.boolean
 		});
 
 		builder.addSchema('completedDataModification', {
