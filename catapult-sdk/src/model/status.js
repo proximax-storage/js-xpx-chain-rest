@@ -440,6 +440,7 @@ const toStringInternal = code => {
 		case 0x806E0018: return 'Failure_SuperContract_v2_Max_Auto_Executions_Number_Exceeded';
 		case 0x806E0019: return 'Failure_SuperContract_v2_Max_Service_Payments_Size_Exceeded';
 		case 0x806E001a: return 'Failure_SuperContract_v2_Outdated_Automatic_Execution';
+		case 0x806E001b: return 'Failure_SuperContract_v2_Invalid_Service_Payment_Mosaic';
 		default: return undefined;
 	}
 };
