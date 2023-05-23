@@ -341,7 +341,6 @@ const toStringInternal = code => {
 		case 0x80620009: return 'Failure_Storage_Is_Not_Owner'
 		case 0x8062000a: return 'Failure_Storage_Drive_Not_Found'
 		case 0x8062000b: return 'Failure_Storage_Data_Modification_Already_Exists'
-		case 0x8062003b: return 'Failure_Storage_Modification_Invalid_Upload_Size'
 		case 0x8062000c: return 'Failure_Storage_No_Replicator'
 		case 0x8062000d: return 'Failure_Storage_Multiple_Replicators'
 		case 0x8062000e: return 'Failure_Storage_Replicator_Not_Found'
@@ -440,7 +439,7 @@ const toStringInternal = code => {
 		case 0x806E0018: return 'Failure_SuperContract_v2_Max_Auto_Executions_Number_Exceeded';
 		case 0x806E0019: return 'Failure_SuperContract_v2_Max_Service_Payments_Size_Exceeded';
 		case 0x806E001a: return 'Failure_SuperContract_v2_Outdated_Automatic_Execution';
-		case 0x806E001b: return 'Failure_SuperContract_v2_Invalid_Service_Payment_Mosaic';
+		case 0x806e001b: return 'Failure_SuperContract_v2_Invalid_Service_Payment_Mosaic';
 		default: return undefined;
 	}
 };
