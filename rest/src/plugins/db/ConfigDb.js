@@ -55,7 +55,7 @@ class ConfigDb {
 		if (offsetCondition)
 			conditions = Object.assign(conditions, offsetCondition);
 
-		if (undefined !== height)
+		if (undefined !== heightCondition)
 			conditions['networkConfig.height'] = heightCondition;
 
 		const sortConditions = { [sortingOptions[options.sortField]]: options.sortDirection };

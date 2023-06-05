@@ -10,7 +10,7 @@ const {convertToLong} = require("../../db/dbUtils");
 const parseHeight = params => routeUtils.parseArgument(params, 'height', 'uint');
 
 module.exports = {
-	register: (server, db) => {
+	register: (server, db, services) => {
 		const validOperator = ["eq", "lt", "gt", "lte", "gte"];
 		server.get('/config/:height', (req, res, next) => {
 			const height = parseHeight(req.params);
@@ -32,13 +32,13 @@ module.exports = {
 				return db.networkConfigurations(operation, options)
 					.then(result => routeUtils.createSender('networkConfigEntry').sendPage(res, next)(result));
 			}
-			const evaluator = routeUtils.parseArgument(params, 'operator', 'string');
-			if(!validOperator.contains(evaluator))
+			const evaluator = params["operator"];
+			if(!validOperator.includes(evaluator))
 				throw errors.createInvalidArgumentError(
 					'Invalid comparison operator'
 				);
 			const operator = "$"+evaluator;
-			let operation = { operator : convertToLong(height) };
+			let operation = { [operator] : convertToLong(height) };
 			const options = routeUtils.parsePaginationArguments(params, services.config.pageSize, { id: 'objectId' });
 			return db.networkConfigurations(operation, options)
 				.then(result => routeUtils.createSender('networkConfigEntry').sendPage(res, next)(result));
