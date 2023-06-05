@@ -111,7 +111,7 @@ const accountRestrictionPlugin = {
 		});
 		builder.addSchema('accountRestriction.restrictions', {
 			version: ModelType.uint16,
-			address: ModelType.encodedAddress,
+			address: ModelType.binary,
 			restrictions: {
 				type: ModelType.array,
 				schemaName: entity => {
