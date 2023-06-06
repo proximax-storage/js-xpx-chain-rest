@@ -270,6 +270,7 @@ class CatapultDb {
 				data: result,
 				pagination: {
 					pageNumber: options.pageNumber,
+					totalEntries: result.length,
 					pageSize
 				}
 			}));
