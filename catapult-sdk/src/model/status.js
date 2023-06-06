@@ -39,9 +39,15 @@ const toStringInternal = code => {
 		case 0x80430018: return 'Failure_Core_Invalid_FeeInterest';
 		case 0x80430019: return 'Failure_Core_Invalid_FeeInterestDenominator';
 		case 0x8043001A: return 'Failure_Core_Invalid_AccountVersionUnsupported';
+		case 0x8043001B: return 'Failure_Core_Nonzero_Internal_Padding';
+		case 0x8043001C: return 'Failure_Core_Invalid_Derivation_Scheme_Unset';
+		case 0x8043001D: return 'Failure_Core_Invalid_Block_Derivation_Scheme_Unset';
+		case 0x8043001E: return 'Failure_Core_Invalid_Signer_Is_Locked';
 		case 0x81480007: return 'Failure_Hash_Exists';
 		case 0x80530008: return 'Failure_Signature_Not_Verifiable';
 		case 0x80530009: return 'Failure_Signature_Invalid_Version';
+		case 0x8053000A: return 'Failure_Signature_Block_Not_Verifiable';
+		case 0x8053000B: return 'Failure_Signature_Block_Invalid_Version';
 		case 0x804C00AA: return 'Failure_AccountLink_Invalid_Action';
 		case 0x804C00AC: return 'Failure_AccountLink_Link_Already_Exists';
 		case 0x804C00AD: return 'Failure_AccountLink_Link_Does_Not_Exist';
