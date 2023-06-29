@@ -753,9 +753,14 @@ caseless@~0.12.0:
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
   integrity sha1-G2gcIf+EAzyCZUMJBolCDRhxUdw=
 
-"catapult-sdk@link:../catapult-sdk":
-  version "0.0.0"
-  uid ""
+catapult-sdk@0.7.20:
+  version "0.7.20"
+  resolved "https://registry.yarnpkg.com/catapult-sdk/-/catapult-sdk-0.7.20.tgz#898163df7d2b10328b0ede7a0d7ed2cb408371cc"
+  integrity sha512-47mMfcYUy/RU8GmEjKgBxT/T+t4s0EtM3jGHejui8WpvrQ3KFArIz3cSjuSkA3SxQxYYBJmV/zpDuXUGpKZIjA==
+  dependencies:
+    js-sha3 "^0.8.0"
+    ripemd160 "^2.0.2"
+    tweetnacl "^1.0.1"
 
 chai@^4.2.0:
   version "4.2.0"
@@ -3135,11 +3140,6 @@ logform@^2.2.0:
     ms "^2.1.1"
     triple-beam "^1.3.0"
 
-long@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/long/-/long-4.0.0.tgz#9a7b71cfb7d361a194ea555241c92f7468d5bf28"
-  integrity sha512-XsP+KhQif4bjX1kbuSiySJFNAehNxgLb6hPRGJ9QsUr8ajHkuXGdrHmFUTUUXhDwVX2R5bY4JNZEwbUiMhV+MA==
-
 loose-envify@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/loose-envify/-/loose-envify-1.4.0.tgz#71ee51fa7be4caec1a63839f7e682d8132d30caf"
@@ -5413,7 +5413,7 @@ tweetnacl@^0.14.3, tweetnacl@~0.14.0:
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-0.14.5.tgz#5ae68177f192d4456269d108afa93ff8743f4f64"
   integrity sha1-WuaBd/GS1EViadEIr6k/+HQ/T2Q=
 
-tweetnacl@^1.0.3:
+tweetnacl@^1.0.1:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-1.0.3.tgz#ac0af71680458d8a6378d0d0d050ab1407d35596"
   integrity sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==
