@@ -46,7 +46,7 @@ const mosaicRestrictionPlugin = {
 			version: ModelType.uint16,
 			compositeHash: ModelType.binary,
 			entryType: ModelType.uint32,
-			mosaicId: ModelType.uint64HexIdentifier,
+			mosaicId: ModelType.uint64,
 			targetAddress: ModelType.binary,
 			restrictions: { type: ModelType.array, schemaName: 'mosaicRestrictions.entry.restrictions' }
 		});

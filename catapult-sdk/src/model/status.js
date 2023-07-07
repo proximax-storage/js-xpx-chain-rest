@@ -43,6 +43,7 @@ const toStringInternal = code => {
 		case 0x8043001C: return 'Failure_Core_Invalid_Derivation_Scheme_Unset';
 		case 0x8043001D: return 'Failure_Core_Invalid_Block_Derivation_Scheme_Unset';
 		case 0x8043001E: return 'Failure_Core_Invalid_Signer_Is_Locked';
+		case 0x8043001F: return 'Failure_Core_Participant_Is_Locked';
 		case 0x81480007: return 'Failure_Hash_Exists';
 		case 0x80530008: return 'Failure_Signature_Not_Verifiable';
 		case 0x80530009: return 'Failure_Signature_Invalid_Version';

@@ -764,7 +764,7 @@ class CatapultDb {
 	// region staking Record retrieval
 
 	stakingRecordById(address, refHeight) {
-		return this.queryDocuments('stakingRecords', { $and: [{ 'stakingAccount.address': Buffer.from(address) }, { 'stakingAccount.refHeight': convertToLong(refHeight) }] })
+		return this.queryDocuments('staking_accounts', { $and: [{ 'stakingAccount.address': Buffer.from(address) }, { 'stakingAccount.refHeight': convertToLong(refHeight) }] })
 			.then(this.sanitizer.deleteId);
 	}
 	stakingRecords(filters, options) {
@@ -786,11 +786,8 @@ class CatapultDb {
 			return undefined;
 		};
 
-		const sortConditions = { $sort: { [options.sortField]: options.sortDirection } };
-		return this.queryPagedDocuments_2(buildConditions(), [], sortConditions,'stakingRecords',  options)
-			.then(entities => entities.map(stakingRecord => {
-				return stakingRecord;
-			}));
+		const sortConditions = {  [options.sortField]: options.sortDirection };
+		return this.queryPagedDocumentsExt(buildConditions(), [], sortConditions,'staking_accounts',  options);
 	}
 
 	// endregion

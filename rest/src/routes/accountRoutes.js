@@ -44,7 +44,7 @@ module.exports = {
 			}
 			const filters = {
 				address: params.accountId ? type == "publicKey" ? catapult.model.address.publicKeyToAddress(accountId, this.networkId) : accountId : undefined,
-				height: params.refHeight ? routeUtils.parseArgument(req.params, 'refHeight', 'uint64') : undefined,
+				refHeight: params.refHeight ? routeUtils.parseArgument(req.params, 'refHeight', 'uint64') : undefined,
 			};
 			const options = routeUtils.parsePaginationArguments(params, services.config.pageSize, { id: 'objectId' });
 			return db.stakingRecords(filters, options)
