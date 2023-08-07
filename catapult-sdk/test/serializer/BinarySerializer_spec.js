@@ -24,7 +24,7 @@ const { expect } = require('chai');
 describe('BinarySerializer', () => {
 	// region constructor
 
-	it('cannot construct binary serializer with non-positive integer size', () => {
+	it('cannot construct binary serializer with non-integer or negative integer size', () => {
 		// Arrange:
 		const message = 'BinarySerializer constructor needs integer size >= 0';
 		const createSerializer = param => new BinarySerializer(param);

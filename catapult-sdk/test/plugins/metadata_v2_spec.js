@@ -21,11 +21,11 @@
 
 const EntityType = require('../../src/model/EntityType');
 const ModelSchemaBuilder = require('../../src/model/ModelSchemaBuilder');
-const metadataPlugin = require('../../src/plugins/metadata_nem');
+const metadataPlugin = require('../../src/plugins/metadata_v2');
 const test = require('../binaryTestUtils');
 const { expect } = require('chai');
 
-describe('metadata nem plugin', () => {
+describe('metadata v2 plugin', () => {
 	describe('register schema', () => {
 		it('adds metadata system schema', () => {
 			// Arrange:
@@ -43,7 +43,7 @@ describe('metadata nem plugin', () => {
 				'mosaicMetadata',
 				'namespaceMetadata',
 				'metadata',
-				'metadataNemEntry'
+				'metadataV2Entry'
 			]);
 
 			// - accountMetadata
@@ -74,8 +74,8 @@ describe('metadata nem plugin', () => {
 			expect(modelSchema.metadata).to.contain.all.keys(['metadataEntry', 'id']);
 
 			// - metadataEntry
-			expect(Object.keys(modelSchema.metadataNemEntry).length).to.equal(9);
-			expect(modelSchema.metadataNemEntry).to.contain.all.keys([
+			expect(Object.keys(modelSchema.metadataV2Entry).length).to.equal(9);
+			expect(modelSchema.metadataV2Entry).to.contain.all.keys([
 				'version',
 				'compositeHash',
 				'sourceAddress',

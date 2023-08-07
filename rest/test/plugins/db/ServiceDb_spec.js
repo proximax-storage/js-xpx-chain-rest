@@ -91,7 +91,7 @@ describe('drive db', () => {
 				"drives",
 				db => db.drives(filters, options),
 				transactionsPage => {
-					const returnedIds = transactionsPage.data.map(t => t.id);
+					const returnedIds = transactionsPage.data.map(t => t.meta.id);
 					expect(transactionsPage.data.length).to.equal(expectedObjectIds.length);
 					expect(returnedIds.sort()).to.deep.equal(expectedObjectIds.sort());
 				}
@@ -110,7 +110,7 @@ describe('drive db', () => {
 				"drives",
 				db => db.drives({}, paginationOptions),
 				page => {
-					const expected_keys = ['drive', 'id'];
+					const expected_keys = ['drive', 'meta'];
 					expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
 				}
 			);
@@ -193,9 +193,9 @@ describe('drive db', () => {
 					"drives",
 					db => db.drives({}, options),
 					transactionsPage => {
-						expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(10));
-						expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
-						expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(30));
+						expect(transactionsPage.data[0].meta.id).to.deep.equal(createObjectId(10));
+						expect(transactionsPage.data[1].meta.id).to.deep.equal(createObjectId(20));
+						expect(transactionsPage.data[2].meta.id).to.deep.equal(createObjectId(30));
 					}
 				);
 			});
@@ -214,9 +214,9 @@ describe('drive db', () => {
 					"drives",
 					db => db.drives({}, options),
 					transactionsPage => {
-						expect(transactionsPage.data[0].id).to.deep.equal(createObjectId(30));
-						expect(transactionsPage.data[1].id).to.deep.equal(createObjectId(20));
-						expect(transactionsPage.data[2].id).to.deep.equal(createObjectId(10));
+						expect(transactionsPage.data[0].meta.id).to.deep.equal(createObjectId(30));
+						expect(transactionsPage.data[1].meta.id).to.deep.equal(createObjectId(20));
+						expect(transactionsPage.data[2].meta.id).to.deep.equal(createObjectId(10));
 					}
 				);
 			});

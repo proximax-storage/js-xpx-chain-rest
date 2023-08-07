@@ -22,7 +22,7 @@ const MongoDb = require('mongodb');
 const test = require('./utils/receiptsDbTestUtils');
 const { expect } = require('chai');
 
-const { Long } = MongoDb;
+const { Binary, Long } = MongoDb;
 
 describe('receipts db', () => {
 	describe('address resolution statements by height', () => {
@@ -95,5 +95,97 @@ describe('receipts db', () => {
 				db => db.statementsAtHeight(Long.fromNumber(knownHeight), 'transactionStatements'),
 				entities => { expect(entities).to.deep.equal([transactionStatement1, transactionStatement2]); }
 			));
+	});
+
+	describe('transaction statements by height and receipt type', () => {
+		// Arrange:
+		const knownHeight = 4668;
+		const transactionStatements = [];
+		for (let t=0; t<3; t++) {
+			transactionStatements.push(test.transactionStatementDb.createTransactionStatement(knownHeight+t));
+		}
+
+		const expectedResults = [{
+			height: transactionStatements[0].height, 
+			source: transactionStatements[0].source, 
+			receipts: [transactionStatements[0].receipts[0]]
+		},
+		{
+			height: transactionStatements[0].height, 
+			source: transactionStatements[0].source, 
+			receipts: [transactionStatements[0].receipts[6]]
+		}];
+
+		it('returns empty array for non-existing transaction statements in block', () =>
+			// Assert:
+			test.transactionStatementDb.runDbTest(
+			transactionStatements,
+			db => db.getReceiptsAtHeightByReceiptType(Long.fromNumber(knownHeight + 10), 8515),
+			entities => { expect(entities).to.deep.equal([]); }
+		));
+
+		it('returns transaction statements of receipt type 8515 in block at height', () =>
+			// Assert:
+			test.transactionStatementDb.runDbTest(
+			transactionStatements,
+			db => db.getReceiptsAtHeightByReceiptType(Long.fromNumber(knownHeight), 8515),
+			entities => { expect(entities).to.deep.equal([expectedResults[0]]); }
+		));
+		
+		it('returns transaction statements of receipt type 50026 in block at height', () =>
+			// Assert:
+			test.transactionStatementDb.runDbTest(
+				transactionStatements,
+				db => db.getReceiptsAtHeightByReceiptType(Long.fromNumber(knownHeight), 50026),
+				entities => { expect(entities).to.deep.equal([expectedResults[1]]); }
+		));
+	});
+
+	describe('transaction statements of exchangesda by public key at height', () => {
+		// Arrange:
+		const knownHeight = 4668;
+		const [senderAccount, recipientAccount] = [test.random.publicKey(), test.random.address()];
+		const transactionStatements = [];
+		for (let t=0; t<3; t++) {
+			transactionStatements.push(test.transactionStatementDb.createTransactionStatement(knownHeight));
+		}
+
+		transactionStatements[0].receipts[5].sender = new Binary(senderAccount);
+		transactionStatements[1].receipts[5].exchangeDetails[1].recipient = new Binary(recipientAccount);
+		const expectedResults = [{
+			height: transactionStatements[0].height, 
+			source: transactionStatements[0].source, 
+			receipts: [transactionStatements[0].receipts[5]]
+		},
+		{
+			height: transactionStatements[1].height, 
+			source: transactionStatements[1].source, 
+			receipts: [transactionStatements[1].receipts[5]]
+		}];
+
+
+		it('returns empty array for non-existing transaction statements in block', () =>
+			// Assert:
+			test.transactionStatementDb.runDbTest(
+				transactionStatements,
+				db => db.getSdaExchangeReceiptsByAccountIdAtHeight(Long.fromNumber(knownHeight + 10), 45674, senderAccount),
+				entities => { expect(entities).to.deep.equal([]); }
+		));
+
+		it('returns when sender is found', () =>
+			// Assert:
+			test.transactionStatementDb.runDbTest(
+				transactionStatements,
+				db => db.getSdaExchangeReceiptsByAccountIdAtHeight(Long.fromNumber(knownHeight), 45674, senderAccount),
+				entities => { expect(entities).to.deep.equal([expectedResults[0]]); }
+		));
+
+		it('returns when recipient is found', () =>
+			// Assert:
+			test.transactionStatementDb.runDbTest(
+				transactionStatements,
+				db => db.getSdaExchangeReceiptsByAccountIdAtHeight(Long.fromNumber(knownHeight), 45674, recipientAccount),
+				entities => { expect(entities).to.deep.equal([expectedResults[1]]); }
+		));
 	});
 });

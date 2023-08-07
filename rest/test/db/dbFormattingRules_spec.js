@@ -164,4 +164,45 @@ describe('db formatting rules', () => {
 		// Assert:
 		expect(result).to.deep.equal([0x00ABCDEF, 0x000FDFFF]);
 	});
+
+	it('can format boolean type', () => {
+		// Act:
+		const result = formattingRules[ModelType.boolean](true);
+
+		// Assert:
+		expect(result).to.equal(true);
+	});
+
+	it('can format boolean type from Binary', () => {
+		// Arrange:
+		const buffer = Buffer.alloc(1, true);
+		const object = new Binary(buffer);
+
+		// Act:
+		const result = formattingRules[ModelType.boolean](object);
+
+		// Assert:
+		expect(result).to.deep.equal(true);
+	});
+
+	it('can format double type', () => {
+		// Act:
+		const result = formattingRules[ModelType.double](1.23456);
+
+		// Assert:
+		expect(result).to.equal(1.23456);
+	});
+
+	it('can format double type from Binary', () => {
+		// Arrange:
+		const buffer = Buffer.alloc(8, 0);
+		buffer.writeDoubleLE(1.23456);
+		const object = new Binary(buffer);
+
+		// Act:
+		const result = formattingRules[ModelType.double](object);
+
+		// Assert:
+		expect(result).to.deep.equal(1.23456);
+	});
 });

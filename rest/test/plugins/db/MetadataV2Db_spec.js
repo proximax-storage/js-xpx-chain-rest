@@ -21,7 +21,7 @@
 
 const CatapultDb = require('../../../src/db/CatapultDb');
 const { convertToLong } = require('../../../src/db/dbUtils');
-const MetadataDb = require('../../../src/plugins/db/MetadataNemDb');
+const MetadataDb = require('../../../src/plugins/db/MetadataV2Db');
 const test = require('../../db/utils/dbTestUtils');
 const catapult = require('catapult-sdk');
 const { expect } = require('chai');
@@ -33,7 +33,7 @@ describe('metadata db', () => {
 	const { createObjectId } = test.db;
 
 	const runMetadataDbTest = (dbEntities, issueDbCommand, assertDbCommandResult) =>
-		test.db.runDbTest(dbEntities, 'metadata_nem', db => new MetadataDb(db), issueDbCommand, assertDbCommandResult);
+		test.db.runDbTest(dbEntities, 'metadata_v2', db => new MetadataDb(db), issueDbCommand, assertDbCommandResult);
 
 	describe('metadata', () => {
 		const testKey1 = address.stringToAddress('SBZ22LWA7GDZLPLQF7PXTMNLWSEZ7ZRVGRMWLXQA');
@@ -64,8 +64,8 @@ describe('metadata db', () => {
 				dbMetadata,
 				dbQuery,
 				metadataPage => {
-					const returnedIds = metadataPage.map(t => t.id);
-					expect(metadataPage.length).to.equal(expectedObjectIds.length);
+					const returnedIds = metadataPage.data.map(t => t.meta.id);
+					expect(metadataPage.data.length).to.equal(expectedObjectIds.length);
 					expect(returnedIds.sort()).to.deep.equal(expectedObjectIds.sort());
 				}
 			);
@@ -80,8 +80,8 @@ describe('metadata db', () => {
 				dbMetadata,
 				db => db.metadata(undefined, undefined, undefined, undefined, undefined, paginationOptions),
 				page => {
-					const expected_keys = ['id', 'metadataEntry'];
-					expect(Object.keys(page[0]).sort()).to.deep.equal(expected_keys.sort());
+					const expected_keys = ['meta', 'metadataEntry'];
+					expect(Object.keys(page.data[0]).sort()).to.deep.equal(expected_keys.sort());
 				}
 			);
 		});
@@ -182,7 +182,7 @@ describe('metadata db', () => {
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
-					sortField: 'id',
+					sortField: '_id',
 					sortDirection: 1
 				};
 
@@ -191,9 +191,9 @@ describe('metadata db', () => {
 					dbMetadata(),
 					db => db.metadata(undefined, undefined, undefined, undefined, undefined, options),
 					page => {
-						expect(page[0].id).to.deep.equal(createObjectId(10));
-						expect(page[1].id).to.deep.equal(createObjectId(20));
-						expect(page[2].id).to.deep.equal(createObjectId(30));
+						expect(page.data[0].meta.id).to.deep.equal(createObjectId(10));
+						expect(page.data[1].meta.id).to.deep.equal(createObjectId(20));
+						expect(page.data[2].meta.id).to.deep.equal(createObjectId(30));
 					}
 				);
 			});
@@ -202,7 +202,7 @@ describe('metadata db', () => {
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
-					sortField: 'id',
+					sortField: '_id',
 					sortDirection: -1
 				};
 
@@ -211,15 +211,15 @@ describe('metadata db', () => {
 					dbMetadata(),
 					db => db.metadata(undefined, undefined, undefined, undefined, undefined, options),
 					page => {
-						expect(page[0].id).to.deep.equal(createObjectId(30));
-						expect(page[1].id).to.deep.equal(createObjectId(20));
-						expect(page[2].id).to.deep.equal(createObjectId(10));
+						expect(page.data[0].meta.id).to.deep.equal(createObjectId(30));
+						expect(page.data[1].meta.id).to.deep.equal(createObjectId(20));
+						expect(page.data[2].meta.id).to.deep.equal(createObjectId(10));
 					}
 				);
 			});
 
 			it('sort field', () => {
-				const queryPagedDocumentsSpy = sinon.spy(CatapultDb.prototype, 'queryPagedDocuments');
+				const queryPagedDocumentsSpy = sinon.spy(CatapultDb.prototype, 'queryPagedDocuments_2');
 				const options = {
 					pageSize: 10,
 					pageNumber: 1,
@@ -249,7 +249,7 @@ describe('metadata db', () => {
 			const options = {
 				pageSize: 10,
 				pageNumber: 1,
-				sortField: 'id',
+				sortField: '_id',
 				sortDirection: 1,
 				offset: createObjectId(20)
 			};

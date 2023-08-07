@@ -246,6 +246,7 @@ describe('namespace db', () => {
 	const aliasTypeAddress = catapult.model.namespace.aliasType.address;
 	const lifetime = { start: 0, end: 100 };
 	const createNamespace = (namespaceId, aliasTarget, aliasType, depth, expirationHeight) => ({
+		meta: { active: true },
 		namespace: {
 			depth,
 			level0: 1 >= depth ? convertToLong(namespaceId) : '',

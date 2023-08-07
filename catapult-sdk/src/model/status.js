@@ -91,6 +91,7 @@ const toStringInternal = code => {
 		case 0x804D00A2: return 'Failure_Mosaic_Supply_Negative';
 		case 0x804D00A3: return 'Failure_Mosaic_Supply_Exceeded';
 		case 0x804D00A4: return 'Failure_Mosaic_Non_Transferable';
+		case 0x804D00A5: return 'Failure_Mosaic_Offer_Duration_Exceeds_Mosaic_Duration';
 		case 0x804D00AA: return 'Failure_Mosaic_Max_Mosaics_Exceeded';
 		case 0x804D00AB: return 'Failure_Mosaic_Plugin_Config_Malformed';
 		case 0x804D0007: return 'Failure_Mosaic_Insufficient_Levy_Balance';
@@ -211,6 +212,29 @@ const toStringInternal = code => {
 		case 0x805D000D: return 'Failure_Exchange_Duplicated_Offer_In_Request';
 		case 0x805D000E: return 'Failure_Exchange_Offer_Exists';
 		case 0x805D000F: return 'Failure_Exchange_Zero_Offer_Duration';
+		case 0x805D0010: return 'Failure_Exchange_Offer_Expired';
+		case 0x805D0011: return 'Failure_Exchange_Cant_Remove_Offer_At_Height';
+		case 0x805D0012: return 'Failure_Exchange_Offer_Duration_Exceeds_Mosaic_Duration';
+		case 0x805D0013: return 'Failure_Exchange_Incorrect_Offer_Type';
+		case 0x805D0014: return 'Failure_Exchange_Mosaic_Does_Not_Exist';
+		case 0x806A0001: return 'Failure_ExchangeSda_No_Offers';
+		case 0x806A0002: return 'Failure_ExchangeSda_Exchanging_Own_Units_Is_Not_Allowed';
+		case 0x806A0003: return 'Failure_ExchangeSda_Account_Doesnt_Have_Any_Offer';
+		case 0x806A0004: return 'Failure_ExchangeSda_Duplicated_Offer_In_Request';
+		case 0x806A0005: return 'Failure_ExchangeSda_Zero_Offer_Duration';
+		case 0x806A0006: return 'Failure_ExchangeSda_Offer_Duration_Too_Large';
+		case 0x806A0007: return 'Failure_ExchangeSda_Mosaic_Not_Found';
+		case 0x806A0008: return 'Failure_ExchangeSda_Zero_Amount';
+		case 0x806A0009: return 'Failure_ExchangeSda_Zero_Price';
+		case 0x806A000A: return 'Failure_ExchangeSda_Offer_Exists';
+		case 0x806A000B: return 'Failure_ExchangeSda_Offer_Doesnt_Exist';
+		case 0x806A000C: return 'Failure_ExchangeSda_Offer_Expired';
+		case 0x806A000D: return 'Failure_ExchangeSda_Invalid_Price';
+		case 0x806A000E: return 'Failure_ExchangeSda_Not_Enough_Units_In_Offer';
+		case 0x806A000F: return 'Failure_ExchangeSda_Cant_Remove_Offer_At_Height';
+		case 0x806A0010: return 'Failure_ExchangeSda_No_Offered_Mosaics_To_Remove';
+		case 0x806A0011: return 'Failure_ExchangeSda_Plugin_Config_Malformed';
+		case 0x806A0012: return 'Failure_ExchangeSda_Exchanging_Same_Units_Is_Not_Allowed';
 		case 0x805A0001: return 'Failure_Service_Drive_Duration_Is_Not_Multiple_Of_BillingPeriod';
 		case 0x805A0002: return 'Failure_Service_Wrong_Percent_Approvers';
 		case 0x805A0003: return 'Failure_Service_Min_Replicators_More_Than_Replicas';
@@ -301,22 +325,23 @@ const toStringInternal = code => {
 		case 0x80FE3005: return 'Failure_Consumer_Remote_Chain_Too_Far_In_Future';
 		case 0x80450101: return 'Failure_Extension_Partial_Transaction_Cache_Prune';
 		case 0x80450102: return 'Failure_Extension_Partial_Transaction_Dependency_Removed';
-		case 0x803F0001: return 'Failure_Metadata_Nem_Value_Too_Small';
-		case 0x803F0002: return 'Failure_Metadata_Nem_Value_Too_Large';
-		case 0x803F0003: return 'Failure_Metadata_Nem_Value_Size_Delta_Too_Large';
-		case 0x803F0004: return 'Failure_Metadata_Nem_Value_Size_Delta_Mismatch';
-		case 0x803F0005: return 'Failure_Metadata_Nem_Value_Change_Irreversible';
+		case 0x803F0001: return 'Failure_Metadata_v2_Value_Too_Small';
+		case 0x803F0002: return 'Failure_Metadata_v2_Value_Too_Large';
+		case 0x803F0003: return 'Failure_Metadata_v2_Value_Size_Delta_Too_Large';
+		case 0x803F0004: return 'Failure_Metadata_v2_Value_Size_Delta_Mismatch';
+		case 0x803F0005: return 'Failure_Metadata_v2_Value_Change_Irreversible';
 		case 0x80620001: return 'Failure_Storage_Drive_Size_Insufficient'
 		case 0x80620002: return 'Failure_Storage_Replicator_Count_Insufficient'
-		case 0x80620003: return 'Failure_Storage_Plugin_Config_Malformed'
-		case 0x80620004: return 'Failure_Storage_Drive_Already_Exists'
-		case 0x80620005: return 'Failure_Storage_No_Active_Data_Modifications'
-		case 0x80620006: return 'Failure_Storage_Invalid_Data_Modification_Id'
-		case 0x80620007: return 'Failure_Storage_Data_Modification_Not_Found'
-		case 0x80620008: return 'Failure_Storage_Data_Modification_Is_Active'
+		case 0x80620003: return 'Failure_Storage_Replicator_Capacity_Insufficient'
+		case 0x80620004: return 'Failure_Storage_Plugin_Config_Malformed'
+		case 0x80620005: return 'Failure_Storage_Drive_Already_Exists'
+		case 0x80620006: return 'Failure_Storage_No_Active_Data_Modifications'
+		case 0x80620007: return 'Failure_Storage_Invalid_Data_Modification_Id'
+		case 0x80620008: return 'Failure_Storage_Data_Modification_Not_Found'
 		case 0x80620009: return 'Failure_Storage_Is_Not_Owner'
 		case 0x8062000a: return 'Failure_Storage_Drive_Not_Found'
 		case 0x8062000b: return 'Failure_Storage_Data_Modification_Already_Exists'
+		case 0x8062003b: return 'Failure_Storage_Modification_Invalid_Upload_Size'
 		case 0x8062000c: return 'Failure_Storage_No_Replicator'
 		case 0x8062000d: return 'Failure_Storage_Multiple_Replicators'
 		case 0x8062000e: return 'Failure_Storage_Replicator_Not_Found'
@@ -326,30 +351,64 @@ const toStringInternal = code => {
 		case 0x80620012: return 'Failure_Storage_Invalid_Transaction_Signer'
 		case 0x80620013: return 'Failure_Storage_Drive_Not_Assigned_To_Replicator'
 		case 0x80620014: return 'Failure_Storage_No_Approved_Data_Modifications'
-		case 0x80620015: return 'Failure_Storage_Opinion_Reocurring_Keys'
-		case 0x80620016: return 'Failure_Storage_Opinion_Invalid_Key'
-		case 0x80620017: return 'Failure_Storage_Opinion_Incorrect_Percentage'
-		case 0x80620018: return 'Failure_Storage_No_Confirmed_Used_Sizes'
-		case 0x80620019: return 'Failure_Storage_BLS_Key_Already_Registered'
-		case 0x8062001a: return 'Failure_Storage_Invalid_Opinion_Index'
-		case 0x8062001b: return 'Failure_Storage_Invalid_BLS_Signature'
-		case 0x8062001c: return 'Failure_Storage_Opinion_Unused_Key'
-		case 0x8062001d: return 'Failure_Storage_Opinions_Reocurring_Individual_Parts'
-		case 0x8062001e: return 'Failure_Storage_Overdue_Download_Approval'
-		case 0x8062001f: return 'Failure_Storage_Invalid_Sequence_Number'
-		case 0x80620020: return 'Failure_Storage_Sender_State_Not_Found'
-		case 0x80620021: return 'Failure_Storage_Recipient_State_Not_Found'
-		case 0x80620022: return 'Failure_Storage_Verification_Bad_Verification_Trigger'
-		case 0x80620023: return 'Failure_Storage_Verification_Wrong_Namber_Of_Provers'
-		case 0x80620024: return 'Failure_Storage_Verification_Some_Provers_Are_Illegal'
-		case 0x80620025: return 'Failure_Storage_Verification_Not_In_Pending'
-		case 0x80620026: return 'Failure_Storage_Stream_Already_Exists'
-		case 0x80620027: return 'Failure_Storage_Invalid_Stream_Id'
-		case 0x80620028: return 'Failure_Storage_Stream_Already_Finished'
-		case 0x80620029: return 'Failure_Storage_Expected_Upload_Size_Exceeded'
-		case 0x8062002A: return 'Failure_Storage_Drive_Size_Excessive'
-		case 0x8062002B: return 'Failure_Storage_Upload_Size_Excessive'
-		case 0x8062002C: return 'Failure_Storage_Download_Size_Excessive'
+		case 0x80620015: return 'Failure_Storage_Invalid_Used_Size'
+		case 0x80620016: return 'Failure_Storage_Opinion_Duplicated_Keys'
+		case 0x80620017: return 'Failure_Storage_Opinion_Invalid_Key'
+		case 0x80620018: return 'Failure_Storage_Invalid_Opinion'
+		case 0x80620019: return 'Failure_Storage_Invalid_Opinions_Sum'
+		case 0x8062001a: return 'Failure_Storage_No_Confirmed_Used_Sizes'
+		case 0x8062001b: return 'Failure_Storage_Opinion_Invalid_Key_Order'
+		case 0x8062001c: return 'Failure_Storage_Opinion_Invalid_Index'
+		case 0x8062001d: return 'Failure_Storage_Opinion_Invalid_Signature'
+		case 0x8062001e: return 'Failure_Storage_Opinion_Unused_Key'
+		case 0x8062001f: return 'Failure_Storage_Opinions_Reocurring_Individual_Parts'
+		case 0x80620020: return 'Failure_Storage_Transaction_Already_Approved'
+		case 0x80620021: return 'Failure_Storage_Invalid_Approval_Trigger'
+		case 0x80620022: return 'Failure_Storage_No_Opinion_Provided_On_Self'
+		case 0x80620023: return 'Failure_Storage_Unused_Opinion'
+		case 0x80620024: return 'Failure_Storage_Opinion_Provided_On_Self'
+		case 0x80620025: return 'Failure_Storage_Drive_Info_Not_Found'
+		case 0x80620026: return 'Failure_Storage_Bad_Verification_Trigger'
+		case 0x80620027: return 'Failure_Storage_Verification_Not_In_Progress'
+		case 0x80620028: return 'Failure_Storage_Verification_Invalid_Prover_Count'
+		case 0x80620029: return 'Failure_Storage_Verification_Invalid_Shard_Id'
+		case 0x8062002a: return 'Failure_Storage_Verification_Invalid_Prover'
+		case 0x8062002b: return 'Failure_Storage_Stream_Already_Exists'
+		case 0x8062002c: return 'Failure_Storage_Invalid_Stream_Id'
+		case 0x8062002d: return 'Failure_Storage_Stream_Already_Finished'
+		case 0x8062002e: return 'Failure_Storage_Expected_Upload_Size_Exceeded'
+		case 0x8062002f: return 'Failure_Storage_Drive_Size_Excessive'
+		case 0x80620030: return 'Failure_Storage_Upload_Size_Excessive'
+		case 0x80620031: return 'Failure_Storage_Download_Size_Excessive'
+		case 0x80620032: return 'Failure_Storage_Download_Size_Insufficient'
+		case 0x80620033: return 'Failure_Storage_Signature_Count_Insufficient'
+		case 0x80620034: return 'Failure_Storage_Already_Applied_For_Offboarding'
+		case 0x80620035: return 'Failure_Storage_Already_Initiated_Channel_Closure'
+		case 0x80620036: return 'Failure_Storage_Download_Channel_Is_Finished'
+		case 0x80620037: return 'Failure_Storage_Service_Unit_Transfer'
+		case 0x80690001: return 'Failure_LiquidityProvider_Liquidity_Provider_Already_Exists'
+		case 0x80690002: return 'Failure_LiquidityProvider_Invalid_Owner'
+		case 0x80690003: return 'Failure_LiquidityProvider_Invalid_Slashing_Period'
+		case 0x80690004: return 'Failure_LiquidityProvider_Invalid_Window_Size'
+		case 0x80690005: return 'Failure_LiquidityProvider_Is_Not_Registered'
+		case 0x80690006: return 'Failure_LiquidityProvider_Insufficient_Currency'
+		case 0x80690007: return 'Failure_LiquidityProvider_Insufficient_Mosaic'
+		case 0x80690008: return 'Failure_LiquidityProvider_Invalid_Exchange_Rate'
+		case 0x80690009: return 'Failure_LiquidityProvider_Plugin_Config_Malformed'
+		case 0x8069000a: return 'Failure_LiquidityProvider_Invalid_Mosaic_Amount'
+		case 0x8069000b: return 'Failure_LiquidityProvider_Invalid_Currency_Amount'
+		case 0x8069000c: return 'Failure_LiquidityProvider_Reserved_Mosaic_Id'
+		case 0x80610001: return 'Failure_Committee_Plugin_Config_Malformed'
+		case 0x80610002: return 'Failure_Committee_Redundant'
+		case 0x80610003: return 'Failure_Committee_Harvester_Ineligible'
+		case 0x80610004: return 'Failure_Committee_Account_Does_Not_Exist'
+		case 0x80610005: return 'Failure_Committee_Signer_Is_Not_Owner'
+		case 0x80610006: return 'Failure_Committee_Harvester_Already_Disabled'
+		case 0x806C0001: return 'Failure_Dbrb_View_Sequence_Already_Exists'
+		case 0x806C0002: return 'Failure_Dbrb_View_Sequence_Size_Insufficient'
+		case 0x806C0003: return 'Failure_Dbrb_Invalid_Replaced_View'
+		case 0x806C0004: return 'Failure_Dbrb_Signatures_Count_Insufficient'
+		case 0x806C0005: return 'Failure_Dbrb_Invalid_Signature'
 		case 0x80670001: return 'Failure_Streaming_Folder_Name_Too_Large'
 		default: return undefined;
 	}

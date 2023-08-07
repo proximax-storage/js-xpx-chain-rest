@@ -48,7 +48,7 @@ module.exports = {
 
 		server.get(`/exchange/mosaics`, (req, res, next) => {
 			const mosaicDb = new MosaicDb(db.getCatapultDb());
-			return mosaicDb.mosaics()
+			return mosaicDb.allMosaics()
 				.then(mosaics => {
 					db.mosaicsParticipatingInOffers(mosaics)
 						.then(routeUtils.createSender('mosaics').sendArray('mosaicId', res, next));

@@ -21,11 +21,12 @@
 const catapult = require('catapult-sdk');
 const routeUtils = require('../../routes/routeUtils');
 const LevyDb = require('../db/LevyDb');
+const errors = require('../../server/errors');
 
 const {uint64} = catapult.utils;
 
 module.exports = {
-    register: (server, db) => {
+    register: (server, db, services) => {
         const mosaicSender = routeUtils.createSender('mosaicDescriptor');
 
         routeUtils.addGetPostDocumentRoutes(
@@ -42,6 +43,31 @@ module.exports = {
 
             return levyDb.levyByMosaicId(mosaicId)
                 .then(routeUtils.createSender('mosaicLevy').sendOne(req.params.mosaicId, res, next));
+        });
+
+        server.get(`/mosaics`, (req, res, next) => {
+            const { params } = req;
+
+            if (params.holding !== undefined && !params.ownerPubKey) {
+				throw errors.createInvalidArgumentError(
+					'can\'t filter by holding when `ownerPubKey` is not provided'
+				);
+			}
+
+            const filters = {
+                ownerPubKey: params.ownerPubKey ? routeUtils.parseArgument(params, 'ownerPubKey', 'publicKey') : undefined,
+                supply: params.supply ? routeUtils.parseArgument(params, 'supply', 'uint') : undefined,
+                mutable: params.mutable ? routeUtils.parseArgument(params, 'mutable', 'boolean') : undefined,
+                transferable: params.transferable ? routeUtils.parseArgument(params, 'transferable', 'boolean') : undefined,
+                holding: params.holding !== undefined ? routeUtils.parseArgument(params, 'holding', 'boolean') : undefined,
+            };
+
+            const options = routeUtils.parsePaginationArguments(params, services.config.pageSize, { id: 'objectId' });
+
+            return db.mosaics(filters, options)
+                .then(result => {
+                    routeUtils.createSender("mosaicDescriptor").sendPage(res, next)(result)
+                });
         });
     }
 };
