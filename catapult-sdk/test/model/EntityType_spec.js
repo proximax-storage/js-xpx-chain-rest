@@ -97,7 +97,14 @@ describe('entity type enumeration', () => {
 			manualRateChange: 0x4269,
 			placeSdaExchangeOffer: 0x416A,
 			removeSdaExchangeOffer: 0x426A,
-			installMessage: 0x416C
+			installMessage: 0x416C,
+			deployContract: 0x416E,
+			automaticExecutionsPayment: 0x436E,
+			endBatchExecutionSingle: 0x466E,
+			manualCall: 0x426E,
+			successfulEndBatchExecution: 0x446E,
+			synchronizationSingle: 0x476E,
+			unsuccessfulEndBatchExecution: 0x456E,
 		});
 	});
 

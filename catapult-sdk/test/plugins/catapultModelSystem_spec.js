@@ -66,9 +66,9 @@ describe('catapult model system', () => {
 				'service',
 				'storage',
 				'supercontract',
+				'supercontract_v2',
 				'transfer',
 				'upgrade',
-				'supercontract_v2',
 			]);
 		});
 	});

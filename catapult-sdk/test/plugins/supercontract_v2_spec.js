@@ -23,7 +23,7 @@ describe('supercontract v2 plugin', () => {
             const modelSchema = builder.build();
 
             // Assert:
-            expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 20);
+            expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 21);
             expect(modelSchema).to.contain.all.keys([
                 'deployContract',
                 'manualCall',
@@ -44,7 +44,7 @@ describe('supercontract v2 plugin', () => {
                 'executorsInfo',
                 'completedCall',
                 'batch',
-                'supercontract',
+                'supercontract'
             ]);
 
             expect(Object.keys(modelSchema.deployContract).length).to.equal(Object.keys(modelSchema.transaction).length + 13);
