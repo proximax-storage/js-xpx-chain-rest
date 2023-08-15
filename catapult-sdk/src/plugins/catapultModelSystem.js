@@ -22,15 +22,19 @@
 const accountLink = require('./accountLink');
 const accountProperties = require('./accountProperties');
 const aggregate = require('./aggregate');
+const committee = require('./committee');
 const config = require('./config');
 const contract = require('./contract');
+const dbrb = require('./dbrb');
 const exchange = require('./exchange');
+const exchangesda = require('./exchange_sda');
 const lock = require('./lock');
+const liquidityProvider = require('./liquidityProvider');
 const ModelCodecBuilder = require('../modelBinary/ModelCodecBuilder');
 const ModelFormatterBuilder = require('../model/ModelFormatterBuilder');
 const ModelSchemaBuilder = require('../model/ModelSchemaBuilder');
 const metadata = require('./metadata');
-const metadata_nem = require('./metadata_nem');
+const metadata_v2 = require('./metadata_v2');
 const mosaic = require('./mosaic');
 const multisig = require('./multisig');
 const namespace = require('./namespace');
@@ -42,9 +46,10 @@ const storage = require('./storage');
 const supercontract = require('./supercontract');
 const transfer = require('./transfer');
 const upgrade = require('./upgrade');
+const streaming = require('./streaming');
 
 const plugins = {
-	accountLink, accountProperties, aggregate, exchange, config, contract, lock, metadata, metadata_nem, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, transfer, upgrade
+	accountLink, accountProperties, aggregate, exchange, exchangesda, committee, config, contract, dbrb, lock, liquidityProvider, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, transfer, upgrade, streaming
 };
 
 /**

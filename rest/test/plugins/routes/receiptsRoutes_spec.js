@@ -21,8 +21,19 @@
 const receiptsRoutes = require('../../../src/plugins/routes/receiptsRoutes');
 const routeUtils = require('../../../src/routes/routeUtils');
 const sinon = require('sinon');
-
+const catapult = require('catapult-sdk');
+const { test } = require('../../routes/utils/routeTestUtils');
 const { expect } = require('chai');
+
+const { address } = catapult.model;
+const { publicKeys, addresses } = test.sets;
+const { convert } = catapult.utils;
+const constants = {
+	sizes: {
+		hexPublicKey: 64,
+		addressEncoded: 40
+	}
+};
 
 describe('receipts routes', () => {
 	describe('get transaction statements by height', () => {
@@ -142,6 +153,324 @@ describe('receipts routes', () => {
 			expect(blockRouteMerkleProcessorSpy.firstCall.args[1]).to.equal('numStatements');
 			expect(blockRouteMerkleProcessorSpy.firstCall.args[2]).to.equal('statementMerkleTree');
 			blockRouteMerkleProcessorSpy.restore();
+		});
+	});
+
+	describe('get transaction statements by height and receipt type', () => {
+		const endpointUnderTest = '/block/:height/receipts/:receiptType';
+
+		const highestHeight = 50;
+		const correctQueriedHeight = highestHeight - 10;
+		const receiptType = 8515;
+
+		const transactionStatementData = ['dummyStatement'];
+		const statementsFake = sinon.stub();
+		statementsFake.withArgs(correctQueriedHeight, receiptType).returns(transactionStatementData);
+
+		const routes = {};
+		const server = {
+			get: (path, handler) => {
+				routes[path] = handler;
+			}
+		};
+
+		receiptsRoutes.register(server, {
+			catapultDb: {
+				chainInfo: () => Promise.resolve({ height: highestHeight })
+			},
+			getReceiptsAtHeightByReceiptType: statementsFake
+		});
+
+		let sentResponse;
+		const next = () => {};
+		const res = {
+			send: response => {
+				sentResponse = response;
+			},
+			redirect: () => {
+				next();
+			}
+		};
+
+		beforeEach(() => statementsFake.resetHistory());
+
+		it('returns result if provided height is valid', () => {
+			// Arrange:
+			const req = { params: { height: correctQueriedHeight.toString(), receiptType: receiptType.toString() } };
+
+			// Act:
+			const route = routes[endpointUnderTest];
+			return route(req, res, next).then(() => {
+				// Assert:
+				expect(statementsFake.calledOnce).to.equal(true);
+				expect(statementsFake.calledWith(correctQueriedHeight, receiptType), `failed at index 0`).to.equal(true);
+
+				expect(sentResponse).to.deep.equal({
+					payload: {
+						receiptStatements: transactionStatementData
+					},
+					type: 'receiptStatements'
+				});
+			});
+		});
+
+		it('returns 404 if not found in the database', () => {
+			// Arrange:
+			const queriedHeight = highestHeight + 10;
+			const req = { params: { height: queriedHeight.toString(), receiptType: receiptType.toString() } };
+
+			// Act:
+			const route = routes[endpointUnderTest];
+			return route(req, res, next).then(() => {
+				// Assert:
+				expect(statementsFake.calledOnce).to.equal(true);
+				expect(sentResponse.statusCode).to.equal(404);
+				expect(sentResponse.message).to.equal(`no resource exists with id '${highestHeight + 10}'`);
+			});
+		});
+
+		it('returns 409 if height is invalid', () => {
+			// Arrange:
+			const req = { params: { height: '10A', receiptTye: receiptType.toString() } };
+
+			// Act:
+			const route = routes[endpointUnderTest];
+			const apiResponse = expect(() => route(req, res, next).then(() => {})).to;
+
+			// Assert:
+			apiResponse.throw('height has an invalid format');
+			apiResponse.with.property('statusCode', 409);
+			apiResponse.with.property('message', 'height has an invalid format');
+			expect(statementsFake.notCalled).to.equal(true);
+		});
+	});
+
+	describe('get exchangesda transaction statements', () => {
+		const endpointUnderTest = '/block/:height/receipts/exchangesda';
+
+		const highestHeight = 50;
+		const correctQueriedHeight = highestHeight - 10;
+
+		const offerCreationData = ['dummyStatement'];
+		const offerExchangeData = ['dummyStatement', 'dummyStatement'];
+		const offerRemovalData = ['dummyStatement'];
+		const statementsFake = sinon.stub();
+		const orderedSdaExchangeEntityTypes = [41322, 45674, 50026];
+		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeEntityTypes[0]).returns(offerCreationData);
+		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeEntityTypes[1]).returns(offerExchangeData);
+		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeEntityTypes[2]).returns(offerRemovalData);
+
+		const routes = {};
+		const server = {
+			get: (path, handler) => {
+				routes[path] = handler;
+			}
+		};
+
+		receiptsRoutes.register(server, {
+			catapultDb: {
+				chainInfo: () => Promise.resolve({ height: highestHeight })
+			},
+			getReceiptsAtHeightByReceiptType: statementsFake
+		});
+		
+		let sentResponse;
+		const next = () => {};
+		const res = {
+			send: response => {
+				sentResponse = response;
+			},
+			redirect: () => {
+				next();
+			}
+		};
+
+		beforeEach(() => statementsFake.resetHistory());
+
+		it('returns result if provided height is valid', () => {
+			// Arrange:
+			const req = { params: { height: correctQueriedHeight.toString() } };
+
+			// Act:
+			const route = routes[endpointUnderTest];
+			return route(req, res, next).then(() => {
+				// Assert:
+				expect(statementsFake.calledThrice).to.equal(true);
+				orderedSdaExchangeEntityTypes.forEach((sdaExchangeData, index) => expect(
+					statementsFake.calledWith(correctQueriedHeight, sdaExchangeData),
+					`failed at index ${index}`
+				).to.equal(true));
+
+				expect(sentResponse).to.deep.equal({
+					payload: {
+						offerCreation: offerCreationData,
+						offerExchange: offerExchangeData,
+						offerRemoval: offerRemovalData
+					},
+					type: 'receipts.exchangesda'
+				});
+			});
+		});
+
+		it('returns 404 if not found in the database', () => {
+			// Arrange:
+			const queriedHeight = highestHeight + 10;
+			const req = { params: { height: queriedHeight.toString() } };
+
+			// Act:
+			const route = routes[endpointUnderTest];
+			return route(req, res, next).then(() => {
+				// Assert:
+				expect(statementsFake.calledThrice).to.equal(true);
+				expect(sentResponse.statusCode).to.equal(404);
+				expect(sentResponse.message).to.equal(`no resource exists with id '${highestHeight + 10}'`);
+			});
+		});
+
+		it('returns 409 if height is invalid', () => {
+			// Arrange:
+			const req = { params: { height: '10A' } };
+
+			// Act:
+			const route = routes[endpointUnderTest];
+			const apiResponse = expect(() => route(req, res, next).then(() => {})).to;
+
+			// Assert:
+			apiResponse.throw('height has an invalid format');
+			apiResponse.with.property('statusCode', 409);
+			apiResponse.with.property('message', 'height has an invalid format');
+			expect(statementsFake.notCalled).to.equal(true);
+		});
+	});
+
+	describe('get exchangesda transaction statements by account id', () => {
+		const endpointUnderTest = '/block/:height/receipts/exchangesda/:accountId';
+
+		const highestHeight = 50;
+		const correctQueriedHeight = highestHeight - 10;
+
+		const offerCreationData = ['dummyStatement'];
+		const offerExchangeData = ['dummyStatement', 'dummyStatement'];
+		const offerRemovalData = ['dummyStatement'];
+		const statementsFake = sinon.stub();
+		const orderedSdaExchangeEntityTypes = [41322, 45674, 50026];
+		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeEntityTypes[0]).returns(offerCreationData);
+		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeEntityTypes[1]).returns(offerExchangeData);
+		statementsFake.withArgs(correctQueriedHeight, orderedSdaExchangeEntityTypes[2]).returns(offerRemovalData);
+
+		const routes = {};
+		const server = {
+			get: (path, handler) => {
+				routes[path] = handler;
+			}
+		};
+
+		receiptsRoutes.register(server, {
+			catapultDb: {
+				chainInfo: () => Promise.resolve({ height: highestHeight, accountId: publicKeys.valid[0] || addresses.valid[0] })
+			},
+			getSdaExchangeReceiptsByAccountIdAtHeight: statementsFake
+		});
+		
+		let sentResponse;
+		const next = () => {};
+		const res = {
+			send: response => {
+				sentResponse = response;
+			},
+			redirect: () => {
+				next();
+			}
+		};
+
+		beforeEach(() => statementsFake.resetHistory());
+
+		describe('returns result if provided height is valid', () => {
+			const assertGetSdaExchangeReceiptsByAccountIdAtHeight = traits => {
+				// Arrange:
+				const req = { params: { height: correctQueriedHeight.toString(), accountId: traits.accountId } };
+
+				// Act:
+				const route = routes[endpointUnderTest];
+				return route(req, res, next).then(() => {
+					// Assert:
+					expect(statementsFake.calledThrice).to.equal(true);
+					orderedSdaExchangeEntityTypes.forEach((sdaExchangeData, index) => expect(
+						statementsFake.calledWith(correctQueriedHeight, sdaExchangeData),
+						`failed at index ${index}`
+					).to.equal(true));
+
+					expect(sentResponse).to.deep.equal({
+						payload: {
+							offerCreation: offerCreationData,
+							offerExchange: offerExchangeData,
+							offerRemoval: offerRemovalData
+						},
+						type: 'receipts.exchangesda'
+					});
+				});
+			};
+
+			it('with public key', () => assertGetSdaExchangeReceiptsByAccountIdAtHeight({
+				accountId: publicKeys.valid[0]
+			}));
+
+			it('with address', () => assertGetSdaExchangeReceiptsByAccountIdAtHeight({
+				accountId: addresses.valid[0]
+			}));
+		});
+
+		describe('returns 404 if not found in the database', () => {
+			const assertGetSdaExchangeReceiptsByAccountIdAtHeight = traits => {
+				// Arrange:
+				const queriedHeight = highestHeight + 10;
+				const req = { params: { height: queriedHeight.toString(), accountId: traits.accountId } };
+
+				// Act:
+				const route = routes[endpointUnderTest];
+				return route(req, res, next).then(() => {
+					// Assert:
+					expect(statementsFake.calledThrice).to.equal(true);
+					expect(sentResponse.statusCode).to.equal(404);
+					if (traits.accountId==constants.sizes.hexPublicKey)
+						expect(sentResponse.message).to.equal(`no resource exists with id '${convert.hexToUint8(publicKeys.valid[0])}'`);
+					else if (traits.accountId==constants.sizes.addressEncoded) 
+						expect(sentResponse.message).to.equal(`no resource exists with id '${address.stringToAddress(addresses.valid[0])}'`);
+				});
+			};
+
+			it('with public key', () => assertGetSdaExchangeReceiptsByAccountIdAtHeight({
+				accountId: publicKeys.valid[0]
+			}));
+
+			it('with address', () => assertGetSdaExchangeReceiptsByAccountIdAtHeight({
+				accountId: addresses.valid[0]
+			}));
+		});
+
+		describe('returns 409 if height is invalid', () => {
+			const assertGetSdaExchangeReceiptsByAccountIdAtHeight = traits => {
+				// Arrange:
+				const req = { params: { height: '10A' } };
+
+				// Act:
+				const route = routes[endpointUnderTest];
+				const apiResponse = expect(() => route(req, res, next).then(() => {})).to;
+
+				// Assert:
+				apiResponse.throw('height has an invalid format');
+				apiResponse.with.property('statusCode', 409);
+				apiResponse.with.property('message', 'height has an invalid format');
+				expect(statementsFake.notCalled).to.equal(true);
+			};
+
+			it('with public key', () => assertGetSdaExchangeReceiptsByAccountIdAtHeight({
+				accountId: publicKeys.valid[0]
+			}));
+
+			it('with address', () => assertGetSdaExchangeReceiptsByAccountIdAtHeight({
+				accountId: addresses.valid[0]
+			}));
 		});
 	});
 });

@@ -29,6 +29,7 @@ describe('entity type enumeration', () => {
 			accountPropertiesAddress: 0x4150,
 			accountPropertiesEntityType: 0x4350,
 			accountPropertiesMosaic: 0x4250,
+			addHarvester: 0x4161,
 			aggregateBonded: 0x4241,
 			aggregateComplete: 0x4141,
 			aliasAddress: 0x424E,
@@ -62,6 +63,7 @@ describe('entity type enumeration', () => {
 			prepareDrive: 0x415A,
 			registerNamespace: 0x414E,
 			removeExchangeOffer: 0x435D,
+			removeHarvester: 0x4261,
 			secretLock: 0x4152,
 			secretProof: 0x4252,
 			startDriveVerification: 0x475A,
@@ -88,6 +90,14 @@ describe('entity type enumeration', () => {
 			downloadApproval: 0x4D62,
 			driveClosure: 0x4E62,
 			endDriveVerificationV2: 0x4F62,
+			streamStart: 0x4167,
+			streamFinish: 0x4267,
+			streamPayment: 0x4367,
+			createLiquidityProvider: 0x4169,
+			manualRateChange: 0x4269,
+			placeSdaExchangeOffer: 0x416A,
+			removeSdaExchangeOffer: 0x426A,
+			installMessage: 0x416C
 		});
 	});
 

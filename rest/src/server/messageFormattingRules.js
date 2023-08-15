@@ -36,10 +36,12 @@ module.exports = {
 	},
 	[ModelType.statusCode]: status.toString,
 	[ModelType.string]: value => value.toString(),
+	[ModelType.uint8]: value => value,
 	[ModelType.uint16]: value => value,
 	[ModelType.uint32]: value => value,
 	[ModelType.uint64]: value => value,
 	[ModelType.uint64HexIdentifier]: value => uint64.toHex(value),
 	[ModelType.int]: value => value,
-	[ModelType.boolean]: value => value
+	[ModelType.boolean]: value => value,
+	[ModelType.double]: value => value,
 };

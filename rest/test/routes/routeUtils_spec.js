@@ -268,7 +268,7 @@ describe('route utils', () => {
 			expect(options).to.deep.equal({
 				pageSize: servicesConfigPageSize.default,
 				pageNumber: 1,
-				sortField: 'id',
+				sortField: '_id',
 				sortDirection: 1,
 				offset: undefined
 			});
@@ -282,7 +282,7 @@ describe('route utils', () => {
 			expect(options).to.deep.equal({
 				pageSize: 12,
 				pageNumber: 1,
-				sortField: 'id',
+				sortField: '_id',
 				sortDirection: 1,
 				offset: undefined
 			});
@@ -299,7 +299,7 @@ describe('route utils', () => {
 			expect(options).to.deep.equal({
 				pageSize: servicesConfigPageSize.max,
 				pageNumber: 1,
-				sortField: 'id',
+				sortField: '_id',
 				sortDirection: 1,
 				offset: undefined
 			});
@@ -316,7 +316,7 @@ describe('route utils', () => {
 			expect(options).to.deep.equal({
 				pageSize: servicesConfigPageSize.min,
 				pageNumber: 1,
-				sortField: 'id',
+				sortField: '_id',
 				sortDirection: 1,
 				offset: undefined
 			});
@@ -330,7 +330,7 @@ describe('route utils', () => {
 			expect(options).to.deep.equal({
 				pageSize: servicesConfigPageSize.default,
 				pageNumber: 5,
-				sortField: 'id',
+				sortField: '_id',
 				sortDirection: 1,
 				offset: undefined
 			});
@@ -344,7 +344,7 @@ describe('route utils', () => {
 			expect(options).to.deep.equal({
 				pageSize: servicesConfigPageSize.default,
 				pageNumber: 1,
-				sortField: 'id',
+				sortField: '_id',
 				sortDirection: 1,
 				offset: undefined
 			});
@@ -374,7 +374,7 @@ describe('route utils', () => {
 					expect(options).to.deep.equal({
 						pageSize: servicesConfigPageSize.default,
 						pageNumber: 1,
-						sortField: 'id',
+						sortField: '_id',
 						sortDirection: expectedValue,
 						offset: undefined
 					});
@@ -397,7 +397,7 @@ describe('route utils', () => {
 			expect(options).to.deep.equal({
 				pageSize: servicesConfigPageSize.default,
 				pageNumber: 1,
-				sortField: 'id',
+				sortField: '_id',
 				sortDirection: 1,
 				offset
 			});
@@ -411,7 +411,7 @@ describe('route utils', () => {
 			expect(options).to.deep.equal({
 				pageSize: 12,
 				pageNumber: 5,
-				sortField: 'id',
+				sortField: '_id',
 				sortDirection: 1,
 				offset: undefined
 			});

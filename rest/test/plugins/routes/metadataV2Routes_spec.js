@@ -19,7 +19,7 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const metadataRoutes = require('../../../src/plugins/routes/metadataNemRoutes');
+const metadataRoutes = require('../../../src/plugins/routes/metadataV2Routes');
 const routeUtils = require('../../../src/routes/routeUtils');
 const { MockServer } = require('../../routes/utils/routeTestUtils');
 const catapult = require('catapult-sdk');
@@ -29,7 +29,7 @@ const { convert } = catapult.utils;
 
 const { address } = catapult.model;
 
-describe('metadata nem routes', () => {
+describe('metadata v2 routes', () => {
 	describe('metadata', () => {
 		const testAddress = 'NAR3W7B4BCOZSZMFIZRYB3N5YGOUSWIYJCJ6HDAB';
 		const targetKey = '5D3DE4A2E0C6CCBC38608B00B3E50652E15A7C500E8B1FD066D421602E14A806';
@@ -100,7 +100,7 @@ describe('metadata nem routes', () => {
 		});
 
 		describe('GET', () => {
-			const route = mockServer.getRoute('/metadata_nem').get();
+			const route = mockServer.getRoute('/metadata_v2').get();
 
 			it('parses and forwards paging options', () => {
 				// Arrange:

@@ -61,6 +61,47 @@ const createTransactionStatement = height => ({
 			type: 8518,
 			mosaicId: Long.fromNumber(4532),
 			amount: Long.fromNumber(200)
+		},
+		// offerCreation
+		{
+			version: 1,
+			type: 41322,
+			sender: new Binary(test.random.publicKey()),
+			mosaicIdGive: Long.fromNumber(678),
+			mosaicIdGet: Long.fromNumber(789),
+			mosaicAmountGive: Long.fromNumber(200),
+			mosaicAmountGet: Long.fromNumber(800)
+		},
+		// offerExchange
+		{
+			version: 1,
+			type: 45674,
+			sender: new Binary(test.random.publicKey()),
+			mosaicIdGive: Long.fromNumber(678),
+			mosaicIdGet: Long.fromNumber(789),
+			exchangeDetails: [{
+				recipient: new Binary(test.random.address()),
+				mosaicIdGive: Long.fromNumber(789),
+				mosaicIdGet: Long.fromNumber(678),
+				mosaicAmountGive: Long.fromNumber(400),
+				mosaicAmountGet: Long.fromNumber(100)
+			},
+			{
+				recipient: new Binary(test.random.address()),
+				mosaicIdGive: Long.fromNumber(789),
+				mosaicIdGet: Long.fromNumber(678),
+				mosaicAmountGive: Long.fromNumber(200),
+				mosaicAmountGet: Long.fromNumber(50)
+			}]
+		},
+		// offerRemoval
+		{
+			version: 1,
+			type: 50026,
+			sender: new Binary(test.random.publicKey()),
+			mosaicIdGive: Long.fromNumber(678),
+			mosaicIdGet: Long.fromNumber(789),
+			mosaicAmountGiveReturned: Long.fromNumber(50)
 		}
 	]
 });

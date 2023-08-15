@@ -38,6 +38,49 @@ class ReceiptsDb {
 	statementsAtHeight(height, statementsCollection) {
 		return this.catapultDb.queryDocuments(statementsCollection, { height: convertToLong(height) });
 	}
+
+	queryTransactionStatementsReceipts(collectionName, height, receiptType, publicKey) {
+		const matchHeight = { $match: {"height": convertToLong(height)} };
+		const unwind = { $unwind: "$receipts" };
+		const matching1 = { $match: {"receipts.type": receiptType} };
+		const matching2 = {
+			$match: { $and: [{"receipts.type": receiptType}, { $or: [{"receipts.sender": publicKey}, {"receipts.exchangeDetails.recipient": publicKey}] }] }
+		};
+
+		const project = {
+			$project: { _id: 0, height: "$height", source: "$source", receipts: ["$receipts"] }
+		};
+
+		const pipe = [matchHeight, unwind];
+		if (height && receiptType && !publicKey)
+			pipe.push(matching1);
+		else if (height && receiptType && publicKey)
+			pipe.push(matching2);
+		pipe.push(project);
+
+		return this.catapultDb.queryPagedDocumentsUsingAggregate(collectionName, pipe, 0, 25);
+	}
+
+	/**
+	 * Retrieves the receipts by receipt type and height.
+	 * @param {module:catapult.utils/uint64~uint64} height Given block height.
+	 * @param {int} receiptType Receipt type.
+	 * @returns {Promise.<array>} The receipts.
+	 */
+	getReceiptsAtHeightByReceiptType(height, receiptType) {
+		return this.queryTransactionStatementsReceipts('transactionStatements', height, receiptType, null);
+	}
+
+	/**
+	 * Retrieves the exchangesda receipts by account.
+	 * @param {module:catapult.utils/uint64~uint64} height Given block height.
+	 * @param {array<object>} accountId Account id.
+	 * @returns {Promise.<array>} The exchangesda receipts for the account.
+	 */
+	 getSdaExchangeReceiptsByAccountIdAtHeight(height, receiptType, accountId) {
+		const buffer = Buffer.from(accountId);
+		return this.queryTransactionStatementsReceipts('transactionStatements', height, receiptType, buffer);
+	};
 }
 
 module.exports = ReceiptsDb;

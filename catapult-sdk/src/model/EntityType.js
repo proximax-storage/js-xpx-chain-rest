@@ -159,6 +159,12 @@ const EntityType = {
 	/** Deactivate super contract. */
 	deactivate: 0x4560,
 
+	/** Add harvester. */
+	addHarvester: 0x4161,
+
+	/** Remove harvester. */
+	removeHarvester: 0x4261,
+
 	/** Account metadata transaction */
 	accountMetadata: 0x413F,
 
@@ -210,8 +216,33 @@ const EntityType = {
 	/** Drive closure transaction */
 	driveClosure: 0x4E62,
 
-	/** Dnd drive verification transaction */
+	/** End drive verification transaction */
 	endDriveVerificationV2: 0x4F62,
+
+	/** Stream start transaction. */
+	streamStart: 0x4166,
+
+	/** Stream finish transaction. */
+	streamFinish: 0x4266,
+
+	/** Stream payment transaction. */
+	streamPayment: 0x4366,
+
+	/** Create liquidity provider transaction. */
+	createLiquidityProvider: 0x4169,
+
+	/** Manual rate change transaction. (LP) */
+	manualRateChange: 0x4269,
+
+	/** Place SDA-SDA exchange offer transaction. */
+	placeSdaExchangeOffer: 0x416A,
+
+	/** Remove SDA-SDA exchange offer transaction. */
+	removeSdaExchangeOffer: 0x426A,
+
+	/** Install message transaction body. */
+	installMessage: 0x416C
+
 };
 
 module.exports = EntityType;

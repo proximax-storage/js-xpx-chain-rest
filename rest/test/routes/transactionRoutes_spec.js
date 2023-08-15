@@ -239,10 +239,15 @@ describe('transaction routes', () => {
 								height: undefined,
 								fromHeight: undefined,
 								toHeight: undefined,
+								publicKey: undefined,
 								recipientAddress: undefined,
 								signerPublicKey: undefined,
 								embedded: undefined,
-								transactionTypes: undefined
+								transactionTypes: undefined,
+								firstLevel: undefined,
+								transferMosaicId: undefined,
+								toTransferAmount: undefined,
+								fromTransferAmount: undefined
 							};
 
 							expectedResult[filter] = value;
@@ -257,11 +262,13 @@ describe('transaction routes', () => {
 					const testCases = [
 						{ filter: 'height', param: '15', value: 15 },
 						{ filter: 'address', param: testAddressString, value: testAddress },
+						{ filter: 'publicKey', param: testPublickeyString, value: testPublickey },
 						{ filter: 'signerPublicKey', param: testPublickeyString, value: testPublickey },
 						{ filter: 'recipientAddress', param: testAddressString, value: testAddress },
 						{ filter: 'embedded', param: 'true', value: true },
 						{ filter: 'fromHeight', param: '1', value: [1,0] },
-						{ filter: 'toHeight', param: '5', value: [5,0] }
+						{ filter: 'toHeight', param: '5', value: [5,0] },
+						{ filter: 'transferMosaicId', param: '13bfc518e40549d7', value: [3825551831,331334936] }
 					];
 
 					testCases.forEach(testCase => {
@@ -278,10 +285,15 @@ describe('transaction routes', () => {
 								height: undefined,
 								fromHeight: undefined,
 								toHeight: undefined,
+								publicKey: undefined,
 								recipientAddress: undefined,
 								signerPublicKey: undefined,
 								embedded: undefined,
-								transactionTypes: [1, 5, 25]
+								transactionTypes: [1, 5, 25],
+								firstLevel: undefined,
+								transferMosaicId: undefined,
+								toTransferAmount: undefined,
+								fromTransferAmount: undefined
 							});
 						});
 					});
@@ -300,10 +312,43 @@ describe('transaction routes', () => {
 								height: undefined,
 								fromHeight: [1, 0],
 								toHeight: [10, 0],
+								publicKey: undefined,
 								recipientAddress: undefined,
 								signerPublicKey: undefined,
 								embedded: undefined,
-								transactionTypes: undefined
+								transactionTypes: undefined,
+								firstLevel: undefined,
+								transferMosaicId: undefined,
+								toTransferAmount: undefined,
+								fromTransferAmount: undefined
+							});
+						});
+					});
+
+					
+					it('transferMosaicIdAmount', () => {
+						const req = { params: {
+								group: TransactionGroups.confirmed,
+								transferMosaicId: "13bfc518e40549d7",
+								fromTransferAmount: "100",
+								toTransferAmount: "100"
+							} };
+
+						return mockServer.callRoute(route, req).then(() => {
+							expect(dbTransactionsFake.firstCall.args[1]).to.deep.equal({
+								address: undefined,
+								height: undefined,
+								fromHeight: undefined,
+								toHeight: undefined,
+								publicKey: undefined,
+								recipientAddress: undefined,
+								signerPublicKey: undefined,
+								embedded: undefined,
+								transactionTypes: undefined,
+								firstLevel: undefined,
+								transferMosaicId: [3825551831,331334936],
+								toTransferAmount: [100,0],
+								fromTransferAmount: [100,0]
 							});
 						});
 					});
@@ -361,6 +406,72 @@ describe('transaction routes', () => {
 					});
 				});
 
+				describe('does not allow filtering by publicKey if address or signerPublicKey or recipientAddress are provided', () => {
+					const errorMessage = 'can\'t filter by publicKey if address or signerPublicKey or recipientAddress are already provided';
+
+					it('publicKey and address', () => {
+						const req = {
+							params: { group: TransactionGroups.confirmed, publicKey: testPublickeyString, address: testAddressString }
+						};
+
+						// Act + Assert
+						expect(() => mockServer.callRoute(route, req)).to.throw(errorMessage);
+					});
+
+					it('publicKey and signer public key', () => {
+						const req = {
+							params: { group: TransactionGroups.confirmed, publicKey: testPublickeyString, recipientAddress: testAddressString }
+						};
+
+						// Act + Assert
+						expect(() => mockServer.callRoute(route, req)).to.throw(errorMessage);
+					});
+
+					it('publicKey and recipient address', () => {
+						const req = {
+							params: { group: TransactionGroups.confirmed, publicKey: testPublickeyString, signerPublicKey: testPublickeyString }
+						};
+
+						// Act + Assert
+						expect(() => mockServer.callRoute(route, req)).to.throw(errorMessage);
+					});
+				});
+
+				describe('does not allow filtering by transfer amount if transferMosaicId is not provided', () => {
+					const errorMessage = 'can\'t filter by transfer amount if `transferMosaicId` is not provided';
+
+					it('toTransferAmount', () => {
+						const req = {
+							params: { group: TransactionGroups.confirmed, toTransferAmount: 1 }
+						};
+
+						// Act + Assert
+						expect(() => mockServer.callRoute(route, req)).to.throw(errorMessage);
+					});
+
+					it('fromTransferAmount', () => {
+						const req = {
+							params: { group: TransactionGroups.confirmed, fromTransferAmount: 1 }
+						};
+
+						// Act + Assert
+						expect(() => mockServer.callRoute(route, req)).to.throw(errorMessage);
+					});
+				});
+
+				describe('does not allow filtering by both transferMosaicId and transaction type provided', () => {
+					const errorMessage = 'can\'t filter by both `transferMosaicId` and transaction `type` provided';
+
+					it('transferMosaicId and type', () => {
+						const req = {
+							params: { group: TransactionGroups.confirmed, transferMosaicId: "13bfc518e40549d7", type: [12345] }
+						};
+
+						// Act + Assert
+						expect(() => mockServer.callRoute(route, req)).to.throw(errorMessage);
+					});
+				});
+
 				describe('checks correct group is provided', () => {
 					const runValidGroupTest = group => {
 						it(group, () =>
@@ -371,10 +482,15 @@ describe('transaction routes', () => {
 									height: undefined,
 									fromHeight: undefined,
 									toHeight: undefined,
+									publicKey: undefined,
 									recipientAddress: undefined,
 									signerPublicKey: undefined,
 									embedded: undefined,
-									transactionTypes: undefined
+									transactionTypes: undefined,
+									firstLevel: undefined,
+									transferMosaicId: undefined,
+									toTransferAmount: undefined,
+									fromTransferAmount: undefined
 								});
 							}));
 					};
@@ -433,7 +549,7 @@ describe('transaction routes', () => {
 						const req = { params: {}};
 
 						// Act + Assert:
-						expect(() => mockServer.callRoute(route, req)).to.throw('transactionTypes has an invalid format: not an array');
+						expect(() => mockServer.callRoute(route, req)).to.throw('transactionTypes not provided or empty');
 					});
 				});
 			});

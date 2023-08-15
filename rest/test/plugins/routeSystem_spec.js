@@ -42,11 +42,15 @@ describe('route system', () => {
 			'accountProperties',
 			'aggregate',
 			'exchange',
+			'exchangesda',
+			'committee',
 			'config',
 			'contract',
+			'dbrb',
 			'lock',
+			'liquidityProvider',
 			'metadata',
-			'metadata_nem',
+			'metadata_v2',
 			'mosaic',
 			'multisig',
 			'namespace',
@@ -57,7 +61,8 @@ describe('route system', () => {
 			'storage',
 			'supercontract',
 			'transfer',
-			'upgrade'
+			'upgrade',
+			'streaming'
 		]);
 	});
 

@@ -54,9 +54,27 @@ module.exports = {
 			if (!isValidTransactionGroup(params.group))
 				return next(new NotFoundError());
 
+			if (params.publicKey && (params.address || params.signerPublicKey || params.recipientAddress)) {
+				throw errors.createInvalidArgumentError(
+					'can\'t filter by publicKey if address or signerPublicKey or recipientAddress are already provided'
+				);
+			}
+
 			if (params.address && (params.signerPublicKey || params.recipientAddress)) {
 				throw errors.createInvalidArgumentError(
 					'can\'t filter by address if signerPublicKey or recipientAddress are already provided'
+				);
+			}
+
+			if ((params.toTransferAmount || params.fromTransferAmount) && !params.transferMosaicId) {
+				throw errors.createInvalidArgumentError(
+					'can\'t filter by transfer amount if `transferMosaicId` is not provided'
+				);
+			}
+
+			if (params.type !== undefined && params.transferMosaicId !== undefined) {
+				throw errors.createInvalidArgumentError(
+					'can\'t filter by both `transferMosaicId` and transaction `type` provided'
 				);
 			}
 
@@ -68,7 +86,12 @@ module.exports = {
 				signerPublicKey: params.signerPublicKey ? routeUtils.parseArgument(params, 'signerPublicKey', 'publicKey') : undefined,
 				recipientAddress: params.recipientAddress ? routeUtils.parseArgument(params, 'recipientAddress', 'address') : undefined,
 				transactionTypes: params.type ? routeUtils.parseArgumentAsArray(params, 'type', 'uint') : undefined,
-				embedded: params.embedded ? routeUtils.parseArgument(params, 'embedded', 'boolean') : undefined
+				embedded: params.embedded ? routeUtils.parseArgument(params, 'embedded', 'boolean') : undefined,
+				publicKey: params.publicKey ? routeUtils.parseArgument(params, 'publicKey', 'publicKey') : undefined,
+				firstLevel: params.firstLevel ? routeUtils.parseArgument(params, 'firstLevel', 'boolean') : undefined,
+				transferMosaicId: params.transferMosaicId ? routeUtils.parseArgument(params, 'transferMosaicId', 'mosaicId') : undefined,
+				toTransferAmount: params.toTransferAmount ? routeUtils.parseArgument(params, 'toTransferAmount', 'uint64'): undefined,
+				fromTransferAmount: params.fromTransferAmount ? routeUtils.parseArgument(params, 'fromTransferAmount', 'uint64'): undefined,
 			};
 
 			const options = routeUtils.parsePaginationArguments(params, services.config.pageSize, { id: 'objectId' });
@@ -130,9 +153,8 @@ module.exports = {
 				}
 			}) : undefined;
 
-			params.transactionTypes = routeUtils.parseArgumentAsArray(params, 'transactionTypes', 'uint');
-			if (!params.transactionTypes.length) {
-				throw errors.createInvalidArgumentError('At least one transaction type should be specified');
+			if (!params.transactionTypes || !params.transactionTypes.length) {
+				throw errors.createInvalidArgumentError('transactionTypes not provided or empty');
 			}
 
 			return db.transactionsCountByType(params.transactionTypes, filter)
