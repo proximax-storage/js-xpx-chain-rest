@@ -61,7 +61,8 @@ describe('route system', () => {
 			'storage',
 			'supercontract',
 			'transfer',
-			'upgrade'
+			'upgrade',
+			'streaming'
 		]);
 	});
 
