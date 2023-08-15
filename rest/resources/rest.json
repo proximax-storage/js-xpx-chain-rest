@@ -8,7 +8,7 @@
   "crossDomainHttpMethods": ["GET", "POST", "PUT", "OPTIONS"],
   "cors": "*",
   "clientPrivateKey": "0100000000000000000000000000000000000000000000000000000000000000",
-  "extensions": ["accountLink", "accountProperties", "aggregate", "exchange", "exchangesda", "committee", "config", "dbrb", "lock", "liquidityProvider", "metadata", "metadata_v2", "mosaic", "multisig", "namespace", "operation", "receipts", "richlist", "service", "storage", "transfer", "upgrade"],
+  "extensions": ["accountLink", "accountProperties", "aggregate", "exchange", "exchangesda", "committee", "config", "dbrb", "lock", "liquidityProvider", "metadata", "metadata_v2", "mosaic", "multisig", "namespace", "operation", "receipts", "richlist", "service", "storage", "transfer", "upgrade", "streaming"],
 
   "https": {
     "ca": "",
