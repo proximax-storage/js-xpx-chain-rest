@@ -71,10 +71,11 @@ describe('streaming plugin', () => {
             const codecs = getCodecs();
 
             // Assert: codec was registered
-            expect(Object.keys(codecs).length).to.equal(2);
+            expect(Object.keys(codecs).length).to.equal(3);
             expect(codecs).to.contain.all.keys([
                 EntityType.streamStart.toString(),
                 EntityType.streamFinish.toString(),
+                EntityType.streamPayment.toString(),
             ]);
         });
 
