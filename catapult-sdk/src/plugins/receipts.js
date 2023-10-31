@@ -85,6 +85,8 @@ const receiptsPlugin = {
 			height: ModelType.uint64,
 			type: ModelType.uint16,
 			version: ModelType.uint32,
+			channelName: ModelType.string,
+			handle: ModelType.binary,
 			size: ModelType.uint32
 		});
 

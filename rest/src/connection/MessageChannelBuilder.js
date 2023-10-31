@@ -50,9 +50,8 @@ const getTopicIdentifierBinaryBuffer = (topicIdentifier) => {
 }
 
 const getTopicIdentifierEntityTypeBinaryBuffer = (topicIdentifier) => {
-	if (topicIdentifier.length != 4)
-		throw new Error('unexpected param does not match a receipt type hex designation');
-	return catapult.utils.convert.hexToUint8(topicIdentifier);
+	if(topicIdentifier.length == 4) return catapult.utils.convert.hexToUint8(topicIdentifier);
+	else return topicIdentifier;
 }
 const receiptResolver = (markerByte) => (topic, heightBuffer, buffer) => {
 	const parser = new BinaryParser();
@@ -73,17 +72,17 @@ const createPolicyBasedFilter = (markerByte, emptyHandler, processor) => topicPa
 
 const handlers = {
 	transaction: channelName => (codec, emit) => (topic, binaryTransaction, hash, merkleComponentHash, height) => {
-		const address = topic.slice(1);
+		const handle = topic.slice(1);
 		const transaction = codec.deserialize(parserFromData(binaryTransaction));
 		const meta = {
-			hash, merkleComponentHash, height: uint64.fromBytes(height), channelName, address
+			hash, merkleComponentHash, height: uint64.fromBytes(height), channelName, handle
 		};
 		emit({ type: 'transactionWithMetadata', payload: { transaction, meta } });
 	},
 
 	transactionHash: channelName => (codec, emit) => (topic, hash) => {
-		const address = topic.slice(1);
-		emit({ type: 'transactionWithMetadata', payload: { meta: { hash, channelName, address } } });
+		const handle = topic.slice(1);
+		emit({ type: 'transactionWithMetadata', payload: { meta: { hash, channelName, handle } } });
 	},
 };
 
@@ -118,11 +117,12 @@ class MessageChannelBuilder {
 		this.add('unconfirmedAdded', 'u', 'transaction');
 		this.add('unconfirmedRemoved', 'r', 'transactionHash');
 		this.addResolver('b', receiptResolver('b'.charCodeAt(0)));
-		this.addResolver('c', receiptResolver('c'.charCodeAt(0)));
+		this.addResolver('A', receiptResolver('A'.charCodeAt(0)));
+		this.addResolver('B', receiptResolver('B'.charCodeAt(0)));
 		this.descriptors.status = {
 			filter: this.createPolicyFilter('s'),
 			handler: (codec, emit) => (topic, buffer) => {
-				const address = topic.slice(1);
+				const handle = topic.slice(1);
 				const parser = new BinaryParser();
 				parser.push(buffer);
 
@@ -130,38 +130,57 @@ class MessageChannelBuilder {
 				const status = parser.uint32();
 				const deadline = parser.uint64();
 
-				const meta = { channelName: 'status', address };
+				const meta = { channelName: 'status', handle };
 				emit({ type: 'transactionStatus', payload: { hash, status, deadline, meta } });
 			}
 		};
 
 		this.descriptors.stateStatement = {
-			filter: this.createReceiptFilter('c'),
-			handler: (codec, emit) => (topic, receipt) => {
+			filter: this.createReceiptFilter('A'),
+			handler: (codec, emit) => (topic, receiptHeight, receipt) => {
+				const handle = topic.slice(1);
 				const parser = new BinaryParser();
-				parser.push(buffer);
-
+				parser.push(receiptHeight);
+				parser.push(receipt);
 				const height = parser.uint64();
 				const size = parser.uint32();
 				const version = parser.uint32();
 				const type = parser.uint16();
 				const data = parser.buffer(size-4-4-2);
-				emit({ type: 'receipts.anonymousReceipt', payload: { meta: { height, size, version, type}, data } });
+				emit({ type: 'receipts.anonymousReceipt', payload: { meta: { channelName: 'stateStatement', handle, height, size, version, type}, data } });
 			}
 		};
 
 		this.descriptors.publicKeyStatement = {
 			filter: this.createReceiptFilter('b'),
-			handler: (codec, emit) => (topic, receipt) => {
+			handler: (codec, emit) => (topic, receiptHeight, receipt) => {
+				const handle = topic.slice(1);
 				const parser = new BinaryParser();
-				parser.push(buffer);
+				parser.push(receiptHeight);
+				parser.push(receipt);
+				const height = parser.uint64();
+				const size = parser.uint32();
+				const version = parser.uint32();
+				const type = parser.uint16();
+				const data = parser.buffer(size-4-4-2);
+				emit({ type: 'receipts.anonymousReceipt', payload: { meta: { channelName: 'stateStatement', handle, height, size, version, type}, data } });
+			}
+		};
+
+		this.descriptors.transactionStatement = {
+			filter: this.createReceiptFilter('B'),
+			handler: (codec, emit) => (topic, receiptHeight, receipt) => {
+				const handle = topic.slice(1);
+				const parser = new BinaryParser();
+				parser.push(receiptHeight);
+				parser.push(receipt);
 
 				const height = parser.uint64();
 				const size = parser.uint32();
 				const version = parser.uint32();
 				const type = parser.uint16();
 				const data = parser.buffer(size-4-4-2);
-				emit({ type: 'receipts.anonymousReceipt', payload: { meta: { height, size, version, type}, data } });
+				emit({ type: 'receipts.anonymousReceipt', payload: { meta: { channelName: 'stateStatement', handle, height, size, version, type}, data } });
 			}
 		};
 	}

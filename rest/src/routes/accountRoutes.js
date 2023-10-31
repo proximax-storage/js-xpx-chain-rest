@@ -34,6 +34,12 @@ module.exports = {
 			return db.accountsByIds([{ [type]: accountId }])
 				.then(sender.sendOne(req.params.accountId, res, next));
 		});
+		server.get('/account/:accountId/next', (req, res, next) => {
+			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
+			const sender = routeUtils.createSender(routeResultTypes.account);
+			return db.accountUpgradeById([{ [type]: accountId }])
+				.then(sender.sendOne(req.params.accountId, res, next));
+		});
 
 		server.post('/stakingRecord', (req, res, next) => {
 			const { params } = req;

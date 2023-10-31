@@ -761,6 +761,15 @@ class CatapultDb {
 			}));
 	}
 
+	accountUpgradeById(id) {
+		// id will either have address property or publicKey property set; in the case of publicKey, convert it to address
+		const account = Buffer.from((id.publicKey
+			? catapult.model.address.publicKeyToAddress(id.publicKey, this.networkId) : id.address));
+
+		return this.queryDocument('accounts', { 'account.upgradedFrom': account })
+			.then(this.catapultDb.sanitizer.copyAndDeleteId);
+	}
+
 	// region staking Record retrieval
 
 	stakingRecordById(address, refHeight) {
