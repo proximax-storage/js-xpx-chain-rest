@@ -146,7 +146,7 @@ describe('route system', () => {
 
 			// Assert:
 			expect(Object.keys(messageChannelDescriptors)).to.deep.equal([
-				'block', 'confirmedAdded', 'unconfirmedAdded', 'unconfirmedRemoved', 'status', "stateStatement", "publicKeyStatement"
+				'block', 'confirmedAdded', 'unconfirmedAdded', 'unconfirmedRemoved', 'status', "stateStatement", "publicKeyStatement", "transactionStatement"
 			]);
 		});
 
@@ -156,7 +156,7 @@ describe('route system', () => {
 
 			// Assert:
 			expect(Object.keys(messageChannelDescriptors)).to.deep.equal([
-				'block', 'confirmedAdded', 'unconfirmedAdded', 'unconfirmedRemoved', 'status', "stateStatement", "publicKeyStatement",
+				'block', 'confirmedAdded', 'unconfirmedAdded', 'unconfirmedRemoved', 'status', "stateStatement", "publicKeyStatement", "transactionStatement",
 				'partialAdded', 'partialRemoved', 'cosignature'
 			]);
 		});
