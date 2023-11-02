@@ -85,7 +85,7 @@ class ModelSchemaBuilder {
 				maxFee: ModelType.uint64
 			},
 			transactionMetadata: {
-				address: ModelType.binary,
+				handle: ModelType.binary,
 				aggregateHash: ModelType.binary,
 				uniqueAggregateHash: ModelType.binary,
 				aggregateId: ModelType.objectId,
