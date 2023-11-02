@@ -113,7 +113,7 @@ describe('message channel builder', () => {
 					merkleComponentHash: 55,
 					height: [66, 0],
 					channelName,
-					address: [22]
+					handle: [22]
 				}
 			}
 		});
@@ -134,7 +134,7 @@ describe('message channel builder', () => {
 		expect(codec.collected.length).to.equal(0);
 
 		expect(emitted.length).to.equal(1);
-		expect(emitted[0]).to.deep.equal({ type: 'transactionWithMetadata', payload: { meta: { hash: 44, channelName, address: [22] } } });
+		expect(emitted[0]).to.deep.equal({ type: 'transactionWithMetadata', payload: { meta: { hash: 44, channelName, handle: [22] } } });
 	};
 
 	describe('default channels', () => {
@@ -144,7 +144,7 @@ describe('message channel builder', () => {
 			const defaultChannelNames = Object.keys(channels);
 
 			// Assert:
-			expect(defaultChannelNames).to.deep.equal(['block', 'confirmedAdded', 'unconfirmedAdded', 'unconfirmedRemoved', 'status', "stateStatement", "publicKeyStatement"]);
+			expect(defaultChannelNames).to.deep.equal(['block', 'confirmedAdded', 'unconfirmedAdded', 'unconfirmedRemoved', 'status', "stateStatement", "publicKeyStatement", "transactionStatement"]);
 		});
 
 		describe('block', () => {
@@ -248,7 +248,7 @@ describe('message channel builder', () => {
 						payload: {
 							meta: {
 								channelName: 'status',
-								address: [22]
+								handle: [22]
 							},
 							hash: Buffer.alloc(test.constants.sizes.hash256, 41),
 							status: 55,
