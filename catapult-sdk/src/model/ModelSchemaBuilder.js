@@ -40,7 +40,7 @@ class ModelSchemaBuilder {
 			},
 
 			topicMetadata: {
-				address: ModelType.binary,
+				handle: ModelType.binary,
 			},
 
 			// endregion
