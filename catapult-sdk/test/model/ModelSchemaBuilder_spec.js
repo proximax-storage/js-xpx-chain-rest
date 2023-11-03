@@ -198,7 +198,7 @@ describe('model schema builder', () => {
 				'verifiableEntity.signature',
 				'verifiableEntity.signer',
 
-				'topicMetadata.address',
+				'topicMetadata.handle',
 				'blockHeader.previousBlockHash',
 				'blockHeader.blockTransactionsHash',
 				'blockHeader.blockReceiptsHash',
@@ -214,7 +214,7 @@ describe('model schema builder', () => {
 
 				'transaction.signature',
 				'transaction.signer',
-				'transactionMetadata.address',
+				'transactionMetadata.handle',
 				'transactionMetadata.aggregateHash',
 				'transactionMetadata.uniqueAggregateHash',
 				'transactionMetadata.hash',
