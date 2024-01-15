@@ -220,13 +220,13 @@ const EntityType = {
 	endDriveVerificationV2: 0x4F62,
 
 	/** Stream start transaction. */
-	streamStart: 0x4166,
+	streamStart: 0x4167,
 
 	/** Stream finish transaction. */
-	streamFinish: 0x4266,
+	streamFinish: 0x4267,
 
 	/** Stream payment transaction. */
-	streamPayment: 0x4366,
+	streamPayment: 0x4367,
 
 	/** Create liquidity provider transaction. */
 	createLiquidityProvider: 0x4169,
