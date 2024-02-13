@@ -128,6 +128,8 @@ class ModelSchemaBuilder {
 				supplementalPublicKeys: { type: ModelType.object, schemaName: 'supplementalPublicKeys' },
 				mosaics: { type: ModelType.array, schemaName: 'mosaic' },
 				lockedMosaics: { type: ModelType.array, schemaName: 'mosaic' },
+				upgradedFrom: ModelType.binary,
+				upgradedFromKey: ModelType.binary
 			},
 
 			supplementalPublicKeys: {

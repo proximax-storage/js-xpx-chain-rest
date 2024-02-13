@@ -767,7 +767,7 @@ class CatapultDb {
 			? catapult.model.address.publicKeyToAddress(id.publicKey, this.networkId) : id.address));
 
 		return this.queryDocument('accounts', { 'account.upgradedFrom': account })
-			.then(this.catapultDb.sanitizer.copyAndDeleteId);
+			.then(this.sanitizer.copyAndDeleteId);
 	}
 
 	// region staking Record retrieval

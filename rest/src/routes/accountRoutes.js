@@ -37,7 +37,7 @@ module.exports = {
 		server.get('/account/:accountId/next', (req, res, next) => {
 			const [type, accountId] = routeUtils.parseArgument(req.params, 'accountId', 'accountId');
 			const sender = routeUtils.createSender(routeResultTypes.account);
-			return db.accountUpgradeById([{ [type]: accountId }])
+			return db.accountUpgradeById({ [type]: accountId })
 				.then(sender.sendOne(req.params.accountId, res, next));
 		});
 

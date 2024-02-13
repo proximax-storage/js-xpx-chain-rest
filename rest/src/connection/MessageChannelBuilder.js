@@ -180,7 +180,7 @@ class MessageChannelBuilder {
 				const version = parser.uint32();
 				const type = parser.uint16();
 				const data = parser.buffer(size-4-4-2);
-				emit({ type: 'receipts.anonymousReceipt', payload: { meta: { channelName: 'stateStatement', handle, height, size, version, type}, data } });
+				emit({ type: 'receipts.anonymousReceipt', payload: { meta: { channelName: 'transactionStatement', handle, height, size, version, type}, data } });
 			}
 		};
 	}

@@ -25,8 +25,8 @@ module.exports = {
 			if(params.minHeight) {
 				minHeight = routeUtils.parseArgument(req.params, 'minHeight', 'uint');
 				let operation = {
-					$lte : convertToLong(minHeight),
-					$gte : convertToLong(height)
+					$gte : convertToLong(minHeight),
+					$lte : convertToLong(height)
 				};
 				const options = routeUtils.parsePaginationArguments(params, services.config.pageSize, { id: 'objectId' });
 				return db.networkConfigurations(operation, options)
