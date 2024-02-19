@@ -224,6 +224,8 @@ describe('model schema builder', () => {
 
 				'account.address',
 				'account.publicKey',
+				'account.upgradedFrom',
+				'account.upgradedFromKey',
 				"supplementalAccountKey.publicKey",
 				"stakingRecord.address",
 				"stakingRecord.publicKey",
