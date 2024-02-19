@@ -107,7 +107,7 @@ describe('aggregate plugin', () => {
 					scheme: 55,
 					parentHash: Buffer.alloc(test.constants.sizes.hash256, 66),
 					meta: {
-						address: [22],
+						handle: [22],
 						channelName: 'cosignature'
 					}
 				}
