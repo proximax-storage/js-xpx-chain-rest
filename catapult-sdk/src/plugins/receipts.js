@@ -31,7 +31,8 @@ const ReceiptType = {
 	0x5143: 'receipts.inflation',
 	0x8143: 'receipts.signerImportance',
 	0x8243: 'receipts.globalStateTracking',
-	0x8162: 'receipts.totalStaked'
+	0x8162: 'receipts.totalStaked',
+	0x3148: 'receipts.lockHashCreated'
 };
 
 /**
@@ -145,6 +146,19 @@ const receiptsPlugin = {
 			type: ModelType.uint16,
 			version: ModelType.uint32,
 			flags: ModelType.uint64,
+		});
+
+		builder.addSchema('receipts.lockHashCreated', {
+			type: ModelType.uint16,
+			version: ModelType.uint32,
+			account: ModelType.binary,
+			mosaicId: ModelType.uint64,
+			amount: ModelType.uint64
+		});
+
+		builder.addSchema('receipts.unknown', {
+			type: ModelType.uint16,
+			version: ModelType.uint32,
 		});
 	},
 
