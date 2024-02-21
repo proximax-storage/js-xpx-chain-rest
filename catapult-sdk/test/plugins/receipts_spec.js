@@ -37,7 +37,7 @@ describe('receipts plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 17);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 19);
 			expect(modelSchema).to.contain.all.keys([
 				'receipts',
 				'receipts.addressResolutionStatement',
@@ -55,7 +55,9 @@ describe('receipts plugin', () => {
 				"receipts.signerImportance",
 				"receipts.totalStaked",
 				"receipts.anonymousReceiptMetadata",
-				'receipts.entry.mosaic'
+				'receipts.entry.mosaic',
+				"receipts.lockHashCreated",
+				"receipts.unknown"
 			]);
 
 			// -  receipts
