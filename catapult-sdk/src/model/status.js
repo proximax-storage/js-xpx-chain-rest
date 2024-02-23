@@ -398,17 +398,18 @@ const toStringInternal = code => {
 		case 0x8069000a: return 'Failure_LiquidityProvider_Invalid_Mosaic_Amount'
 		case 0x8069000b: return 'Failure_LiquidityProvider_Invalid_Currency_Amount'
 		case 0x8069000c: return 'Failure_LiquidityProvider_Reserved_Mosaic_Id'
-		case 0x80610001: return 'Failure_Committee_Plugin_Config_Malformed';
-		case 0x80610002: return 'Failure_Committee_Redundant';
-		case 0x80610003: return 'Failure_Committee_Harvester_Ineligible';
-		case 0x80610004: return 'Failure_Committee_Account_Does_Not_Exist';
-		case 0x80610005: return 'Failure_Committee_Signer_Is_Not_Owner';
-		case 0x80610006: return 'Failure_Committee_Harvester_Already_Disabled';
-		case 0x806C0001: return 'Failure_Dbrb_View_Sequence_Already_Exists';
-		case 0x806C0002: return 'Failure_Dbrb_View_Sequence_Size_Insufficient';
-		case 0x806C0003: return 'Failure_Dbrb_Invalid_Replaced_View';
-		case 0x806C0004: return 'Failure_Dbrb_Signatures_Count_Insufficient';
-		case 0x806C0005: return 'Failure_Dbrb_Invalid_Signature';
+		case 0x80610001: return 'Failure_Committee_Plugin_Config_Malformed'
+		case 0x80610002: return 'Failure_Committee_Redundant'
+		case 0x80610003: return 'Failure_Committee_Harvester_Ineligible'
+		case 0x80610004: return 'Failure_Committee_Account_Does_Not_Exist'
+		case 0x80610005: return 'Failure_Committee_Signer_Is_Not_Owner'
+		case 0x80610006: return 'Failure_Committee_Harvester_Already_Disabled'
+		case 0x806C0001: return 'Failure_Dbrb_View_Sequence_Already_Exists'
+		case 0x806C0002: return 'Failure_Dbrb_View_Sequence_Size_Insufficient'
+		case 0x806C0003: return 'Failure_Dbrb_Invalid_Replaced_View'
+		case 0x806C0004: return 'Failure_Dbrb_Signatures_Count_Insufficient'
+		case 0x806C0005: return 'Failure_Dbrb_Invalid_Signature'
+		case 0x80670001: return 'Failure_Streaming_Folder_Name_Too_Large'
 		default: return undefined;
 	}
 };
