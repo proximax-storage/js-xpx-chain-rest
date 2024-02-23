@@ -39,7 +39,7 @@
   "dependencies": {
     "catapult-sdk": "link:../catapult-sdk",
     "coveralls": "^3.1.0",
-    "mongodb": "^3.6.0",
+    "mongodb": "^3.7.3",
     "nyc": "^15.1.0",
     "restify": "^8.5.1",
     "restify-errors": "^8.0.2",
