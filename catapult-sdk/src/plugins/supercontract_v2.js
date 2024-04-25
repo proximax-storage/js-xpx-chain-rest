@@ -77,7 +77,7 @@ const superContractV2Plugin = {
         builder.addTransactionSupport(EntityType.endBatchExecutionSingle, {
             contractKey: ModelType.binary,
             batchId: ModelType.uint64,
-            poEx: {type: ModelType.array, schemaName: 'poEx'},
+            poEx: {type: ModelType.object, schemaName: 'poEx'},
         });
 
         builder.addTransactionSupport(EntityType.synchronizationSingle, {
