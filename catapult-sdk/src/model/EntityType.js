@@ -241,8 +241,10 @@ const EntityType = {
 	removeSdaExchangeOffer: 0x426A,
 
 	/** Install message transaction body. */
-	installMessage: 0x416C
+	installMessage: 0x416C,
 
+	/** Replicators cleanup transaction body. */
+	replicatorsCleanup: 0x4062,
 };
 
 module.exports = EntityType;

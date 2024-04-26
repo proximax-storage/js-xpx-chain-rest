@@ -62,6 +62,9 @@ const storagePlugin = {
 		builder.addTransactionSupport(EntityType.replicatorOnboarding, {
 			publicKey:				{ type: ModelType.binary, schemaName: 'dataModificationCancel.publicKey' },
 			capacity:				{ type: ModelType.uint64, schemaName: 'replicatorOnboarding.capacity' },
+			nodeBootKey:				{ type: ModelType.binary, schemaName: 'replicatorOnboarding.nodeBootKey' },
+			message:				{ type: ModelType.binary, schemaName: 'replicatorOnboarding.message' },
+			messageSignature:				{ type: ModelType.binary, schemaName: 'replicatorOnboarding.messageSignature' },
 		});
 
 		builder.addTransactionSupport(EntityType.replicatorOffboarding, {
@@ -122,11 +125,20 @@ const storagePlugin = {
 			opinions: 				ModelType.uint8,
 		});
 
+		builder.addTransactionSupport(EntityType.replicatorsCleanup, {
+			replicatorKeys:		{ type: ModelType.array,  schemaName: ModelType.binary },
+		});
+
 		builder.addSchema('driveInfo', {
 			drive: 									ModelType.binary,
 			lastApprovedDataModificationId: 		ModelType.binary,
 			initialDownloadWork: 					ModelType.uint64,
 			lastCompletedCumulativeDownloadWork: 	ModelType.uint64,
+		});
+
+		builder.addSchema('bootKeyReplicatorEntry', {
+			nodeBootKey:   ModelType.binary,
+			replicatorKey: ModelType.binary,
 		});
 
 		builder.addSchema('replicatorEntry', {
@@ -136,6 +148,7 @@ const storagePlugin = {
 		builder.addSchema('replicator', {
 			key:			ModelType.binary,
 			version:		ModelType.uint32,
+			nodeBootKey:			ModelType.binary,
 			drives: 		{ type: ModelType.array, schemaName: 'driveInfo' },
 			downloadChannels: { type: ModelType.array, schemaName: ModelType.binary }
 		});
@@ -401,12 +414,18 @@ const storagePlugin = {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.capacity = parser.uint64();
+				transaction.nodeBootKey = parser.buffer(constants.sizes.signer);
+				transaction.message = parser.buffer(constants.sizes.hash256);
+				transaction.messageSignature = parser.buffer(constants.sizes.signature);
 
 				return transaction;
 			},
 
 			serialize: (transaction, serializer) => {
 				serializer.writeUint64(transaction.capacity);
+				serializer.writeBuffer(transaction.nodeBootKey);
+				serializer.writeBuffer(transaction.message);
+				serializer.writeBuffer(transaction.messageSignature);
 			}
 		});
 
@@ -602,53 +621,76 @@ const storagePlugin = {
 			}
 		});
 
-        codecBuilder.addTransactionSupport(EntityType.endDriveVerificationV2, {
-            deserialize: parser => {
-                const transaction = {};
-                transaction.driveKey = parser.buffer(constants.sizes.signer);
-                transaction.verificationTrigger = parser.buffer(constants.sizes.hash256);
-                transaction.shardId = parser.uint16();
+      codecBuilder.addTransactionSupport(EntityType.endDriveVerificationV2, {
+          deserialize: parser => {
+              const transaction = {};
+              transaction.driveKey = parser.buffer(constants.sizes.signer);
+              transaction.verificationTrigger = parser.buffer(constants.sizes.hash256);
+              transaction.shardId = parser.uint16();
 
-				// Skip total number of replicators.
-				parser.uint8();
+			// Skip total number of replicators.
+			parser.uint8();
 
-				// Number of replicators that provided their opinions.
-				const judgingKeyCount = parser.uint8();
+			// Number of replicators that provided their opinions.
+			const judgingKeyCount = parser.uint8();
 
-				transaction.publicKeys = [];
-				transaction.signatures = [];
+			transaction.publicKeys = [];
+			transaction.signatures = [];
 
-				for (let i = 0; i < judgingKeyCount; i++) {
-					transaction.publicKeys.push(parser.buffer(constants.sizes.signer));
+			for (let i = 0; i < judgingKeyCount; i++) {
+				transaction.publicKeys.push(parser.buffer(constants.sizes.signer));
+			}
+
+			for (let i = 0; i < judgingKeyCount; i++) {
+				transaction.signatures.push(parser.buffer(constants.sizes.signature));
+			}
+
+			transaction.opinions = parser.uint8();
+
+              return transaction;
+          },
+
+          serialize: (transaction, serializer) => {
+              serializer.writeBuffer(transaction.driveKey);
+              serializer.writeBuffer(transaction.verificationTrigger);
+			serializer.writeUint16(transaction.shardId);
+			serializer.writeUint8(transaction.publicKeys.length);
+			serializer.writeUint8(transaction.signatures.length);
+
+			transaction.publicKeys.forEach(key => {
+				serializer.writeBuffer(key);
+			})
+
+			transaction.signatures.forEach(signature => {
+				serializer.writeBuffer(signature);
+			})
+
+			serializer.writeUint8(transaction.opinions)
+          }
+      });
+
+		codecBuilder.addTransactionSupport(EntityType.replicatorsCleanup, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.replicatorCount = parser.uint16();
+
+				transaction.replicatorKeys = [];
+				let count = transaction.replicatorCount;
+				while (count-- > 0) {
+					transaction.replicatorKeys.push(parser.buffer(constants.sizes.signer));
 				}
 
-				for (let i = 0; i < judgingKeyCount; i++) {
-					transaction.signatures.push(parser.buffer(constants.sizes.signature));
-				}
+				return transaction;
+			},
 
-				transaction.opinions = parser.uint8();
+			serialize: (transaction, serializer) => {
+				serializer.writeUint16(transaction.replicatorKeys.length);
 
-                return transaction;
-            },
-
-            serialize: (transaction, serializer) => {
-                serializer.writeBuffer(transaction.driveKey);
-                serializer.writeBuffer(transaction.verificationTrigger);
-				serializer.writeUint16(transaction.shardId);
-				serializer.writeUint8(transaction.publicKeys.length);
-				serializer.writeUint8(transaction.signatures.length);
-
-				transaction.publicKeys.forEach(key => {
+				transaction.replicatorKeys.forEach(key => {
 					serializer.writeBuffer(key);
-				})
-
-				transaction.signatures.forEach(signature => {
-					serializer.writeBuffer(signature);
-				})
-
-				serializer.writeUint8(transaction.opinions)
-            }
-        });
+				});
+			}
+		});
 	}
 };
 

@@ -97,7 +97,8 @@ describe('entity type enumeration', () => {
 			manualRateChange: 0x4269,
 			placeSdaExchangeOffer: 0x416A,
 			removeSdaExchangeOffer: 0x426A,
-			installMessage: 0x416C
+			installMessage: 0x416C,
+			replicatorsCleanup: 0x4062,
 		});
 	});
 
