@@ -226,6 +226,7 @@ const storagePlugin = {
 			multisigAddress:			ModelType.binary,
 			owner:						ModelType.binary,
 			rootHash:					ModelType.binary,
+			lastModificationId:			ModelType.binary,
 			size:						ModelType.uint64,
 			usedSizeBytes:				ModelType.uint64,
 			metaFilesSizeBytes:			ModelType.uint64,
