@@ -175,6 +175,15 @@ const toStringInternal = code => {
 		case 0x8059000B: return 'Failure_NetworkConfig_HarvestBeneficiaryPercentage_Exceeds_One_Hundred';
 		case 0x8059000C: return 'Failure_NetworkConfig_MaxMosaicAtomicUnits_Invalid';
 		case 0x8059000D: return 'Failure_NetworkConfig_ApplyHeightDelta_Zero';
+		case 0x8059000E: return 'Failure_NetworkConfig_Block_Generation_Time_Zero_Public';
+		case 0x8059000F: return 'Failure_NetworkConfig_AccountVersion_Less_Than_Minimum';
+		case 0x80590010: return 'Failure_NetworkConfig_MinimumAccountVersion_Less_Than_Current';
+		case 0x80590011: return 'Failure_NetworkConfig_AccountVersion_Less_Than_Current';
+		case 0x80590012: return 'Failure_NetworkConfig_Interval_Must_Change_After_Reward_Tier';
+		case 0x80590013: return 'Failure_NetworkConfig_Interval_Must_Not_Be_Zero';
+		case 0x80590014: return 'Failure_NetworkConfig_ApplyHeight_In_The_Past';
+		case 0x80590015: return 'Failure_NetworkConfig_Required_Plugins_Not_Matching';
+		case 0x80590016: return 'Failure_NetworkConfig_Weighted_Voting_And_Dbrb_Fast_Finality_Both_Enabled';
 		case 0x80580001: return 'Failure_BlockchainUpgrade_Invalid_Signer';
 		case 0x80580002: return 'Failure_BlockchainUpgrade_Upgrade_Period_Too_Low';
 		case 0x80580003: return 'Failure_BlockchainUpgrade_Redundant';
