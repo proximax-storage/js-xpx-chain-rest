@@ -245,6 +245,9 @@ const EntityType = {
 
 	/** Replicators cleanup transaction body. */
 	replicatorsCleanup: 0x4062,
+
+	/** Replicator tree rebuild transaction body. */
+	replicatorTreeRebuild: 0x4167,
 };
 
 module.exports = EntityType;

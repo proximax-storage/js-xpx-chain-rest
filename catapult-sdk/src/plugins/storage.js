@@ -129,6 +129,10 @@ const storagePlugin = {
 			replicatorKeys:		{ type: ModelType.array,  schemaName: ModelType.binary },
 		});
 
+		builder.addTransactionSupport(EntityType.replicatorTreeRebuild, {
+			replicatorKeys:		{ type: ModelType.array,  schemaName: ModelType.binary },
+		});
+
 		builder.addSchema('driveInfo', {
 			drive: 									ModelType.binary,
 			lastApprovedDataModificationId: 		ModelType.binary,
@@ -621,55 +625,78 @@ const storagePlugin = {
 			}
 		});
 
-      codecBuilder.addTransactionSupport(EntityType.endDriveVerificationV2, {
-          deserialize: parser => {
-              const transaction = {};
-              transaction.driveKey = parser.buffer(constants.sizes.signer);
-              transaction.verificationTrigger = parser.buffer(constants.sizes.hash256);
-              transaction.shardId = parser.uint16();
+      	codecBuilder.addTransactionSupport(EntityType.endDriveVerificationV2, {
+          	deserialize: parser => {
+              	const transaction = {};
+              	transaction.driveKey = parser.buffer(constants.sizes.signer);
+              	transaction.verificationTrigger = parser.buffer(constants.sizes.hash256);
+              	transaction.shardId = parser.uint16();
 
-			// Skip total number of replicators.
-			parser.uint8();
+				// Skip total number of replicators.
+				parser.uint8();
 
-			// Number of replicators that provided their opinions.
-			const judgingKeyCount = parser.uint8();
+				// Number of replicators that provided their opinions.
+				const judgingKeyCount = parser.uint8();
 
-			transaction.publicKeys = [];
-			transaction.signatures = [];
+				transaction.publicKeys = [];
+				transaction.signatures = [];
 
-			for (let i = 0; i < judgingKeyCount; i++) {
-				transaction.publicKeys.push(parser.buffer(constants.sizes.signer));
-			}
+				for (let i = 0; i < judgingKeyCount; i++) {
+					transaction.publicKeys.push(parser.buffer(constants.sizes.signer));
+				}
 
-			for (let i = 0; i < judgingKeyCount; i++) {
-				transaction.signatures.push(parser.buffer(constants.sizes.signature));
-			}
+				for (let i = 0; i < judgingKeyCount; i++) {
+					transaction.signatures.push(parser.buffer(constants.sizes.signature));
+				}
 
-			transaction.opinions = parser.uint8();
+				transaction.opinions = parser.uint8();
 
-              return transaction;
-          },
+              	return transaction;
+          	},
 
-          serialize: (transaction, serializer) => {
-              serializer.writeBuffer(transaction.driveKey);
-              serializer.writeBuffer(transaction.verificationTrigger);
-			serializer.writeUint16(transaction.shardId);
-			serializer.writeUint8(transaction.publicKeys.length);
-			serializer.writeUint8(transaction.signatures.length);
+          	serialize: (transaction, serializer) => {
+              	serializer.writeBuffer(transaction.driveKey);
+              	serializer.writeBuffer(transaction.verificationTrigger);
+				serializer.writeUint16(transaction.shardId);
+				serializer.writeUint8(transaction.publicKeys.length);
+				serializer.writeUint8(transaction.signatures.length);
 
-			transaction.publicKeys.forEach(key => {
-				serializer.writeBuffer(key);
-			})
+				transaction.publicKeys.forEach(key => {
+					serializer.writeBuffer(key);
+				})
 
-			transaction.signatures.forEach(signature => {
-				serializer.writeBuffer(signature);
-			})
+				transaction.signatures.forEach(signature => {
+					serializer.writeBuffer(signature);
+				})
 
-			serializer.writeUint8(transaction.opinions)
-          }
-      });
+				serializer.writeUint8(transaction.opinions)
+          	}
+      	});
 
 		codecBuilder.addTransactionSupport(EntityType.replicatorsCleanup, {
+			deserialize: parser => {
+				const transaction = {};
+				transaction.replicatorCount = parser.uint16();
+
+				transaction.replicatorKeys = [];
+				let count = transaction.replicatorCount;
+				while (count-- > 0) {
+					transaction.replicatorKeys.push(parser.buffer(constants.sizes.signer));
+				}
+
+				return transaction;
+			},
+
+			serialize: (transaction, serializer) => {
+				serializer.writeUint16(transaction.replicatorKeys.length);
+
+				transaction.replicatorKeys.forEach(key => {
+					serializer.writeBuffer(key);
+				});
+			}
+		});
+
+		codecBuilder.addTransactionSupport(EntityType.replicatorTreeRebuild, {
 			deserialize: parser => {
 				const transaction = {};
 				transaction.replicatorCount = parser.uint16();

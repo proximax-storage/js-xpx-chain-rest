@@ -23,7 +23,7 @@ describe('storage plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 33);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 34);
 			expect(modelSchema).to.contain.all.keys([
 				'prepareBcDrive',
 				'dataModification',
@@ -55,6 +55,7 @@ describe('storage plugin', () => {
 				'endDriveVerificationV2',
 				'replicatorsCleanup',
 				'bootKeyReplicatorEntry',
+				'replicatorTreeRebuild',
 			]);
 
 			expect(Object.keys(modelSchema.prepareBcDrive).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
@@ -172,6 +173,11 @@ describe('storage plugin', () => {
 
 			expect(Object.keys(modelSchema.replicatorsCleanup).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
 			expect(modelSchema.replicatorsCleanup).to.contain.all.keys([
+				'replicatorKeys',
+			]);
+
+			expect(Object.keys(modelSchema.replicatorTreeRebuild).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
+			expect(modelSchema.replicatorTreeRebuild).to.contain.all.keys([
 				'replicatorKeys',
 			]);
 
@@ -316,7 +322,7 @@ describe('storage plugin', () => {
 			const codecs = getCodecs();
 
 			// Assert: codec was registered
-			expect(Object.keys(codecs).length).to.equal(16);
+			expect(Object.keys(codecs).length).to.equal(17);
 			expect(codecs).to.contain.all.keys([
 				EntityType.prepareBcDrive.toString(),
 				EntityType.dataModification.toString(),
@@ -334,6 +340,7 @@ describe('storage plugin', () => {
 				EntityType.driveClosure.toString(),
 				EntityType.endDriveVerificationV2.toString(),
 				EntityType.replicatorsCleanup.toString(),
+				EntityType.replicatorTreeRebuild.toString(),
 			]);
 		});
 
@@ -787,6 +794,29 @@ describe('storage plugin', () => {
 
 		describe('supports replicators cleanup transaction', () => {
 			const codec = getCodecs()[EntityType.replicatorsCleanup];
+			const replicatorCount = Buffer.of(0x04, 0x00);
+			const key1 = createByteArray(0x05, 32);
+			const key2 = createByteArray(0x06, 32);
+			const key3 = createByteArray(0x07, 32);
+			const key4 = createByteArray(0x08, 32);
+
+			test.binary.test.addAll(codec, 2 + 4 * 32, () => ({
+				buffer: Buffer.concat([
+					replicatorCount,
+					key1,
+					key2,
+					key3,
+					key4,
+				]),
+				object: {
+					replicatorCount: 0x04,
+					replicatorKeys: [ key1, key2, key3, key4 ],
+				}
+			}));
+		});
+
+		describe('supports replicator tree rebuild transaction', () => {
+			const codec = getCodecs()[EntityType.replicatorTreeRebuild];
 			const replicatorCount = Buffer.of(0x04, 0x00);
 			const key1 = createByteArray(0x05, 32);
 			const key2 = createByteArray(0x06, 32);

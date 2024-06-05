@@ -416,6 +416,7 @@ const toStringInternal = code => {
 		case 0x80610004: return 'Failure_Committee_Account_Does_Not_Exist'
 		case 0x80610005: return 'Failure_Committee_Signer_Is_Not_Owner'
 		case 0x80610006: return 'Failure_Committee_Harvester_Already_Disabled'
+		case 0x8062003f: return 'Failure_Storage_Empty_Replicator_List'
 		case 0x806c0001: return 'Failure_Dbrb_Process_Not_Expired'
 		case 0x806c0002: return 'Failure_Dbrb_Node_Removal_Too_Far_In_Future'
 		case 0x806c0003: return 'Failure_Dbrb_Node_Removal_Too_Far_In_Past'

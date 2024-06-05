@@ -99,6 +99,7 @@ describe('entity type enumeration', () => {
 			removeSdaExchangeOffer: 0x426A,
 			installMessage: 0x416C,
 			replicatorsCleanup: 0x4062,
+			replicatorTreeRebuild: 0x4167,
 		});
 	});
 
