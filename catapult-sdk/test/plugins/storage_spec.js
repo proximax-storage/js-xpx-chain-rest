@@ -23,7 +23,7 @@ describe('storage plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 31);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 34);
 			expect(modelSchema).to.contain.all.keys([
 				'prepareBcDrive',
 				'dataModification',
@@ -52,7 +52,10 @@ describe('storage plugin', () => {
 				'confirmedUsedSize',
 				'verification',
 				'shard',
-				'endDriveVerificationV2'
+				'endDriveVerificationV2',
+				'replicatorsCleanup',
+				'bootKeyReplicatorEntry',
+				'replicatorTreeRebuild',
 			]);
 
 			expect(Object.keys(modelSchema.prepareBcDrive).length).to.equal(Object.keys(modelSchema.transaction).length + 3);
@@ -102,10 +105,13 @@ describe('storage plugin', () => {
 				'dataModificationId',
 			]);
 
-			expect(Object.keys(modelSchema.replicatorOnboarding).length).to.equal(Object.keys(modelSchema.transaction).length + 2);
+			expect(Object.keys(modelSchema.replicatorOnboarding).length).to.equal(Object.keys(modelSchema.transaction).length + 5);
 			expect(modelSchema.replicatorOnboarding).to.contain.all.keys([
 				'publicKey',
 				'capacity',
+				'nodeBootKey',
+				'message',
+				'messageSignature',
 			]);
 
 			expect(Object.keys(modelSchema.replicatorOffboarding).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
@@ -165,13 +171,27 @@ describe('storage plugin', () => {
 				'driveKey',
 			]);
 
+			expect(Object.keys(modelSchema.replicatorsCleanup).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
+			expect(modelSchema.replicatorsCleanup).to.contain.all.keys([
+				'replicatorKeys',
+			]);
+
+			expect(Object.keys(modelSchema.replicatorTreeRebuild).length).to.equal(Object.keys(modelSchema.transaction).length + 1);
+			expect(modelSchema.replicatorTreeRebuild).to.contain.all.keys([
+				'replicatorKeys',
+			]);
+
+			expect(Object.keys(modelSchema['bootKeyReplicatorEntry']).length).to.equal(2);
+			expect(modelSchema['bootKeyReplicatorEntry']).to.contain.all.keys(['nodeBootKey', 'replicatorKey']);
+
 			expect(Object.keys(modelSchema['replicatorEntry']).length).to.equal(1);
 			expect(modelSchema['replicatorEntry']).to.contain.all.keys(['replicator']);
 
-			expect(Object.keys(modelSchema['replicator']).length).to.equal(4);
+			expect(Object.keys(modelSchema['replicator']).length).to.equal(5);
 			expect(modelSchema['replicator']).to.contain.all.keys([
 				'key',
 				'version',
+				'nodeBootKey',
 				// 'capacity',
 				'drives',
 				'downloadChannels'
@@ -302,7 +322,7 @@ describe('storage plugin', () => {
 			const codecs = getCodecs();
 
 			// Assert: codec was registered
-			expect(Object.keys(codecs).length).to.equal(15);
+			expect(Object.keys(codecs).length).to.equal(17);
 			expect(codecs).to.contain.all.keys([
 				EntityType.prepareBcDrive.toString(),
 				EntityType.dataModification.toString(),
@@ -319,6 +339,8 @@ describe('storage plugin', () => {
 				EntityType.downloadApproval.toString(),
 				EntityType.driveClosure.toString(),
 				EntityType.endDriveVerificationV2.toString(),
+				EntityType.replicatorsCleanup.toString(),
+				EntityType.replicatorTreeRebuild.toString(),
 			]);
 		});
 
@@ -491,10 +513,23 @@ describe('storage plugin', () => {
 		describe('supports replicator onboarding transaction', () => {
 			const codec = getCodecs()[EntityType.replicatorOnboarding];
 			const capacity = Buffer.of(0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+			const nodeBootKey = createByteArray(0x01);
+			const message = createByteArray(0x01);
+			const messageSignature = createByteArray(0x01, 64);
 
-			test.binary.test.addAll(codec, 8, () => ({
-				buffer: Buffer.concat([capacity]),
-				object: {capacity: [0x01, 0x0]}
+			test.binary.test.addAll(codec, 136, () => ({
+				buffer: Buffer.concat([
+					capacity,
+					nodeBootKey,
+					message,
+					messageSignature,
+				]),
+				object: {
+					capacity: [0x01, 0x0],
+					nodeBootKey,
+					message,
+					messageSignature,
+				}
 			}));
 		});
 
@@ -729,32 +764,78 @@ describe('storage plugin', () => {
             });
 
 			it('can be deserialized', () => {
-                // Arrange:
-                const deserializationObject = {
-                    driveKey: driveKey,
-                    verificationTrigger: trigger,
-                    shardId: 0x05,
-                    publicKeys: [keyOne, keyTwo],
-                    signatures: [signatureOne, signatureTwo],
-                    opinions: 0x4,
-                }
-                const deserializedBuffer = Buffer.concat([
-                    driveKey,
-                    trigger,
-                    shardId,
-                    keyCount,
+        // Arrange:
+        const deserializationObject = {
+          driveKey: driveKey,
+          verificationTrigger: trigger,
+          shardId: 0x05,
+          publicKeys: [keyOne, keyTwo],
+          signatures: [signatureOne, signatureTwo],
+          opinions: 0x4,
+        }
+        const deserializedBuffer = Buffer.concat([
+          driveKey,
+          trigger,
+          shardId,
+          keyCount,
 					signatureCount,
-                    keyOne,
-                    keyTwo,
-                    signatureOne,
-                    signatureTwo,
-                    opinions
-                ])
-                const deserializationSize = 32 + 32 + 2 + 1 + 1 + (2 * 32) + (2 * 64) + 1;
+          keyOne,
+          keyTwo,
+          signatureOne,
+          signatureTwo,
+          opinions
+        ])
+        const deserializationSize = 32 + 32 + 2 + 1 + 1 + (2 * 32) + (2 * 64) + 1;
 
 				// Assert:
 				test.binary.assertDeserialization(codec, deserializationSize, deserializedBuffer, deserializationObject);
 			});
+		});
+
+		describe('supports replicators cleanup transaction', () => {
+			const codec = getCodecs()[EntityType.replicatorsCleanup];
+			const replicatorCount = Buffer.of(0x04, 0x00);
+			const key1 = createByteArray(0x05, 32);
+			const key2 = createByteArray(0x06, 32);
+			const key3 = createByteArray(0x07, 32);
+			const key4 = createByteArray(0x08, 32);
+
+			test.binary.test.addAll(codec, 2 + 4 * 32, () => ({
+				buffer: Buffer.concat([
+					replicatorCount,
+					key1,
+					key2,
+					key3,
+					key4,
+				]),
+				object: {
+					replicatorCount: 0x04,
+					replicatorKeys: [ key1, key2, key3, key4 ],
+				}
+			}));
+		});
+
+		describe('supports replicator tree rebuild transaction', () => {
+			const codec = getCodecs()[EntityType.replicatorTreeRebuild];
+			const replicatorCount = Buffer.of(0x04, 0x00);
+			const key1 = createByteArray(0x05, 32);
+			const key2 = createByteArray(0x06, 32);
+			const key3 = createByteArray(0x07, 32);
+			const key4 = createByteArray(0x08, 32);
+
+			test.binary.test.addAll(codec, 2 + 4 * 32, () => ({
+				buffer: Buffer.concat([
+					replicatorCount,
+					key1,
+					key2,
+					key3,
+					key4,
+				]),
+				object: {
+					replicatorCount: 0x04,
+					replicatorKeys: [ key1, key2, key3, key4 ],
+				}
+			}));
 		});
 	});
 });

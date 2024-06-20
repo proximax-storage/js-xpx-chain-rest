@@ -220,13 +220,13 @@ const EntityType = {
 	endDriveVerificationV2: 0x4F62,
 
 	/** Stream start transaction. */
-	streamStart: 0x4167,
+	streamStart: 0x4166,
 
 	/** Stream finish transaction. */
-	streamFinish: 0x4267,
+	streamFinish: 0x4266,
 
 	/** Stream payment transaction. */
-	streamPayment: 0x4367,
+	streamPayment: 0x4366,
 
 	/** Create liquidity provider transaction. */
 	createLiquidityProvider: 0x4169,
@@ -241,6 +241,7 @@ const EntityType = {
 	removeSdaExchangeOffer: 0x426A,
 
 	/** Install message transaction body. */
+	installMessage: 0x416C,
 	installMessage: 0x416C,
 
 	/** Deploy contract transaction */
@@ -262,7 +263,13 @@ const EntityType = {
 	endBatchExecutionSingle: 0x466E,
 
 	/** Synchronization Single */
-	synchronizationSingle: 0x476E
+	synchronizationSingle: 0x476E,
+
+	/** Replicators cleanup transaction body. */
+	replicatorsCleanup: 0x4062,
+
+	/** Replicator tree rebuild transaction body. */
+	replicatorTreeRebuild: 0x4167,
 };
 
 module.exports = EntityType;
