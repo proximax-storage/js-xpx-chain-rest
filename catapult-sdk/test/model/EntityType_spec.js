@@ -90,9 +90,9 @@ describe('entity type enumeration', () => {
 			downloadApproval: 0x4D62,
 			driveClosure: 0x4E62,
 			endDriveVerificationV2: 0x4F62,
-			streamStart: 0x4167,
-			streamFinish: 0x4267,
-			streamPayment: 0x4367,
+			streamStart: 0x4166,
+			streamFinish: 0x4266,
+			streamPayment: 0x4366,
 			createLiquidityProvider: 0x4169,
 			manualRateChange: 0x4269,
 			placeSdaExchangeOffer: 0x416A,
@@ -105,6 +105,8 @@ describe('entity type enumeration', () => {
 			successfulEndBatchExecution: 0x446E,
 			synchronizationSingle: 0x476E,
 			unsuccessfulEndBatchExecution: 0x456E,
+			replicatorsCleanup: 0x4062,
+			replicatorTreeRebuild: 0x4167,
 		});
 	});
 
