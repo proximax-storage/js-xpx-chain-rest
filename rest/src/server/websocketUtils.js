@@ -39,6 +39,7 @@ module.exports = {
 		 */
 		send: data => {
 			const view = formatter(data);
+			winston.debug(`send ${view}`);
 			subscribers.forEach(client => {
 				winston.debug(`websocket ${client.uid}: multisender.send sending data to client`);
 				client.send(view, err => {

@@ -19,6 +19,7 @@
  */
 
 const catapult = require('catapult-sdk');
+const winston = require("winston");
 
 const { BinaryParser } = catapult.parser;
 const { uint64 } = catapult.utils;

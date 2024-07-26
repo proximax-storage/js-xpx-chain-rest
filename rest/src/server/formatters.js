@@ -45,6 +45,9 @@ const formatBody = (modelFormatter, body) => {
 		view = formatCatapultObject(body.payload, body.type, body.structure);
 	}
 
+	if (view.hash !== undefined) {
+		console.log("hash: " + view.hash)
+	}
 	return {
 		statusCode,
 		json: JSON.stringify(view)
