@@ -37,7 +37,7 @@
     "catapult-sdk": "link:../catapult-sdk",
     "coveralls": "^3.1.0",
     "net": "^1.0.2",
-    "nyc": "^15.1.0",
-    "winston": "^3.3.3"
+    "nyc": "^17.0.0",
+    "winston": "^3.3.4"
   }
 }
