@@ -38,8 +38,8 @@
     "command-line-args": "^5.1.1",
     "command-line-usage": "^6.1.0",
     "coveralls": "^3.1.0",
-    "nyc": "^15.1.0",
+    "nyc": "^17.0.0",
     "restify-clients": "^3.0.0",
-    "winston": "^3.3.3"
+    "winston": "^3.3.4"
   }
 }
