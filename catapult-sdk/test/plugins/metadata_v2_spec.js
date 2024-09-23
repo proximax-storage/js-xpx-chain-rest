@@ -37,11 +37,14 @@ describe('metadata v2 plugin', () => {
 			const modelSchema = builder.build();
 
 			// Assert:
-			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 5);
+			expect(Object.keys(modelSchema).length).to.equal(numDefaultKeys + 8);
 			expect(modelSchema).to.contain.all.keys([
 				'accountMetadata',
+				'accountExtendedMetadata',
 				'mosaicMetadata',
+				'mosaicExtendedMetadata',
 				'namespaceMetadata',
+				'namespaceExtendedMetadata',
 				'metadata',
 				'metadataV2Entry'
 			]);
@@ -52,10 +55,22 @@ describe('metadata v2 plugin', () => {
 				'targetKey', 'scopedMetadataKey', 'valueSizeDelta', 'valueSize', 'value'
 			]);
 
+			// - accountExtendedMetadata
+			expect(Object.keys(modelSchema.accountExtendedMetadata).length).to.equal(Object.keys(modelSchema.transaction).length + 6);
+			expect(modelSchema.accountExtendedMetadata).to.contain.all.keys([
+				'targetKey', 'scopedMetadataKey', 'isValueImmutable', 'valueSizeDelta', 'valueSize', 'value'
+			]);
+
 			// - mosaicMetadata
 			expect(Object.keys(modelSchema.mosaicMetadata).length).to.equal(Object.keys(modelSchema.transaction).length + 6);
 			expect(modelSchema.mosaicMetadata).to.contain.all.keys([
 				'targetKey', 'scopedMetadataKey', 'targetMosaicId', 'valueSizeDelta', 'valueSize', 'value'
+			]);
+
+			// - mosaicExtendedMetadata
+			expect(Object.keys(modelSchema.mosaicExtendedMetadata).length).to.equal(Object.keys(modelSchema.transaction).length + 7);
+			expect(modelSchema.mosaicExtendedMetadata).to.contain.all.keys([
+				'targetKey', 'scopedMetadataKey', 'targetMosaicId', 'isValueImmutable', 'valueSizeDelta', 'valueSize', 'value'
 			]);
 
 			// - namespaceMetadata
@@ -69,18 +84,31 @@ describe('metadata v2 plugin', () => {
 				'value'
 			]);
 
+			// - namespaceExtendedMetadata
+			expect(Object.keys(modelSchema.namespaceExtendedMetadata).length).to.equal(Object.keys(modelSchema.transaction).length + 7);
+			expect(modelSchema.namespaceExtendedMetadata).to.contain.all.keys([
+				'targetKey',
+				'scopedMetadataKey',
+				'targetNamespaceId',
+				'isValueImmutable',
+				'valueSizeDelta',
+				'valueSize',
+				'value'
+			]);
+
 			// - metadata
 			expect(Object.keys(modelSchema.metadata).length).to.equal(2);
 			expect(modelSchema.metadata).to.contain.all.keys(['metadataEntry', 'id']);
 
 			// - metadataEntry
-			expect(Object.keys(modelSchema.metadataV2Entry).length).to.equal(9);
+			expect(Object.keys(modelSchema.metadataV2Entry).length).to.equal(10);
 			expect(modelSchema.metadataV2Entry).to.contain.all.keys([
 				'version',
 				'compositeHash',
 				'sourceAddress',
 				'targetKey',
 				'scopedMetadataKey',
+				'isValueImmutable',
 				'targetId',
 				'metadataType',
 				'valueSize',
@@ -104,11 +132,14 @@ describe('metadata v2 plugin', () => {
 			const codecs = getCodecs();
 
 			// Assert: codecs were registered
-			expect(Object.keys(codecs).length).to.equal(3);
+			expect(Object.keys(codecs).length).to.equal(6);
 			expect(codecs).to.contain.all.keys([
 				EntityType.accountMetadata.toString(),
+				EntityType.accountExtendedMetadata.toString(),
 				EntityType.mosaicMetadata.toString(),
-				EntityType.namespaceMetadata.toString()
+				EntityType.mosaicExtendedMetadata.toString(),
+				EntityType.namespaceMetadata.toString(),
+				EntityType.namespaceExtendedMetadata.toString()
 			]);
 		});
 
@@ -130,6 +161,30 @@ describe('metadata v2 plugin', () => {
 				object: {
 					targetKey,
 					scopedMetadataKey: [0x066C26F2, 0x92B28340],
+					valueSizeDelta: 3,
+					value: valueBuffer
+				}
+			}));
+		});
+
+		describe('supports account extended metadata', () => {
+			const targetKey = test.random.bytes(test.constants.sizes.signer);
+			const valueBuffer = Buffer.of(0x6d, 0x65, 0x74, 0x61, 0x20, 0x69, 0x6e, 0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x69, 0x6f, 0x6e);
+
+			test.binary.test.addAll(getCodec(EntityType.accountExtendedMetadata), 61, () => ({
+				buffer: Buffer.concat([
+					Buffer.from(targetKey), // address 32b
+					Buffer.of(0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92), // scopedMetadataKey 8b
+					Buffer.of(0x01), // isValueImmutable
+					Buffer.of(0x03, 0x00), // valueSizeDelta
+					Buffer.of(0x10, 0x00), // valueSize
+					valueBuffer // value 16b
+				]),
+
+				object: {
+					targetKey,
+					scopedMetadataKey: [0x066C26F2, 0x92B28340],
+					isValueImmutable: 1,
 					valueSizeDelta: 3,
 					value: valueBuffer
 				}
@@ -160,6 +215,32 @@ describe('metadata v2 plugin', () => {
 			}));
 		});
 
+		describe('supports mosaic extended metadata', () => {
+			const targetKey = test.random.bytes(test.constants.sizes.signer);
+			const valueBuffer = Buffer.of(0x6d, 0x65, 0x74, 0x61, 0x20, 0x69, 0x6e, 0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x69, 0x6f, 0x6e);
+
+			test.binary.test.addAll(getCodec(EntityType.mosaicExtendedMetadata), 69, () => ({
+				buffer: Buffer.concat([
+					Buffer.from(targetKey), // address 32b
+					Buffer.of(0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92), // scopedMetadataKey 8b
+					Buffer.of(0x93, 0x53, 0xBB, 0x24, 0x12, 0xB1, 0xFF, 0x36), // targetMosaicId 8b
+					Buffer.of(0x01), // isValueImmutable
+					Buffer.of(0x05, 0x00), // valueSizeDelta
+					Buffer.of(0x10, 0x00), // valueSize
+					valueBuffer // value 16b
+				]),
+
+				object: {
+					targetKey,
+					scopedMetadataKey: [0x066C26F2, 0x92B28340],
+					targetMosaicId: [0x24BB5393, 0x36FFB112],
+					isValueImmutable: 1,
+					valueSizeDelta: 5,
+					value: valueBuffer
+				}
+			}));
+		});
+
 		describe('supports namespace metadata', () => {
 			const targetKey = test.random.bytes(test.constants.sizes.signer);
 			const valueBuffer = Buffer.of(0x6d, 0x65, 0x74, 0x61, 0x20, 0x69, 0x6e, 0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x69, 0x6f, 0x6e);
@@ -178,6 +259,32 @@ describe('metadata v2 plugin', () => {
 					targetKey,
 					scopedMetadataKey: [0x066C26F2, 0x92B28340],
 					targetNamespaceId: [0x32C222AA, 0x63DEBC99],
+					valueSizeDelta: 18,
+					value: valueBuffer
+				}
+			}));
+		});
+
+		describe('supports namespace extended metadata', () => {
+			const targetKey = test.random.bytes(test.constants.sizes.signer);
+			const valueBuffer = Buffer.of(0x6d, 0x65, 0x74, 0x61, 0x20, 0x69, 0x6e, 0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x69, 0x6f, 0x6e);
+
+			test.binary.test.addAll(getCodec(EntityType.namespaceExtendedMetadata), 69, () => ({
+				buffer: Buffer.concat([
+					Buffer.from(targetKey), // address 32b
+					Buffer.of(0xF2, 0x26, 0x6C, 0x06, 0x40, 0x83, 0xB2, 0x92), // scopedMetadataKey 8b
+					Buffer.of(0xAA, 0x22, 0xC2, 0x32, 0x99, 0xBC, 0xDE, 0x63), // targetNamespaceId 8b
+					Buffer.of(0x01), // isValueImmutable
+					Buffer.of(0x12, 0x00), // valueSizeDelta
+					Buffer.of(0x10, 0x00), // valueSize
+					valueBuffer // value 16b
+				]),
+
+				object: {
+					targetKey,
+					scopedMetadataKey: [0x066C26F2, 0x92B28340],
+					targetNamespaceId: [0x32C222AA, 0x63DEBC99],
+					isValueImmutable: 1,
 					valueSizeDelta: 18,
 					value: valueBuffer
 				}
