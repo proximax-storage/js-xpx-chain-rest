@@ -230,7 +230,7 @@ describe('storage plugin', () => {
 			expect(Object.keys(modelSchema['bcDriveEntry']).length).to.equal(1);
 			expect(modelSchema['bcDriveEntry']).to.contain.all.keys(['drive']);
 
-			expect(Object.keys(modelSchema['bcDrive']).length).to.equal(16);
+			expect(Object.keys(modelSchema['bcDrive']).length).to.equal(17);
 			expect(modelSchema['bcDrive']).to.contain.all.keys([
 				'multisig',
 				'multisigAddress',
