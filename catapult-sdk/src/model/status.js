@@ -426,6 +426,7 @@ const toStringInternal = code => {
 		case 0x806c0007: return 'Failure_Dbrb_Node_Removal_Invalid_Signature'
 		case 0x806c0008: return 'Failure_Dbrb_Process_Is_Not_Registered'
 		case 0x80670001: return 'Failure_Streaming_Folder_Name_Too_Large'
+		case 0x803f0006: return 'Failure_Metadata_v2_Value_Is_Immutable'
 		default: return undefined;
 	}
 };
