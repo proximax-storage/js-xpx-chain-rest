@@ -175,6 +175,15 @@ const toStringInternal = code => {
 		case 0x8059000B: return 'Failure_NetworkConfig_HarvestBeneficiaryPercentage_Exceeds_One_Hundred';
 		case 0x8059000C: return 'Failure_NetworkConfig_MaxMosaicAtomicUnits_Invalid';
 		case 0x8059000D: return 'Failure_NetworkConfig_ApplyHeightDelta_Zero';
+		case 0x8059000E: return 'Failure_NetworkConfig_Block_Generation_Time_Zero_Public';
+		case 0x8059000F: return 'Failure_NetworkConfig_AccountVersion_Less_Than_Minimum';
+		case 0x80590010: return 'Failure_NetworkConfig_MinimumAccountVersion_Less_Than_Current';
+		case 0x80590011: return 'Failure_NetworkConfig_AccountVersion_Less_Than_Current';
+		case 0x80590012: return 'Failure_NetworkConfig_Interval_Must_Change_After_Reward_Tier';
+		case 0x80590013: return 'Failure_NetworkConfig_Interval_Must_Not_Be_Zero';
+		case 0x80590014: return 'Failure_NetworkConfig_ApplyHeight_In_The_Past';
+		case 0x80590015: return 'Failure_NetworkConfig_Required_Plugins_Not_Matching';
+		case 0x80590016: return 'Failure_NetworkConfig_Weighted_Voting_And_Dbrb_Fast_Finality_Both_Enabled';
 		case 0x80580001: return 'Failure_BlockchainUpgrade_Invalid_Signer';
 		case 0x80580002: return 'Failure_BlockchainUpgrade_Upgrade_Period_Too_Low';
 		case 0x80580003: return 'Failure_BlockchainUpgrade_Redundant';
@@ -386,6 +395,9 @@ const toStringInternal = code => {
 		case 0x80620035: return 'Failure_Storage_Already_Initiated_Channel_Closure'
 		case 0x80620036: return 'Failure_Storage_Download_Channel_Is_Finished'
 		case 0x80620037: return 'Failure_Storage_Service_Unit_Transfer'
+		case 0x8062003c: return 'Failure_Storage_Boot_Key_Is_Registered_With_Other_Replicator'
+		case 0x8062003d: return 'Failure_Storage_No_Replicators_To_Remove'
+		case 0x8062003e: return 'Failure_Storage_Replicator_Is_Bound_With_Boot_Key'
 		case 0x80690001: return 'Failure_LiquidityProvider_Liquidity_Provider_Already_Exists'
 		case 0x80690002: return 'Failure_LiquidityProvider_Invalid_Owner'
 		case 0x80690003: return 'Failure_LiquidityProvider_Invalid_Slashing_Period'
@@ -404,11 +416,15 @@ const toStringInternal = code => {
 		case 0x80610004: return 'Failure_Committee_Account_Does_Not_Exist'
 		case 0x80610005: return 'Failure_Committee_Signer_Is_Not_Owner'
 		case 0x80610006: return 'Failure_Committee_Harvester_Already_Disabled'
-		case 0x806C0001: return 'Failure_Dbrb_View_Sequence_Already_Exists'
-		case 0x806C0002: return 'Failure_Dbrb_View_Sequence_Size_Insufficient'
-		case 0x806C0003: return 'Failure_Dbrb_Invalid_Replaced_View'
-		case 0x806C0004: return 'Failure_Dbrb_Signatures_Count_Insufficient'
-		case 0x806C0005: return 'Failure_Dbrb_Invalid_Signature'
+		case 0x8062003f: return 'Failure_Storage_Empty_Replicator_List'
+		case 0x806c0001: return 'Failure_Dbrb_Process_Not_Expired'
+		case 0x806c0002: return 'Failure_Dbrb_Node_Removal_Too_Far_In_Future'
+		case 0x806c0003: return 'Failure_Dbrb_Node_Removal_Too_Far_In_Past'
+		case 0x806c0004: return 'Failure_Dbrb_Node_Removal_Subject_Is_Not_In_Dbrb_System'
+		case 0x806c0005: return 'Failure_Dbrb_Node_Removal_Not_Enough_Votes'
+		case 0x806c0006: return 'Failure_Dbrb_Node_Removal_Voter_Is_Not_In_Dbrb_System'
+		case 0x806c0007: return 'Failure_Dbrb_Node_Removal_Invalid_Signature'
+		case 0x806c0008: return 'Failure_Dbrb_Process_Is_Not_Registered'
 		case 0x80670001: return 'Failure_Streaming_Folder_Name_Too_Large'
 		default: return undefined;
 	}

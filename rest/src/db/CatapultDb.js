@@ -301,10 +301,10 @@ class CatapultDb {
 			queryConditions.splice(preprocessingIndex, 1);
 		}
 
-		let countConditions = {};
+		const countConditions = [];
 		if (queryConditions.length) {
 			conditions.push(1 === queryConditions.length ? { $match: queryConditions[0] } : { $match: { $and: queryConditions } });
-			countConditions = {$and: queryConditions};
+			countConditions.push(1 === queryConditions.length ? queryConditions[0] : { $and: queryConditions });
 		}
 
 		conditions.push(sortConditions);
@@ -382,11 +382,19 @@ class CatapultDb {
 			});
 		}.bind(this);
 
-		return collection
-			.countDocuments(countConditions)
-			.then(totalEntries => {
-				return aggregateResult(totalEntries);
-			});
+		if (countConditions.length) {
+			return collection
+				.countDocuments(countConditions[0])
+				.then(totalEntries => {
+					return aggregateResult(totalEntries);
+				});
+		} else {
+			return collection
+				.estimatedDocumentCount()
+				.then(totalEntries => {
+					return aggregateResult(totalEntries);
+				});
+		}
 	}
 
 	/**
@@ -453,8 +461,7 @@ class CatapultDb {
 				firstLevelConditions.push(1);
 
 			if (!filters.embedded)
-				// embedded txs have the meta.uniqueAggregateHash and meta.aggregateHash
-				conditions.push({ 'meta.hash': { $ne: null } });
+				conditions.push({ 'meta.aggregateId': { $exists: false } });
 
 			if(filters.transferMosaicId !== undefined){
 				
