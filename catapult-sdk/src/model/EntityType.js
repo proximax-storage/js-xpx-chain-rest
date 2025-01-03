@@ -168,11 +168,20 @@ const EntityType = {
 	/** Account metadata transaction */
 	accountMetadata: 0x413F,
 
+	/** Account extended metadata transaction */
+	accountExtendedMetadata: 0x443F,
+
 	/** Mosaic metadata transaction */
 	mosaicMetadata: 0x423F,
 
+	/** Mosaic extended metadata transaction */
+	mosaicExtendedMetadata: 0x453F,
+
 	/** Namespace metadata transaction */
 	namespaceMetadata: 0x433F,
+
+	/** Namespace extended metadata transaction */
+	namespaceExtendedMetadata: 0x463F,
 
 	/** Prepare drive transaction */
 	prepareBcDrive: 0x4162,
