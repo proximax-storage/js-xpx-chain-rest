@@ -57,13 +57,16 @@ const superContractV2Plugin = {
         builder.addTransactionSupport(EntityType.successfulEndBatchExecution, {
             contractKey: ModelType.binary,
             batchId: ModelType.uint64,
-            automaticExecutionsNextBlockToCheck: ModelType.uint64,
             storageHash: ModelType.binary,
             usedSizeBytes: ModelType.uint64,
             metaFilesSizeBytes: ModelType.uint64,
             proofOfExecutionVerificationInformation: ModelType.binary,
+            automaticExecutionsNextBlockToCheck: ModelType.uint64,
+            publicKeys: {type: ModelType.array, schemaName: ModelType.binary},
+            signatures: {type: ModelType.array, schemaName: ModelType.binary},
+            proofsOfExecution: {type: ModelType.array, schemaName: 'poEx'},
             callDigests: {type: ModelType.array, schemaName: 'extendedCallDigest'},
-            opinions: {type: ModelType.array, schemaName: 'opinion'},
+            callPayments: {type: ModelType.array, schemaName: 'callPayment'},
         });
 
         builder.addTransactionSupport(EntityType.unsuccessfulEndBatchExecution, {
