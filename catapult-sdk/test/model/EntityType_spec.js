@@ -98,6 +98,13 @@ describe('entity type enumeration', () => {
 			placeSdaExchangeOffer: 0x416A,
 			removeSdaExchangeOffer: 0x426A,
 			installMessage: 0x416C,
+			deployContract: 0x416E,
+			automaticExecutionsPayment: 0x436E,
+			endBatchExecutionSingle: 0x466E,
+			manualCall: 0x426E,
+			successfulEndBatchExecution: 0x446E,
+			synchronizationSingle: 0x476E,
+			unsuccessfulEndBatchExecution: 0x456E,
 			replicatorsCleanup: 0x4062,
 			replicatorTreeRebuild: 0x4167,
 		});

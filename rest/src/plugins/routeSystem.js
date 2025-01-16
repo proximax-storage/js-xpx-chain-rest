@@ -41,9 +41,10 @@ const supercontract = require('./supercontract');
 const upgrade = require('./upgrade');
 const service = require('./service');
 const storage = require('./storage');
+const supercontract_v2 = require('./supercontract_v2');
 
 const plugins = {
-	accountLink: empty, accountProperties, aggregate, exchange, exchangesda, committee, config, contract, dbrb: empty, lock, liquidityProvider, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, transfer: empty, upgrade, streaming: empty
+	accountLink: empty, accountProperties, aggregate, exchange, exchangesda, committee, config, contract, dbrb: empty, lock, liquidityProvider, metadata, metadata_v2, mosaic, multisig, namespace, operation, receipts, richlist, service, storage, supercontract, supercontract_v2, transfer: empty, upgrade, streaming: empty
 };
 
 module.exports = {

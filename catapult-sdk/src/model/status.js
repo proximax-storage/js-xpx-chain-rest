@@ -350,7 +350,6 @@ const toStringInternal = code => {
 		case 0x80620009: return 'Failure_Storage_Is_Not_Owner'
 		case 0x8062000a: return 'Failure_Storage_Drive_Not_Found'
 		case 0x8062000b: return 'Failure_Storage_Data_Modification_Already_Exists'
-		case 0x8062003b: return 'Failure_Storage_Modification_Invalid_Upload_Size'
 		case 0x8062000c: return 'Failure_Storage_No_Replicator'
 		case 0x8062000d: return 'Failure_Storage_Multiple_Replicators'
 		case 0x8062000e: return 'Failure_Storage_Replicator_Not_Found'
@@ -395,6 +394,11 @@ const toStringInternal = code => {
 		case 0x80620035: return 'Failure_Storage_Already_Initiated_Channel_Closure'
 		case 0x80620036: return 'Failure_Storage_Download_Channel_Is_Finished'
 		case 0x80620037: return 'Failure_Storage_Service_Unit_Transfer'
+		case 0x80620038: return 'Failure_Storage_Owner_Management_Is_Forbidden'
+		case 0x80620039: return 'Failure_Storage_Replicator_Count_Exceeded'
+		case 0x8062003a: return 'Failure_Storage_Modification_Not_Ready_For_Approval'
+		case 0x8062003b: return 'Failure_Storage_Modification_Invalid_Upload_Size'
+		case 0x8062003c: return 'Failure_Storage_Modification_In_Progress'
 		case 0x8062003c: return 'Failure_Storage_Boot_Key_Is_Registered_With_Other_Replicator'
 		case 0x8062003d: return 'Failure_Storage_No_Replicators_To_Remove'
 		case 0x8062003e: return 'Failure_Storage_Replicator_Is_Bound_With_Boot_Key'
@@ -410,12 +414,12 @@ const toStringInternal = code => {
 		case 0x8069000a: return 'Failure_LiquidityProvider_Invalid_Mosaic_Amount'
 		case 0x8069000b: return 'Failure_LiquidityProvider_Invalid_Currency_Amount'
 		case 0x8069000c: return 'Failure_LiquidityProvider_Reserved_Mosaic_Id'
-		case 0x80610001: return 'Failure_Committee_Plugin_Config_Malformed'
-		case 0x80610002: return 'Failure_Committee_Redundant'
-		case 0x80610003: return 'Failure_Committee_Harvester_Ineligible'
-		case 0x80610004: return 'Failure_Committee_Account_Does_Not_Exist'
-		case 0x80610005: return 'Failure_Committee_Signer_Is_Not_Owner'
-		case 0x80610006: return 'Failure_Committee_Harvester_Already_Disabled'
+		case 0x80610001: return 'Failure_Committee_Plugin_Config_Malformed';
+		case 0x80610002: return 'Failure_Committee_Redundant';
+		case 0x80610003: return 'Failure_Committee_Harvester_Ineligible';
+		case 0x80610004: return 'Failure_Committee_Account_Does_Not_Exist';
+		case 0x80610005: return 'Failure_Committee_Signer_Is_Not_Owner';
+		case 0x80610006: return 'Failure_Committee_Harvester_Already_Disabled';
 		case 0x8062003f: return 'Failure_Storage_Empty_Replicator_List'
 		case 0x806c0001: return 'Failure_Dbrb_Process_Not_Expired'
 		case 0x806c0002: return 'Failure_Dbrb_Node_Removal_Too_Far_In_Future'
@@ -426,6 +430,38 @@ const toStringInternal = code => {
 		case 0x806c0007: return 'Failure_Dbrb_Node_Removal_Invalid_Signature'
 		case 0x806c0008: return 'Failure_Dbrb_Process_Is_Not_Registered'
 		case 0x80670001: return 'Failure_Streaming_Folder_Name_Too_Large'
+		case 0x806C0001: return 'Failure_Dbrb_View_Sequence_Already_Exists';
+		case 0x806C0002: return 'Failure_Dbrb_View_Sequence_Size_Insufficient';
+		case 0x806C0003: return 'Failure_Dbrb_Invalid_Replaced_View';
+		case 0x806C0004: return 'Failure_Dbrb_Signatures_Count_Insufficient';
+		case 0x806C0005: return 'Failure_Dbrb_Invalid_Signature';
+		case 0x806E0001: return 'Failure_SuperContract_v2_Contract_Does_Not_Exist';
+		case 0x806E0002: return 'Failure_SuperContract_v2_Deployment_In_Progress';
+		case 0x806E0003: return 'Failure_SuperContract_v2_Contract_Already_Deployed_On_Drive';
+		case 0x806E0004: return 'Failure_SuperContract_v2_Plugin_Config_Malformed';
+		case 0x806E0005: return 'Failure_SuperContract_v2_Invalid_Batch_Id';
+		case 0x806E0006: return 'Failure_SuperContract_v2_Invalid_T_Proof';
+		case 0x806E0007: return 'Failure_SuperContract_v2_Invalid_Start_Batch_Id';
+		case 0x806E0008: return 'Failure_SuperContract_v2_Invalid_Batch_Proof';
+		case 0x806E0009: return 'Failure_SuperContract_v2_Manual_Calls_Are_Not_Requested';
+		case 0x806E000a: return 'Failure_SuperContract_v2_Automatic_Calls_Are_Not_Requested';
+		case 0x806E000b: return 'Failure_SuperContract_v2_Invalid_Call_Id';
+		case 0x806E000c: return 'Failure_SuperContract_v2_Execution_Work_Is_Too_Large';
+		case 0x806E000d: return 'Failure_SuperContract_v2_Download_Work_Is_Too_Large';
+		case 0x806E000e: return 'Failure_SuperContract_v2_Empty_Batch';
+		case 0x806E001f: return 'Failure_SuperContract_v2_Duplicate_Cosigner_In_Progress';
+		case 0x806E0010: return 'Failure_SuperContract_v2_Not_Enough_Signatures';
+		case 0x806E0011: return 'Failure_SuperContract_v2_Invalid_Signature';
+		case 0x806E0012: return 'Failure_SuperContract_v2_Is_Not_Executor';
+		case 0x806E0013: return 'Failure_SuperContract_v2_Batch_Already_Proven';
+		case 0x806E0014: return 'Failure_SuperContract_v2_Invalid_Released_Transactions_Hash';
+		case 0x806E0015: return 'Failure_SuperContract_v2_Invalid_Number_Of_Subtransactions_Cosigners';
+		case 0x806E0016: return 'Failure_SuperContract_v2_Max_Row_Size_Exceeded';
+		case 0x806E0017: return 'Failure_SuperContract_v2_Max_Execution_Payment_Exceeded';
+		case 0x806E0018: return 'Failure_SuperContract_v2_Max_Auto_Executions_Number_Exceeded';
+		case 0x806E0019: return 'Failure_SuperContract_v2_Max_Service_Payments_Size_Exceeded';
+		case 0x806E001a: return 'Failure_SuperContract_v2_Outdated_Automatic_Execution';
+		case 0x806e001b: return 'Failure_SuperContract_v2_Invalid_Service_Payment_Mosaic';
 		default: return undefined;
 	}
 };
