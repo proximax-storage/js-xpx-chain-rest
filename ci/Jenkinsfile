@@ -29,7 +29,7 @@ pipeline {
           sh '(cd catapult-sdk; yarn install; yarn run clean; yarn run build)'
 
           echo 'Building REST'
-          sh '(cd rest; yarn install)'
+          sh '(cd rest; yarn install; yarn run build)'
         }
       }
       post {
